@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajax Aspire U15 | Player Portal</title>
+  <style>
+    :root {
+      --navy: #0D1B2A; --green: #1E5C38; --teal: #3ABFB8;
+      --gold: #C8A951; --white: #FFFFFF; --light-gray: #F4F4F9;
+    }
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--light-gray); color: var(--navy); }
+    header { background-color: var(--navy); color: var(--white); padding: 1.5rem; text-align: center; border-bottom: 4px solid var(--teal); }
+    h1 { color: var(--gold); letter-spacing: 1px; margin: 0; }
+    .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    .card { background: var(--white); border-radius: 8px; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem; border-top: 4px solid var(--green); }
+    .input-group { margin-bottom: 1.5rem; }
+    input { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { background-color: var(--green); color: var(--white); border: none; padding: 1rem; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; }
+    button:hover { background-color: var(--teal); }
+    #dashboard-section { display: none; }
+    .coach-notes { background-color: #E8F6F5; padding: 1.5rem; border-left: 4px solid var(--teal); border-radius: 4px; margin-bottom: 2rem; font-style: italic; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; }
+    .stat-box { background: var(--navy); color: var(--white); padding: 1rem; border-radius: 8px; text-align: center; border-bottom: 4px solid var(--gold); }
+    .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--teal); }
+    textarea { width: 100%; padding: 1rem; box-sizing: border-box; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>AJAX ASPIRE U15</h1>
+    <p>Individual Development Portal</p>
+  </header>
+
+  <div class="container">
+    <div id="login-section" class="card">
+      <h2>Locker Room Access</h2>
+      <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" id="playerName" placeholder="e.g. Zahra Serrano">
+      </div>
+      <div class="input-group">
+        <label>4-Digit PIN</label>
+        <input type="password" id="playerPin" placeholder="****">
+      </div>
+      <button onclick="login()">Enter Portal</button>
+    </div>
+
+    <div id="dashboard-section">
+      <h2 id="display-name">Welcome!</h2>
+      <div class="card">
+        <h3>Coach Notes</h3>
+        <div class="coach-notes" id="display-notes">Loading feedback...</div>
+        <h3>Season Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-box"><div class="stat-value" id="stat-gp">0</div>Games</div>
+          <div class="stat-box"><div class="stat-value" id="stat-mins">0</div>Total Mins</div>
+          <div class="stat-box"><div class="stat-value" id="stat-avg">0</div>Avg Mins</div>
+          <div class="stat-box"><div class="stat-value" id="stat-goals">0</div>Goals</div>
+          <div class="stat-box"><div class="stat-value" id="stat-ast">0</div>Assists</div>
+          <div class="stat-box"><div class="stat-value" id="stat-shots">0</div>Shots on Target</div>
+          <div class="stat-box"><div class="stat-value" id="stat-kp">0</div>Key Passes</div>
+          <div class="stat-box"><div class="stat-value" id="stat-duels">0</div>Duels</div>
+          <div class="stat-box"><div class="stat-value" id="stat-to">0</div>Turnovers (Def)</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Post-Match Reflection</h3>
+        <textarea id="reflection-text" placeholder="Type reflection here..."></textarea>
+        <button onclick="submitReflection()">Submit Reflection</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. REPLACE THIS URL WITH YOUR DEPLOYED GOOGLE WEB APP URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbxXSCn4L-GwGGpWeYAtkrhAs8eMXd1DQR3TmOMCfg4MuvYwk5IegjZequLUXt1uuShi/exec"; 
+    let currentPlayerName = "";
+
+    async function login() {
+      const name = document.getElementById('playerName').value.trim();
+      const pin = document.getElementById('playerPin').value.trim();
+      const response = await fetch(`${API_URL}?name=${encodeURIComponent(name)}&pin=${encodeURIComponent(pin)}`);
+      const data = await response.json();
+
+      if (data.success) {
+        currentPlayerName = data.name;
+        document.getElementById('display-name').innerText = `Welcome, ${data.name.split(' ')}!`;
+        document.getElementById('display-notes').innerText = data.notes || "Keep working hard.";
+        document.getElementById('stat-gp').innerText = data.stats.gamesPlayed;
+        document.getElementById('stat-mins').innerText = data.stats.minutes;
+        document.getElementById('stat-avg').innerText = Math.round(data.stats.avgMinutes);
+        document.getElementById('stat-goals').innerText = data.stats.goals;
+        document.getElementById('stat-ast').innerText = data.stats.assists;
+        document.getElementById('stat-shots').innerText = data.stats.shotsOnTarget;
+        document.getElementById('stat-kp').innerText = data.stats.keyPasses;
+        document.getElementById('stat-duels').innerText = data.stats.duels;
+        document.getElementById('stat-to').innerText = data.stats.turnoversDef;
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('dashboard-section').style.display = 'block';
+      } else { alert("Invalid Credentials."); }
+    }
+
+    async function submitReflection() {
+      const text = document.getElementById('reflection-text').value.trim();
+      await fetch(API_URL, { method: 'POST', body: JSON.stringify({ name: currentPlayerName, reflection: text }) });
+      alert("Reflection Submitted!");
+      document.getElementById('reflection-text').value = "";
+    }
+  </script>
+</body>
+</html>
