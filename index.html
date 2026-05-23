@@ -1,54 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AJAX Aspire U15 – Team Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
- :root {
- --green: #1E5C38; --green-lt: #2A7A4B; --teal: #3ABFB8;
- --navy: #0D1B2A; --navy-mid: #122030; --card: #172535;
- --border: #1E3348; --white: #FFFFFF; --text: #D8E8F0;
- --muted: #5A7A92; --gold: #C8A951;
- }
- * { margin: 0; padding: 0; box-sizing: border-box; }
- body { background: var(--navy); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
- /* --- PORTAL SPECIFIC STYLES --- */
- .portal-card { background: var(--card); border: 1px solid var(--border); padding: 2rem; border-radius: 12px; margin: 2rem auto; max-width: 500px; text-align: center; }
- .input-group { margin-bottom: 1rem; text-align: left; }
- input { width: 100%; padding: 0.8rem; background: var(--navy-mid); border: 1px solid var(--border); color: white; border-radius: 4px; }
- button { background: var(--green); color: white; border: none; padding: 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; }
- #dashboard-section { display: none; text-align: left; }
- .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1rem; }
- .stat-box { background: var(--navy-mid); padding: 1rem; border-radius: 8px; border-bottom: 2px solid var(--gold); }
-</style>
+  <title>AJAX Aspire U15 – Team Hub</title>
+  <style>
+    /* [PASTE YOUR ORIGINAL CSS HERE] */
+    /* ADD THESE PORTAL STYLES TO THE BOTTOM OF YOUR CSS */
+    #dashboard-section { display: none; }
+    .portal-card { background: var(--card); border: 1px solid var(--border); padding: 2rem; border-radius: 12px; }
+    .stat-box { background: var(--navy-mid); padding: 1rem; border-radius: 8px; border-bottom: 2px solid var(--gold); }
+  </style>
 </head>
 <body>
 
-  <div id="portal-content" class="section">
+  <div id="portal" class="section">
     <div id="login-section" class="portal-card">
       <h2>Locker Room Access</h2>
-      <div class="input-group">
-        <label>Full Name</label>
-        <input type="text" id="playerName" placeholder="Zahra Serrano">
-      </div>
-      <div class="input-group">
-        <label>PIN</label>
-        <input type="password" id="playerPin" placeholder="****">
-      </div>
+      <input type="text" id="playerName" placeholder="Full Name">
+      <input type="password" id="playerPin" placeholder="PIN">
       <button onclick="login()">Enter Portal</button>
     </div>
 
     <div id="dashboard-section" class="portal-card">
       <h2 id="display-name">Welcome!</h2>
-      <div id="display-notes" style="margin:1rem 0; font-style:italic;"></div>
+      <div id="display-notes"></div>
       <div class="stats-grid">
         <div class="stat-box">Games: <span id="stat-gp">0</span></div>
         <div class="stat-box">Goals: <span id="stat-goals">0</span></div>
-      </div>
-      <textarea id="reflection-text" style="width:100%; margin-top:1rem; padding:0.5rem;" placeholder="Reflection..."></textarea>
-      <button onclick="submitReflection()" style="margin-top:0.5rem;">Submit</button>
+        </div>
+      <button onclick="logout()">Logout</button>
     </div>
   </div>
 
@@ -60,7 +39,6 @@
       const pin = document.getElementById('playerPin').value.trim();
       const response = await fetch(`${API_URL}?name=${encodeURIComponent(name)}&pin=${encodeURIComponent(pin)}`);
       const data = await response.json();
-
       if (data.success) {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('dashboard-section').style.display = 'block';
@@ -68,6 +46,10 @@
         document.getElementById('stat-gp').innerText = data.stats.gamesPlayed;
         document.getElementById('stat-goals').innerText = data.stats.goals;
       } else { alert("Invalid Credentials."); }
+    }
+    
+    function logout() {
+      location.reload(); // Simple way to reset portal
     }
   </script>
 </body>
