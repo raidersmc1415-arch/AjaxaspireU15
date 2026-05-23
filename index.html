@@ -14,7 +14,6 @@
  }
 
  * { margin: 0; padding: 0; box-sizing: border-box; }
-
  body { background: var(--navy); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
  /* HERO */
@@ -31,7 +30,7 @@
  .tab-btn:hover { color: var(--text); }
  .tab-btn.active { color: var(--teal); border-bottom-color: var(--teal); }
 
- /* MAIN CONTENT & SECTIONS */
+ /* MAIN CONTENT */
  .main { max-width: 1000px; margin: 0 auto; padding: 40px 32px 80px; }
  .section { display: none; }
  .section.active { display: block; animation: fadeUp 0.35s ease; }
@@ -42,30 +41,37 @@
  .section-title { font-family: 'Bebas Neue', cursive; font-size: 40px; letter-spacing: 1px; color: var(--white); line-height: 1; }
  .section-desc { color: var(--muted); font-size: 14px; margin-top: 7px; font-weight: 300; }
 
- /* COMPONENTS */
  .card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 26px; margin-bottom: 20px; }
  .tag { display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; text-transform: uppercase; }
  .tag-teal { background: rgba(58,191,184,0.1); color: var(--teal); border: 1px solid rgba(58,191,184,0.25); }
 
- /* POSITIONS FIELD */
+ /* FIELD */
  .field { background: linear-gradient(180deg, #0c3d1c 0%, #082e13 100%); border: 2px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 20px; position: relative; min-height: 420px; display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 18px; }
  .field::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%; }
  .field::after { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.08); }
  .field-row { display: flex; justify-content: center; gap: 12px; position: relative; z-index: 1; }
  .pos-btn { background: rgba(30,92,56,0.85); border: 2px solid rgba(255,255,255,0.25); border-radius: 50%; width: 50px; height: 50px; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: bold; color: #fff; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; flex-direction: column; }
- .pos-btn:hover { background: var(--green); border-color: var(--teal); transform: scale(1.1); }
+ .pos-btn:hover, .pos-btn.active { background: var(--green); border-color: var(--teal); transform: scale(1.1); }
  .pos-btn span { font-size: 9px; opacity: 0.8; font-weight: normal; }
  .pos-detail { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 22px; display: none; margin-top: 15px; }
  .pos-detail.active { display: block; animation: fadeUp 0.3s ease; }
 
- /* PHRASE CARDS (Comm & Parents) */
+ /* PHRASE CARDS */
  .phrase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; }
- .phrase-card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 16px; transition: all 0.2s; }
- .phrase-card:hover { border-color: var(--teal); background: rgba(58,191,184,0.04); }
+ .phrase-card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 16px; transition: all 0.2s; cursor: pointer; }
+ .phrase-card:hover { border-color: var(--teal); background: rgba(58,191,184,0.04); transform: translateY(-2px); }
  .phrase-word { font-family: 'Bebas Neue', cursive; font-size: 20px; color: var(--teal); margin-bottom: 6px; }
  .phrase-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
- /* PORTAL SPECIFICS */
+ /* MODAL STYLES */
+ .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+ .modal-overlay.open { display: flex; }
+ .modal { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 30px; max-width: 500px; width: 100%; animation: fadeUp 0.3s ease; position: relative; }
+ .modal h3 { font-family: 'Bebas Neue', cursive; font-size: 32px; color: var(--teal); margin-bottom: 14px; }
+ .modal-close { position: absolute; top: 15px; right: 20px; background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; }
+ .modal-close:hover { color: var(--white); }
+
+ /* PORTAL STYLES */
  .portal-gate { max-width: 460px; margin: 0 auto; text-align: center; padding: 56px 28px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
  .portal-icon { font-size: 60px; margin-bottom: 22px; display: block; }
  .input-group { margin-bottom: 14px; text-align: left; }
@@ -113,14 +119,47 @@
         <div class="section-title">Welcome to the Hub</div>
         <div class="section-desc">Our core principles and team identity.</div>
       </div>
+
       <div class="card">
         <h2 style="font-family: 'Bebas Neue', cursive; color: var(--white); font-size: 28px; margin-bottom: 15px;">Our Game Model</h2>
-        <p style="line-height: 1.6; color: var(--muted); margin-bottom: 15px;">We play proactive, attacking football. We build from the back, press high out of possession, and value intelligence and bravery on the ball. Our system relies on technical execution and constant communication.</p>
-        <ul style="color: var(--muted); line-height: 1.8; margin-left: 20px;">
-          <li><strong>In Possession:</strong> Expand the field. Look to break lines. Be brave in 1v1 situations in the final third.</li>
-          <li><strong>Out of Possession:</strong> Immediate counter-press upon losing the ball. Stay compact and deny central penetration.</li>
-          <li><strong>Transition:</strong> React instantly. Find the highest open player when winning the ball. Sprint to recovery positions when losing it.</li>
-        </ul>
+        <p style="line-height: 1.6; color: var(--muted); margin-bottom: 15px;">We play proactive, attacking football. We build from the back, press high out of possession, everyone is a defender mentality, and value intelligence and bravery on the ball. Our system relies on high effort, high attitude, technical execution and constant communication.</p>
+      </div>
+
+      <div class="card">
+        <h2 style="font-family: 'Bebas Neue', cursive; color: var(--white); font-size: 24px; margin-bottom: 10px;">Team Goals 25/26</h2>
+        <span style="color: var(--teal); font-weight: 600; margin-top: 15px; display: block;">Short Term</span>
+        <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-top: 5px;">Preseason fitness, technical load, and defending and attacking principles of play install.<br><strong>Defending:</strong> Pressure Cover Balance, Pressing Triggers and Back 4 movement.<br><strong>Attacking:</strong> Look forward first, second secure the ball and advance with quick combination play providing angles of support.</p>
+        
+        <span style="color: var(--teal); font-weight: 600; margin-top: 15px; display: block;">Long Term</span>
+        <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-top: 5px;">Demonstrate tactical and technical development, qualify for ASPIRE playoffs.</p>
+        
+        <span style="color: var(--teal); font-weight: 600; margin-top: 15px; display: block;">Process</span>
+        <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-top: 5px;">Review game film, 90% practice attendance, take ownership of your IDP.</p>
+      </div>
+
+      <div class="card">
+        <h2 style="font-family: 'Bebas Neue', cursive; color: var(--white); font-size: 24px; margin-bottom: 10px;">Team Statistics</h2>
+        <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="stat-box"><div class="stat-label">W-D-L</div><div class="stat-val" style="font-size:1.5rem">0-0-0</div></div>
+          <div class="stat-box"><div class="stat-label">Goals For</div><div class="stat-val" style="font-size:1.5rem">0</div></div>
+          <div class="stat-box"><div class="stat-label">Clean Sheets</div><div class="stat-val" style="font-size:1.5rem">0</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="font-family: 'Bebas Neue', cursive; color: var(--white); font-size: 24px; margin-bottom: 10px;">Leadership Council</h2>
+        <p style="color: var(--muted);">Our captain and vice-captains lead by example on and off the pitch. Reach out to them with team concerns.</p>
+        <div style="margin-top:15px; color:var(--teal);">• Captain: [Name Placeholder]</div>
+        <div style="color:var(--teal);">• Vice Captain: [Name Placeholder]</div>
+      </div>
+
+      <div class="card">
+        <h2 style="font-family: 'Bebas Neue', cursive; color: var(--white); font-size: 24px; margin-bottom: 10px;">GA Aspire Events 25/26</h2>
+        <div style="color: var(--muted); line-height: 1.8;">
+          <p><strong>Sept 10:</strong> Kickoff Showcase</p>
+          <p><strong>Nov 15:</strong> Winter College ID Camp</p>
+          <p><strong>Feb 20:</strong> Spring Regional Tournament</p>
+        </div>
       </div>
     </div>
 
@@ -128,27 +167,28 @@
       <div class="section-header">
         <div class="section-label">Tactical Setup</div>
         <div class="section-title">Positions & Roles</div>
-        <div class="section-desc">Select a position on the field to view specific responsibilities.</div>
+        <div class="section-desc">Select a position on the field to view specific expectations.</div>
       </div>
       
       <div class="field">
         <div class="field-row">
-          <button class="pos-btn" onclick="showPos('pos-w')">7/11<span>Wing</span></button>
-          <button class="pos-btn" onclick="showPos('pos-st')">9<span>ST</span></button>
-          <button class="pos-btn" onclick="showPos('pos-w')">7/11<span>Wing</span></button>
+          <button class="pos-btn" onclick="showPos('pos-w', this)">11<span>Wing</span></button>
+          <button class="pos-btn" onclick="showPos('pos-st', this)">9<span>ST</span></button>
+          <button class="pos-btn" onclick="showPos('pos-w', this)">7<span>Wing</span></button>
         </div>
         <div class="field-row">
-          <button class="pos-btn" onclick="showPos('pos-mid')">8/10<span>Mid</span></button>
-          <button class="pos-btn" onclick="showPos('pos-mid')">6<span>CDM</span></button>
+          <button class="pos-btn" onclick="showPos('pos-8-10', this)">8/10<span>AM</span></button>
+          <button class="pos-btn" onclick="showPos('pos-6', this)">6<span>CDM</span></button>
+         <button class="pos-btn" onclick="showPos('pos-8-10', this)">8/10<span>AM</span></button>
         </div>
         <div class="field-row">
-          <button class="pos-btn" onclick="showPos('pos-fb')">2/3<span>FB</span></button>
-          <button class="pos-btn" onclick="showPos('pos-cb')">4/5<span>CB</span></button>
-          <button class="pos-btn" onclick="showPos('pos-cb')">4/5<span>CB</span></button>
-          <button class="pos-btn" onclick="showPos('pos-fb')">2/3<span>FB</span></button>
+          <button class="pos-btn" onclick="showPos('pos-3', this)">3<span>LB</span></button>
+          <button class="pos-btn" onclick="showPos('pos-cb', this)">5<span>CB</span></button>
+          <button class="pos-btn" onclick="showPos('pos-cb', this)">4<span>CB</span></button>
+          <button class="pos-btn" onclick="showPos('pos-2', this)">2<span>RB</span></button>
         </div>
         <div class="field-row">
-          <button class="pos-btn" onclick="showPos('pos-gk')">1<span>GK</span></button>
+          <button class="pos-btn" onclick="showPos('pos-gk', this)">1<span>GK</span></button>
         </div>
       </div>
       
@@ -156,25 +196,33 @@
         <div class="tag tag-teal" style="margin-bottom:14px">Goalkeeper #1</div>
         <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Initiate attacks from saves and crosses. Be an option for back passes.<br><br><strong>Out of Possession:</strong> Stop shots. Cover space behind defenders. Organize defensive line constantly.</p>
       </div>
-      <div id="pos-fb" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Full Backs #2 & #3</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Provide width and depth. Make overlapping runs.<br><br><strong>Out of Possession:</strong> Stop crosses. Provide compactness. Track overlapping runners.</p>
+      <div id="pos-2" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Right Back #2</div>
+        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Provide width and depth on the right flank. Make overlapping/underlapping runs.<br><br><strong>Out of Possession:</strong> Stop crosses. Provide compactness. Track runners and shift with the back line.</p>
+      </div>
+      <div id="pos-3" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Left Back #3</div>
+        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Provide width and depth on the left flank. Make overlapping/underlapping runs.<br><br><strong>Out of Possession:</strong> Stop crosses. Provide compactness. Track runners and shift with the back line.</p>
       </div>
       <div id="pos-cb" class="pos-detail">
         <div class="tag tag-teal" style="margin-bottom:14px">Center Backs #4 & #5</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Split to edges of box. Break lines with passes.<br><br><strong>Out of Possession:</strong> Command the defensive line. Win aerial duels. Stay compact.</p>
+        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Split to edges of box. Composure on the ball in the build. Break lines with passes or idenfity when to carry the ball forward.<br><br><strong>Out of Possession:</strong> Command the defensive line. Win aerial duels. Stay compact. Recognize when theres space in behind an delay first principle, make good defensive decisions.</p>
       </div>
-      <div id="pos-mid" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Midfielders #6, #8, #10</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Control the tempo. Connect defense to attack. Provide passing angles.<br><br><strong>Out of Possession:</strong> Screen the backline. Counter-press immediately. Deny central passes.</p>
+      <div id="pos-6" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Holding Midfielder #6</div>
+        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Anchor the build-up by receiving with an open body to break lines, connecting our back four to the #8/#10, and serving as the primary outlet to switch play in the attacking half.<br><br><strong>Out of Possession:</strong> Protect the back 4 by maintaing position discipline and connection no more than 10 yards away. Intercept passes into the opponents 9. Compete to win second balls in the air from opponet keeper or long balls. Work hard to stay in-line or behind the ball in transition.</p>
+      </div>
+      <div id="pos-8-10" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Central and Attacking Midfielders #8 & #10</div>
+        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Operate in the half-spaces. Connect midfield to attack, break lines with passes or dribbles, and provide the primary creative spark in the final third. Counter-press immediately upon losing the ball. The 10 will operate higher on the pitch, dropping into the windows on build outs, looking to receive and play forward or quick combination play with wide players or central to the 9. The 8 is the engine, box to box midfielder who will organize the attack, change the pace (slow the attack down or quick counter), high work rate.<br><br><strong>Out of Possession:</strong> The 8 will work to track back immediately to support the 6, same principle work hard to get in line or behind the ball in transition. The 10 will need to track back immediately if the ball is lost on their strong side, weak side identify opponents making the counter attack runs and mark them in transition. The 10 almost always marks the opponent 6 in the build out. In a mid block, the 10 will support the 9 to start the press when triggers are identified.</p>
       </div>
       <div id="pos-w" class="pos-detail">
         <div class="tag tag-teal" style="margin-bottom:14px">Wingers #7 & #11</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Stay high and wide. Take on 1v1s. Cross into the box.<br><br><strong>Out of Possession:</strong> Press the opponent's fullbacks. Track back to defend the wide areas.</p>
+        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Create width when the ball is strong side by putting heals on the touch line. Recognize when to cut in with the ball.  Take on 1v1s, space in behind, final 3rd. Cross into the box. Rest defense, weakside should be tracking the play and tucking into central channels and be ready for a turnover and stop the counter.<br><br><strong>Out of Possession:</strong> Press the opponent's fullbacks. Track back to defend the wide areas. Lose the ball, fight to win it back.</p>
       </div>
       <div id="pos-st" class="pos-detail">
         <div class="tag tag-teal" style="margin-bottom:14px">Center Forward #9</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Stretch the defense with runs in behind. Hold up the ball.<br><br><strong>Out of Possession:</strong> Initiate the press. Force play one direction. Block passes to holding mid.</p>
+        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Stretch the defense with runs in behind. Create depth by pinning the opponent back 4 high up the pitch. Hold up the ball when you can't immediately turn, look to combine with your 8/10 when facing your own goal. Arrive at the penalty spot for crosses into the box.<br><br><strong>Out of Possession:</strong> Initiate the press. Force play one direction. Block passes to holding mid. When in a block, look for pressing triggers to start the press and cut off switch of play.</p>
       </div>
     </div>
 
@@ -182,40 +230,32 @@
       <div class="section-header">
         <div class="section-label">Team Language</div>
         <div class="section-title">Communication</div>
-        <div class="section-desc">Key phrases used on the field to ensure we play as one unit.</div>
+        <div class="section-desc">Click any phrase to see its exact in-game usage and meaning.</div>
       </div>
       <div class="phrase-grid">
-        <div class="phrase-card">
-          <div class="phrase-word">Space!</div>
-          <div class="phrase-desc">Open area available — move into it or pass to it.</div>
+        <div class="phrase-card" onclick="openPhrase('Space!','Open area available — move into or for a pass to be directed there. Helps spread play and exploit gaps.')">
+          <div class="phrase-word">Space!</div><div class="phrase-desc">Open area available — move into it</div>
         </div>
-        <div class="phrase-card">
-          <div class="phrase-word">Drop!</div>
-          <div class="phrase-desc">Come back and offer a passing option or retreat defensively.</div>
+        <div class="phrase-card" onclick="openPhrase('Drop!','Move back toward your own goal — to defend or to offer a closer passing option for the ball carrier.')">
+          <div class="phrase-word">Drop!</div><div class="phrase-desc">Come back and offer a passing option</div>
         </div>
-        <div class="phrase-card">
-          <div class="phrase-word">Switch!</div>
-          <div class="phrase-desc">Change the point of attack to the opposite flank.</div>
+        <div class="phrase-card" onclick="openPhrase('Switch!','An opportunity to switch the play from one side of the field to the other — exploiting space on the opposite flank.')">
+          <div class="phrase-word">Switch!</div><div class="phrase-desc">Change the point of attack now</div>
         </div>
-        <div class="phrase-card">
-          <div class="phrase-word">Keeper's!</div>
-          <div class="phrase-desc">GK calling for the ball — clear out immediately.</div>
+        <div class="phrase-card" onclick="openPhrase('Keeper\'s!','The goalkeeper is claiming a ball in the air — teammates must stand clear immediately to prevent collisions.')">
+          <div class="phrase-word">Keeper's!</div><div class="phrase-desc">GK calling for the ball — clear out</div>
         </div>
-        <div class="phrase-card">
-          <div class="phrase-word">Overlap!</div>
-          <div class="phrase-desc">Run beyond the ball carrier to create an extra option.</div>
+        <div class="phrase-card" onclick="openPhrase('Overlap!','Run around and beyond the player with the ball — usually down the wing — to create an extra passing option and stretch the defense.')">
+          <div class="phrase-word">Overlap!</div><div class="phrase-desc">Run beyond to create an extra option</div>
         </div>
-        <div class="phrase-card">
-          <div class="phrase-word">Through!</div>
-          <div class="phrase-desc">Split the defense with a pass in behind the line.</div>
+        <div class="phrase-card" onclick="openPhrase('Through!','A call for a pass that splits the defense — the calling player will run onto the ball in behind the line.')">
+          <div class="phrase-word">Through!</div><div class="phrase-desc">Split the defense with a pass in behind</div>
         </div>
-        <div class="phrase-card">
-          <div class="phrase-word">One-Two!</div>
-          <div class="phrase-desc">Quick give-and-go pass and movement.</div>
+        <div class="phrase-card" onclick="openPhrase('One-Two!','Quick give-and-go: pass to a teammate and immediately run forward to receive the return pass.')">
+          <div class="phrase-word">One-Two!</div><div class="phrase-desc">Give-and-go — pass and move now</div>
         </div>
-        <div class="phrase-card">
-          <div class="phrase-word">Shot!</div>
-          <div class="phrase-desc">Encouraging a teammate in a good position to shoot.</div>
+        <div class="phrase-card" onclick="openPhrase('Leave!','Encouraging a teammate who is marked to let the ball roll pass them to a teammate behind them unmarked.')">
+          <div class="phrase-word">Leave!</div><div class="phrase-desc">The ball rolls past one teammate to a teammate arriving in the box unmarked for a one touch finish on goall</div>
         </div>
       </div>
     </div>
@@ -223,189 +263,4 @@
     <div id="film" class="section">
       <div class="section-header">
         <div class="section-label">Video Review</div>
-        <div class="section-title">Film Room</div>
-        <div class="section-desc">Upload game clips and training videos for review.</div>
-      </div>
-      <div style="background: rgba(58,191,184,0.08); border: 1px solid var(--teal); padding: 15px; border-radius: 4px; color: var(--text); margin-bottom: 20px;">
-        🔗 <strong>Veo Access:</strong> All home games are uploaded to our team Veo account within 48 hours.
-      </div>
-      <div style="border: 2px dashed var(--border); border-radius: 8px; padding: 40px 20px; text-align: center;">
-        <span style="font-size: 40px; display: block; margin-bottom: 10px;">📹</span>
-        <h3 style="color: var(--white); font-family: 'Bebas Neue', cursive; font-size: 24px;">Upload Match Clips</h3>
-        <p style="color: var(--muted); font-size: 14px;">Place a Google Drive folder link here for players to submit individual highlights.</p>
-      </div>
-    </div>
-
-    <div id="parents" class="section">
-      <div class="section-header">
-        <div class="section-label">Information & Policies</div>
-        <div class="section-title">Parent Hub</div>
-        <div class="section-desc">Important resources and club guidelines for families.</div>
-      </div>
-      <div class="phrase-grid">
-        <div class="phrase-card">
-          <div class="phrase-word" style="color:var(--green-lt)">GA & Aspire Overview</div>
-          <div class="phrase-desc">Review the framework, mission, and player pathway.</div>
-        </div>
-        <div class="phrase-card">
-          <div class="phrase-word" style="color:var(--green-lt)">AJAX Parent Policy</div>
-          <div class="phrase-desc">Read our expectations for sideline behavior.</div>
-        </div>
-        <div class="phrase-card">
-          <div class="phrase-word" style="color:var(--green-lt)">Referee Abuse Program</div>
-          <div class="phrase-desc">Zero tolerance policy guidelines to protect officials.</div>
-        </div>
-        <div class="phrase-card">
-          <div class="phrase-word" style="color:var(--green-lt)">Concussion Protocol</div>
-          <div class="phrase-desc">Health and safety steps for head injury evaluation.</div>
-        </div>
-        <div class="phrase-card">
-          <div class="phrase-word" style="color:var(--green-lt)">CIF Sports Policy</div>
-          <div class="phrase-desc">High school soccer overlap and participation guidelines.</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="portal" class="section">
-      <div class="section-header">
-        <div class="section-label">Individual Development Plans</div>
-        <div class="section-title">Player Portal</div>
-        <div class="section-desc">Secure access to your personal development plan — players only</div>
-      </div>
-
-      <div id="portal-login" class="portal-gate">
-        <span class="portal-icon">🔐</span>
-        <h2>Player Login</h2>
-        <p>Enter your name and passcode to access your IDP and Stats.</p>
-        <div class="input-group">
-          <label>Your Name</label>
-          <input type="text" id="player-name" placeholder="e.g. Shawn Craig">
-        </div>
-        <div class="input-group">
-          <label>4-Digit PIN</label>
-          <input type="password" id="player-pass" placeholder="****">
-        </div>
-        <button class="btn" id="login-btn" onclick="loginPortal()" style="margin-top: 10px;">Unlock My IDP →</button>
-      </div>
-
-      <div id="portal-content">
-        <div class="player-header">
-          <div class="player-avatar" id="player-avatar">⚽</div>
-          <div class="player-info">
-            <h3 id="portal-welcome">Welcome!</h3>
-            <p>AJAX Aspire U15 · Individual Development Plan</p>
-          </div>
-          <button class="btn btn-outline" onclick="logoutPortal()" style="margin-left: auto;">Log Out</button>
-        </div>
-
-        <h3 style="font-family: 'Bebas Neue', cursive; font-size: 24px; color: var(--gold); margin-top: 20px;">Coach Feedback</h3>
-        <div class="coach-notes" id="display-notes">Loading notes...</div>
-
-        <h3 style="font-family: 'Bebas Neue', cursive; font-size: 24px; color: var(--gold); margin-top: 30px;">Season Statistics</h3>
-        <div class="stats-grid">
-          <div class="stat-box"><div class="stat-label">Games</div><div class="stat-val" id="stat-gp">0</div></div>
-          <div class="stat-box"><div class="stat-label">Total Mins</div><div class="stat-val" id="stat-mins">0</div></div>
-          <div class="stat-box"><div class="stat-label">Goals</div><div class="stat-val" id="stat-goals">0</div></div>
-          <div class="stat-box"><div class="stat-label">Assists</div><div class="stat-val" id="stat-ast">0</div></div>
-          <div class="stat-box"><div class="stat-label">Key Passes</div><div class="stat-val" id="stat-kp">0</div></div>
-          <div class="stat-box"><div class="stat-label">Def Duels</div><div class="stat-val" id="stat-duels">0</div></div>
-        </div>
-
-        <div style="background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-top: 30px;">
-          <h3 style="font-family: 'Bebas Neue', cursive; font-size: 24px; color: var(--white); margin-bottom: 15px;">Post-Match Reflection</h3>
-          <div class="input-group">
-            <label>Submit your thoughts</label>
-            <textarea id="reflection-text" placeholder="What went well? What is your focus area for next practice?"></textarea>
-          </div>
-          <button class="btn" onclick="submitNetlifyReflection()">Submit Reflection</button>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <script>
-    // 1. TAB SWITCHING LOGIC (All 6 Tabs)
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
-    }
-
-    // 2. POSITIONS FIELD LOGIC
-    function showPos(posId) {
-      document.querySelectorAll('.pos-detail').forEach(d => d.classList.remove('active'));
-      document.getElementById(posId).classList.add('active');
-    }
-
-    // 3. GOOGLE SHEETS API URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbxXSCn4L-GwGGpWeYAtkrhAs8eMXd1DQR3TmOMCfg4MuvYwk5IegjZequLUXt1uuShi/exec";
-
-    // 4. LOGIN & FETCH STATS
-    async function loginPortal() {
-      const name = document.getElementById('player-name').value.trim();
-      const pin = document.getElementById('player-pass').value.trim();
-      
-      if(!name || !pin) { alert("Please enter both your name and PIN."); return; }
-
-      const btn = document.getElementById('login-btn');
-      const originalText = btn.innerText;
-      btn.innerText = "Loading Stats...";
-
-      try {
-        const response = await fetch(`${API_URL}?name=${encodeURIComponent(name)}&pin=${encodeURIComponent(pin)}`);
-        const data = await response.json();
-
-        if (data.success) {
-          document.getElementById('portal-login').style.display = 'none';
-          document.getElementById('portal-content').style.display = 'block';
-          
-          // Note the addition to fix the comma name bug!
-          document.getElementById('portal-welcome').innerText = `Welcome, ${data.name.split(' ')}!`;
-          document.getElementById('player-avatar').innerText = data.name.charAt(0).toUpperCase();
-          document.getElementById('display-notes').innerText = `"${data.notes || 'Keep working hard. See you at training.'}"`;
-          
-          document.getElementById('stat-gp').innerText = data.stats.gamesPlayed || 0;
-          document.getElementById('stat-mins').innerText = data.stats.minutes || 0;
-          document.getElementById('stat-goals').innerText = data.stats.goals || 0;
-          document.getElementById('stat-ast').innerText = data.stats.assists || 0;
-          document.getElementById('stat-kp').innerText = data.stats.keyPasses || 0;
-          document.getElementById('stat-duels').innerText = data.stats.duels || 0;
-        } else {
-          alert("Invalid Credentials. Check your exact spelling and PIN.");
-        }
-      } catch(err) {
-        alert("Error connecting to the database. Please try again.");
-      } finally {
-        btn.innerText = originalText;
-      }
-    }
-
-    // 5. LOGOUT LOGIC
-    function logoutPortal() {
-      document.getElementById('portal-content').style.display = 'none';
-      document.getElementById('portal-login').style.display = 'block';
-      document.getElementById('player-name').value = '';
-      document.getElementById('player-pass').value = '';
-    }
-
-    // 6. SUBMIT REFLECTION
-    async function submitNetlifyReflection() {
-      const text = document.getElementById('reflection-text').value.trim();
-      const welcomeText = document.getElementById('portal-welcome').innerText;
-      const name = welcomeText.replace("Welcome, ", "").replace("!", ""); 
-      
-      if(!text) { alert("Please type a reflection first."); return; }
-
-      try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ name: name, reflection: text }) });
-        alert("Reflection Submitted Successfully! Coach Shawn will review it.");
-        document.getElementById('reflection-text').value = "";
-      } catch(err) {
-        alert("There was an error submitting your reflection.");
-      }
-    }
-  </script>
-</body>
-</html>
+        <div class="section
