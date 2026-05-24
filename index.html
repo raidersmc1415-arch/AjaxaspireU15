@@ -386,6 +386,23 @@
         <div class="section-desc">Watch the clip, then submit your feedback below. Coach Shawn reviews all responses.</div>
       </div>
 
+      <!-- FILM ROOM PASSWORD GATE -->
+      <div id="film-gate" style="max-width: 420px; margin: 40px auto; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 40px 32px; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 16px;">🎬</div>
+        <div style="font-family: 'Bebas Neue', cursive; font-size: 30px; color: var(--white); margin-bottom: 8px;">Film Room Access</div>
+        <p style="color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 8px;">Enter the team code to unlock the Film Room.</p>
+        <p style="color: var(--teal); font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 1px; margin-bottom: 24px;">Hint: It's a defending principle — three words, no spaces.</p>
+        <div class="input-group" style="text-align: left;">
+          <label>Team Code</label>
+          <input type="password" id="film-code" placeholder="entercode" onkeydown="if(event.key==='Enter') unlockFilm()">
+        </div>
+        <button class="btn" onclick="unlockFilm()" style="margin-top: 8px;">Unlock →</button>
+        <div id="film-code-error" style="display:none; color:#e05555; font-size:13px; margin-top:12px;">Incorrect code — check with your teammates 👀</div>
+      </div>
+
+      <!-- FILM ROOM CONTENT (hidden until unlocked) -->
+      <div id="film-content" style="display:none;">
+
       <div style="background: rgba(200,169,81,0.08); border: 1px solid rgba(200,169,81,0.25); padding: 14px 18px; border-radius: 4px; color: var(--gold); margin-bottom: 20px; font-size: 13px; line-height: 1.6;">
         <strong>📌 Coach Shawn — Adding new videos:</strong> Upload to your <a href="https://www.youtube.com/playlist?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw" target="_blank" style="color:var(--teal);">YouTube playlist ↗</a> and it appears here automatically. No file updates or Netlify re-uploads needed. Update the title, date, and focus points below to match your latest clip.
       </div>
@@ -463,6 +480,7 @@
         <a href="https://app.veo.co/clubs/ajax-50ad2f70/teams/ajax-2012g/recordings/" target="_blank" style="color: var(--teal); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; text-decoration:none; border:1px solid rgba(58,191,184,0.3); padding:4px 12px; border-radius:2px;">Open Veo ↗</a>
       </div>
 
+      </div><!-- end film-content -->
     </div>
 
     <div id="parents" class="section">
@@ -551,6 +569,28 @@
   </div>
 
   <script>
+    // FILM ROOM PASSWORD
+    function unlockFilm() {
+      const code = document.getElementById('film-code').value.trim().toLowerCase().replace(/\s/g,'');
+      if (code === 'delaydirectdeny') {
+        document.getElementById('film-gate').style.display = 'none';
+        document.getElementById('film-content').style.display = 'block';
+        sessionStorage.setItem('filmUnlocked', 'true');
+      } else {
+        document.getElementById('film-code-error').style.display = 'block';
+        document.getElementById('film-code').value = '';
+        document.getElementById('film-code').focus();
+      }
+    }
+
+    // Keep film unlocked within the same session (so switching tabs doesn't re-lock it)
+    document.addEventListener('DOMContentLoaded', function() {
+      if (sessionStorage.getItem('filmUnlocked') === 'true') {
+        document.getElementById('film-gate').style.display = 'none';
+        document.getElementById('film-content').style.display = 'block';
+      }
+    });
+
     // TABS LOGIC
     function switchTab(tabId, btn) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
