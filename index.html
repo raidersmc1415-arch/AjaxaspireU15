@@ -56,7 +56,71 @@
  .pos-detail { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 22px; display: none; margin-top: 15px; }
  .pos-detail.active { display: block; animation: fadeUp 0.3s ease; }
 
- /* PHRASE CARDS */
+ /* TACTICS BOARD */
+ .tac-btn { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:10px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; text-align:center; }
+ .tac-btn:hover { border-color:var(--teal); color:var(--teal); }
+ .tac-btn.active { background:var(--teal); color:var(--navy); border-color:var(--teal); }
+
+ /* GLOSSARY CARDS */
+ .gloss-card { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:16px; transition:border-color 0.2s; }
+ .gloss-card:hover { border-color:rgba(58,191,184,0.3); }
+ .gloss-term { font-family:'Bebas Neue',cursive; font-size:20px; color:var(--teal); margin-bottom:6px; }
+ .gloss-def { font-size:13px; color:var(--muted); line-height:1.6; }
+ .gloss-link { display:inline-block; margin-top:8px; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--green-lt); border:1px solid rgba(42,122,75,0.3); padding:2px 8px; border-radius:2px; cursor:pointer; }
+ .gloss-link:hover { background:rgba(42,122,75,0.1); }
+
+ /* STAT BOXES */
+ .stat-box { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:16px; text-align:center; }
+ .stat-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+ .stat-val { font-family:'Bebas Neue',cursive; font-size:40px; color:var(--teal); line-height:1; }
+
+ /* LEADERBOARD ROWS */
+ .lb-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+ .lb-row:last-child { border-bottom:none; }
+ .lb-rank { font-family:'Bebas Neue',cursive; font-size:18px; color:var(--muted); min-width:24px; }
+ .lb-rank.top { color:var(--gold); }
+ .lb-name { font-size:14px; color:var(--text); flex:1; }
+ .lb-val { font-family:'DM Mono',monospace; font-size:13px; color:var(--teal); font-weight:600; }
+
+
+ /* IDP SLIDERS */
+ .idp-skill { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+ .idp-skill:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+ .idp-skill-name { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 10px; }
+ .idp-slider-wrap { position: relative; }
+ .idp-slider {
+   -webkit-appearance: none; appearance: none;
+   width: 100%; height: 6px;
+   background: var(--border); border-radius: 3px; outline: none; cursor: pointer;
+ }
+ .idp-slider::-webkit-slider-thumb {
+   -webkit-appearance: none; appearance: none;
+   width: 22px; height: 22px;
+   background: var(--teal); border-radius: 50%;
+   cursor: pointer; border: 3px solid var(--navy);
+   box-shadow: 0 0 8px rgba(58,191,184,0.4);
+ }
+ .idp-slider::-moz-range-thumb {
+   width: 22px; height: 22px; background: var(--teal);
+   border-radius: 50%; cursor: pointer; border: 3px solid var(--navy);
+ }
+ .idp-slider-labels {
+   display: flex; justify-content: space-between;
+   font-size: 11px; color: var(--muted); margin-top: 6px;
+   font-family: 'DM Mono', monospace; letter-spacing: 0.3px;
+ }
+ .idp-slider-val {
+   text-align: center; font-family: 'Bebas Neue', cursive;
+   font-size: 28px; color: var(--teal); margin-top: 2px; line-height: 1;
+ }
+ .idp-ro-section { background: var(--navy-mid); border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-bottom: 12px; }
+ .idp-ro-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+ .idp-ro-val { font-size: 14px; color: var(--text); line-height: 1.6; }
+ .idp-ro-bar-wrap { margin-top: 6px; display: flex; align-items: center; gap: 10px; }
+ .idp-ro-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+ .idp-ro-bar-fill { height: 100%; background: var(--teal); border-radius: 3px; }
+ .idp-ro-num { font-family: 'Bebas Neue', cursive; font-size: 18px; color: var(--teal); min-width: 16px; }
+
  .phrase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; }
  .phrase-card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 16px; transition: all 0.2s; cursor: pointer; }
  .phrase-card:hover { border-color: var(--teal); background: rgba(58,191,184,0.04); transform: translateY(-2px); }
@@ -107,6 +171,8 @@
     <button class="tab-btn" onclick="switchTab('pos', this)">Positions</button>
     <button class="tab-btn" onclick="switchTab('comm', this)">Communication</button>
     <button class="tab-btn" onclick="switchTab('film', this)">Film Room</button>
+    <button class="tab-btn" onclick="switchTab('tactics', this)">⚙️ Tactics Board</button>
+    <button class="tab-btn" onclick="switchTab('glossary', this)">📖 Glossary</button>
     <button class="tab-btn" onclick="switchTab('parents', this)">Parent Hub</button>
     <button class="tab-btn" onclick="switchTab('portal', this)" style="color: var(--gold);">🔒 Player Portal</button>
   </nav>
@@ -120,10 +186,130 @@
         <div class="section-desc">Our core principles, team goals, and season information.</div>
       </div>
 
+      <!-- ULIVIERI PULL-QUOTE -->
+      <div style="background: linear-gradient(135deg, rgba(30,92,56,0.25), rgba(13,27,42,0.8)); border: 1px solid rgba(58,191,184,0.3); border-left: 4px solid var(--teal); border-radius: 6px; padding: 28px 32px; margin-bottom: 20px; position: relative; overflow: hidden;">
+        <div style="position:absolute; top:-10px; left:20px; font-size:80px; color:rgba(58,191,184,0.08); font-family:'Bebas Neue',cursive; line-height:1; pointer-events:none;">"</div>
+        <div style="font-family:'Bebas Neue',cursive; font-size:clamp(18px,3vw,26px); color:var(--white); line-height:1.3; letter-spacing:0.5px; position:relative; z-index:1;">
+          If we have to sit deep and counter-attack, we are Italian.<br>
+          If we win the ball with no immediate counter, we are Spanish.<br>
+          If the fastest solution is forward, we are German.
+        </div>
+        <div style="margin-top:16px; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--teal);">— Renzo Ulivieri · Director, Coverciano Italian Football School</div>
+        <div style="margin-top:10px; font-size:13px; color:var(--muted); line-height:1.6; max-width:600px;">This is our identity. We don't play one way — we read the game and solve the problem in front of us. Our three build-out plans, our defensive spectrum, our attacking patterns — all of it flows from this principle. Smart football. Fluid football.</div>
+      </div>
+
       <!-- GAME MODEL -->
       <div class="card">
-        <h2 style="font-family: 'Bebas Neue', cursive; color: var(--white); font-size: 28px; margin-bottom: 15px;">Our Game Model</h2>
-        <p style="line-height: 1.6; color: var(--muted);">We play proactive, attacking football. With build up play, we'll go around-through-over, use quick combination play to advance the ball. We value intelligence and bravery on the ball. Defensively everyone is a defender mentality, smart but physical when defending. Our system relies on high effort, high attitude, technical execution and constant communication.</p>
+        <h2 style="font-family:'Bebas Neue',cursive; color:var(--white); font-size:28px; margin-bottom:15px;">Our Game Model</h2>
+        <p style="line-height:1.7; color:var(--muted); font-size:14px;">We play proactive, intelligent football. In possession we build with purpose — going around, through, or over the opponent's pressure depending on what the game presents. We value technical quality, spatial awareness, and bravery on the ball. Out of possession, every player is a defender from the moment we lose it. Our system demands high effort, high standards, and constant communication — but above all, the ability to read the game and make the right decision.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:20px;">
+
+          <!-- IN POSSESSION -->
+          <div style="background:var(--navy-mid); border:1px solid var(--border); border-left:3px solid var(--green-lt); border-radius:4px; padding:18px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:18px; color:var(--green-lt); margin-bottom:14px;">✅ In Possession</div>
+
+            <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <div style="font-size:13px; font-weight:600; color:var(--white); margin-bottom:4px;">1 — Look Forward First</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.6;">Look forward first. If it's on, play it. If not, keep the ball and reset — patience creates the moment, bravery takes it.</div>
+            </div>
+
+            <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <div style="font-size:13px; font-weight:600; color:var(--white); margin-bottom:4px;">2 — Create Superiority Off the Ball</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.6;">Move to create an advantage — never stand in the same line as a teammate. Every run either opens space for you or opens space for someone else.</div>
+            </div>
+
+            <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <div style="font-size:13px; font-weight:600; color:var(--white); margin-bottom:4px;">3 — Recognize the Moment and Commit</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.6;">When space opens behind their line — take it. Be brave in 1v1s. Hesitation is the only mistake.</div>
+            </div>
+
+            <div>
+              <div style="font-size:13px; font-weight:600; color:var(--white); margin-bottom:4px;">4 — Build Until the Moment Arrives. Then Be Ruthless.</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.6;">Quality over volume. We don't force chances — we earn them. When the opportunity comes, we finish it.</div>
+            </div>
+          </div>
+
+          <!-- OUT OF POSSESSION -->
+          <div style="background:var(--navy-mid); border:1px solid var(--border); border-left:3px solid var(--teal); border-radius:4px; padding:18px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:18px; color:var(--teal); margin-bottom:14px;">🛡️ Out of Possession</div>
+
+            <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <div style="font-size:13px; font-weight:600; color:var(--white); margin-bottom:4px;">1 — Defending Starts at the Front</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.6;">Every player is a defender the moment we lose the ball. This is a mentality, not a position.</div>
+            </div>
+
+            <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <div style="font-size:13px; font-weight:600; color:var(--white); margin-bottom:4px;">2 — Five Seconds. Hunt.</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.6;">The moment we lose the ball is the moment we win it back. The opponent is most vulnerable in the first five seconds after receiving. Counter-press immediately.</div>
+            </div>
+
+            <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <div style="font-size:13px; font-weight:600; color:var(--white); margin-bottom:4px;">3 — Defend as One Body</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.6;">Get compact. Shrink the field. No daylight between the lines. We don't defend as individuals — we defend as a connected unit.</div>
+            </div>
+
+            <div>
+              <div style="font-size:13px; font-weight:600; color:var(--white); margin-bottom:4px;">4 — Know Your Role in the Moment</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.6;">Every player out of possession is always one of three things: the pressure, the cover, or the balance. Read the game. Know which one you are right now.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEFENSIVE SPECTRUM -->
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+          <div style="font-family:'Bebas Neue',cursive; font-size:20px; color:var(--white); margin-bottom:14px;">Our Defensive Spectrum</div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+
+            <div style="background:var(--navy-mid); border:1px solid var(--border); border-top:3px solid var(--teal); border-radius:4px; padding:14px;">
+              <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--teal); margin-bottom:8px;">⬆️ High Press</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.7;">Coordinated, trigger-based. We press as a unit when the cue fires — bad first touch, slow pass, opponent facing their own goal, GK with ball. Half-pressing is worse than not pressing. Commit fully or hold your shape.</div>
+            </div>
+
+            <div style="background:var(--navy-mid); border:1px solid var(--border); border-top:3px solid var(--gold); border-radius:4px; padding:14px;">
+              <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--gold); margin-bottom:8px;">➡️ Mid Block (4-4-2)</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.7;">Zonal compactness. Two banks connected and staggered — we hold our shape and force play into predictable corridors. Don't chase runners out of your zone. Move as a unit. Squeeze when the trigger fires on the touchline.</div>
+            </div>
+
+            <div style="background:var(--navy-mid); border:1px solid var(--border); border-top:3px solid #e05555; border-radius:4px; padding:14px;">
+              <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:#e05555; margin-bottom:8px;">⬇️ Emergency / Box Defense</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.7;">When we're defending our 18, zonal is over. Grab your mark. Emergency defending — every player accounts for a body. Clear your lines. Live to play another day. No heroics — defend first.</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PLAYER BEHAVIOURS -->
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+          <div style="font-family:'Bebas Neue',cursive; font-size:20px; color:var(--white); margin-bottom:14px;">Player Standards</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+
+            <div style="background:var(--navy-mid); border:1px solid var(--border); border-left:3px solid var(--green-lt); border-radius:4px; padding:14px;">
+              <div style="font-family:'Bebas Neue',cursive; font-size:15px; color:var(--green-lt); margin-bottom:10px;">What We Do</div>
+              <ul style="color:var(--muted); font-size:12px; line-height:2; padding-left:16px; margin:0;">
+                <li>Hold yourself and your teammates to a high standard — with kindness</li>
+                <li>Bring energy to every session. High fives, encouragement, focus</li>
+                <li>Be coachable. Listen, ask questions, apply the feedback</li>
+                <li>Show up on time, ready — cleats on, phone away</li>
+                <li>Support teammates on and off the field. No one stands alone</li>
+                <li>Take ownership of your development. The work you do away from training defines you</li>
+              </ul>
+            </div>
+
+            <div style="background:var(--navy-mid); border:1px solid var(--border); border-left:3px solid rgba(224,85,85,0.6); border-radius:4px; padding:14px;">
+              <div style="font-family:'Bebas Neue',cursive; font-size:15px; color:#e05555; margin-bottom:10px;">What We Don't Do</div>
+              <ul style="color:var(--muted); font-size:12px; line-height:2; padding-left:16px; margin:0;">
+                <li>Gossip, negativity, or poor conduct on social media — it reflects on all of us</li>
+                <li>Direct frustration at teammates. Compete with each other, not against each other</li>
+                <li>Confuse being loud with being a leader. Leadership is demonstrated, not declared</li>
+                <li>Use poor body language. How you carry yourself sends a message to your team</li>
+                <li>Make excuses or point fingers. Take accountability and move forward</li>
+                <li>Be casual about punctuality. Being late communicates that your time matters more than everyone else's</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
       </div>
 
       <!-- TEAM GOALS -->
@@ -312,36 +498,36 @@
       </div>
       
       <div id="pos-gk" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Goalkeeper #1</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Initiate attacks from saves and crosses. Be an option for back passes.<br><br><strong>Out of Possession:</strong> Stop shots. Cover space behind defenders. Organize defensive line constantly.</p>
+        <div class="tag tag-teal" style="margin-bottom:14px">Goalkeeper · #1</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> You start every attack. Read the press before the ball arrives and make the decision — distribute with purpose, not panic. Be a composed outlet for back passes. Use your footwork as a weapon. Initiate attacks quickly from saves and crosses with accurate distribution to the right target.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Organize the defensive line constantly — your voice sets the shape. Cover the space behind defenders as the team pushes up. Command your box on aerial balls. Call off the back four clearly and early. Your composure and communication under pressure sets the tone for the whole team.</p>
       </div>
       <div id="pos-2" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Right Back #2</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Provide width and depth on the right flank. Make overlapping/underlapping runs.<br><br><strong>Out of Possession:</strong> Stop crosses. Provide compactness. Track runners and shift with the back line.</p>
+        <div class="tag tag-teal" style="margin-bottom:14px">Right Back · #2</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Provide width and depth on the right flank. Read when the winger cuts inside — that's your trigger to overlap into the space they've vacated. Tuck into the half-space when the ball is on the opposite side. Connect with the 6 and 8 as a third-man option in the build. Drive forward when the channel is open.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Stop crosses at the source. Stay compact and connected to the center backs. When defending your wide channel with an overlapping runner, track the runner — the center backs shift to cover the ball carrier. In the mid block, hold your zone. In emergency box defense, grab your mark and defend it.</p>
       </div>
       <div id="pos-3" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Left Back #3</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Provide width and depth on the left flank. Make overlapping/underlapping runs.<br><br><strong>Out of Possession:</strong> Stop crosses. Provide compactness. Track runners and shift with the back line.</p>
+        <div class="tag tag-teal" style="margin-bottom:14px">Left Back · #3</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Provide width and depth on the left flank. Read when the winger cuts inside — that's your trigger to overlap into the vacated wide channel. Tuck into the half-space when the ball is on the opposite side. Be a reliable outlet in the build and a threat in the final third when the lane opens.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Stop crosses at the source. Stay compact and connected to the center backs. When defending your wide channel with an overlapping runner, track the runner — the center backs shift to cover the ball carrier. In the mid block, hold your zone. In emergency box defense, grab your mark and defend it.</p>
       </div>
       <div id="pos-cb" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Center Backs #4 & #5</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Split to edges of box. Composure on the ball in the build. Break lines with passes or idenfity when to carry the ball forward.<br><br><strong>Out of Possession:</strong> Command the defensive line. Win aerial duels. Stay compact. Recognize when theres space in behind an delay first principle, make good defensive decisions.</p>
+        <div class="tag tag-teal" style="margin-bottom:14px">Center Backs · #4 & #5</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Split wide to the edges of the box to receive and draw the press. Composure on the ball is non-negotiable — your calm starts the attack. Look to break lines with passes into the midfield windows. Scan before the ball arrives. Know your next pass before you receive it. Join the attack when the channel opens — you have permission to carry forward.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Command the defensive line — communicate constantly. Delay first when space is behind you — do not dive in. Direct the opponent away from goal, then find the moment to engage. Win aerial duels and clear with authority. In the mid block, move as a connected unit. In emergency box defense, grab your mark, defend your space, and clear your lines first.</p>
       </div>
       <div id="pos-6" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Holding Midfielder #6</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Anchor the build-up by receiving with an open body to break lines, connecting our back four to the #8/#10, and serving as the primary outlet to switch play in the attacking half.<br><br><strong>Out of Possession:</strong> Protect the back 4 by maintaing position discipline and connection no more than 10 yards away. Intercept passes into the opponents 9. Compete to win second balls in the air from opponet keeper or long balls. Work hard to stay in-line or behind the ball in transition.
+        <div class="tag tag-teal" style="margin-bottom:14px">Holding Midfielder · #6</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> You are the connection between the back four and the attack. Receive with an open body — scan before the ball arrives and know where your next pass is going. Serve as the primary relief valve when the fullbacks are pressed. Look to break lines into the 8 and 10's half-space pockets. In build-out you are the pivot — Plan B lives and dies with your ability to receive, turn, and play forward immediately. Be the third-man option when the ball goes wide.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Protect the back four. Maintain positional discipline — stay connected, never more than 10-12 yards from the defensive line. Intercept passes aimed at the opponent's striker. Compete for second balls. Work hard to stay in line or behind the ball in every transition — if you're caught high, you've exposed the back four.</p>
       </div>
       <div id="pos-8-10" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Central and Attacking Midfielders #8 & #10</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Operate in the half-spaces. Connect midfield to attack, break lines with passes or dribbles, and provide the primary creative spark in the final third. Counter-press immediately upon losing the ball. The 10 will operate higher on the pitch, dropping into the windows on build outs, looking to receive and play forward or quick combination play with wide players or central to the 9. The 8 is the engine, box to box midfielder who will organize the attack, change the pace (slow the attack down or quick counter), high work rate.br><br><strong>Out of Possession:</strong> The 8 will work to track back immediately to support the 6, same principle work hard to get in line or behind the ball in transition. The 10 will need to track back immediately if the ball is lost on their strong side, weak side identify opponents making the counter attack runs and mark them in transition. The 10 almost always marks the opponent 6 in the build out. In a mid block, the 10 will support the 9 to start the press when triggers are identified.
+        <div class="tag tag-teal" style="margin-bottom:14px">Central & Attacking Midfielders · #8 & #10</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession — #10:</strong> Operate higher between the opponent's lines — in the window behind their press. Receive on the half-turn, already scanning, already knowing where you're going. Your first thought is always forward. In build-out you drop into the pocket space to connect — receive, turn, and penetrate. Combine quickly with wide players and the 9. You are the creative spark.<br><br><strong style="color:var(--white);">In Possession — #8:</strong> You are the engine. Box to box. Receive from the 6 and drive the attack forward. Read when to change the pace — when to slow it down and when to go. Your energy and work rate sets the standard for the entire team. Make yourself available constantly.<br><br><strong style="color:var(--white);">Out of Possession — #8:</strong> Track back immediately to support the 6. Get in line or behind the ball in transition — no exceptions. Your defensive work rate enables the team's pressing shape.<br><br><strong style="color:var(--white);">Out of Possession — #10:</strong> If the ball is lost on your strong side, track back immediately. On the weak side, identify runners making counter-attack runs and cut them off in transition. In the mid block, work with the 9 to screen the opponent's pivot and trigger the press when the cue fires.</p>
       </div>
       <div id="pos-w" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Wingers #7 & #11</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Create width when the ball is strong side by putting heals on the touch line. Recognize when to cut in with the ball.  Take on 1v1s, space in behind, final 3rd. Cross into the box. Rest defense, weakside should be tracking the play and tucking into central channels and be ready for a turnover and stop the counter.<br><br><strong>Out of Possession:</strong> Press the opponent's fullbacks. Track back to defend the wide areas. Lose the ball, fight to win it back.</p>
+        <div class="tag tag-teal" style="margin-bottom:14px">Wingers · #7 & #11</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> When the ball is on your side, heels on the touchline — your width is what stretches their back four and creates half-space pockets for the 8 and 10. Read when to cut inside and when to hold width. Take on 1v1s in the final third — be brave, be direct. Deliver crosses on the ground to the front post. Weak-side winger: track the play, tuck into the central channel, and be ready for a turnover or a switch of play arriving at speed.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Press the opponent's fullbacks immediately. Your press angle should cut off the pass back to their center backs. Track back to support your fullback in wide defensive situations. Lose the ball — you're the first to chase it. In the mid block, hold your horizontal line and don't get pulled out of shape by runners.</p>
       </div>
       <div id="pos-st" class="pos-detail">
-        <div class="tag tag-teal" style="margin-bottom:14px">Center Forward #9</div>
-        <p style="color:var(--muted); font-size: 14px;"><strong>In Possession:</strong> Stretch the defense with runs in behind. Create depth by pinning the opponent back 4 high up the pitch. Hold up the ball when you can't immediately turn, look to combine with your 8/10 when facing your own goal. Arrive at the penalty spot for crosses into the box.<br><br><strong>Out of Possession:</strong> Initiate the press. Force play one direction. Block passes to holding mid. When in a block, look for pressing triggers to start the press and cut off switch of play.</p>
+        <div class="tag tag-teal" style="margin-bottom:14px">Center Forward · #9</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Your job starts before the ball arrives — pin the opponent's back line deep with smart movement. Keep them honest. Don't stand next to defenders; make them find you. When you receive facing your own goal, hold the ball and combine with the 8 or 10 arriving in support. Make runs in behind to exploit space. Arrive at the penalty spot for crosses. Follow every shot — the rebound is yours if you're there.<br><br><strong style="color:var(--white);">Out of Possession:</strong> You start the press. Your angle of approach sets the direction the whole team defends. Approach on a curve to cut off the pass back to the goalkeeper — force play one side. Block the opponent's pivot. In the mid block, be patient — wait for the pressing trigger, then commit fully. In the high press, you are the spark that ignites the team.</p>
       </div>
     </div>
 
@@ -481,7 +667,130 @@
       </div>
 
       </div><!-- end film-content -->
+      <!-- LEADERBOARD -->
+      <div class="card" style="margin-top: 20px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+          <h2 style="font-family:'Bebas Neue',cursive; color:var(--white); font-size:28px; margin:0;">🏅 Season Leaderboard</h2>
+          <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:rgba(200,169,81,0.1); color:var(--gold); border:1px solid rgba(200,169,81,0.25); padding:3px 10px; border-radius:2px;">Season 25/26 · Live</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;">
+          <div style="background:var(--navy-mid); border:1px solid var(--border); border-top:3px solid var(--teal); border-radius:4px; padding:16px;">
+            <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:12px;">📝 Reflections Submitted</div>
+            <div id="reflect-board">
+              <div style="text-align:center; padding:20px; color:var(--muted); font-size:13px; font-style:italic;">Loading leaderboard...</div>
+            </div>
+          </div>
+          <div style="background:var(--navy-mid); border:1px solid var(--border); border-top:3px solid var(--green-lt); border-radius:4px; padding:16px;">
+            <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--green-lt); margin-bottom:12px;">📅 Training Attendance</div>
+            <div id="attend-board">
+              <div style="text-align:center; padding:20px; color:var(--muted); font-size:13px; font-style:italic;">Loading leaderboard...</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--muted); font-style:italic;">Leaderboard updates from your Google Sheet. First names only — visible to the whole team.</p>
+      </div>
+
     </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- TACTICS BOARD                                       -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="tactics" class="section">
+      <div class="section-header">
+        <div class="section-label">Systems of Play</div>
+        <div class="section-title">Tactics Board</div>
+        <div class="section-desc">Select a formation or pattern to see player positions, movement, and when to use each system.</div>
+      </div>
+
+      <!-- SCENARIO BUTTONS -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px; margin-bottom:20px;">
+        <button class="tac-btn active" onclick="setTactic('433',this)">4-3-3 Attacking</button>
+        <button class="tac-btn" onclick="setTactic('overlap',this)">Winger Cuts / Overlap</button>
+        <button class="tac-btn" onclick="setTactic('buildA',this)">Build Out — Plan A</button>
+        <button class="tac-btn" onclick="setTactic('buildB',this)">Build Out — Plan B</button>
+        <button class="tac-btn" onclick="setTactic('buildC',this)">Build Out — Plan C</button>
+        <button class="tac-btn" onclick="setTactic('back4attack',this)">Back 4 — Attacking Roles</button>
+        <button class="tac-btn" onclick="setTactic('442block',this)">4-4-2 Mid Block</button>
+        <button class="tac-btn" onclick="setTactic('press',this)">4-3-3 Press</button>
+      </div>
+
+      <!-- SITUATION CARD -->
+      <div id="tac-situation" style="background:rgba(58,191,184,0.07); border:1px solid rgba(58,191,184,0.2); border-left:4px solid var(--teal); border-radius:4px; padding:12px 16px; margin-bottom:16px; display:flex; align-items:flex-start; gap:12px;">
+        <span style="font-size:20px; flex-shrink:0;">🎯</span>
+        <div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:4px;">When to use this</div>
+          <div id="tac-situation-text" style="font-size:14px; color:var(--text); line-height:1.5;"></div>
+        </div>
+      </div>
+
+      <!-- PITCH SVG -->
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:16px; position:relative;">
+        <svg id="tac-pitch" viewBox="0 0 400 560" style="width:100%; max-width:500px; display:block; margin:0 auto;" xmlns="http://www.w3.org/2000/svg">
+          <!-- Pitch surface -->
+          <rect width="400" height="560" fill="#1a5c2a" rx="6"/>
+          <!-- Pitch stripes -->
+          <rect x="0" y="0" width="400" height="70" fill="rgba(255,255,255,0.03)"/>
+          <rect x="0" y="140" width="400" height="70" fill="rgba(255,255,255,0.03)"/>
+          <rect x="0" y="280" width="400" height="70" fill="rgba(255,255,255,0.03)"/>
+          <rect x="0" y="420" width="400" height="70" fill="rgba(255,255,255,0.03)"/>
+          <!-- Pitch border -->
+          <rect x="10" y="10" width="380" height="540" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+          <!-- Halfway line -->
+          <line x1="10" y1="280" x2="390" y2="280" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+          <!-- Centre circle -->
+          <circle cx="200" cy="280" r="55" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <circle cx="200" cy="280" r="3" fill="rgba(255,255,255,0.5)"/>
+          <!-- Top penalty box -->
+          <rect x="100" y="10" width="200" height="90" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/>
+          <!-- Top 6-yard box -->
+          <rect x="150" y="10" width="100" height="35" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+          <!-- Bottom penalty box -->
+          <rect x="100" y="460" width="200" height="90" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/>
+          <!-- Bottom 6-yard box -->
+          <rect x="150" y="525" width="100" height="35" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+          <!-- Goals -->
+          <rect x="160" y="4" width="80" height="12" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+          <rect x="160" y="544" width="80" height="12" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+          <!-- Penalty spots -->
+          <circle cx="200" cy="80" r="3" fill="rgba(255,255,255,0.5)"/>
+          <circle cx="200" cy="480" r="3" fill="rgba(255,255,255,0.5)"/>
+
+          <!-- ARROWS GROUP — drawn first so dots appear on top -->
+          <g id="tac-arrows"></g>
+
+          <!-- PLAYER DOTS GROUP -->
+          <g id="tac-players"></g>
+        </svg>
+      </div>
+
+      <!-- COACHING NOTES -->
+      <div style="background:var(--card); border:1px solid var(--border); border-left:4px solid var(--gold); border-radius:4px; padding:20px;">
+        <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:10px;" id="tac-title"></div>
+        <div style="font-size:14px; color:var(--muted); line-height:1.8;" id="tac-notes"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- GLOSSARY                                            -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="glossary" class="section">
+      <div class="section-header">
+        <div class="section-label">Soccer IQ</div>
+        <div class="section-title">Glossary</div>
+        <div class="section-desc">Every term you'll hear from Coach Shawn — defined and linked to where you'll see it in the Tactics Board.</div>
+      </div>
+
+      <!-- SEARCH -->
+      <div style="margin-bottom:20px; position:relative;">
+        <input type="text" id="glossary-search" placeholder="Search terms... e.g. pressing trigger, half space" oninput="filterGlossary()" style="width:100%; background:var(--card); border:1px solid var(--border); border-radius:4px; padding:14px 16px 14px 42px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none;">
+        <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:18px; pointer-events:none;">🔍</span>
+      </div>
+
+      <div id="glossary-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:12px;"></div>
+      <div id="glossary-empty" style="display:none; text-align:center; padding:40px; color:var(--muted); font-size:14px;">No terms match your search. Try a different word.</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
 
     <div id="parents" class="section">
       <div class="section-header">
@@ -533,15 +842,17 @@
           <div class="player-avatar" id="player-avatar">⚽</div>
           <div class="player-info">
             <h3 id="portal-welcome">Welcome!</h3>
-            <p>AJAX Aspire U15 · Individual Development Plan</p>
+            <p>AJAX Aspire U15 · Individual Development Plan · Season 25/26</p>
           </div>
           <button class="btn btn-outline" onclick="logoutPortal()" style="margin-left: auto;">Log Out</button>
         </div>
 
-        <h3 style="font-family: 'Bebas Neue', cursive; font-size: 24px; color: var(--gold); margin-top: 20px;">Coach Feedback</h3>
+        <!-- COACH FEEDBACK -->
+        <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--gold); margin-top:20px;">Coach Shawn's Notes</h3>
         <div class="coach-notes" id="display-notes">Loading notes...</div>
 
-        <h3 style="font-family: 'Bebas Neue', cursive; font-size: 24px; color: var(--gold); margin-top: 30px;">Season Statistics</h3>
+        <!-- SEASON STATS -->
+        <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--gold); margin-top:30px;">Season Statistics</h3>
         <div class="stats-grid">
           <div class="stat-box"><div class="stat-label">Games</div><div class="stat-val" id="stat-gp">0</div></div>
           <div class="stat-box"><div class="stat-label">Total Mins</div><div class="stat-val" id="stat-mins">0</div></div>
@@ -551,8 +862,181 @@
           <div class="stat-box"><div class="stat-label">Def Duels</div><div class="stat-val" id="stat-duels">0</div></div>
         </div>
 
-        <div style="background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-top: 30px;">
-          <h3 style="font-family: 'Bebas Neue', cursive; font-size: 24px; color: var(--white); margin-bottom: 15px;">Post-Match Reflection</h3>
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- IDP FORM (shown when not yet submitted)         -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <div id="idp-form">
+
+          <!-- OWNERSHIP ANCHOR -->
+          <div style="background:var(--card); border:1px solid var(--border); border-left:4px solid var(--gold); border-radius:4px; padding:24px; margin-top:30px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:6px;">🎯 Ownership Check-In</div>
+            <p style="color:var(--muted); font-size:13px; margin-bottom:18px;">Be honest — this is for you, not for anyone else.</p>
+            <div class="input-group">
+              <label>How much are you currently driving your own development outside of practice? (1 = not at all · 5 = every day)</label>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="ownership-slider" oninput="updateSliderVal('ownership-slider','ownership-val')">
+                <div class="idp-slider-labels">
+                  <span>Not at all</span><span>Sometimes</span><span>Every day</span>
+                </div>
+                <div class="idp-slider-val" id="ownership-val">3</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GOALS -->
+          <div style="background:var(--card); border:1px solid var(--border); border-left:4px solid var(--teal); border-radius:4px; padding:24px; margin-top:16px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:6px;">🏆 My Goals</div>
+            <p style="color:var(--muted); font-size:13px; margin-bottom:18px;">Set these with intention — they will anchor your season. You won't be changing them.</p>
+            <div class="input-group">
+              <label>By the end of this season, I want to...</label>
+              <textarea id="goal-short" maxlength="150" placeholder="Be specific. What does success look like for you on the field this season?" style="min-height:80px;"></textarea>
+              <div style="font-size:11px; color:var(--muted); margin-top:4px; text-align:right;" id="goal-short-count">0 / 150</div>
+            </div>
+            <div class="input-group" style="margin-top:14px;">
+              <label>In 2 years I see myself...</label>
+              <textarea id="goal-long" maxlength="150" placeholder="Where do you want this game to take you?" style="min-height:80px;"></textarea>
+              <div style="font-size:11px; color:var(--muted); margin-top:4px; text-align:right;" id="goal-long-count">0 / 150</div>
+            </div>
+          </div>
+
+          <!-- TECHNICAL SELF-ASSESSMENT -->
+          <div style="background:var(--card); border:1px solid var(--border); border-left:4px solid var(--green-lt); border-radius:4px; padding:24px; margin-top:16px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:6px;">⚽ Technical Self-Assessment</div>
+            <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Rate yourself honestly — where you are right now, not where you want to be.</p>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">Dribbling</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="t-dribbling" oninput="updateSliderVal('t-dribbling','tv-dribbling')">
+                <div class="idp-slider-labels"><span>I avoid it</span><span>Selective</span><span>Back myself every time</span></div>
+                <div class="idp-slider-val" id="tv-dribbling">3</div>
+              </div>
+            </div>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">Passing</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="t-passing" oninput="updateSliderVal('t-passing','tv-passing')">
+                <div class="idp-slider-labels"><span>Play it safe</span><span>Building</span><span>Consistently break lines</span></div>
+                <div class="idp-slider-val" id="tv-passing">3</div>
+              </div>
+            </div>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">Movement</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="t-movement" oninput="updateSliderVal('t-movement','tv-movement')">
+                <div class="idp-slider-labels"><span>Wait for the ball</span><span>Improving</span><span>Always creating angles</span></div>
+                <div class="idp-slider-val" id="tv-movement">3</div>
+              </div>
+            </div>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">Duels & 1v1s</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="t-duels" oninput="updateSliderVal('t-duels','tv-duels')">
+                <div class="idp-slider-labels"><span>Shy away</span><span>Selective</span><span>Compete every time</span></div>
+                <div class="idp-slider-val" id="tv-duels">3</div>
+              </div>
+            </div>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">First Touch</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="t-touch" oninput="updateSliderVal('t-touch','tv-touch')">
+                <div class="idp-slider-labels"><span>Inconsistent</span><span>Getting there</span><span>Controls the game</span></div>
+                <div class="idp-slider-val" id="tv-touch">3</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TACTICAL SELF-ASSESSMENT -->
+          <div style="background:var(--card); border:1px solid var(--border); border-left:4px solid var(--teal); border-radius:4px; padding:24px; margin-top:16px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:6px;">🧠 Tactical Self-Assessment</div>
+            <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">How well do you understand and execute these moments in the game?</p>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">Supporting the Ball</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="tac-support" oninput="updateSliderVal('tac-support','tacv-support')">
+                <div class="idp-slider-labels"><span>Often out of position</span><span>Getting there</span><span>Always an option</span></div>
+                <div class="idp-slider-val" id="tacv-support">3</div>
+              </div>
+            </div>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">Rest Defense</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="tac-restdef" oninput="updateSliderVal('tac-restdef','tacv-restdef')">
+                <div class="idp-slider-labels"><span>Don't track back</span><span>Improving</span><span>Read it and recover always</span></div>
+                <div class="idp-slider-val" id="tacv-restdef">3</div>
+              </div>
+            </div>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">Pressing Triggers</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="tac-press" oninput="updateSliderVal('tac-press','tacv-press')">
+                <div class="idp-slider-labels"><span>Don't recognize them</span><span>Learning</span><span>Initiate the press</span></div>
+                <div class="idp-slider-val" id="tacv-press">3</div>
+              </div>
+            </div>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">Attacking Principles</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="tac-attack" oninput="updateSliderVal('tac-attack','tacv-attack')">
+                <div class="idp-slider-labels"><span>Still learning</span><span>Building</span><span>Execute consistently</span></div>
+                <div class="idp-slider-val" id="tacv-attack">3</div>
+              </div>
+            </div>
+
+            <div class="idp-skill">
+              <div class="idp-skill-name">Defending Principles</div>
+              <div class="idp-slider-wrap">
+                <input type="range" min="1" max="5" value="3" class="idp-slider" id="tac-defend" oninput="updateSliderVal('tac-defend','tacv-defend')">
+                <div class="idp-slider-labels"><span>Still learning</span><span>Building</span><span>Execute consistently</span></div>
+                <div class="idp-slider-val" id="tacv-defend">3</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ONE THING -->
+          <div style="background:var(--card); border:1px solid var(--border); border-left:4px solid var(--gold); border-radius:4px; padding:24px; margin-top:16px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:6px;">💬 The One Thing</div>
+            <div class="input-group">
+              <label>The one thing I most want to improve this season is...</label>
+              <textarea id="goal-one-thing" maxlength="200" placeholder="Don't overthink it. What comes to mind first?" style="min-height:80px;"></textarea>
+              <div style="font-size:11px; color:var(--muted); margin-top:4px; text-align:right;" id="one-thing-count">0 / 200</div>
+            </div>
+          </div>
+
+          <!-- SUBMIT -->
+          <div style="margin-top:20px; padding:20px; background:rgba(58,191,184,0.05); border:1px solid rgba(58,191,184,0.15); border-radius:4px;">
+            <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.6;">Once you submit, your IDP is set for the season — these goals will anchor your development. If you need to request a revision at the halfway point, speak with Coach Shawn directly.</p>
+            <button class="btn" style="background:var(--teal); color:var(--navy); font-size:15px; padding:14px 32px;" onclick="submitIDP()">Submit My IDP →</button>
+            <div id="idp-submit-msg" style="display:none; margin-top:14px; background:rgba(58,191,184,0.08); border:1px solid rgba(58,191,184,0.2); border-radius:4px; padding:14px; color:var(--teal); font-size:14px;">
+              ✅ IDP submitted! Coach Shawn will review your self-assessment. Own this season.
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- IDP READ-ONLY VIEW (shown after submission)     -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <div id="idp-submitted" style="display:none;">
+          <div style="background:rgba(58,191,184,0.06); border:1px solid rgba(58,191,184,0.2); border-radius:4px; padding:20px; margin-top:24px; text-align:center;">
+            <div style="font-size:32px; margin-bottom:8px;">🎯</div>
+            <div style="font-family:'Bebas Neue',cursive; font-size:26px; color:var(--teal);">Your IDP is Set</div>
+            <p style="color:var(--muted); font-size:13px; margin-top:6px;">These goals anchor your season. Come back to them often.</p>
+          </div>
+          <div id="idp-readonly" style="margin-top:16px;"></div>
+          <div style="margin-top:20px; font-size:12px; color:var(--muted); text-align:center; font-style:italic;">Need a revision? Speak with Coach Shawn directly.</div>
+        </div>
+
+        <!-- POST-MATCH REFLECTION -->
+        <div style="background:var(--card); border:1px solid var(--border); padding:25px; border-radius:8px; margin-top:30px;">
+          <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white); margin-bottom:15px;">Post-Match Reflection</h3>
           <div class="input-group"><label>Submit your thoughts</label><textarea id="reflection-text" placeholder="What went well? What is your focus area for next practice?"></textarea></div>
           <button class="btn" onclick="submitNetlifyReflection()">Submit Reflection</button>
         </div>
@@ -647,6 +1131,9 @@
           document.getElementById('stat-ast').innerText = data.stats.assists || 0;
           document.getElementById('stat-kp').innerText = data.stats.keyPasses || 0;
           document.getElementById('stat-duels').innerText = data.stats.duels || 0;
+
+          // Check if player already has an IDP submitted
+          checkIDPSubmitted(data.name);
         } else { alert("Invalid Credentials. Check your exact spelling and PIN."); }
       } catch(err) { alert("Error connecting to the database. Please try again."); } finally { btn.innerText = originalText; }
     }
@@ -657,6 +1144,151 @@
       document.getElementById('player-name').value = '';
       document.getElementById('player-pass').value = '';
     }
+
+    // ── IDP FUNCTIONS ─────────────────────────────────────────────────
+
+    function updateSliderVal(sliderId, valId) {
+      document.getElementById(valId).textContent = document.getElementById(sliderId).value;
+      // Update slider fill color dynamically
+      const slider = document.getElementById(sliderId);
+      const val = (slider.value - 1) / 4 * 100;
+      slider.style.background = `linear-gradient(to right, var(--teal) ${val}%, var(--border) ${val}%)`;
+    }
+
+    // Init all sliders on load
+    function initSliders() {
+      document.querySelectorAll('.idp-slider').forEach(slider => {
+        const valId = slider.id.replace('t-','tv-').replace('tac-','tacv-').replace('ownership-slider','ownership-val');
+        updateSliderVal(slider.id, valId);
+      });
+    }
+
+    // Character counters for textareas
+    function initCharCounters() {
+      [['goal-short','goal-short-count',150],['goal-long','goal-long-count',150],['goal-one-thing','one-thing-count',200]].forEach(([id, countId, max]) => {
+        const el = document.getElementById(id);
+        const counter = document.getElementById(countId);
+        if (el && counter) {
+          el.addEventListener('input', () => { counter.textContent = `${el.value.length} / ${max}`; });
+        }
+      });
+    }
+
+    // Check if this player already submitted their IDP (stored in localStorage by name)
+    function checkIDPSubmitted(name) {
+      const saved = localStorage.getItem('idp_' + name.toLowerCase().trim());
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          showIDPReadOnly(data);
+        } catch(e) { showIDPForm(); }
+      } else {
+        showIDPForm();
+      }
+    }
+
+    function showIDPForm() {
+      document.getElementById('idp-form').style.display = 'block';
+      document.getElementById('idp-submitted').style.display = 'none';
+      initSliders();
+      initCharCounters();
+    }
+
+    function showIDPReadOnly(data) {
+      document.getElementById('idp-form').style.display = 'none';
+      document.getElementById('idp-submitted').style.display = 'block';
+      const ro = document.getElementById('idp-readonly');
+      const skillLabels = { dribbling:'Dribbling', passing:'Passing', movement:'Movement', duels:'Duels & 1v1s', touch:'First Touch' };
+      const tacLabels = { support:'Supporting the Ball', restdef:'Rest Defense', press:'Pressing Triggers', attack:'Attacking Principles', defend:'Defending Principles' };
+
+      ro.innerHTML = `
+        <div class="idp-ro-section">
+          <div class="idp-ro-label">Ownership Check-In</div>
+          <div class="idp-ro-bar-wrap">
+            <div class="idp-ro-bar"><div class="idp-ro-bar-fill" style="width:${(data.ownership-1)/4*100}%"></div></div>
+            <div class="idp-ro-num">${data.ownership}/5</div>
+          </div>
+        </div>
+        <div class="idp-ro-section">
+          <div class="idp-ro-label">Short-Term Goal</div>
+          <div class="idp-ro-val">"${data.goalShort}"</div>
+        </div>
+        <div class="idp-ro-section">
+          <div class="idp-ro-label">Long-Term Goal</div>
+          <div class="idp-ro-val">"${data.goalLong}"</div>
+        </div>
+        <div class="idp-ro-section">
+          <div class="idp-ro-label">Technical Self-Assessment</div>
+          ${Object.entries(skillLabels).map(([k,label]) => `
+            <div style="margin-bottom:10px;">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${label}</div>
+              <div class="idp-ro-bar-wrap">
+                <div class="idp-ro-bar"><div class="idp-ro-bar-fill" style="width:${(data['t_'+k]-1)/4*100}%"></div></div>
+                <div class="idp-ro-num">${data['t_'+k]}/5</div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="idp-ro-section">
+          <div class="idp-ro-label">Tactical Self-Assessment</div>
+          ${Object.entries(tacLabels).map(([k,label]) => `
+            <div style="margin-bottom:10px;">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${label}</div>
+              <div class="idp-ro-bar-wrap">
+                <div class="idp-ro-bar"><div class="idp-ro-bar-fill" style="width:${(data['tac_'+k]-1)/4*100}%"></div></div>
+                <div class="idp-ro-num">${data['tac_'+k]}/5</div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="idp-ro-section">
+          <div class="idp-ro-label">The One Thing</div>
+          <div class="idp-ro-val">"${data.oneThing}"</div>
+        </div>
+      `;
+    }
+
+    async function submitIDP() {
+      const name = document.getElementById('portal-welcome').innerText.replace('Welcome, ','').replace('!','').trim();
+      const goalShort = document.getElementById('goal-short').value.trim();
+      const goalLong  = document.getElementById('goal-long').value.trim();
+      const oneThing  = document.getElementById('goal-one-thing').value.trim();
+
+      if (!goalShort || !goalLong || !oneThing) {
+        alert('Please complete all three goal fields before submitting.'); return;
+      }
+
+      const data = {
+        ownership: document.getElementById('ownership-slider').value,
+        goalShort, goalLong, oneThing,
+        t_dribbling: document.getElementById('t-dribbling').value,
+        t_passing:   document.getElementById('t-passing').value,
+        t_movement:  document.getElementById('t-movement').value,
+        t_duels:     document.getElementById('t-duels').value,
+        t_touch:     document.getElementById('t-touch').value,
+        tac_support: document.getElementById('tac-support').value,
+        tac_restdef: document.getElementById('tac-restdef').value,
+        tac_press:   document.getElementById('tac-press').value,
+        tac_attack:  document.getElementById('tac-attack').value,
+        tac_defend:  document.getElementById('tac-defend').value,
+      };
+
+      // Save locally so it persists across sessions
+      localStorage.setItem('idp_' + name.toLowerCase().trim(), JSON.stringify(data));
+
+      // Post to Google Sheet
+      const payload = {
+        name,
+        reflection: `[IDP SUBMISSION]\nOwnership: ${data.ownership}/5\nShort-Term: ${goalShort}\nLong-Term: ${goalLong}\nOne Thing: ${oneThing}\nTechnical — Dribbling:${data.t_dribbling} Passing:${data.t_passing} Movement:${data.t_movement} Duels:${data.t_duels} Touch:${data.t_touch}\nTactical — Support:${data.tac_support} RestDef:${data.tac_restdef} Press:${data.tac_press} Attack:${data.tac_attack} Defend:${data.tac_defend}`
+      };
+
+      try {
+        await fetch(API_URL, { method:'POST', body: JSON.stringify(payload) });
+      } catch(e) { /* silent — data saved locally regardless */ }
+
+      document.getElementById('idp-submit-msg').style.display = 'block';
+      setTimeout(() => { showIDPReadOnly(data); }, 1800);
+    }
+
+
 
     async function submitFilmFeedback() {
       const name = document.getElementById('film-player-name').value.trim();
@@ -695,6 +1327,368 @@
         document.getElementById('reflection-text').value = "";
       } catch(err) { alert("There was an error submitting your reflection."); }
     }
+
+    // ═══════════════════════════════════════════════
+    // TACTICS BOARD
+    // ═══════════════════════════════════════════════
+
+    // Pitch is 400 wide x 560 tall in SVG units
+    // We're attacking upward (toward y=0)
+    const TACTICS = {
+      // ── 4-3-3 ATTACKING ──────────────────────────────────────────────
+      '433': {
+        title: '4-3-3 Attacking Shape',
+        situation: 'Opponent is organized in their half. We have the ball and are building into the final third. Width from 7 and 11 stretches their back line, opening half-space pockets for 8 and 10.',
+        notes: '<strong style="color:var(--teal)">7 & 11 — Width first:</strong> Heels on the touchline. Force their fullbacks to stay wide and create space between their lines.<br><br><strong style="color:var(--teal)">8 & 10 — Half-spaces, staggered:</strong> Never flat. 10 sits higher (between their mid and back line). 8 sits slightly deeper (between their forward and mid lines). Both on different vertical planes to create constant triangles with 6 and the fullbacks.<br><br><strong style="color:var(--teal)">6 — Single pivot anchor:</strong> Stays low between the center backs on the ball side — available for reset or switch. Never higher than the 8.<br><br><strong style="color:var(--teal)">9 — Pins the back line:</strong> Stays high between their CBs to hold the defensive line deep.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:355,y:420}, p3:{x:45,y:420},    // 2 & 3 tucked slightly in from touchline toward half-space
+          p4:{x:270,y:460}, p5:{x:130,y:460},
+          p6:{x:210,y:355},
+          p8:{x:305,y:255},
+          p10:{x:115,y:215},
+          p7:{x:382,y:165}, p11:{x:18,y:165},
+          p9:{x:200,y:105}
+        },
+        arrows: []
+      },
+
+      // ── WINGER CUTS / OVERLAP ─────────────────────────────────────────
+      'overlap': {
+        title: 'Trigger: Winger Cuts Inside → Fullback Overlaps',
+        situation: 'The winger (7 or 11) receives and drives inside. The wide channel is vacated. The fullback reads the trigger and overlaps immediately to create width.',
+        notes: '<strong style="color:var(--teal)">7 drives inside:</strong> Takes on the defender centrally, dragging defensive attention inward and opening the wide channel.<br><br><strong style="color:var(--teal)">2 overlaps at speed:</strong> Attacks the vacated wide channel — becomes the width. Arrive before the ball does.<br><br><strong style="color:var(--teal)">8 drops slightly:</strong> Provides rest defense cover as 2 pushes high. Creates the balance triangle.<br><br><strong style="color:var(--teal)">9 attacks near post:</strong> Anticipates the cross from 2 — front post run.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:375,y:135}, p3:{x:40,y:420},
+          p4:{x:270,y:460}, p5:{x:130,y:460},
+          p6:{x:210,y:355},
+          p8:{x:295,y:305},
+          p10:{x:115,y:215},
+          p7:{x:275,y:195},
+          p11:{x:18,y:165},
+          p9:{x:175,y:110}
+        },
+        arrows: [
+          {from:{x:375,y:420}, to:{x:375,y:145}, color:'#3ABFB8', dash:false, label:'2 overlaps'},
+          {from:{x:340,y:210}, to:{x:275,y:195}, color:'#C8A951', dash:false, label:'7 cuts inside'},
+          {from:{x:295,y:270}, to:{x:295,y:305}, color:'#2A7A4B', dash:true,  label:'8 cover'}
+        ]
+      },
+
+      // ── BUILD OUT PLAN A ──────────────────────────────────────────────
+      'buildA': {
+        title: 'Build Out — Plan A',
+        situation: 'Opponent overloads the press but leaves our fullbacks unmarked. GK plays to CB, CB switches wide to the free fullback, fullback advances into midfield.',
+        notes: '<strong style="color:var(--teal)">Pass 1 — GK → CB:</strong> CB splits wide to the edge of the box, forcing opponent strikers to commit to a long press run.<br><br><strong style="color:var(--teal)">Pass 2 — CB → FB (wide):</strong> FB is positioned wide to the touchline, body open and facing forward to receive.<br><br><strong style="color:var(--teal)">Pass 3a — FB → 6 (relief valve):</strong> If the central lane is contested, FB plays to 6 checking in as the pivot outlet.<br><br><strong style="color:var(--teal)">Pass 3b — FB skip pass → 8 or 10:</strong> If the half-space is open, the FB skips a line and plays directly into 8 or 10 between the lines.<br><br><strong style="color:var(--teal)">Pass 4 — Line Breaker:</strong> Receiving mid scans 360°, turns, and plays immediately to 7, 11, or 9.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:382,y:390}, p3:{x:18,y:390},
+          p4:{x:270,y:455}, p5:{x:130,y:455},
+          p6:{x:200,y:340},
+          p8:{x:305,y:245},
+          p10:{x:130,y:210},
+          p7:{x:382,y:165}, p11:{x:18,y:165},
+          p9:{x:200,y:110}
+        },
+        arrows: [
+          {from:{x:200,y:520}, to:{x:270,y:455}, color:'#3ABFB8', dash:false, label:'GK → CB'},
+          {from:{x:270,y:455}, to:{x:382,y:390}, color:'#3ABFB8', dash:false, label:'CB → FB wide'},
+          {from:{x:382,y:390}, to:{x:200,y:340}, color:'#C8A951', dash:true,  label:'FB → 6 relief'},
+          {from:{x:382,y:390}, to:{x:305,y:245}, color:'#C8A951', dash:false, label:'FB skip → 8'},
+          {from:{x:305,y:245}, to:{x:200,y:110}, color:'#2A7A4B', dash:false, label:'8 breaks line → 9'}
+        ]
+      },
+
+      // ── BUILD OUT PLAN B ──────────────────────────────────────────────
+      // 1/4/5 deep near our box. 6 checks short from deep.
+      // 8 below 10. 10 at bottom of centre circle (y=335).
+      // 7/11/9 just into opponent half pinning the back line.
+      'buildB': {
+        title: 'Build Out — Plan B',
+        situation: 'Opponent leaves our #6 unmarked in the pivot. Most direct route up the pitch — GK goes straight to the pivot, 6 turns and attacks immediately.',
+        notes: '<strong style="color:var(--teal)">Pass 1 — GK → 6 (Pivot):</strong> GK identifies the unmarked 6 and plays directly. 6 checks short into space to receive.<br><br><strong style="color:var(--teal)">6 receives on the half-turn:</strong> Body open, already scanning before the ball arrives. Receive on the back foot to face forward immediately.<br><br><strong style="color:var(--teal)">Pass 2 — 6 → 8:</strong> 8 sits just below the 10 — the engine ready to receive and drive. 6 plays into feet and 8 carries forward.<br><br><strong style="color:var(--teal)">Pass 3 — 8 → 10 (diagonal):</strong> 10 sits at the bottom of the centre circle, searching for the pocket between lines. 8 plays the diagonal pass forward into that window.<br><br><strong style="color:var(--teal)">Key:</strong> 7, 11, and 9 stay on or just beyond halfway to pin the opponent back line deep — creating the space and depth for 8 and 10 to operate in.',
+        players: {
+          p1:{x:200,y:520},                       // GK deep
+          p2:{x:355,y:470}, p3:{x:45,y:470},    // FBs wide and deep
+          p4:{x:268,y:505}, p5:{x:132,y:505},   // CBs level with GK
+          p6:{x:200,y:420},                       // 6 checks short from deep
+          p8:{x:265,y:362},                       // 8 below 10, diagonal pass angle
+          p10:{x:148,y:335},                      // 10 at bottom of centre circle
+          p7:{x:368,y:262}, p11:{x:32,y:262},   // 7 & 11 just beyond halfway, wide
+          p9:{x:200,y:255}                        // 9 just beyond halfway, pinning CB
+        },
+        arrows: [
+          {from:{x:200,y:520}, to:{x:200,y:435}, color:'#3ABFB8', dash:false, label:'GK → 6 (Pivot)'},
+          {from:{x:200,y:420}, to:{x:265,y:372}, color:'#C8A951', dash:false, label:'6 → 8'},
+          {from:{x:265,y:362}, to:{x:368,y:265}, color:'#2A7A4B', dash:false, label:'8 → 7 (first look)'},
+          {from:{x:265,y:362}, to:{x:200,y:258}, color:'#2A7A4B', dash:false, label:'8 → 9'},
+          {from:{x:265,y:362}, to:{x:150,y:345}, color:'#C8A951', dash:true,  label:'8 → 10 (third option)'}
+        ]
+      },
+
+      // ── BUILD OUT PLAN C ──────────────────────────────────────────────
+      // Same deep starting shape as Plan B.
+      // 6 decoy. 5 splits wide. 10 at bottom of centre circle (y=335).
+      // 8 below 10 at y=362. 7/11/9 pin the back line just beyond halfway.
+      'buildC': {
+        title: 'Build Out — Plan C',
+        situation: 'Opponent plays high press — marking our back 4 AND our pivot. Build out is blocked. We go over the press into the 10 pocket. Must win the second ball.',
+        notes: '<strong style="color:var(--teal)">6 — Decoy only:</strong> 6 checks in as normal to draw the press and pull a marker. They will NOT receive the ball.<br><br><strong style="color:var(--teal)">Pass 1 — GK → CB (#5 splits wide):</strong> CB receives at the edge of the box, forcing the opponent striker to commit to a long press run.<br><br><strong style="color:var(--teal)">Pass 2 — CB over press → 10 pocket:</strong> As the striker closes, CB plays a firm vertical ball over them. The 10 sits at the bottom of the centre circle — the window between the opponent\'s forwards and midfielders. Clearly below 9, searching for the pocket.<br><br><strong style="color:var(--teal)">Pass 3 — 10 turns and penetrates:</strong> 10 scans 360° before the ball arrives, receives on the back foot, turns and immediately plays a line-breaker to 7, 11, or 9.<br><br><strong style="color:var(--teal)">7, 11, 9 — Pin the back line:</strong> Stay on or just beyond halfway. Their depth creates the space and pocket for 10 to operate in. Second ball is critical — 8 competes.',
+        players: {
+          p1:{x:200,y:520},                       // GK deep
+          p2:{x:355,y:470}, p3:{x:45,y:470},    // FBs wide and deep
+          p4:{x:268,y:505}, p5:{x:118,y:490},   // 5 splits wider to receive
+          p6:{x:205,y:418},                       // 6 checking as DECOY
+          p8:{x:265,y:362},                       // 8 below 10, ready for second ball
+          p10:{x:148,y:335},                      // 10 at bottom of centre circle
+          p7:{x:368,y:262}, p11:{x:32,y:262},   // 7 & 11 just beyond halfway, wide
+          p9:{x:200,y:255}                        // 9 just beyond halfway, pinning CB
+        },
+        arrows: [
+          // 6 decoy — faded grey dashed
+          {from:{x:205,y:450}, to:{x:205,y:425}, color:'rgba(90,122,146,0.6)', dash:true, label:'6 decoy (no ball)'},
+          // GK → 5
+          {from:{x:200,y:520}, to:{x:123,y:495}, color:'#3ABFB8', dash:false, label:'GK → CB (#5)'},
+          // 5 over press into 10 pocket
+          {from:{x:123,y:490}, to:{x:150,y:348}, color:'#C8A951', dash:false, label:'CB over press → 10'},
+          // 10 → 9
+          {from:{x:150,y:335}, to:{x:200,y:258}, color:'#2A7A4B', dash:false, label:'10 → 9'},
+          // 10 → 7 alt
+          {from:{x:150,y:335}, to:{x:368,y:265}, color:'#2A7A4B', dash:true,  label:'10 → 7 (alt)'}
+        ]
+      },
+
+      // ── BACK 4 — ATTACKING ROLES ──────────────────────────────────────
+      // Shows fullbacks wide and advanced, CBs split high with depth
+      // Arrows show: 2 overlapping wide, 3 tucked as inverted option,
+      // 4 & 5 providing depth and diagonal switch of play
+      'back4attack': {
+        title: 'Back 4 — Attacking Roles',
+        situation: 'We have possession and are building or sustaining an attack. The back 4 must provide width, depth, and diagonal options — not just stand still and watch.',
+        notes: '<strong style="color:var(--teal)">#2 & #3 — Fullbacks provide width and join the attack:</strong> When the winger cuts inside, the fullback overlaps into the vacated channel. When the ball is on the opposite side, the weak-side fullback tucks into the half-space and becomes a switch option. Never both attacking at the same time — one goes, one holds.<br><br><strong style="color:var(--teal)">#4 & #5 — Center Backs split and provide depth:</strong> Both CBs split wide to the edges of the penalty area, creating a wide base for the build. This stretches the opponent\'s press and opens passing lanes into midfield. They do not push into the attack — they provide the depth that allows everyone else to push forward without exposing us to the counter.<br><br><strong style="color:var(--teal)">Diagonal angles are everything:</strong> The back 4\'s positioning creates diagonal passing options for the GK and for each other. No square passes across the back — every pass should advance or switch the point of attack.<br><br><strong style="color:var(--teal)">Rest defense awareness:</strong> When one fullback attacks, the weak-side CB shifts across to cover the space left behind. The back 4 always maintains a shape that can recover — we never leave four players permanently high.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:375,y:390},   // 2 advanced wide right — attacking
+          p3:{x:55,y:430},    // 3 tucked, providing half-space switch option
+          p4:{x:270,y:460},   // 4 split wide right of center
+          p5:{x:130,y:460},   // 5 split wide left of center
+          p6:{x:205,y:350},
+          p8:{x:298,y:258},
+          p10:{x:118,y:225},
+          p7:{x:382,y:175}, p11:{x:22,y:175},
+          p9:{x:200,y:115}
+        },
+        arrows: [
+          // 2 advanced — showing the overlap run
+          {from:{x:375,y:430}, to:{x:375,y:398}, color:'#3ABFB8', dash:false, label:'2 joins attack wide'},
+          // 5 diagonal pass option to 6
+          {from:{x:130,y:460}, to:{x:205,y:358}, color:'#C8A951', dash:false, label:'5 diagonal → 6'},
+          // 4 diagonal to 8
+          {from:{x:270,y:460}, to:{x:298,y:265}, color:'#C8A951', dash:true, label:'4 line-break → 8'},
+          // 3 as switch option
+          {from:{x:200,y:350}, to:{x:60,y:435}, color:'#2A7A4B', dash:true, label:'6 switches to 3'}
+        ]
+      },
+
+      // ── 4-4-2 MID BLOCK ───────────────────────────────────────────────
+      '442block': {
+        title: '4-4-2 Mid Block — Defending Shape',
+        situation: 'Opponent has the ball and is building toward us. We sit compact in two connected banks, deny the center, and force play wide.',
+        notes: '<strong style="color:var(--teal)">Staggered, not flat:</strong> The midfield 4 sit between the gaps of the back 4 — this closes line-breaking lanes through the center. Neither bank aligns with the other.<br><br><strong style="color:var(--teal)">Compact vertically:</strong> The distance between the midfield line and the back 4 is tight — no space to play into between the lines.<br><br><strong style="color:var(--teal)">9 and 10 lead the block:</strong> Screen the opponent\'s pivot. Force play wide by cutting the central option.<br><br><strong style="color:var(--teal)">Trigger to engage:</strong> Opponent CB plays to fullback under pressure — squeeze and press with the strong-side winger. Win the ball on the touchline.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:348,y:450}, p3:{x:52,y:450},
+          p4:{x:258,y:458}, p5:{x:142,y:458},
+          p7:{x:358,y:348}, p6:{x:245,y:360},
+          p8:{x:155,y:348}, p11:{x:42,y:360},
+          p10:{x:258,y:255}, p9:{x:142,y:255}
+        },
+        arrows: []
+      },
+
+      // ── 4-3-3 HIGH PRESS ──────────────────────────────────────────────
+      // Whole team pushed up — back 4 just behind halfway, mid ahead of halfway
+      'press': {
+        title: '4-3-3 Press — Forcing the Trigger',
+        situation: 'Opponent GK or CB has the ball. We want to win it high. Front three close passing lanes and force a mistake or a long ball we can compete for.',
+        notes: '<strong style="color:var(--teal)">9 leads and angles the press:</strong> Approaches on an angle to cut off the pass back to the GK — forces play to one side. Never sprint straight at the CB.<br><br><strong style="color:var(--teal)">7 closes strong-side CB:</strong> Engages the CB on the pressed side. Cuts off the switch across the back.<br><br><strong style="color:var(--teal)">11 tucks inside:</strong> Does NOT press wide. Stays inside to intercept any attempted switch of play.<br><br><strong style="color:var(--teal)">Midfield pushes into opponent half:</strong> 6, 8, and 10 step ahead of the halfway line — cutting passing lanes into the opponent\'s midfielders. No space to play through our lines.<br><br><strong style="color:var(--teal)">Back 4 hold a high line:</strong> Sits just behind halfway — compressing space, keeping the team compact. Hold the line and don\'t drop.<br><br><strong style="color:var(--teal)">Pressing triggers:</strong> GK in hands, bad first touch, facing own goal, slow square pass. When triggered — commit fully. Half-pressing is worse than not pressing.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:340,y:355}, p3:{x:60,y:355},    // back 4 high — just behind halfway
+          p4:{x:262,y:365}, p5:{x:138,y:365},
+          p6:{x:200,y:255}, p8:{x:300,y:235}, p10:{x:118,y:248}, // mid ahead of halfway
+          p7:{x:318,y:120},
+          p11:{x:148,y:155},
+          p9:{x:218,y:85}
+        },
+        arrows: [
+          {from:{x:218,y:85},  to:{x:218,y:55},  color:'#3ABFB8', dash:false, label:'9 angles press'},
+          {from:{x:318,y:120}, to:{x:348,y:75},  color:'#C8A951', dash:false, label:'7 closes CB'},
+          {from:{x:148,y:155}, to:{x:185,y:125}, color:'#2A7A4B', dash:true,  label:'11 cuts switch'}
+        ]
+      }
+    };
+    let currentTactic = '433';
+
+    function setTactic(key, btn) {
+      currentTactic = key;
+      document.querySelectorAll('.tac-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const t = TACTICS[key];
+      document.getElementById('tac-situation-text').textContent = t.situation;
+      document.getElementById('tac-title').textContent = t.title;
+      document.getElementById('tac-notes').innerHTML = t.notes;
+      renderPlayers(t.players, t.arrows || []);
+    }
+
+    function renderPlayers(positions, arrows) {
+      const pg = document.getElementById('tac-players');
+      const ag = document.getElementById('tac-arrows');
+      pg.innerHTML = '';
+      ag.innerHTML = '';
+
+      // Draw arrows first
+      arrows.forEach(a => {
+        const dx = a.to.x - a.from.x;
+        const dy = a.to.y - a.from.y;
+        const len = Math.sqrt(dx*dx + dy*dy);
+        const ux = dx/len; const uy = dy/len;
+        // Shorten line so arrow doesn't overlap dots
+        const sx = a.from.x + ux*16; const sy = a.from.y + uy*16;
+        const ex = a.to.x - ux*18; const ey = a.to.y - uy*18;
+        const arrowId = 'arr' + Math.random().toString(36).substr(2,6);
+
+        ag.innerHTML += `
+          <defs>
+            <marker id="${arrowId}" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="${a.color}"/>
+            </marker>
+          </defs>
+          <line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}"
+            stroke="${a.color}" stroke-width="${a.dash ? 1.5 : 2.5}"
+            stroke-dasharray="${a.dash ? '8,5' : 'none'}"
+            marker-end="url(#${arrowId})" opacity="0.9"/>
+        `;
+      });
+
+      // Draw player dots
+      const labels = {p1:'1',p2:'2',p3:'3',p4:'4',p5:'5',p6:'6',p7:'7',p8:'8',p9:'9',p10:'10',p11:'11'};
+      Object.entries(positions).forEach(([id, pos]) => {
+        const num = labels[id] || id;
+        const isGK = id === 'p1';
+        pg.innerHTML += `
+          <g class="player-group" style="cursor:default;">
+            <circle cx="${pos.x}" cy="${pos.y}" r="16" fill="${isGK ? '#1E5C38' : '#C8A951'}" stroke="${isGK ? '#3ABFB8' : '#0D1B2A'}" stroke-width="2"/>
+            <text x="${pos.x}" y="${pos.y+1}" text-anchor="middle" dominant-baseline="middle"
+              font-family="'DM Sans',sans-serif" font-size="${num.length > 1 ? '11' : '13'}"
+              font-weight="bold" fill="${isGK ? '#fff' : '#0D1B2A'}">${num}</text>
+          </g>
+        `;
+      });
+    }
+
+    // Init tactics board
+    document.addEventListener('DOMContentLoaded', () => {
+      setTactic('433', document.querySelector('.tac-btn.active'));
+    });
+
+    // ═══════════════════════════════════════════════
+    // GLOSSARY
+    // ═══════════════════════════════════════════════
+    const GLOSSARY = [
+      { term:'Half Space', def:'The vertical channel between the wide player and the center — most dangerous area to receive and play forward. Where 8 and 10 operate.', tactic:'433' },
+      { term:'Pressing Trigger', def:'A cue that tells the team to press — bad first touch, opponent facing own goal, slow pass, GK has ball, goalkeeper or CB under pressure.', tactic:'press' },
+      { term:'Pivot', def:'The #6 — the central anchor in the build-out. Drops between the CBs or checks short to receive and connect back 4 to midfield.', tactic:'buildB' },
+      { term:'Line-Breaking Pass', def:'A pass that bypasses one or more lines of the opponent\'s defensive structure — played through or over their midfield into space.', tactic:'433' },
+      { term:'Rest Defense', def:'When attacking, the player(s) who stay back or drop to protect against a counter attack. Typically the 6 and one fullback.', tactic:'overlap' },
+      { term:'Delay · Direct · Deny', def:'Defensive principle when 1v1 with space in behind. First delay (don\'t dive in), then direct the opponent away from goal, then deny (tackle on heavy touch).', tactic:'442block' },
+      { term:'Pressure · Cover · Balance', def:'Defending shape. One player pressures the ball, one covers in case the press is beaten, one balances for any switch of play or blind-side run.', tactic:'442block' },
+      { term:'Mid Block', def:'Defensive shape where the team sits compact in the middle third — not high pressing, not sitting deep. Forces play wide and waits for the trigger.', tactic:'442block' },
+      { term:'Underlap', def:'A run inside and beyond a teammate with the ball — the opposite of an overlap. Used when the winger drives outside and the fullback cuts inside through the half-space.', tactic:'overlap' },
+      { term:'Overlap', def:'A run outside and beyond a teammate with the ball — typically the fullback runs beyond the winger to create width when the winger cuts inside.', tactic:'overlap' },
+      { term:'Second Ball', def:'A ball that neither team has clean possession of after a long pass, clearance, or aerial duel. Winning second balls is critical in Plan C build-out.', tactic:'buildC' },
+      { term:'Pocket', def:'A small space between the opponent\'s lines where a player can receive on the half-turn and play forward. The #10 looks for the pocket in Plan C.', tactic:'buildC' },
+      { term:'Switch of Play', def:'Moving the ball quickly from one side of the pitch to the other to exploit space — typically through the pivot or a long ball over the top.', tactic:'buildA' },
+      { term:'Combination Play', def:'Quick passing sequences between two or three players — one-twos, overlaps, give-and-go — to break defensive lines and create space.', tactic:'433' },
+      { term:'Compactness', def:'Keeping the team shape tight and connected so there are no gaps for the opponent to play through — key in the mid block.', tactic:'442block' },
+      { term:'Strong Side', def:'The side of the pitch where the ball currently is. Players on the strong side are active; weak-side players must tuck in and stay connected.', tactic:'442block' },
+      { term:'Recovery Run', def:'A run made at speed to get back into defensive position after losing the ball or attacking. Non-negotiable — everyone tracks back.', tactic:'press' },
+      { term:'Counter Press', def:'Immediately pressing the opponent the moment we lose the ball — before they can organize. Best time to win it back is within 5 seconds of losing it.', tactic:'press' },
+      { term:'Build Out', def:'How we move the ball from our goalkeeper and defensive third into the midfield and attacking third — through Plan A, B, or C depending on the press.', tactic:'buildA' },
+      { term:'High Press', def:'Pressing the opponent very high up the pitch — in their defensive third — to win the ball back quickly and create goal-scoring chances. Triggered by specific cues.', tactic:'press' },
+    ];
+
+    function buildGlossary(filter='') {
+      const grid = document.getElementById('glossary-grid');
+      const empty = document.getElementById('glossary-empty');
+      const filtered = GLOSSARY.filter(g => g.term.toLowerCase().includes(filter) || g.def.toLowerCase().includes(filter));
+      if (!filtered.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+      empty.style.display='none';
+      grid.innerHTML = filtered.map(g => `
+        <div class="gloss-card">
+          <div class="gloss-term">${g.term}</div>
+          <div class="gloss-def">${g.def}</div>
+          ${g.tactic ? `<span class="gloss-link" onclick="goToTactic('${g.tactic}')">See on Tactics Board →</span>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function filterGlossary() {
+      buildGlossary(document.getElementById('glossary-search').value.toLowerCase().trim());
+    }
+
+    function goToTactic(key) {
+      const btn = [...document.querySelectorAll('.tac-btn')].find(b => b.getAttribute('onclick').includes(`'${key}'`));
+      if (btn) { setTactic(key, btn); }
+      const tacTab = [...document.querySelectorAll('.tab-btn')].find(b => b.getAttribute('onclick').includes("'tactics'"));
+      if (tacTab) { switchTab('tactics', tacTab); }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { buildGlossary(); });
+
+    // ═══════════════════════════════════════════════
+    // LEADERBOARD — reads from your existing Google Sheet
+    // ═══════════════════════════════════════════════
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch(`${API_URL}?action=leaderboard`);
+        const data = await res.json();
+        if (data.reflections) renderBoard('reflect-board', data.reflections, 'reflections');
+        if (data.attendance)  renderBoard('attend-board',  data.attendance,  'sessions');
+      } catch(e) {
+        // If leaderboard endpoint not yet set up, show placeholder
+        renderPlaceholderBoard('reflect-board');
+        renderPlaceholderBoard('attend-board');
+      }
+    }
+
+    function renderBoard(id, rows, unit) {
+      const el = document.getElementById(id);
+      if (!rows || !rows.length) { el.innerHTML='<div style="color:var(--muted);font-size:13px;font-style:italic;padding:10px 0;">No data yet — season starts July 13!</div>'; return; }
+      el.innerHTML = rows.slice(0,10).map((r,i) => `
+        <div class="lb-row">
+          <div class="lb-rank ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+          <div class="lb-name">${r.name}</div>
+          <div class="lb-val">${r.value} <span style="font-size:10px;color:var(--muted);">${unit}</span></div>
+        </div>`).join('');
+    }
+
+    function renderPlaceholderBoard(id) {
+      const names = ['Emma','Sofia','Mia','Lily','Ava','Grace','Zoe','Chloe','Ella','Maya'];
+      const el = document.getElementById(id);
+      el.innerHTML = `
+        <div style="color:var(--muted);font-size:12px;font-style:italic;margin-bottom:10px;">Preview — add leaderboard endpoint to your Apps Script to go live.</div>
+        ${names.map((n,i) => `
+        <div class="lb-row">
+          <div class="lb-rank ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+          <div class="lb-name">${n}</div>
+          <div class="lb-val">${Math.max(1, 10-i)} <span style="font-size:10px;color:var(--muted);">${id.includes('reflect')?'reflections':'sessions'}</span></div>
+        </div>`).join('')}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadLeaderboard);
+
   </script>
 </body>
 </html>
