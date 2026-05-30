@@ -1133,8 +1133,9 @@
 
       try {
         const res  = await fetch(`${API_URL}?action=coachingVideos&name=${encodeURIComponent(playerName)}`);
-        const data = await res.json();
-        const videos = data.videos || [];
+const data = await res.json();
+alert('Film response: ' + JSON.stringify(data));
+const videos = data.videos || [];
 
         badge.textContent = `${videos.length} Video${videos.length !== 1 ? 's' : ''}`;
 
