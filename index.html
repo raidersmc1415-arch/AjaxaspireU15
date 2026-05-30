@@ -1175,7 +1175,11 @@
               <textarea id="ifb-${index}" placeholder="What did you take from this? What questions do you have for Coach Shawn?" style="min-height:80px;"></textarea>
             </div>
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-              <button class="btn" style="padding:10px 20px; font-size:13px;" onclick="submitIndividualFilmFeedback(${index}, ${JSON.stringify(playerName)}, ${JSON.stringify(video.title)})">Submit Response →</button>
+              <button class="btn" style="padding:10px 20px; font-size:13px;"
+                data-index="${index}"
+                data-player="${playerName}"
+                data-title="${video.title}"
+                onclick="submitIndividualFilmFeedback(this)">Submit Response →</button>
               <span id="ifb-msg-${index}" style="display:none; color:var(--teal); font-size:13px;">✅ Sent to Coach Shawn</span>
             </div>
           </div>
@@ -1197,7 +1201,10 @@
       return url;
     }
 
-    async function submitIndividualFilmFeedback(index, playerName, videoTitle) {
+    async function submitIndividualFilmFeedback(btn) {
+      const index      = btn.dataset.index;
+      const playerName = btn.dataset.player;
+      const videoTitle = btn.dataset.title;
       const text = document.getElementById(`ifb-${index}`).value.trim();
       if (!text) { alert('Please write a response before submitting.'); return; }
       const payload = {
