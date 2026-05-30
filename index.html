@@ -1272,8 +1272,9 @@
           document.getElementById('stat-duels').innerText = data.stats.duels || 0;
 
           // Check if player already has an IDP submitted
-          checkIDPSubmitted(data.name);
-          loadIndividualFilm(data.name);
+checkIDPSubmitted(data.name);
+alert('Passing to film: [' + data.name + ']');
+loadIndividualFilm(data.name);
         } else { alert("Invalid Credentials. Check your exact spelling and PIN."); }
       } catch(err) { alert("Error connecting to the database. Please try again."); } finally { btn.innerText = originalText; }
     }
