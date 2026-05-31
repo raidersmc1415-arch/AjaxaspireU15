@@ -728,52 +728,66 @@ SESSION FORMAT (US Soccer C-Course style):
 PLAYER STANDARDS:
 High fives, encouragement, energy. Be coachable. Compete on every rep. No casual standards.
 
+OUTPUT CONSTRAINTS — CRITICAL:
+- This plan will be read on a clipboard on the sideline. Be concise and scannable.
+- SESSION OVERVIEW: 2-3 sentences max. Coach's voice, no fluff.
+- OBJECTIVES: 2 bullet points only.
+- COACHING POINTS: 3 bullet points max. One line each.
+- Each activity RULES & CONSTRAINTS: 2-3 sentences only. Key constraints, nothing more.
+- Each activity COACHING FOCUS: 3 bullet points max. One line each.
+- Each activity WHEN TO INTERVENE: One sentence only.
+- PROGRESSION: One sentence only.
+- HALF-TIME NOTES: 2 bullet points max.
+- REFLECTION QUESTIONS: 2 questions max.
+- Use position numbers (#7, #9, etc.) not position names.
+- No padding, no repetition, no restating what was already said.
+
 OUTPUT FORMAT:
-Return a structured session plan in this exact format with these section headers (use these exact headers, nothing else):
+Return a structured session plan in this exact format with these section headers:
 
 SESSION OVERVIEW
-[Brief paragraph on the session theme and how it connects to the game model — 3-4 sentences max, written in Coach Shawn's voice]
+[2-3 sentences max]
 
 OBJECTIVES
-[2-3 bullet points]
+[2 bullet points]
 
 COACHING POINTS
-[3-4 key coaching points for the session]
+[3 bullet points max, one line each]
 
 PRINCIPLES ADDRESSED
-[List: In Possession / Out of Possession / Transition + specific sub-principles]
+[List: In Possession / Out of Possession + specific sub-principles]
 
 ---ACTIVITY: WARM-UP---
 Name: [creative drill name]
 Duration: [X min] | Players: [X] | Setup: [field size/shape]
-Scoring: [how to score]
-Rules & Constraints: [key rules]
-Coaching Focus: [what to look for and reinforce]
-When to Intervene: [natural stoppage / in the flow]
+Scoring: [one line]
+Rules & Constraints: [2-3 sentences]
+Coaching Focus: [3 bullets max, one line each]
+When to Intervene: [one sentence]
 
 ---ACTIVITY: ACTIVITY 1---
 Name: [creative drill name]
 Duration: [X min] | Players: [X] | Setup: [field size/shape]
 Objective: [one line]
-Scoring: [how to score]
-Rules & Constraints: [key rules]
-Coaching Focus: [what to look for]
-When to Intervene: [planned stoppage / freeze / in flow]
-Progression: [how to advance if players nail it]
+Scoring: [one line]
+Rules & Constraints: [2-3 sentences]
+Coaching Focus: [3 bullets max, one line each]
+When to Intervene: [one sentence]
+Progression: [one sentence]
 
 ---ACTIVITY: ACTIVITY 2---
 [same format]
 
 ---ACTIVITY: ACTIVITY 3 (GAME)---
-[same format, this should be an 8v8 or similar match scenario]
+[same format, 8v8 or similar match scenario]
 
 HALF-TIME / REST NOTES
-[2-3 bullet points on what to reinforce at the break]
+[2 bullet points max]
 
 POST-SESSION REFLECTION QUESTIONS
-[2-3 guided discovery questions to ask the group]
+[2 guided discovery questions]
 
-Write in Coach Shawn's voice: direct, high-standard, tactically intelligent. Reference specific position numbers (e.g. "#7 needs to initiate the L-shaped run before the ball is played"). No fluff.`;
+Write in Coach Shawn's voice: direct, high-standard, tactically intelligent. Reference specific position numbers. No fluff.`;
 
     const userPrompt = `Build me a complete session plan with these parameters:
 
