@@ -1,0 +1,6 @@
+AjaxaspireU15/
+├── netlify.toml                          ← root level
+├── ajax-session-planner.html             ← root level
+└── netlify/
+    └── functions/
+        └── session-planner.js            ← the backend function
