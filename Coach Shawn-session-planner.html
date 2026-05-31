@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajax Aspire · Session Planner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
+
+  :root {
+    --green: #16a34a;
+    --cyan: #22d3ee;
+    --gold: #d4a017;
+    --dark: #0f1117;
+    --dark2: #161b24;
+    --dark3: #1e2530;
+    --border: rgba(255,255,255,0.08);
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    font-size: 15px;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--dark2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .logo-ajax {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--green);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .logo-aspire {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .logo-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    border: 1px solid rgba(34,211,238,0.3);
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* PAGE TITLE */
+  .page-title {
+    margin-bottom: 36px;
+  }
+
+  .page-title h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .page-title h1 span {
+    color: var(--cyan);
+  }
+
+  .page-title p {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  /* FORM CARD */
+  .form-card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    margin-bottom: 32px;
+  }
+
+  .form-section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .form-grid.three {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group.full {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  select, input, textarea {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+
+  select:focus, input:focus, textarea:focus {
+    border-color: rgba(34,211,238,0.5);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  /* PILL SELECTOR */
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pill {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    color: var(--muted);
+    background: var(--dark3);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .pill:hover {
+    border-color: rgba(34,211,238,0.4);
+    color: var(--cyan);
+  }
+
+  .pill.active {
+    background: rgba(34,211,238,0.1);
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+
+  .pill.active.green {
+    background: rgba(22,163,74,0.1);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* GENERATE BUTTON */
+  .btn-generate {
+    width: 100%;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-generate:hover:not(:disabled) {
+    background: #15803d;
+    transform: translateY(-1px);
+  }
+
+  .btn-generate:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* LOADING */
+  .loading-bar {
+    display: none;
+    height: 3px;
+    background: var(--dark3);
+    border-radius: 2px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+
+  .loading-bar.active {
+    display: block;
+  }
+
+  .loading-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    border-radius: 2px;
+    animation: loading 2s ease-in-out infinite;
+    width: 40%;
+  }
+
+  @keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  .loading-text {
+    display: none;
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-top: 10px;
+  }
+
+  .loading-text.active {
+    display: block;
+  }
+
+  /* OUTPUT */
+  #output {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  #output.visible {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .output-header h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .output-header h2 span {
+    color: var(--cyan);
+  }
+
+  .btn-copy, .btn-print {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--dark3);
+    color: var(--muted);
+  }
+
+  .btn-copy:hover, .btn-print:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+
+  .btn-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* SESSION OUTPUT BLOCKS */
+  .session-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .meta-chip {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 2px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .meta-chip strong {
+    color: var(--text);
+  }
+
+  .session-block {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .session-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .block-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .block-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-cyan { background: var(--cyan); }
+  .dot-green { background: var(--green); }
+  .dot-gold { background: var(--gold); }
+  .dot-muted { background: var(--muted); }
+
+  .block-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .block-duration {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .session-block-body {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #cbd5e1;
+    white-space: pre-wrap;
+  }
+
+  .session-block-body strong {
+    color: var(--cyan);
+    font-weight: 600;
+  }
+
+  /* COACHING POINTS BOX */
+  .coaching-points {
+    margin-top: 12px;
+    padding: 14px 16px;
+    background: rgba(34,211,238,0.04);
+    border-left: 3px solid var(--cyan);
+    border-radius: 0 2px 2px 0;
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* PRINCIPLE TAG */
+  .principle-tag {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 1px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+  }
+
+  .tag-attack { background: rgba(22,163,74,0.15); color: var(--green); border: 1px solid rgba(22,163,74,0.3); }
+  .tag-defend { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .tag-transition { background: rgba(212,160,23,0.1); color: var(--gold); border: 1px solid rgba(212,160,23,0.2); }
+  .tag-technical { background: rgba(34,211,238,0.1); color: var(--cyan); border: 1px solid rgba(34,211,238,0.2); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.three { grid-template-columns: 1fr 1fr; }
+    header { padding: 14px 16px; }
+    main { padding: 24px 16px 60px; }
+    .form-card { padding: 20px; }
+  }
+
+  /* PRINT */
+  @media print {
+    header, .form-card, .btn-actions, .btn-generate, .loading-bar, .loading-text { display: none !important; }
+    body { background: white; color: black; }
+    .session-block { border: 1px solid #ccc; }
+    .block-name, .output-header h2 { color: black; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-ajax">Ajax</span>
+    <span class="logo-aspire">Aspire</span>
+    <span class="logo-tag">&nbsp;·&nbsp; Session Planner</span>
+  </div>
+  <div class="badge">U15 · GA Aspire</div>
+</header>
+
+<main>
+
+  <div class="page-title">
+    <h1>Build Your <span>Session</span></h1>
+    <p>AJAX ASPIRE · COACH SHAWN CRAIG · SEASON 26/27</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-section-title">Session Parameters</div>
+
+    <div class="form-grid three">
+      <div class="form-group">
+        <label>Session Duration</label>
+        <select id="duration">
+          <option value="60">60 minutes</option>
+          <option value="75">75 minutes</option>
+          <option value="90" selected>90 minutes</option>
+          <option value="105">105 minutes</option>
+          <option value="120">120 minutes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Number of Players</label>
+        <input type="number" id="players" value="16" min="8" max="22" placeholder="16">
+      </div>
+      <div class="form-group">
+        <label>Week in Season</label>
+        <select id="week">
+          <option value="preseason">Preseason</option>
+          <option value="early">Early Season</option>
+          <option value="mid" selected>Mid Season</option>
+          <option value="late">Late Season</option>
+          <option value="preGame">Pre-Match Week</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <div class="form-section-title">Game Moment</div>
+      <div class="pill-group" id="momentGroup">
+        <div class="pill active" data-val="attacking">Attacking / In Possession</div>
+        <div class="pill" data-val="defending">Defending / Out of Possession</div>
+        <div class="pill" data-val="transition">Transition</div>
+        <div class="pill" data-val="technical">Technical / Individual</div>
+        <div class="pill" data-val="set_pieces">Set Pieces</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <div class="form-section-title">Training Load (3-Load Model)</div>
+      <div class="pill-group" id="loadGroup">
+        <div class="pill" data-val="low">Low — Recovery / Technical</div>
+        <div class="pill active green" data-val="medium">Medium — Core Session</div>
+        <div class="pill" data-val="high">High — Match Intensity</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <div class="form-section-title">Session Focus</div>
+      <div class="form-group">
+        <label>Specific Focus or Game Situation</label>
+        <textarea id="focus" placeholder="e.g. Breaking lines in the final third — timing the run in behind, #7 L-shaped run, #10 through ball. Or: Building out under pressure from the back 4..."></textarea>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <label style="display:block; margin-bottom: 8px;">Defensive Context (if relevant)</label>
+        <div class="pill-group" id="defenseGroup">
+          <div class="pill" data-val="high_press">High Press</div>
+          <div class="pill" data-val="mid_block">Mid Block 4-4-2</div>
+          <div class="pill" data-val="emergency">Emergency / Box Defense</div>
+          <div class="pill active green" data-val="na">N/A — Attacking Session</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <div class="form-section-title">Context (Optional)</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Recent Issue to Address</label>
+          <input type="text" id="issue" placeholder="e.g. Players not timing runs, too flat in midfield">
+        </div>
+        <div class="form-group">
+          <label>Upcoming Opponent Style</label>
+          <input type="text" id="opponent" placeholder="e.g. High press, 4-3-3, physical">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-generate" id="generateBtn" onclick="generateSession()">
+      Generate Session Plan
+    </button>
+    <div class="loading-bar" id="loadingBar"><div class="loading-fill"></div></div>
+    <div class="loading-text" id="loadingText">Building your session...</div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div id="output">
+    <div class="divider"></div>
+    <div class="output-header">
+      <h2>Session <span>Plan</span></h2>
+      <div class="btn-actions">
+        <button class="btn-copy" onclick="copySession()">Copy Text</button>
+        <button class="btn-print" onclick="window.print()">Print</button>
+      </div>
+    </div>
+    <div id="sessionMeta" class="session-meta"></div>
+    <div id="sessionContent"></div>
+  </div>
+
+</main>
+
+<script>
+  // PILL SELECTION (single select per group)
+  document.querySelectorAll('.pill-group').forEach(group => {
+    group.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        group.querySelectorAll('.pill').forEach(p => p.classList.remove('active', 'green'));
+        pill.classList.add('active');
+        // Moment pills stay cyan; load and defense use green where relevant
+        const groupId = group.id;
+        if (groupId === 'loadGroup' || groupId === 'defenseGroup') {
+          pill.classList.add('green');
+          pill.classList.remove('active');
+          group.querySelectorAll('.pill').forEach(p => p.classList.remove('active','green'));
+          pill.classList.add('active','green');
+        }
+      });
+    });
+  });
+
+  function getSelected(groupId) {
+    const active = document.querySelector(`#${groupId} .pill.active`);
+    return active ? active.dataset.val : null;
+  }
+
+  async function generateSession() {
+    const btn = document.getElementById('generateBtn');
+    const loadingBar = document.getElementById('loadingBar');
+    const loadingText = document.getElementById('loadingText');
+    const output = document.getElementById('output');
+
+    const duration = document.getElementById('duration').value;
+    const players = document.getElementById('players').value;
+    const week = document.getElementById('week').value;
+    const moment = getSelected('momentGroup');
+    const load = getSelected('loadGroup');
+    const defense = getSelected('defenseGroup');
+    const focus = document.getElementById('focus').value;
+    const issue = document.getElementById('issue').value;
+    const opponent = document.getElementById('opponent').value;
+
+    btn.disabled = true;
+    btn.textContent = 'Building Session...';
+    loadingBar.classList.add('active');
+    loadingText.classList.add('active');
+    output.classList.remove('visible');
+
+    const systemPrompt = `You are Coach Shawn Craig's personal session planning assistant for the Ajax Aspire U15 Girls Academy team, Season 26/27.
+
+COACHING IDENTITY:
+Our identity is built on reading the game and solving the problem in front of us:
+- If we have to sit deep and counter-attack → Italian
+- If we win the ball with no immediate counter → Spanish  
+- If the fastest solution is forward → German
+
+GAME MODEL — IN POSSESSION:
+1. Look Forward First — play it if it's on, reset if not
+2. Create Superiority Off the Ball — never stand in the same line as a teammate, every run opens space
+3. Recognize the Moment and Commit — when space opens behind their line, take it. Be brave in 1v1s
+4. Build Until the Moment Arrives. Then Be Ruthless — quality over volume
+
+GAME MODEL — OUT OF POSSESSION:
+1. Defending Starts at the Front — every player is a defender immediately
+2. Five Seconds. Hunt — counter-press in the first 5 seconds after losing the ball
+3. Defend as One Body — compact, no daylight between lines
+4. Know Your Role in the Moment — Pressure, Cover, or Balance. Read it.
+
+DEFENSIVE SPECTRUM:
+- High Press: Trigger-based, coordinated. Triggers: bad first touch, slow pass, opponent facing own goal, GK with ball. Commit fully or hold shape.
+- Mid Block (4-4-2): Zonal compactness. Two connected banks. Force play into predictable corridors. Move as a unit.
+- Emergency / Box Defense: Zonal is over — grab your mark. Clear your lines. No heroics.
+
+POSITIONAL SYSTEM (4-3-3 / 4-2-3-1):
+- #1 GK, #2 & #3 Full Backs, #4 & #5 Center Backs, #6 CDM, #8 & #10 Attacking Mids, #7 & #11 Wide Forwards, #9 Centre Forward
+- #7: L-shaped runs in behind to pull defenders, brave 1v1s, cross low to front post
+- #10: Half-space positioning as visual cue, line-breaking passes, freedom to create
+- #9: Hold the line, focal point, drop to create mid-diamond shape when needed, don't allow switch of play
+- #6: Relief valve, bottom of triangle, win second balls on punts
+
+SESSION FORMAT (US Soccer C-Course style):
+- Arrival/Warm-Up Activity (SSG or technical)
+- Activity 1: Establish the pattern (unopposed or semi-opposed)
+- Activity 2: Add opposition/constraints
+- Activity 3: Game application (8v8 or similar)
+- Each activity includes: objective, field size, players, scoring, duration, reps/sets, coaching points, when/how to intervene
+
+PLAYER STANDARDS:
+High fives, encouragement, energy. Be coachable. Compete on every rep. No casual standards.
+
+OUTPUT FORMAT:
+Return a structured session plan in this exact format with these section headers (use these exact headers, nothing else):
+
+SESSION OVERVIEW
+[Brief paragraph on the session theme and how it connects to the game model — 3-4 sentences max, written in Coach Shawn's voice]
+
+OBJECTIVES
+[2-3 bullet points]
+
+COACHING POINTS
+[3-4 key coaching points for the session]
+
+PRINCIPLES ADDRESSED
+[List: In Possession / Out of Possession / Transition + specific sub-principles]
+
+---ACTIVITY: WARM-UP---
+Name: [creative drill name]
+Duration: [X min] | Players: [X] | Setup: [field size/shape]
+Scoring: [how to score]
+Rules & Constraints: [key rules]
+Coaching Focus: [what to look for and reinforce]
+When to Intervene: [natural stoppage / in the flow]
+
+---ACTIVITY: ACTIVITY 1---
+Name: [creative drill name]
+Duration: [X min] | Players: [X] | Setup: [field size/shape]
+Objective: [one line]
+Scoring: [how to score]
+Rules & Constraints: [key rules]
+Coaching Focus: [what to look for]
+When to Intervene: [planned stoppage / freeze / in flow]
+Progression: [how to advance if players nail it]
+
+---ACTIVITY: ACTIVITY 2---
+[same format]
+
+---ACTIVITY: ACTIVITY 3 (GAME)---
+[same format, this should be an 8v8 or similar match scenario]
+
+HALF-TIME / REST NOTES
+[2-3 bullet points on what to reinforce at the break]
+
+POST-SESSION REFLECTION QUESTIONS
+[2-3 guided discovery questions to ask the group]
+
+Write in Coach Shawn's voice: direct, high-standard, tactically intelligent. Reference specific position numbers (e.g. "#7 needs to initiate the L-shaped run before the ball is played"). No fluff.`;
+
+    const userPrompt = `Build me a complete session plan with these parameters:
+
+Duration: ${duration} minutes
+Players: ${players}
+Season Phase: ${week}
+Game Moment: ${moment}
+Training Load: ${load}
+Defensive Context: ${defense}
+${focus ? `Session Focus / Game Situation: ${focus}` : ''}
+${issue ? `Recent Issue to Address: ${issue}` : ''}
+${opponent ? `Upcoming Opponent: ${opponent}` : ''}
+
+Make sure all activities connect directly to our game model principles and use our positional numbering system. The session should feel like it was written by a licensed coach who knows this team.`;
+
+    try {
+      const response = await fetch("/.netlify/functions/session-planner", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ systemPrompt, userPrompt })
+      });
+
+      const data = await response.json();
+      const text = data.text || data.error || 'No response received.';
+
+      renderSession(text, { duration, players, week, moment, load });
+
+    } catch (err) {
+      document.getElementById('sessionContent').innerHTML = `<div style="color:#f87171;padding:20px;">Error generating session. Please try again.</div>`;
+      output.classList.add('visible');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Generate Session Plan';
+    loadingBar.classList.remove('active');
+    loadingText.classList.remove('active');
+  }
+
+  function renderSession(text, params) {
+    const output = document.getElementById('output');
+    const metaEl = document.getElementById('sessionMeta');
+    const contentEl = document.getElementById('sessionContent');
+
+    // META CHIPS
+    const weekLabels = { preseason:'Preseason', early:'Early Season', mid:'Mid Season', late:'Late Season', preGame:'Pre-Match Week' };
+    const momentLabels = { attacking:'Attacking', defending:'Defending', transition:'Transition', technical:'Technical', set_pieces:'Set Pieces' };
+    const loadLabels = { low:'Low Load', medium:'Medium Load', high:'High Load' };
+
+    metaEl.innerHTML = `
+      <div class="meta-chip"><strong>${params.duration} min</strong></div>
+      <div class="meta-chip"><strong>${params.players}</strong> players</div>
+      <div class="meta-chip"><strong>${momentLabels[params.moment] || params.moment}</strong></div>
+      <div class="meta-chip"><strong>${loadLabels[params.load] || params.load}</strong></div>
+      <div class="meta-chip">${weekLabels[params.week] || params.week}</div>
+    `;
+
+    // PARSE AND RENDER
+    contentEl.innerHTML = '';
+
+    // Split into sections by activity markers and main sections
+    const sections = parseSessionText(text);
+    sections.forEach(section => {
+      contentEl.appendChild(renderBlock(section));
+    });
+
+    output.classList.add('visible');
+    output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function parseSessionText(text) {
+    const lines = text.split('\n');
+    const sections = [];
+    let current = null;
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+
+      // Detect activity headers
+      if (trimmed.startsWith('---ACTIVITY:')) {
+        if (current) sections.push(current);
+        const name = trimmed.replace(/---ACTIVITY:\s*/,'').replace(/---/,'').trim();
+        current = { type: 'activity', title: name, content: '' };
+        return;
+      }
+
+      // Detect main section headers (all caps lines or known headers)
+      const mainHeaders = ['SESSION OVERVIEW', 'OBJECTIVES', 'COACHING POINTS', 'PRINCIPLES ADDRESSED', 'HALF-TIME / REST NOTES', 'POST-SESSION REFLECTION QUESTIONS'];
+      if (mainHeaders.includes(trimmed)) {
+        if (current) sections.push(current);
+        current = { type: 'info', title: trimmed, content: '' };
+        return;
+      }
+
+      if (current) {
+        current.content += line + '\n';
+      } else if (trimmed) {
+        current = { type: 'info', title: 'SESSION', content: line + '\n' };
+      }
+    });
+
+    if (current) sections.push(current);
+    return sections.filter(s => s.content.trim());
+  }
+
+  function renderBlock(section) {
+    const block = document.createElement('div');
+    block.className = 'session-block';
+
+    const isActivity = section.type === 'activity';
+    const title = section.title;
+
+    // Pick dot color
+    let dotClass = 'dot-muted';
+    let nameColor = '';
+    if (title.includes('WARM-UP')) { dotClass = 'dot-cyan'; }
+    else if (title.includes('ACTIVITY 1')) { dotClass = 'dot-green'; }
+    else if (title.includes('ACTIVITY 2')) { dotClass = 'dot-gold'; }
+    else if (title.includes('GAME') || title.includes('ACTIVITY 3')) { dotClass = 'dot-cyan'; nameColor = 'color: var(--cyan)'; }
+    else if (title.includes('OVERVIEW')) { dotClass = 'dot-cyan'; }
+    else if (title.includes('OBJECTIVES') || title.includes('COACHING')) { dotClass = 'dot-green'; }
+    else if (title.includes('REFLECTION') || title.includes('HALF')) { dotClass = 'dot-gold'; }
+
+    block.innerHTML = `
+      <div class="session-block-header">
+        <div class="block-label">
+          <div class="block-dot ${dotClass}"></div>
+          <div class="block-name" style="${nameColor}">${title}</div>
+        </div>
+      </div>
+      <div class="session-block-body">${formatContent(section.content)}</div>
+    `;
+
+    return block;
+  }
+
+  function formatContent(text) {
+    // Bold key labels
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/(Name:|Duration:|Players:|Setup:|Objective:|Scoring:|Rules & Constraints:|Coaching Focus:|When to Intervene:|Progression:)/g, '<strong>$1</strong>');
+  }
+
+  function copySession() {
+    const content = document.getElementById('sessionContent').innerText;
+    const meta = document.getElementById('sessionMeta').innerText;
+    navigator.clipboard.writeText('AJAX ASPIRE U15 — SESSION PLAN\n' + meta + '\n\n' + content).then(() => {
+      const btn = document.querySelector('.btn-copy');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy Text', 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
