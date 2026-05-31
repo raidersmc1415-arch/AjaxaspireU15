@@ -34,7 +34,7 @@ exports.handler = async function(event, context) {
           parts: [{ text: userPrompt }]
         }],
         generationConfig: {
-          maxOutputTokens: 2000,
+          maxOutputTokens: 8000,
           temperature: 0.7
         }
       })
