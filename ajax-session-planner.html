@@ -1308,8 +1308,9 @@ Make sure all activities connect directly to our game model principles and use o
           s += playerTriangle(bx+bw, by+bh, '▲', false);
           s += playerTriangle(cx, by-20, '▲', false);
           s += playerTriangle(cx, by+bh+20, '▲', false);
-          // Inner defender (red circle)
-          s += oppCircle(cx, h*0.5, '▼');
+          // Inner defenders (red circles) — 4v2 default
+          s += oppCircle(cx-18, h*0.47, '▼');
+          s += oppCircle(cx+18, h*0.53, '▼');
           // Pass arrows around the box
           s += passArrow(bx+18, by, bx+bw-18, by, 'white');
           s += passArrow(bx, by+18, bx, by+bh-18, 'white');
