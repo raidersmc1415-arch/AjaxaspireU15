@@ -461,7 +461,79 @@
     font-weight: 600;
   }
 
-  /* COACHING POINTS BOX */
+  /* DIAGRAM SELECTORS */
+  .diagram-controls {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--dark3);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .diagram-control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .diagram-control-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .diag-pill {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    color: var(--muted);
+    background: var(--dark2);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .diag-pill:hover { border-color: rgba(34,211,238,0.4); color: var(--cyan); }
+  .diag-pill.active { background: rgba(34,211,238,0.1); border-color: var(--cyan); color: var(--cyan); }
+
+  /* DIAGRAM CANVAS */
+  .diagram-canvas {
+    padding: 16px 20px;
+    background: var(--dark2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+  }
+
+  .diagram-canvas svg {
+    width: 100%;
+    max-width: 520px;
+    display: block;
+  }
+
+  .diagram-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+
   .coaching-points {
     margin-top: 12px;
     padding: 14px 16px;
@@ -711,6 +783,11 @@ DEFENSIVE SPECTRUM:
 - Mid Block (4-4-2): Zonal compactness. Two connected banks. Force play into predictable corridors. Move as a unit.
 - Emergency / Box Defense: Zonal is over — grab your mark. Clear your lines. No heroics.
 
+OFFENSIVE SPECTRUM:
+- Build Out (Constructive): Patient build from the back through the thirds. GK reads the press and selects Plan A (around — FB wide), Plan B (through — #6 pivot unmarked), or Plan C (over — CB plays over press into #10 pocket). Never forced, always read.
+- Combination Play (Progression): Quick connecting passes to advance through lines. 1-2s, overlaps, underlaps, give-and-go's in the half spaces. #8 and #10 operate between lines on different vertical planes. #7 and #11 provide width, #6 anchors the triangle. Move the ball with purpose, not just possession.
+- Direct / Transition Attack (Penetration): When we win the ball with space in behind, go immediately — same five-second urgency as the counter-press but in the other direction. #9 pins the defensive line, #7 or #11 makes the run in behind, #6 or #8 plays the line-breaker. No hesitation. This is the fastest solution forward.
+
 POSITIONAL SYSTEM (4-3-3 / 4-2-3-1):
 - #1 GK, #2 & #3 Full Backs, #4 & #5 Center Backs, #6 CDM, #8 & #10 Attacking Mids, #7 & #11 Wide Forwards, #9 Centre Forward
 - #7: L-shaped runs in behind to pull defenders, brave 1v1s, cross low to front post
@@ -727,6 +804,9 @@ SESSION FORMAT (US Soccer C-Course style):
 
 PLAYER STANDARDS:
 High fives, encouragement, energy. Be coachable. Compete on every rep. No casual standards.
+
+FIELD & EQUIPMENT REALITY:
+Coach has access to quarter field, half field, or full field — never assumes a full field is available. Equipment: full size goals, 9v9 goals, mini goals, and cones. Design sessions with spatial progression — each activity expands from the previous one. Warm-up uses the smallest space. Activities 1 and 2 expand outward. Final game activity uses the largest space. Equipment transitions should remove cones rather than add them. Name each activity with the drill shape included e.g. "Horizontal Channel — Build Out Progression" or "Box Rondo 4v1 — Pressing Triggers" or "Half Field 8v8 — Defensive Shape".
 
 OUTPUT CONSTRAINTS — CRITICAL:
 - This plan will be read on a clipboard on the sideline. Be concise and scannable.
@@ -899,7 +979,6 @@ Make sure all activities connect directly to our game model principles and use o
     const isActivity = section.type === 'activity';
     const title = section.title;
 
-    // Pick dot color
     let dotClass = 'dot-muted';
     let nameColor = '';
     if (title.includes('WARM-UP')) { dotClass = 'dot-cyan'; }
@@ -910,6 +989,42 @@ Make sure all activities connect directly to our game model principles and use o
     else if (title.includes('OBJECTIVES') || title.includes('COACHING')) { dotClass = 'dot-green'; }
     else if (title.includes('REFLECTION') || title.includes('HALF')) { dotClass = 'dot-gold'; }
 
+    const blockId = 'block-' + Math.random().toString(36).substr(2, 6);
+
+    // Build diagram controls only for activities
+    let diagramHTML = '';
+    if (isActivity) {
+      diagramHTML = `
+        <div class="diagram-controls">
+          <div class="diagram-control-group">
+            <span class="diagram-control-label">Field</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','size','quarter',this)">Quarter</span>
+            <span class="diag-pill active" onclick="setDiagram('${blockId}','size','half',this)">Half</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','size','threequarter',this)">¾</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','size','full',this)">Full</span>
+          </div>
+          <div class="diagram-control-group">
+            <span class="diagram-control-label">Type</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','horiz',this)">H-Channel</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','vert',this)">V-Channel</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','rondo-box',this)">Box Rondo</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','rondo-circle',this)">Circle Rondo</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','1v1',this)">1v1</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','2v2',this)">2v2</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','3v3',this)">3v3</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','4v4',this)">4v4</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','buildout',this)">Build Out</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','pressing',this)">Pressing</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','8v8',this)">8v8</span>
+            <span class="diag-pill" onclick="setDiagram('${blockId}','type','11v11',this)">11v11</span>
+            <span class="diag-pill active" onclick="setDiagram('${blockId}','type','open',this)">Open</span>
+          </div>
+        </div>
+        <div class="diagram-canvas" id="canvas-${blockId}">
+          ${drawDiagram('half','open')}
+        </div>`;
+    }
+
     block.innerHTML = `
       <div class="session-block-header">
         <div class="block-label">
@@ -917,14 +1032,489 @@ Make sure all activities connect directly to our game model principles and use o
           <div class="block-name" style="${nameColor}">${title}</div>
         </div>
       </div>
+      ${diagramHTML}
       <div class="session-block-body">${formatContent(section.content)}</div>
     `;
+
+    // Store state
+    if (isActivity) {
+      block._diagState = { size: 'half', type: 'open' };
+      block._blockId = blockId;
+    }
 
     return block;
   }
 
+  // Track diagram state per block
+  const diagStates = {};
+
+  function setDiagram(blockId, key, val, pill) {
+    if (!diagStates[blockId]) diagStates[blockId] = { size: 'half', type: 'open' };
+    diagStates[blockId][key] = val;
+
+    // Update pill active state within the same group
+    const group = pill.parentElement;
+    group.querySelectorAll('.diag-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+
+    // Re-render diagram
+    const canvas = document.getElementById('canvas-' + blockId);
+    if (canvas) canvas.innerHTML = drawDiagram(diagStates[blockId].size, diagStates[blockId].type);
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // SVG DIAGRAM LIBRARY — US Soccer Diagramming Standards
+  // Your team = blue filled triangles (attack UP)
+  // Opposition = red filled circles (attack DOWN)
+  // Passes = solid line + arrowhead
+  // Dribble = wavy line + arrowhead
+  // Movement without ball = dashed line + arrowhead
+  // Tactical = solid red line
+  // ═══════════════════════════════════════════════════════
+
+  function drawDiagram(size, type) {
+    // Field dimensions based on size
+    const dims = {
+      quarter:     { w: 400, h: 280, label: 'Quarter Field' },
+      half:        { w: 400, h: 360, label: 'Half Field' },
+      threequarter:{ w: 400, h: 460, label: '¾ Field' },
+      full:        { w: 400, h: 560, label: 'Full Field' }
+    };
+    const d = dims[size] || dims.half;
+
+    // Build SVG
+    let svg = `<svg viewBox="0 0 ${d.w} ${d.h}" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;width:100%;">`;
+    svg += fieldBase(d.w, d.h, size);
+    svg += diagramContent(type, d.w, d.h, size);
+    svg += fieldLabel(d.w, d.h, d.label, type);
+    svg += `</svg>`;
+    return svg;
+  }
+
+  function fieldBase(w, h, size) {
+    // Green field with horizontal stripes
+    let s = `<rect width="${w}" height="${h}" fill="#2d6a2d" rx="4"/>`;
+
+    // Horizontal shadow stripes
+    const stripeH = h / 8;
+    for (let i = 0; i < 8; i++) {
+      if (i % 2 === 0) s += `<rect x="0" y="${i * stripeH}" width="${w}" height="${stripeH}" fill="rgba(0,0,0,0.06)"/>`;
+    }
+
+    // Field border
+    s += `<rect x="8" y="8" width="${w-16}" height="${h-16}" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
+
+    // Field lines based on size
+    if (size === 'full') {
+      // Halfway line
+      s += `<line x1="8" y1="${h/2}" x2="${w-8}" y2="${h/2}" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>`;
+      // Centre circle
+      s += `<circle cx="${w/2}" cy="${h/2}" r="45" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      s += `<circle cx="${w/2}" cy="${h/2}" r="3" fill="rgba(255,255,255,0.7)"/>`;
+      // Top penalty box
+      s += `<rect x="${w*0.25}" y="8" width="${w*0.5}" height="${h*0.14}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      // Top 6-yard
+      s += `<rect x="${w*0.36}" y="8" width="${w*0.28}" height="${h*0.055}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      // Top goal
+      s += `<rect x="${w*0.4}" y="2" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
+      // Bottom penalty box
+      s += `<rect x="${w*0.25}" y="${h-8-h*0.14}" width="${w*0.5}" height="${h*0.14}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      // Bottom 6-yard
+      s += `<rect x="${w*0.36}" y="${h-8-h*0.055}" width="${w*0.28}" height="${h*0.055}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      // Bottom goal
+      s += `<rect x="${w*0.4}" y="${h-12}" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
+      // Penalty spots
+      s += `<circle cx="${w/2}" cy="${h*0.12}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
+      s += `<circle cx="${w/2}" cy="${h*0.88}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
+
+    } else if (size === 'threequarter') {
+      // Attacking end full box
+      s += `<rect x="${w*0.25}" y="8" width="${w*0.5}" height="${h*0.18}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      s += `<rect x="${w*0.36}" y="8" width="${w*0.28}" height="${h*0.07}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      s += `<rect x="${w*0.4}" y="2" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
+      s += `<circle cx="${w/2}" cy="${h*0.15}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
+      // Halfway-ish line at bottom
+      s += `<line x1="8" y1="${h*0.82}" x2="${w-8}" y2="${h*0.82}" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="6,4"/>`;
+
+    } else if (size === 'half') {
+      // One penalty box at top
+      s += `<rect x="${w*0.25}" y="8" width="${w*0.5}" height="${h*0.22}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      s += `<rect x="${w*0.36}" y="8" width="${w*0.28}" height="${h*0.085}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      s += `<rect x="${w*0.4}" y="2" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
+      s += `<circle cx="${w/2}" cy="${h*0.18}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
+      // Half line at bottom
+      s += `<line x1="8" y1="${h-8}" x2="${w-8}" y2="${h-8}" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      // Half circle
+      s += `<path d="M ${w*0.25} ${h-8} A 60 60 0 0 0 ${w*0.75} ${h-8}" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>`;
+
+    } else {
+      // Quarter field — just border and maybe mini goals
+      s += `<line x1="8" y1="${h-8}" x2="${w-8}" y2="${h-8}" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>`;
+    }
+
+    return s;
+  }
+
+  // Blue triangle for our players (attack UP)
+  function playerTriangle(x, y, num, hasball) {
+    const size = 14;
+    const pts = `${x},${y-size} ${x-size*0.85},${y+size*0.5} ${x+size*0.85},${y+size*0.5}`;
+    let s = `<polygon points="${pts}" fill="${hasball ? '#1d4ed8' : '#2563eb'}" stroke="white" stroke-width="1.5"/>`;
+    s += `<text x="${x}" y="${y+6}" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="white">${num}</text>`;
+    return s;
+  }
+
+  // Red circle for opposition (attack DOWN)
+  function oppCircle(x, y, num) {
+    let s = `<circle cx="${x}" cy="${y}" r="14" fill="#dc2626" stroke="white" stroke-width="1.5"/>`;
+    s += `<text x="${x}" y="${y+4}" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="white">${num}</text>`;
+    return s;
+  }
+
+  // Cone marker
+  function cone(x, y) {
+    return `<polygon points="${x},${y-8} ${x-6},${y+5} ${x+6},${y+5}" fill="#f59e0b" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>`;
+  }
+
+  // Mini goal
+  function miniGoal(x, y, horiz) {
+    if (horiz) return `<rect x="${x-20}" y="${y-4}" width="40" height="8" fill="none" stroke="white" stroke-width="2"/>`;
+    return `<rect x="${x-4}" y="${y-20}" width="8" height="40" fill="none" stroke="white" stroke-width="2"/>`;
+  }
+
+  // Full goal (horizontal at top/bottom)
+  function fullGoal(x, y, w) {
+    return `<rect x="${x}" y="${y}" width="${w}" height="10" fill="none" stroke="white" stroke-width="2"/>`;
+  }
+
+  // Pass arrow (solid)
+  function passArrow(x1, y1, x2, y2, color) {
+    color = color || 'white';
+    const id = 'arr' + Math.random().toString(36).substr(2,4);
+    return `<defs><marker id="${id}" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="${color}"/></marker></defs>
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.8" marker-end="url(#${id})"/>`;
+  }
+
+  // Movement arrow (dashed)
+  function moveArrow(x1, y1, x2, y2, color) {
+    color = color || 'white';
+    const id = 'arr' + Math.random().toString(36).substr(2,4);
+    return `<defs><marker id="${id}" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="${color}"/></marker></defs>
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#${id})"/>`;
+  }
+
+  // Zone line
+  function zoneLine(x1, y1, x2, y2) {
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-dasharray="8,5"/>`;
+  }
+
+  // Zone fill
+  function zoneFill(x, y, w, h, color) {
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${color || 'rgba(255,255,255,0.06)'}"/>`;
+  }
+
+  function diagramContent(type, w, h, size) {
+    let s = '';
+    const cx = w / 2;
+
+    switch(type) {
+
+      case 'open':
+        // Blank open field — just players in neutral positions
+        if (size === 'quarter') {
+          s += playerTriangle(cx-60, h*0.7, '▲', false);
+          s += playerTriangle(cx, h*0.7, '▲', true);
+          s += playerTriangle(cx+60, h*0.7, '▲', false);
+          s += playerTriangle(cx-30, h*0.45, '▲', false);
+          s += playerTriangle(cx+30, h*0.45, '▲', false);
+        } else {
+          s += playerTriangle(cx, h*0.85, '1', false);
+          s += playerTriangle(cx-80, h*0.72, '2', false);
+          s += playerTriangle(cx+80, h*0.72, '3', false);
+          s += playerTriangle(cx-40, h*0.72, '5', false);
+          s += playerTriangle(cx+40, h*0.72, '4', false);
+          s += playerTriangle(cx, h*0.56, '6', true);
+          s += playerTriangle(cx-55, h*0.42, '8', false);
+          s += playerTriangle(cx+55, h*0.42, '10', false);
+          s += playerTriangle(cx-90, h*0.28, '11', false);
+          s += playerTriangle(cx+90, h*0.28, '7', false);
+          s += playerTriangle(cx, h*0.18, '9', false);
+        }
+        break;
+
+      case 'horiz':
+        // 3 Horizontal channel grid — bands running across width
+        {
+          const z1 = h * 0.33; const z2 = h * 0.66;
+          s += zoneFill(8, 8, w-16, z1-8, 'rgba(34,211,238,0.06)');
+          s += zoneFill(8, z1, w-16, z2-z1, 'rgba(255,255,255,0.04)');
+          s += zoneFill(8, z2, w-16, h-z2-8, 'rgba(22,163,74,0.06)');
+          s += zoneLine(8, z1, w-8, z1);
+          s += zoneLine(8, z2, w-8, z2);
+          // Labels
+          s += `<text x="${w-14}" y="${z1*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(34,211,238,0.7)" letter-spacing="1">FINAL</text>`;
+          s += `<text x="${w-14}" y="${(z1+z2)*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)" letter-spacing="1">MID</text>`;
+          s += `<text x="${w-14}" y="${(z2+h)*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(22,163,74,0.7)" letter-spacing="1">BUILD</text>`;
+          // Players in channels
+          s += playerTriangle(cx-60, h*0.82, '4', false);
+          s += playerTriangle(cx+60, h*0.82, '5', false);
+          s += playerTriangle(cx, h*0.82, '1', false);
+          s += playerTriangle(cx, h*0.5, '6', true);
+          s += playerTriangle(cx-50, h*0.18, '10', false);
+          s += playerTriangle(cx+50, h*0.18, '7', false);
+        }
+        break;
+
+      case 'vert':
+        // 3 Vertical channel grid — lanes running top to bottom
+        {
+          const v1 = w * 0.33; const v2 = w * 0.67;
+          s += zoneFill(8, 8, v1-8, h-16, 'rgba(34,211,238,0.05)');
+          s += zoneFill(v1, 8, v2-v1, h-16, 'rgba(255,255,255,0.04)');
+          s += zoneFill(v2, 8, w-v2-8, h-16, 'rgba(22,163,74,0.05)');
+          s += zoneLine(v1, 8, v1, h-8);
+          s += zoneLine(v2, 8, v2, h-8);
+          // Labels
+          s += `<text x="${v1*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(34,211,238,0.7)" letter-spacing="1">LEFT</text>`;
+          s += `<text x="${(v1+v2)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)" letter-spacing="1">CENTER</text>`;
+          s += `<text x="${(v2+w)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(22,163,74,0.7)" letter-spacing="1">RIGHT</text>`;
+          // Players
+          s += playerTriangle(v1*0.5, h*0.3, '3', false);
+          s += playerTriangle(v1*0.5, h*0.7, '11', false);
+          s += playerTriangle((v1+v2)*0.5, h*0.4, '6', true);
+          s += playerTriangle((v1+v2)*0.5-25, h*0.65, '5', false);
+          s += playerTriangle((v1+v2)*0.5+25, h*0.65, '4', false);
+          s += playerTriangle((v2+w)*0.5, h*0.3, '2', false);
+          s += playerTriangle((v2+w)*0.5, h*0.7, '7', false);
+          // Opposition in right channel
+          s += oppCircle((v2+w)*0.5, h*0.45, '▼');
+        }
+        break;
+
+      case 'rondo-box':
+        // Box rondo — 4v1 or 4v2, players on corners + sides
+        {
+          const bx = w*0.2; const by = h*0.2;
+          const bw = w*0.6; const bh = h*0.6;
+          // Draw box
+          s += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="rgba(34,211,238,0.06)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;
+          // Corner cones
+          s += cone(bx, by); s += cone(bx+bw, by);
+          s += cone(bx, by+bh); s += cone(bx+bw, by+bh);
+          // Outer players (blue triangles) on corners/sides
+          s += playerTriangle(bx, by, '▲', false);
+          s += playerTriangle(bx+bw, by, '▲', false);
+          s += playerTriangle(bx, by+bh, '▲', true);
+          s += playerTriangle(bx+bw, by+bh, '▲', false);
+          s += playerTriangle(cx, by-20, '▲', false);
+          s += playerTriangle(cx, by+bh+20, '▲', false);
+          // Inner defender (red circle)
+          s += oppCircle(cx, h*0.5, '▼');
+          // Pass arrows around the box
+          s += passArrow(bx+18, by, bx+bw-18, by, 'white');
+          s += passArrow(bx, by+18, bx, by+bh-18, 'white');
+        }
+        break;
+
+      case 'rondo-circle':
+        // Circle rondo — players around outside, defenders inside
+        {
+          const r = Math.min(w, h) * 0.32;
+          s += `<circle cx="${cx}" cy="${h*0.5}" r="${r}" fill="rgba(34,211,238,0.05)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;
+          // Outer players at positions around the circle
+          const positions = [0, 60, 120, 180, 240, 300];
+          positions.forEach((deg, i) => {
+            const rad = (deg - 90) * Math.PI / 180;
+            const px = cx + r * Math.cos(rad);
+            const py = h*0.5 + r * Math.sin(rad);
+            s += playerTriangle(px, py, '▲', i===0);
+          });
+          // Inner defenders
+          s += oppCircle(cx-20, h*0.47, '▼');
+          s += oppCircle(cx+20, h*0.53, '▼');
+        }
+        break;
+
+      case '1v1':
+        // 1v1 — quarter field, cone gates, one each end
+        {
+          s += cone(cx-40, h*0.15); s += cone(cx+40, h*0.15);
+          s += cone(cx-40, h*0.85); s += cone(cx+40, h*0.85);
+          s += `<text x="${cx}" y="${h*0.12}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;
+          s += `<text x="${cx}" y="${h*0.96}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;
+          s += playerTriangle(cx-20, h*0.65, '▲', true);
+          s += oppCircle(cx+20, h*0.38, '▼');
+          s += moveArrow(cx-15, h*0.62, cx+15, h*0.42, '#60a5fa');
+        }
+        break;
+
+      case '2v2':
+        {
+          s += miniGoal(cx, h*0.1, true);
+          s += miniGoal(cx, h*0.9, true);
+          s += playerTriangle(cx-25, h*0.68, '▲', true);
+          s += playerTriangle(cx+25, h*0.72, '▲', false);
+          s += oppCircle(cx-25, h*0.33, '▼');
+          s += oppCircle(cx+25, h*0.37, '▼');
+          s += moveArrow(cx-20, h*0.65, cx-20, h*0.38, '#60a5fa');
+        }
+        break;
+
+      case '3v3':
+        {
+          s += miniGoal(cx, h*0.1, true);
+          s += miniGoal(cx, h*0.9, true);
+          s += playerTriangle(cx-40, h*0.68, '▲', false);
+          s += playerTriangle(cx, h*0.72, '▲', true);
+          s += playerTriangle(cx+40, h*0.68, '▲', false);
+          s += oppCircle(cx-40, h*0.33, '▼');
+          s += oppCircle(cx, h*0.28, '▼');
+          s += oppCircle(cx+40, h*0.33, '▼');
+          s += passArrow(cx-5, h*0.7, cx-35, h*0.35, 'white');
+        }
+        break;
+
+      case '4v4':
+        {
+          s += miniGoal(cx, h*0.1, true);
+          s += miniGoal(cx, h*0.9, true);
+          s += playerTriangle(cx-55, h*0.72, '▲', false);
+          s += playerTriangle(cx-18, h*0.68, '▲', true);
+          s += playerTriangle(cx+18, h*0.68, '▲', false);
+          s += playerTriangle(cx+55, h*0.72, '▲', false);
+          s += oppCircle(cx-55, h*0.3, '▼');
+          s += oppCircle(cx-18, h*0.28, '▼');
+          s += oppCircle(cx+18, h*0.28, '▼');
+          s += oppCircle(cx+55, h*0.3, '▼');
+          s += passArrow(cx-15, h*0.66, cx-50, h*0.34, 'white');
+        }
+        break;
+
+      case 'buildout':
+        // Build out — GK + back line deep, midfield checking, forwards pinning
+        {
+          // GK
+          s += playerTriangle(cx, h*0.88, '1', false);
+          // CBs split wide
+          s += playerTriangle(cx-70, h*0.78, '5', false);
+          s += playerTriangle(cx+70, h*0.78, '4', false);
+          // FBs wide
+          s += playerTriangle(cx-110, h*0.72, '3', false);
+          s += playerTriangle(cx+110, h*0.72, '2', false);
+          // 6 checking in
+          s += playerTriangle(cx, h*0.62, '6', true);
+          // 8 and 10 staggered
+          s += playerTriangle(cx+55, h*0.48, '8', false);
+          s += playerTriangle(cx-55, h*0.38, '10', false);
+          // Forwards pinning
+          s += playerTriangle(cx-90, h*0.22, '11', false);
+          s += playerTriangle(cx+90, h*0.22, '7', false);
+          s += playerTriangle(cx, h*0.18, '9', false);
+          // Opposition pressing
+          s += oppCircle(cx-20, h*0.52, '▼');
+          s += oppCircle(cx+20, h*0.44, '▼');
+          // Pass arrows — Plan B
+          s += passArrow(cx, h*0.86, cx, h*0.65, 'white');
+          s += passArrow(cx, h*0.6, cx+50, h*0.5, 'white');
+          s += moveArrow(cx+50, h*0.46, cx-50, h*0.4, '#60a5fa');
+        }
+        break;
+
+      case 'pressing':
+        // 4-3-3 pressing shape — compact, team pushed up
+        {
+          // GK deep
+          s += playerTriangle(cx, h*0.9, '1', false);
+          // Back 4 just behind halfway
+          s += playerTriangle(cx-100, h*0.68, '3', false);
+          s += playerTriangle(cx-38, h*0.7, '5', false);
+          s += playerTriangle(cx+38, h*0.7, '4', false);
+          s += playerTriangle(cx+100, h*0.68, '2', false);
+          // Mid ahead of halfway
+          s += playerTriangle(cx-45, h*0.52, '8', false);
+          s += playerTriangle(cx, h*0.5, '6', false);
+          s += playerTriangle(cx+45, h*0.52, '10', false);
+          // Front 3 pressing high
+          s += playerTriangle(cx-90, h*0.28, '11', false);
+          s += playerTriangle(cx, h*0.22, '9', true);
+          s += playerTriangle(cx+90, h*0.28, '7', false);
+          // Opposition in build-out
+          s += oppCircle(cx-60, h*0.12, '5');
+          s += oppCircle(cx+60, h*0.12, '4');
+          s += oppCircle(cx, h*0.08, '1');
+          // Press arrows
+          s += moveArrow(cx, h*0.24, cx, h*0.12, '#ef4444');
+          s += moveArrow(cx+85, h*0.3, cx+65, h*0.16, '#ef4444');
+          s += moveArrow(cx-85, h*0.3, cx-65, h*0.16, '#ef4444');
+        }
+        break;
+
+      case '8v8':
+        // 8v8 three-quarter field
+        {
+          s += playerTriangle(cx, h*0.9, '1', false);
+          s += playerTriangle(cx-80, h*0.78, '3', false);
+          s += playerTriangle(cx-30, h*0.78, '5', false);
+          s += playerTriangle(cx+30, h*0.78, '4', false);
+          s += playerTriangle(cx+80, h*0.78, '2', false);
+          s += playerTriangle(cx-40, h*0.62, '8', false);
+          s += playerTriangle(cx, h*0.6, '6', true);
+          s += playerTriangle(cx+40, h*0.62, '10', false);
+          s += playerTriangle(cx, h*0.38, '9', false);
+          // Opposition
+          s += oppCircle(cx-70, h*0.22, '▼');
+          s += oppCircle(cx, h*0.18, '▼');
+          s += oppCircle(cx+70, h*0.22, '▼');
+          s += oppCircle(cx-35, h*0.32, '▼');
+          s += oppCircle(cx+35, h*0.32, '▼');
+          // Full size goal at top (opposition end)
+          s += fullGoal(w*0.35, 2, w*0.3);
+        }
+        break;
+
+      case '11v11':
+        // Full field 11v11
+        {
+          // Your team (attack up)
+          s += playerTriangle(cx, h*0.92, '1', false);
+          s += playerTriangle(cx-95, h*0.8, '3', false);
+          s += playerTriangle(cx-35, h*0.8, '5', false);
+          s += playerTriangle(cx+35, h*0.8, '4', false);
+          s += playerTriangle(cx+95, h*0.8, '2', false);
+          s += playerTriangle(cx-50, h*0.65, '8', false);
+          s += playerTriangle(cx, h*0.63, '6', true);
+          s += playerTriangle(cx+50, h*0.65, '10', false);
+          s += playerTriangle(cx-95, h*0.48, '11', false);
+          s += playerTriangle(cx, h*0.45, '9', false);
+          s += playerTriangle(cx+95, h*0.48, '7', false);
+          // Opposition (attack down)
+          s += oppCircle(cx, h*0.08, '1');
+          s += oppCircle(cx-95, h*0.2, '▼');
+          s += oppCircle(cx-35, h*0.2, '▼');
+          s += oppCircle(cx+35, h*0.2, '▼');
+          s += oppCircle(cx+95, h*0.2, '▼');
+          s += oppCircle(cx-50, h*0.35, '▼');
+          s += oppCircle(cx, h*0.37, '▼');
+          s += oppCircle(cx+50, h*0.35, '▼');
+          s += oppCircle(cx-95, h*0.5, '▼');
+          s += oppCircle(cx, h*0.52, '▼');
+          s += oppCircle(cx+95, h*0.5, '▼');
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    return s;
+  }
+
+  function fieldLabel(w, h, sizeLabel, typeLabel) {
+    return `<text x="12" y="${h-12}" font-family="Arial,sans-serif" font-size="9" fill="rgba(255,255,255,0.4)" letter-spacing="1" text-transform="uppercase">${sizeLabel.toUpperCase()} · ${typeLabel.toUpperCase()}</text>
+    <text x="${w-12}" y="${h-12}" text-anchor="end" font-family="Arial,sans-serif" font-size="8" fill="rgba(255,255,255,0.3)">▲ YOUR TEAM · ● OPPOSITION</text>`;
+  }
+
   function formatContent(text) {
-    // Bold key labels
     return text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/(Name:|Duration:|Players:|Setup:|Objective:|Scoring:|Rules & Constraints:|Coaching Focus:|When to Intervene:|Progression:)/g, '<strong>$1</strong>');
