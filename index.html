@@ -1432,7 +1432,7 @@
     }
 
     // GOOGLE API LOGIC
-    const API_URL = "https://script.google.com/macros/s/AKfycbxiims5wVHjYEdrHblVKZ-4jShSkFvaVgu5wesdvCH-Piblck-orHS2MOXIXoodOIFF/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbx-MHwgGsJJ_yjjA5KknW-P6Q-1o_AIEbdM5TI3McH4xkpWIocK6EbauWDkNi2vl1CY/exec";
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
@@ -1615,7 +1615,9 @@
           tac_support: data.tac_support, tac_restdef: data.tac_restdef, tac_press: data.tac_press,
           tac_attack: data.tac_attack, tac_defend: data.tac_defend
         },
-        ownership: data.ownership, goalShort, goalLong, oneThing
+        ownership: data.ownership, goalShort, goalLong, oneThing,
+        // ADDED: Re-introducing the text blob for the Reflections_Log
+        reflection: `[IDP SUBMISSION]\nOwnership: ${data.ownership}/5\nShort-Term: ${goalShort}\nLong-Term: ${goalLong}\nOne Thing: ${oneThing}\nTechnical — Dribbling:${data.t_dribbling} Passing:${data.t_passing} Movement:${data.t_movement} Duels:${data.t_duels} Touch:${data.t_touch}\nTactical — Support:${data.tac_support} RestDef:${data.tac_restdef} Press:${data.tac_press} Attack:${data.tac_attack} Defend:${data.tac_defend}`
       };
 
       try {
