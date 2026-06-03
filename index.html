@@ -90,6 +90,27 @@
  .lb-val { font-family:'DM Mono',monospace; font-size:13px; color:var(--teal); font-weight:600; }
 
 
+ /* COACH RATINGS COMPARISON */
+ .coach-rating-row { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+ .coach-rating-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+ .coach-rating-skill { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+ .coach-rating-deviation { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 2px 8px; border-radius: 2px; }
+ .dev-high { background: rgba(224,85,85,0.15); color: #e05555; border: 1px solid rgba(224,85,85,0.3); }
+ .dev-low  { background: rgba(58,191,184,0.1); color: var(--teal); border: 1px solid rgba(58,191,184,0.2); }
+ .rating-track { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+ .rating-track-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; min-width: 52px; }
+ .rating-track-label.player { color: var(--teal); }
+ .rating-track-label.coach  { color: var(--gold); }
+ .rating-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+ .rating-bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+ .rating-bar-fill.player { background: var(--teal); }
+ .rating-bar-fill.coach  { background: var(--gold); }
+ .rating-num { font-family: 'Bebas Neue', cursive; font-size: 20px; min-width: 20px; text-align: right; }
+ .rating-num.player { color: var(--teal); }
+ .rating-num.coach  { color: var(--gold); }
+ .coach-comment { margin-top: 8px; background: rgba(200,169,81,0.07); border: 1px solid rgba(200,169,81,0.2); border-left: 3px solid var(--gold); border-radius: 4px; padding: 10px 14px; font-size: 13px; color: var(--text); line-height: 1.6; }
+ .coach-comment::before { content: 'Coach Shawn — '; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 4px; }
+
  /* IDP SLIDERS */
  .idp-skill { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
  .idp-skill:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -1052,7 +1073,50 @@
             <p style="color:var(--muted); font-size:13px; margin-top:6px;">These goals anchor your season. Come back to them often.</p>
           </div>
           <div id="idp-readonly" style="margin-top:16px;"></div>
-          <div style="margin-top:20px; font-size:12px; color:var(--muted); text-align:center; font-style:italic;">Need a revision? Speak with Coach Shawn directly.</div>
+          <!-- COACH RATINGS COMPARISON — shown only when coach has filled in ratings -->
+      <div id="coach-ratings-section" style="display:none; margin-top:16px;">
+        <div style="background:var(--card); border:1px solid var(--border); border-radius:4px; overflow:hidden;">
+          <div style="background:linear-gradient(135deg, rgba(200,169,81,0.12), rgba(200,169,81,0.04)); border-bottom:1px solid var(--border); padding:16px 20px; display:flex; align-items:center; gap:12px;">
+            <div style="flex:1;">
+              <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:4px;">Coach Shawn's Assessment</div>
+              <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white);">Your Ratings vs Coach's View</div>
+            </div>
+            <div style="display:flex; gap:16px;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <div style="width:12px; height:12px; background:var(--teal); border-radius:2px;"></div>
+                <span style="font-size:11px; color:var(--muted); font-family:'DM Mono',monospace;">YOUR RATING</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <div style="width:12px; height:12px; background:var(--gold); border-radius:2px;"></div>
+                <span style="font-size:11px; color:var(--muted); font-family:'DM Mono',monospace;">COACH RATING</span>
+              </div>
+            </div>
+          </div>
+          <div style="padding:20px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--green-lt); margin-bottom:14px; letter-spacing:1px;">Technical</div>
+            <div id="coach-technical-ratings"></div>
+            <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--teal); margin-top:20px; margin-bottom:14px; letter-spacing:1px;">Tactical</div>
+            <div id="coach-tactical-ratings"></div>
+
+            <div id="coach-only-block" style="display:none;">
+              <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border);">
+                <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:4px;">Coach Shawn's Eye</div>
+                <div style="font-size:12px; color:var(--muted); line-height:1.6; margin-bottom:16px;">These are mine to call — your effort, growth and mindset as I see them. No self-score here, and no number to chase. Just what I'm watching for.</div>
+              </div>
+              <div id="coach-physical-block" style="display:none;">
+                <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--green-lt); margin-bottom:14px; letter-spacing:1px;">Physical</div>
+                <div id="coach-physical-ratings"></div>
+              </div>
+              <div id="coach-mental-block" style="display:none;">
+                <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--teal); margin-top:20px; margin-bottom:14px; letter-spacing:1px;">Mental</div>
+                <div id="coach-mental-ratings"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; font-size:12px; color:var(--muted); text-align:center; font-style:italic;">Need a revision? Speak with Coach Shawn directly.</div>
         </div>
 
         <!-- ═══════════════════════════════════════════════ -->
@@ -1117,6 +1181,115 @@
         document.getElementById('film-content').style.display = 'block';
       }
     });
+
+    // ═══════════════════════════════════════════════
+    // COACH RATINGS
+    // ═══════════════════════════════════════════════
+
+    const SKILL_LABELS = {
+      t_dribbling: 'Dribbling',
+      t_passing:   'Passing',
+      t_movement:  'Movement',
+      t_duels:     'Duels & 1v1s',
+      t_touch:     'First Touch',
+      tac_support: 'Supporting the Ball',
+      tac_restdef: 'Rest Defense',
+      tac_press:   'Pressing Triggers',
+      tac_attack:  'Attacking Principles',
+      tac_defend:  'Defending Principles',
+      // Coach-only pillars (Physical / Mental)
+      phy_speed:        'Speed',
+      phy_strength:     'Strength & Duels',
+      phy_endurance:    'Endurance',
+      phy_workrate:     'Recovery & Work Rate',
+      men_composure:    'Composure',
+      men_decisions:    'Decision-Making Under Pressure',
+      men_resilience:   'Resilience',
+      men_coachability: 'Coachability'
+    };
+
+    const TECH_KEYS = ['t_dribbling','t_passing','t_movement','t_duels','t_touch'];
+    const TAC_KEYS  = ['tac_support','tac_restdef','tac_press','tac_attack','tac_defend'];
+    const PHY_KEYS  = ['phy_speed','phy_strength','phy_endurance','phy_workrate'];
+    const MEN_KEYS  = ['men_composure','men_decisions','men_resilience','men_coachability'];
+
+    function loadPlayerEvaluation(idpSubmitted, coachRatings, coachComments) {
+      // Form vs read-only driven by the Sheet — works on any device
+      if (idpSubmitted) {
+        showIDPReadOnly(idpSubmitted);
+      } else {
+        showIDPForm();
+      }
+
+      const playerData = idpSubmitted || {};
+      const cr = coachRatings  || {};
+      const cc = coachComments || {};
+
+      // Only show coach section once coach has actually rated or noted something
+      const hasCoachRatings = Object.keys(cr).some(k => parseInt(cr[k] || 0) > 0);
+      const hasCoachNotes   = Object.keys(cc).some(k => cc[k]);
+      if (!hasCoachRatings && !hasCoachNotes) return;
+
+      document.getElementById('coach-ratings-section').style.display = 'block';
+
+      document.getElementById('coach-technical-ratings').innerHTML =
+        TECH_KEYS.map(k => renderRatingRow(k, playerData, cr, cc)).join('');
+      document.getElementById('coach-tactical-ratings').innerHTML =
+        TAC_KEYS.map(k => renderRatingRow(k, playerData, cr, cc)).join('');
+
+      const physHTML = PHY_KEYS.filter(k => cc[k]).map(k => renderCoachNote(k, cc)).join('');
+      const menHTML  = MEN_KEYS.filter(k => cc[k]).map(k => renderCoachNote(k, cc)).join('');
+      document.getElementById('coach-physical-ratings').innerHTML = physHTML;
+      document.getElementById('coach-mental-ratings').innerHTML   = menHTML;
+      document.getElementById('coach-physical-block').style.display = physHTML ? 'block' : 'none';
+      document.getElementById('coach-mental-block').style.display   = menHTML  ? 'block' : 'none';
+      document.getElementById('coach-only-block').style.display     = (physHTML || menHTML) ? 'block' : 'none';
+    }
+
+    function renderRatingRow(key, playerData, coachRatings, comments) {
+      const playerVal = parseInt(playerData[key] || 3);
+      const coachVal  = parseInt(coachRatings[key] || 0);
+      const label     = SKILL_LABELS[key];
+      const comment   = comments[key] || '';
+      const deviation = coachVal - playerVal;
+
+      if (coachVal === 0) return '';
+
+      const devBadge = Math.abs(deviation) >= 2
+        ? `<span class="coach-rating-deviation ${deviation > 0 ? 'dev-low' : 'dev-high'}">${deviation > 0 ? '▲ Coach rates higher' : '▼ Coach rates lower'}</span>`
+        : `<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">aligned</span>`;
+
+      const commentHTML = (comment && Math.abs(deviation) >= 2)
+        ? `<div class="coach-comment">${comment}</div>` : '';
+
+      return `
+        <div class="coach-rating-row">
+          <div class="coach-rating-skill"><span>${label}</span>${devBadge}</div>
+          <div class="rating-track">
+            <span class="rating-track-label player">You</span>
+            <div class="rating-bar"><div class="rating-bar-fill player" style="width:${(playerVal/5)*100}%"></div></div>
+            <span class="rating-num player">${playerVal}</span>
+          </div>
+          <div class="rating-track">
+            <span class="rating-track-label coach">Coach</span>
+            <div class="rating-bar"><div class="rating-bar-fill coach" style="width:${(coachVal/5)*100}%"></div></div>
+            <span class="rating-num coach">${coachVal}</span>
+          </div>
+          ${commentHTML}
+        </div>`;
+    }
+
+    // Coach-only pillars (Physical / Mental): a label + comment, no bars, no number
+    function renderCoachNote(key, comments) {
+      const label   = SKILL_LABELS[key];
+      const comment = comments[key] || '';
+      if (!comment) return '';
+      return `
+        <div class="coach-rating-row">
+          <div class="coach-rating-skill"><span>${label}</span></div>
+          <div class="coach-comment">${comment}</div>
+        </div>`;
+    }
 
     // ═══════════════════════════════════════════════
     // INDIVIDUAL FILM ROOM
@@ -1248,7 +1421,7 @@
     }
 
     // GOOGLE API LOGIC
-    const API_URL = "https://script.google.com/macros/s/AKfycbweF0q0eODK_xyROZPNNJc7yYC5J69l2YFtqsFfg6XTIOvKpeoE57lk6v6Y-yhwQm1v/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxfINqoX5D6WPzmN7wfwc1hYWezX54xi_HnuR1F6HNVY7VMbMT-ayjo4QbEGBDa716S/exec";
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
@@ -1278,8 +1451,8 @@
           document.getElementById('stat-kp').innerText = data.stats.keyPasses || 0;
           document.getElementById('stat-duels').innerText = data.stats.duels || 0;
 
-          // Check if player already has an IDP submitted
-          checkIDPSubmitted(data.name);
+          // Pull self-ratings + coach ratings from the Sheet (works on any device)
+          loadPlayerEvaluation(data.idpSubmitted, data.coachRatings, data.coachComments);
           loadIndividualFilm(data.name);
         } else { alert("Invalid Credentials. Check your exact spelling and PIN."); }
       } catch(err) { alert("Error connecting to the database. Please try again."); } finally { btn.innerText = originalText; }
@@ -1418,10 +1591,11 @@
         tac_defend:  document.getElementById('tac-defend').value,
       };
 
-      // Save locally so it persists across sessions
+      // Save locally as an instant cache (server is the real source of truth)
       localStorage.setItem('idp_' + name.toLowerCase().trim(), JSON.stringify(data));
 
-      // Post to Google Sheet
+      // Post to Reflections_Log in the same format as all existing entries.
+      // The backend also writes structured data to IDP_Submitted for cross-device access.
       const payload = {
         name,
         reflection: `[IDP SUBMISSION]\nOwnership: ${data.ownership}/5\nShort-Term: ${goalShort}\nLong-Term: ${goalLong}\nOne Thing: ${oneThing}\nTechnical — Dribbling:${data.t_dribbling} Passing:${data.t_passing} Movement:${data.t_movement} Duels:${data.t_duels} Touch:${data.t_touch}\nTactical — Support:${data.tac_support} RestDef:${data.tac_restdef} Press:${data.tac_press} Attack:${data.tac_attack} Defend:${data.tac_defend}`
@@ -1429,7 +1603,7 @@
 
       try {
         await fetch(API_URL, { method:'POST', body: JSON.stringify(payload) });
-      } catch(e) { /* silent — data saved locally regardless */ }
+      } catch(e) { /* silent — cached locally */ }
 
       document.getElementById('idp-submit-msg').style.display = 'block';
       setTimeout(() => { showIDPReadOnly(data); }, 1800);
