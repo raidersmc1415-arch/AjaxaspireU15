@@ -1213,27 +1213,38 @@
     const PHY_KEYS  = ['phy_speed','phy_strength','phy_endurance','phy_workrate'];
     const MEN_KEYS  = ['men_composure','men_decisions','men_resilience','men_coachability'];
 
-    async function loadCoachRatings(playerName) {
+    async function loadPlayerEvaluation(playerName) {
       try {
         const res  = await fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}`);
         const data = await res.json();
+
+        // Decide form vs read-only from the SHEET (works on any device)
+        if (data.submitted && data.self) {
+          showIDPReadOnly(data.self);
+        } else {
+          showIDPForm();
+        }
+
         if (!data.found) return;
 
-        // Get player's own ratings from localStorage
-        const saved = localStorage.getItem('idp_' + playerName.toLowerCase().trim());
-        if (!saved) return;
-        const playerData = JSON.parse(saved);
+        const playerData    = data.self     || {};
+        const coachRatings  = data.ratings  || {};
+        const coachComments = data.comments || {};
 
-        // Show the section
+        // Only reveal the coach section once the coach has actually rated/noted something
+        const hasCoachRatings = Object.keys(coachRatings).some(k => parseInt(coachRatings[k] || 0) > 0);
+        const hasCoachNotes   = Object.keys(coachComments).some(k => coachComments[k]);
+        if (!hasCoachRatings && !hasCoachNotes) return;
+
         document.getElementById('coach-ratings-section').style.display = 'block';
 
         document.getElementById('coach-technical-ratings').innerHTML =
-          TECH_KEYS.map(k => renderRatingRow(k, playerData, data.ratings, data.comments)).join('');
+          TECH_KEYS.map(k => renderRatingRow(k, playerData, coachRatings, coachComments)).join('');
         document.getElementById('coach-tactical-ratings').innerHTML =
-          TAC_KEYS.map(k => renderRatingRow(k, playerData, data.ratings, data.comments)).join('');
+          TAC_KEYS.map(k => renderRatingRow(k, playerData, coachRatings, coachComments)).join('');
 
         // Coach-only pillars: Physical / Mental — comments only, no numbers
-        const c = data.comments || {};
+        const c = coachComments;
         const physHTML = PHY_KEYS.filter(k => c[k]).map(k => renderCoachNote(k, c)).join('');
         const menHTML  = MEN_KEYS.filter(k => c[k]).map(k => renderCoachNote(k, c)).join('');
 
@@ -1421,7 +1432,7 @@
     }
 
     // GOOGLE API LOGIC
-    const API_URL = "https://script.google.com/macros/s/AKfycbw_qayJZ97MSVYqTqwac6-8e6Z9Kpw0kTPqs8rV4q6K3J-GN8f_Yn-ioMgnfG0ELWV3/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbweF0q0eODK_xyROZPNNJc7yYC5J69l2YFtqsFfg6XTIOvKpeoE57lk6v6Y-yhwQm1v/exec";
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
@@ -1451,9 +1462,8 @@
           document.getElementById('stat-kp').innerText = data.stats.keyPasses || 0;
           document.getElementById('stat-duels').innerText = data.stats.duels || 0;
 
-          // Check if player already has an IDP submitted
-          checkIDPSubmitted(data.name);
-          loadCoachRatings(data.name);
+          // Pull self-ratings + coach ratings from the Sheet (works on any device)
+          loadPlayerEvaluation(data.name);
           loadIndividualFilm(data.name);
         } else { alert("Invalid Credentials. Check your exact spelling and PIN."); }
       } catch(err) { alert("Error connecting to the database. Please try again."); } finally { btn.innerText = originalText; }
@@ -1592,18 +1602,25 @@
         tac_defend:  document.getElementById('tac-defend').value,
       };
 
-      // Save locally so it persists across sessions
+      // Save locally as an instant cache (server is the real source of truth)
       localStorage.setItem('idp_' + name.toLowerCase().trim(), JSON.stringify(data));
 
-      // Post to Google Sheet
+      // Persist to the Sheet so it shows on every device the player logs in from
       const payload = {
+        type: 'idpRatings',
         name,
-        reflection: `[IDP SUBMISSION]\nOwnership: ${data.ownership}/5\nShort-Term: ${goalShort}\nLong-Term: ${goalLong}\nOne Thing: ${oneThing}\nTechnical — Dribbling:${data.t_dribbling} Passing:${data.t_passing} Movement:${data.t_movement} Duels:${data.t_duels} Touch:${data.t_touch}\nTactical — Support:${data.tac_support} RestDef:${data.tac_restdef} Press:${data.tac_press} Attack:${data.tac_attack} Defend:${data.tac_defend}`
+        ratings: {
+          t_dribbling: data.t_dribbling, t_passing: data.t_passing, t_movement: data.t_movement,
+          t_duels: data.t_duels, t_touch: data.t_touch,
+          tac_support: data.tac_support, tac_restdef: data.tac_restdef, tac_press: data.tac_press,
+          tac_attack: data.tac_attack, tac_defend: data.tac_defend
+        },
+        ownership: data.ownership, goalShort, goalLong, oneThing
       };
 
       try {
         await fetch(API_URL, { method:'POST', body: JSON.stringify(payload) });
-      } catch(e) { /* silent — data saved locally regardless */ }
+      } catch(e) { /* silent — cached locally, will sync on next login */ }
 
       document.getElementById('idp-submit-msg').style.display = 'block';
       setTimeout(() => { showIDPReadOnly(data); }, 1800);
