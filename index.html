@@ -90,6 +90,42 @@
  .lb-val { font-family:'DM Mono',monospace; font-size:13px; color:var(--teal); font-weight:600; }
 
 
+ .checkin-toggle { background: var(--navy); border: 1px solid var(--border); border-radius: 4px; padding: 8px 16px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; flex: 1; }
+ .checkin-toggle:hover { border-color: var(--teal); color: var(--teal); }
+ .checkin-toggle.selected-yes { background: rgba(42,122,75,0.2); border-color: var(--green-lt); color: var(--green-lt); }
+ .checkin-toggle.selected-no  { background: rgba(224,85,85,0.1); border-color: #e05555; color: #e05555; }
+
+ /* COMPETITION HUB */
+ .challenge-card { background: linear-gradient(135deg, rgba(200,169,81,0.12), rgba(13,27,42,0.95)); border: 1px solid rgba(200,169,81,0.3); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+ .challenge-header { padding: 20px 24px; border-bottom: 1px solid rgba(200,169,81,0.2); }
+ .challenge-live-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(200,169,81,0.15); border: 1px solid rgba(200,169,81,0.3); color: var(--gold); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; margin-bottom: 10px; }
+ .challenge-live-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse-dot 1.5s ease-in-out infinite; }
+ @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+ .lb-table { width: 100%; border-collapse: collapse; }
+ .lb-table th { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); font-weight: normal; }
+ .lb-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text); }
+ .lb-table tr:last-child td { border-bottom: none; }
+ .lb-table tr:hover td { background: rgba(255,255,255,0.02); }
+ .lb-rank-num { font-family: 'Bebas Neue', cursive; font-size: 20px; color: var(--muted); min-width: 28px; }
+ .lb-rank-num.gold { color: var(--gold); }
+ .lb-rank-num.silver { color: #9ca3af; }
+ .lb-rank-num.bronze { color: #c08040; }
+ .lb-points { font-family: 'Bebas Neue', cursive; font-size: 22px; color: var(--teal); }
+ .lb-streak { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+ .badge-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+ .badge-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px 16px; text-align: center; transition: border-color 0.2s; }
+ .badge-item:hover { border-color: rgba(200,169,81,0.4); }
+ .badge-item svg { width: 80px; height: 90px; margin: 0 auto 12px; display: block; }
+ .badge-player { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+ .badge-name { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); }
+ .badge-date { font-size: 11px; color: var(--muted); margin-top: 4px; }
+ .circuit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+ .circuit-day { background: var(--navy-mid); border: 1px solid var(--border); border-radius: 4px; padding: 14px; }
+ .circuit-day-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+ .circuit-day-label.core { color: var(--teal); }
+ .circuit-day-label.legs { color: var(--green-lt); }
+ .circuit-item { font-size: 12px; color: var(--muted); line-height: 1.8; }
+
  /* COACH RATINGS COMPARISON */
  .coach-rating-row { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
  .coach-rating-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -215,6 +251,7 @@
     <button class="tab-btn" onclick="switchTab('film', this)">Film Room</button>
     <button class="tab-btn" onclick="switchTab('tactics', this)">⚙️ Tactics Board</button>
     <button class="tab-btn" onclick="switchTab('glossary', this)">📖 Glossary</button>
+    <button class="tab-btn" onclick="switchTab('competition', this)" style="color: var(--gold);">🏆 Competition Hub</button>
     <button class="tab-btn" onclick="switchTab('parents', this)">Parent Hub</button>
     <button class="tab-btn" onclick="switchTab('portal', this)" style="color: var(--gold);">🔒 Player Portal</button>
   </nav>
@@ -709,28 +746,6 @@
       </div>
 
       </div><!-- end film-content -->
-      <!-- LEADERBOARD -->
-      <div class="card" style="margin-top: 20px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
-          <h2 style="font-family:'Bebas Neue',cursive; color:var(--white); font-size:28px; margin:0;">🏅 Season Leaderboard</h2>
-          <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:rgba(200,169,81,0.1); color:var(--gold); border:1px solid rgba(200,169,81,0.25); padding:3px 10px; border-radius:2px;">Season 26/27 · Live</span>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;">
-          <div style="background:var(--navy-mid); border:1px solid var(--border); border-top:3px solid var(--teal); border-radius:4px; padding:16px;">
-            <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:12px;">📝 Reflections Submitted</div>
-            <div id="reflect-board">
-              <div style="text-align:center; padding:20px; color:var(--muted); font-size:13px; font-style:italic;">Loading leaderboard...</div>
-            </div>
-          </div>
-          <div style="background:var(--navy-mid); border:1px solid var(--border); border-top:3px solid var(--green-lt); border-radius:4px; padding:16px;">
-            <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--green-lt); margin-bottom:12px;">📅 Training Attendance</div>
-            <div id="attend-board">
-              <div style="text-align:center; padding:20px; color:var(--muted); font-size:13px; font-style:italic;">Loading leaderboard...</div>
-            </div>
-          </div>
-        </div>
-        <p style="font-size:12px; color:var(--muted); font-style:italic;">Leaderboard updates from your Google Sheet. First names only — visible to the whole team.</p>
-      </div>
 
     </div>
 
@@ -833,6 +848,208 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════ -->
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- COMPETITION HUB                                     -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="competition" class="section">
+      <div class="section-header">
+        <div class="section-label">Ajax Aspire U15 · Season 26/27</div>
+        <div class="section-title">Competition Hub</div>
+        <div class="section-desc">Team challenges, leaderboards, and earned badges. Show up. Put in the work. Get recognized.</div>
+      </div>
+
+      <!-- CURRENT CHALLENGE CARD -->
+      <div class="challenge-card" id="current-challenge-card">
+        <div class="challenge-header">
+          <div class="challenge-live-badge">
+            <div class="challenge-live-dot"></div>
+            Active Challenge
+          </div>
+          <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--white); margin-bottom:4px;" id="ch-title">Ball Mastery Challenge</div>
+          <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--gold); letter-spacing:2px;" id="ch-dates">July 4 – July 13, 2026  ·  10 Days</div>
+          <div style="font-size:14px; color:var(--muted); margin-top:10px; line-height:1.6;" id="ch-desc">Complete the ball mastery routine and daily fitness circuit every day for 10 days. One submission per day. Log it, own it, compete for it. The gold AJAX Ball Mastery badge goes to the challenge winner.</div>
+        </div>
+
+        <!-- VIDEO EMBED -->
+        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:var(--navy);">
+          <iframe id="ch-video"
+            src="https://www.youtube.com/embed/nHxClhfQjlM?rel=0&modestbranding=1"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <!-- FITNESS CIRCUIT SCHEDULE -->
+        <div style="padding:20px 24px; border-top:1px solid rgba(200,169,81,0.2);">
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:14px;">Daily Fitness Circuit — After the Ball Work</div>
+          <div class="circuit-grid">
+            <div class="circuit-day">
+              <div class="circuit-day-label core">Core Days — 1, 3, 5, 7, 9</div>
+              <div class="circuit-item">
+                4 × Plank — 30 sec on / 30 sec off<br>
+                4 × Hollow Hold — 30 sec on / 30 sec off<br>
+                4 × Dead Bug — 30 sec on / 30 sec off
+              </div>
+            </div>
+            <div class="circuit-day">
+              <div class="circuit-day-label legs">Leg Days — 2, 4, 6, 8, 10</div>
+              <div class="circuit-item">
+                4 × Air Squat — 30 sec on / 30 sec off<br>
+                4 × Reverse Lunge — 30 sec on / 30 sec off<br>
+                4 × Glute Bridge — 30 sec on / 30 sec off
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHECK-IN FORM -->
+        <div style="padding:20px 24px; border-top:1px solid rgba(200,169,81,0.2); background:rgba(13,27,42,0.5);">
+          <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:6px;">Log Today's Completion</div>
+          <div style="font-size:13px; color:var(--muted); margin-bottom:18px;">One submission per day. Enter your name and PIN to log your entry.</div>
+
+          <div id="checkin-form">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+              <div class="input-group">
+                <label>Your Name</label>
+                <input type="text" id="ch-name" placeholder="First Last">
+              </div>
+              <div class="input-group">
+                <label>PIN</label>
+                <input type="password" id="ch-pin" placeholder="Your portal PIN">
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+              <div style="background:var(--navy-mid); border:1px solid var(--border); border-radius:4px; padding:14px;">
+                <div style="font-size:13px; color:var(--white); font-weight:600; margin-bottom:10px;">⚽ Ball Mastery Video</div>
+                <div style="display:flex; gap:10px;">
+                  <button class="checkin-toggle" id="vid-yes" onclick="setToggle('vid','yes')">✓ Done</button>
+                  <button class="checkin-toggle" id="vid-no" onclick="setToggle('vid','no')">✗ Not Yet</button>
+                </div>
+              </div>
+              <div style="background:var(--navy-mid); border:1px solid var(--border); border-radius:4px; padding:14px;">
+                <div style="font-size:13px; color:var(--white); font-weight:600; margin-bottom:10px;">💪 Fitness Circuit</div>
+                <div style="display:flex; gap:10px;">
+                  <button class="checkin-toggle" id="fit-yes" onclick="setToggle('fit','yes')">✓ Done</button>
+                  <button class="checkin-toggle" id="fit-no" onclick="setToggle('fit','no')">✗ Not Yet</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="input-group" style="margin-bottom:14px;">
+              <label>How did it feel? (optional)</label>
+              <input type="text" id="ch-reflection" placeholder="One line — be honest with yourself">
+            </div>
+
+            <button class="btn" onclick="submitCheckin()" style="padding:12px 28px;">Submit Today's Entry →</button>
+            <div id="checkin-msg" style="display:none; margin-top:12px; background:rgba(58,191,184,0.08); border:1px solid rgba(58,191,184,0.2); border-radius:4px; padding:12px 16px; color:var(--teal); font-size:14px;"></div>
+            <div id="checkin-error" style="display:none; margin-top:12px; background:rgba(224,85,85,0.08); border:1px solid rgba(224,85,85,0.2); border-radius:4px; padding:12px 16px; color:#e05555; font-size:14px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRIZE PREVIEW -->
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+          <div style="flex-shrink:0;">
+            <svg viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg" style="width:110px; height:126px; display:block; filter:drop-shadow(0 0 16px rgba(200,169,81,0.4));">
+              <defs>
+                <linearGradient id="goldGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#f0c040;stop-opacity:1"/>
+                  <stop offset="50%" style="stop-color:#C8A951;stop-opacity:1"/>
+                  <stop offset="100%" style="stop-color:#a07830;stop-opacity:1"/>
+                </linearGradient>
+              </defs>
+              <path d="M50 4 L94 18 L94 62 Q94 95 50 112 Q6 95 6 62 L6 18 Z" fill="url(#goldGrad2)" stroke="#f0c040" stroke-width="1.5"/>
+              <path d="M50 12 L86 24 L86 61 Q86 88 50 104 Q14 88 14 61 L14 24 Z" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+              <!-- Gold outline ball — clean seam lines, no fill patches -->
+              <circle cx="50" cy="62" r="20" fill="rgba(255,255,255,0.12)" stroke="#f0c040" stroke-width="1.8"/>
+              <!-- Vertical seam arc -->
+              <path d="M50 42 Q58 52 58 62 Q58 72 50 82" fill="none" stroke="#f0c040" stroke-width="1.2" opacity="0.7"/>
+              <!-- Horizontal seam arc -->
+              <path d="M30 62 Q40 55 50 55 Q60 55 70 62" fill="none" stroke="#f0c040" stroke-width="1.2" opacity="0.7"/>
+              <!-- Lower horizontal seam arc -->
+              <path d="M31 67 Q40 73 50 73 Q60 73 69 67" fill="none" stroke="#f0c040" stroke-width="1.2" opacity="0.7"/>
+              <!-- Left seam arc -->
+              <path d="M50 42 Q42 52 42 62 Q42 72 50 82" fill="none" stroke="#f0c040" stroke-width="1.2" opacity="0.7"/>
+              <text x="50" y="34" font-family="Impact,sans-serif" font-size="11" fill="white" text-anchor="middle" letter-spacing="2">AJAX</text>
+              <text x="50" y="96" font-family="Impact,sans-serif" font-size="7" fill="white" text-anchor="middle" letter-spacing="1">BALL MASTERY</text>
+              <polygon points="50,6 51.5,10 55.5,10 52.5,12.5 53.5,16.5 50,14 46.5,16.5 47.5,12.5 44.5,10 48.5,10" fill="white" opacity="0.9"/>
+            </svg>
+          </div>
+          <div style="flex:1; min-width:200px;">
+            <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">Challenge Prize</div>
+            <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); margin-bottom:6px; line-height:1;">Gold AJAX Ball Mastery Badge</div>
+            <div style="font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:12px;">Awarded to the challenge winner on July 14. Ties earn the badge too. This badge lives permanently on your profile — the first badge of the season and the only way to earn it is to show up every day.</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <span style="background:rgba(200,169,81,0.1); border:1px solid rgba(200,169,81,0.3); color:var(--gold); font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; padding:4px 10px; border-radius:2px;">July 4 – 13</span>
+              <span style="background:rgba(200,169,81,0.1); border:1px solid rgba(200,169,81,0.3); color:var(--gold); font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; padding:4px 10px; border-radius:2px;">10 Points Max</span>
+              <span style="background:rgba(200,169,81,0.1); border:1px solid rgba(200,169,81,0.3); color:var(--gold); font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; padding:4px 10px; border-radius:2px;">Ties All Win</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+
+        <!-- Current Challenge -->
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white);">Current Challenge</div>
+            <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; color:var(--gold);">10 PTS MAX</span>
+          </div>
+          <div id="lb-current">
+            <div style="text-align:center; padding:20px; color:var(--muted); font-size:13px; font-style:italic;">Loading leaderboard...</div>
+          </div>
+        </div>
+
+        <!-- Season Leaders -->
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white);">Season Leaders</div>
+            <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; color:var(--teal);">ALL CHALLENGES</span>
+          </div>
+          <div id="lb-season">
+            <div style="text-align:center; padding:20px; color:var(--muted); font-size:13px; font-style:italic;">Loading leaderboard...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BADGE WALL -->
+      <div class="card">
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:6px;">Earned Badges</div>
+          <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white);">Badge Wall</div>
+          <div style="font-size:13px; color:var(--muted); margin-top:4px;">Badges are permanent. Earn them. Own them.</div>
+        </div>
+
+        <!-- Badge legend -->
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px; padding:14px; background:var(--navy-mid); border:1px solid var(--border); border-radius:4px;">
+          <div style="font-size:12px; color:var(--muted);">
+            <span style="color:var(--gold); font-weight:600;">🏅 Challenge Winner</span> — Win any challenge
+          </div>
+          <div style="font-size:12px; color:var(--muted);">
+            <span style="color:var(--teal); font-weight:600;">🔭 Scanning</span> — Top reflections + film feedback (Half 1 & Season)
+          </div>
+          <div style="font-size:12px; color:var(--muted);">
+            <span style="color:var(--teal); font-weight:600;">🏆 Season Leader</span> — Most competition points at season end
+          </div>
+          <div style="font-size:12px; color:var(--muted);">
+            <span style="color:#e05555; font-weight:600;">🔥 Streak</span> — Win 3 consecutive challenges
+          </div>
+          <div style="font-size:12px; color:var(--muted);">
+            <span style="color:var(--green-lt); font-weight:600;">🎯 All-In</span> — Top 3 cumulative points all season
+          </div>
+        </div>
+
+        <div class="badge-wall" id="badge-wall">
+          <div style="text-align:center; padding:30px; color:var(--muted); font-size:13px; font-style:italic; grid-column:1/-1;">No badges awarded yet — challenge ends July 13. First badges drop July 14.</div>
+        </div>
+      </div>
+    </div>
 
     <div id="parents" class="section">
       <div class="section-header">
@@ -1097,21 +1314,6 @@
             <div id="coach-technical-ratings"></div>
             <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--teal); margin-top:20px; margin-bottom:14px; letter-spacing:1px;">Tactical</div>
             <div id="coach-tactical-ratings"></div>
-
-            <div id="coach-only-block" style="display:none;">
-              <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border);">
-                <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:4px;">Coach Shawn's Eye</div>
-                <div style="font-size:12px; color:var(--muted); line-height:1.6; margin-bottom:16px;">These are mine to call — your effort, growth and mindset as I see them. No self-score here, and no number to chase. Just what I'm watching for.</div>
-              </div>
-              <div id="coach-physical-block" style="display:none;">
-                <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--green-lt); margin-bottom:14px; letter-spacing:1px;">Physical</div>
-                <div id="coach-physical-ratings"></div>
-              </div>
-              <div id="coach-mental-block" style="display:none;">
-                <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--teal); margin-top:20px; margin-bottom:14px; letter-spacing:1px;">Mental</div>
-                <div id="coach-mental-ratings"></div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -1196,54 +1398,32 @@
       tac_restdef: 'Rest Defense',
       tac_press:   'Pressing Triggers',
       tac_attack:  'Attacking Principles',
-      tac_defend:  'Defending Principles',
-      // Coach-only pillars (Physical / Mental)
-      phy_speed:        'Speed',
-      phy_strength:     'Strength & Duels',
-      phy_endurance:    'Endurance',
-      phy_workrate:     'Recovery & Work Rate',
-      men_composure:    'Composure',
-      men_decisions:    'Decision-Making Under Pressure',
-      men_resilience:   'Resilience',
-      men_coachability: 'Coachability'
+      tac_defend:  'Defending Principles'
     };
 
     const TECH_KEYS = ['t_dribbling','t_passing','t_movement','t_duels','t_touch'];
     const TAC_KEYS  = ['tac_support','tac_restdef','tac_press','tac_attack','tac_defend'];
-    const PHY_KEYS  = ['phy_speed','phy_strength','phy_endurance','phy_workrate'];
-    const MEN_KEYS  = ['men_composure','men_decisions','men_resilience','men_coachability'];
 
-    function loadPlayerEvaluation(idpSubmitted, coachRatings, coachComments) {
-      // Form vs read-only driven by the Sheet — works on any device
-      if (idpSubmitted) {
-        showIDPReadOnly(idpSubmitted);
-      } else {
-        showIDPForm();
-      }
+    async function loadCoachRatings(playerName) {
+      try {
+        const res  = await fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}`);
+        const data = await res.json();
+        if (!data.found) return;
 
-      const playerData = idpSubmitted || {};
-      const cr = coachRatings  || {};
-      const cc = coachComments || {};
+        // Get player's own ratings from localStorage
+        const saved = localStorage.getItem('idp_' + playerName.toLowerCase().trim());
+        if (!saved) return;
+        const playerData = JSON.parse(saved);
 
-      // Only show coach section once coach has actually rated or noted something
-      const hasCoachRatings = Object.keys(cr).some(k => parseInt(cr[k] || 0) > 0);
-      const hasCoachNotes   = Object.keys(cc).some(k => cc[k]);
-      if (!hasCoachRatings && !hasCoachNotes) return;
+        // Show the section
+        document.getElementById('coach-ratings-section').style.display = 'block';
 
-      document.getElementById('coach-ratings-section').style.display = 'block';
+        document.getElementById('coach-technical-ratings').innerHTML =
+          TECH_KEYS.map(k => renderRatingRow(k, playerData, data.ratings, data.comments)).join('');
+        document.getElementById('coach-tactical-ratings').innerHTML =
+          TAC_KEYS.map(k => renderRatingRow(k, playerData, data.ratings, data.comments)).join('');
 
-      document.getElementById('coach-technical-ratings').innerHTML =
-        TECH_KEYS.map(k => renderRatingRow(k, playerData, cr, cc)).join('');
-      document.getElementById('coach-tactical-ratings').innerHTML =
-        TAC_KEYS.map(k => renderRatingRow(k, playerData, cr, cc)).join('');
-
-      const physHTML = PHY_KEYS.filter(k => cc[k]).map(k => renderCoachNote(k, cc)).join('');
-      const menHTML  = MEN_KEYS.filter(k => cc[k]).map(k => renderCoachNote(k, cc)).join('');
-      document.getElementById('coach-physical-ratings').innerHTML = physHTML;
-      document.getElementById('coach-mental-ratings').innerHTML   = menHTML;
-      document.getElementById('coach-physical-block').style.display = physHTML ? 'block' : 'none';
-      document.getElementById('coach-mental-block').style.display   = menHTML  ? 'block' : 'none';
-      document.getElementById('coach-only-block').style.display     = (physHTML || menHTML) ? 'block' : 'none';
+      } catch(err) { /* silent fail */ }
     }
 
     function renderRatingRow(key, playerData, coachRatings, comments) {
@@ -1276,18 +1456,6 @@
             <span class="rating-num coach">${coachVal}</span>
           </div>
           ${commentHTML}
-        </div>`;
-    }
-
-    // Coach-only pillars (Physical / Mental): a label + comment, no bars, no number
-    function renderCoachNote(key, comments) {
-      const label   = SKILL_LABELS[key];
-      const comment = comments[key] || '';
-      if (!comment) return '';
-      return `
-        <div class="coach-rating-row">
-          <div class="coach-rating-skill"><span>${label}</span></div>
-          <div class="coach-comment">${comment}</div>
         </div>`;
     }
 
@@ -1400,6 +1568,7 @@
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       btn.classList.add('active');
+      if (tabId === 'competition') loadCompetitionLeaderboard();
     }
 
     // POSITIONS LOGIC
@@ -1421,7 +1590,7 @@
     }
 
     // GOOGLE API LOGIC
-    const API_URL = "https://script.google.com/macros/s/AKfycbxfINqoX5D6WPzmN7wfwc1hYWezX54xi_HnuR1F6HNVY7VMbMT-ayjo4QbEGBDa716S/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbweF0q0eODK_xyROZPNNJc7yYC5J69l2YFtqsFfg6XTIOvKpeoE57lk6v6Y-yhwQm1v/exec";
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
@@ -1451,8 +1620,9 @@
           document.getElementById('stat-kp').innerText = data.stats.keyPasses || 0;
           document.getElementById('stat-duels').innerText = data.stats.duels || 0;
 
-          // Pull self-ratings + coach ratings from the Sheet (works on any device)
-          loadPlayerEvaluation(data.idpSubmitted, data.coachRatings, data.coachComments);
+          // Check if player already has an IDP submitted
+          checkIDPSubmitted(data.name);
+          loadCoachRatings(data.name);
           loadIndividualFilm(data.name);
         } else { alert("Invalid Credentials. Check your exact spelling and PIN."); }
       } catch(err) { alert("Error connecting to the database. Please try again."); } finally { btn.innerText = originalText; }
@@ -1591,11 +1761,10 @@
         tac_defend:  document.getElementById('tac-defend').value,
       };
 
-      // Save locally as an instant cache (server is the real source of truth)
+      // Save locally so it persists across sessions
       localStorage.setItem('idp_' + name.toLowerCase().trim(), JSON.stringify(data));
 
-      // Post to Reflections_Log in the same format as all existing entries.
-      // The backend also writes structured data to IDP_Submitted for cross-device access.
+      // Post to Google Sheet
       const payload = {
         name,
         reflection: `[IDP SUBMISSION]\nOwnership: ${data.ownership}/5\nShort-Term: ${goalShort}\nLong-Term: ${goalLong}\nOne Thing: ${oneThing}\nTechnical — Dribbling:${data.t_dribbling} Passing:${data.t_passing} Movement:${data.t_movement} Duels:${data.t_duels} Touch:${data.t_touch}\nTactical — Support:${data.tac_support} RestDef:${data.tac_restdef} Press:${data.tac_press} Attack:${data.tac_attack} Defend:${data.tac_defend}`
@@ -1603,7 +1772,7 @@
 
       try {
         await fetch(API_URL, { method:'POST', body: JSON.stringify(payload) });
-      } catch(e) { /* silent — cached locally */ }
+      } catch(e) { /* silent — data saved locally regardless */ }
 
       document.getElementById('idp-submit-msg').style.display = 'block';
       setTimeout(() => { showIDPReadOnly(data); }, 1800);
@@ -1971,44 +2140,254 @@
     // ═══════════════════════════════════════════════
     // LEADERBOARD — reads from your existing Google Sheet
     // ═══════════════════════════════════════════════
-    async function loadLeaderboard() {
+
+
+
+
+
+    // ═══════════════════════════════════════════════
+    // COMPETITION HUB
+    // ═══════════════════════════════════════════════
+
+    const checkinState = { vid: null, fit: null };
+
+    function setToggle(type, val) {
+      checkinState[type] = val;
+      const yesBtn = document.getElementById(type + '-yes');
+      const noBtn  = document.getElementById(type + '-no');
+      yesBtn.className = 'checkin-toggle' + (val === 'yes' ? ' selected-yes' : '');
+      noBtn.className  = 'checkin-toggle' + (val === 'no'  ? ' selected-no'  : '');
+    }
+
+    async function submitCheckin() {
+      const name       = document.getElementById('ch-name').value.trim();
+      const pin        = document.getElementById('ch-pin').value.trim();
+      const reflection = document.getElementById('ch-reflection').value.trim();
+      const msgEl      = document.getElementById('checkin-msg');
+      const errEl      = document.getElementById('checkin-error');
+      msgEl.style.display = 'none';
+      errEl.style.display = 'none';
+
+      if (!name || !pin) { errEl.textContent = 'Please enter your name and PIN.'; errEl.style.display = 'block'; return; }
+      if (!checkinState.vid) { errEl.textContent = 'Please select whether you completed the ball mastery video.'; errEl.style.display = 'block'; return; }
+      if (!checkinState.fit) { errEl.textContent = 'Please select whether you completed the fitness circuit.'; errEl.style.display = 'block'; return; }
+
+      const today = new Date().toISOString().split('T')[0];
+      const payload = {
+        action:     'challengeCheckin',
+        name, pin,
+        challenge:  document.getElementById('ch-title').innerText,
+        date:       today,
+        videoComplete: checkinState.vid === 'yes',
+        fitComplete:   checkinState.fit === 'yes',
+        reflection
+      };
+
       try {
-        const res = await fetch(`${API_URL}?action=leaderboard`);
+        const res  = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
         const data = await res.json();
-        if (data.reflections) renderBoard('reflect-board', data.reflections, 'reflections');
-        if (data.attendance)  renderBoard('attend-board',  data.attendance,  'sessions');
-      } catch(e) {
-        // If leaderboard endpoint not yet set up, show placeholder
-        renderPlaceholderBoard('reflect-board');
-        renderPlaceholderBoard('attend-board');
+
+        if (data.success) {
+          const pts = (checkinState.vid === 'yes' || checkinState.fit === 'yes') ? 1 : 0;
+          msgEl.innerHTML = pts > 0
+            ? `✅ Entry logged! +1 point earned. Keep the streak alive.`
+            : `📝 Entry logged. No points today — but you showed up. Come back tomorrow.`;
+          msgEl.style.display = 'block';
+          // Reset form
+          document.getElementById('ch-name').value = '';
+          document.getElementById('ch-pin').value = '';
+          document.getElementById('ch-reflection').value = '';
+          checkinState.vid = null; checkinState.fit = null;
+          setToggle('vid', null); setToggle('fit', null);
+          document.getElementById('vid-yes').className = 'checkin-toggle';
+          document.getElementById('vid-no').className  = 'checkin-toggle';
+          document.getElementById('fit-yes').className = 'checkin-toggle';
+          document.getElementById('fit-no').className  = 'checkin-toggle';
+          // Reload leaderboard
+          loadCompetitionLeaderboard();
+        } else if (data.alreadyLogged) {
+          errEl.textContent = `Already logged today — come back tomorrow. Your streak is safe.`;
+          errEl.style.display = 'block';
+        } else if (data.invalidPin) {
+          errEl.textContent = `Invalid name or PIN. Use the same credentials as your Player Portal.`;
+          errEl.style.display = 'block';
+        } else {
+          errEl.textContent = `Something went wrong. Try again in a moment.`;
+          errEl.style.display = 'block';
+        }
+      } catch(err) {
+        errEl.textContent = `Connection error. Check your internet and try again.`;
+        errEl.style.display = 'block';
       }
     }
 
-    function renderBoard(id, rows, unit) {
-      const el = document.getElementById(id);
-      if (!rows || !rows.length) { el.innerHTML='<div style="color:var(--muted);font-size:13px;font-style:italic;padding:10px 0;">No data yet — season starts July 13!</div>'; return; }
-      el.innerHTML = rows.slice(0,10).map((r,i) => `
-        <div class="lb-row">
-          <div class="lb-rank ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
-          <div class="lb-name">${r.name}</div>
-          <div class="lb-val">${r.value} <span style="font-size:10px;color:var(--muted);">${unit}</span></div>
-        </div>`).join('');
+    async function loadCompetitionLeaderboard() {
+      try {
+        const res  = await fetch(`${API_URL}?action=challengeLeaderboard`);
+        const data = await res.json();
+        renderLeaderboard('lb-current', data.current || [], 'pts');
+        renderLeaderboard('lb-season',  data.season  || [], 'pts');
+        if (data.badges && data.badges.length) renderBadgeWall(data.badges);
+      } catch(e) {
+        // Show placeholder on error
+        renderPlaceholderLB('lb-current');
+        renderPlaceholderLB('lb-season');
+      }
     }
 
-    function renderPlaceholderBoard(id) {
-      const names = ['Emma','Sofia','Mia','Lily','Ava','Grace','Zoe','Chloe','Ella','Maya'];
-      const el = document.getElementById(id);
-      el.innerHTML = `
-        <div style="color:var(--muted);font-size:12px;font-style:italic;margin-bottom:10px;">Preview — add leaderboard endpoint to your Apps Script to go live.</div>
+    function renderLeaderboard(elId, rows, unit) {
+      const el = document.getElementById(elId);
+      if (!rows.length) {
+        el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;font-style:italic;">Challenge starts July 4 — leaderboard goes live then.</div>`;
+        return;
+      }
+      const medals = ['🥇','🥈','🥉'];
+      el.innerHTML = `<table class="lb-table">
+        <thead><tr>
+          <th></th><th>Player</th><th>Points</th><th>Streak</th>
+        </tr></thead>
+        <tbody>
+        ${rows.map((r,i) => `
+          <tr>
+            <td><span class="lb-rank-num ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${medals[i] || i+1}</span></td>
+            <td>${r.name}</td>
+            <td><span class="lb-points">${r.points}</span></td>
+            <td><span class="lb-streak">${r.streak ? '🔥 ' + r.streak : '—'}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    }
+
+    function renderPlaceholderLB(elId) {
+      const el = document.getElementById(elId);
+      const names = ['Emma','Sofia','Mia','Lily','Ava','Grace','Zoe'];
+      const medals = ['🥇','🥈','🥉'];
+      el.innerHTML = `<table class="lb-table">
+        <thead><tr><th></th><th>Player</th><th>Points</th><th>Streak</th></tr></thead>
+        <tbody>
         ${names.map((n,i) => `
-        <div class="lb-row">
-          <div class="lb-rank ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
-          <div class="lb-name">${n}</div>
-          <div class="lb-val">${Math.max(1, 10-i)} <span style="font-size:10px;color:var(--muted);">${id.includes('reflect')?'reflections':'sessions'}</span></div>
-        </div>`).join('')}`;
+          <tr>
+            <td><span class="lb-rank-num ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${medals[i]||i+1}</span></td>
+            <td style="color:var(--muted);">${n}</td>
+            <td><span class="lb-points" style="color:var(--border);">${10-i}</span></td>
+            <td><span class="lb-streak">—</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:10px;text-align:center;">Preview only — live data loads July 4</div>`;
     }
 
-    document.addEventListener('DOMContentLoaded', loadLeaderboard);
+    // Gold AJAX Ball Mastery badge SVG
+    function ballMasteryBadgeSVG() {
+      return `<svg viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#f0c040;stop-opacity:1"/>
+            <stop offset="50%" style="stop-color:#C8A951;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#a07830;stop-opacity:1"/>
+          </linearGradient>
+        </defs>
+        <!-- Shield -->
+        <path d="M50 4 L94 18 L94 62 Q94 95 50 112 Q6 95 6 62 L6 18 Z" fill="url(#goldGrad)" stroke="#f0c040" stroke-width="1.5"/>
+        <!-- Inner shield -->
+        <path d="M50 12 L86 24 L86 61 Q86 88 50 104 Q14 88 14 61 L14 24 Z" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+        <!-- Gold outline ball -->
+        <circle cx="50" cy="62" r="20" fill="rgba(255,255,255,0.12)" stroke="#f0c040" stroke-width="1.8"/>
+        <path d="M50 42 Q58 52 58 62 Q58 72 50 82" fill="none" stroke="#f0c040" stroke-width="1.2" opacity="0.7"/>
+        <path d="M30 62 Q40 55 50 55 Q60 55 70 62" fill="none" stroke="#f0c040" stroke-width="1.2" opacity="0.7"/>
+        <path d="M31 67 Q40 73 50 73 Q60 73 69 67" fill="none" stroke="#f0c040" stroke-width="1.2" opacity="0.7"/>
+        <path d="M50 42 Q42 52 42 62 Q42 72 50 82" fill="none" stroke="#f0c040" stroke-width="1.2" opacity="0.7"/>
+        <!-- AJAX text -->
+        <text x="50" y="34" font-family="Impact,sans-serif" font-size="11" fill="white" text-anchor="middle" letter-spacing="2">AJAX</text>
+        <!-- BALL MASTERY text -->
+        <text x="50" y="96" font-family="Impact,sans-serif" font-size="7" fill="white" text-anchor="middle" letter-spacing="1">BALL MASTERY</text>
+        <!-- Stars -->
+        <polygon points="50,6 51.5,10 55.5,10 52.5,12.5 53.5,16.5 50,14 46.5,16.5 47.5,12.5 44.5,10 48.5,10" fill="white" opacity="0.9"/>
+      </svg>`;
+    }
+
+    // Scanning Badge SVG — binoculars + 360° rings
+    function scanningBadgeSVG(label) {
+      label = label || 'SCANNING';
+      return `<svg viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="scanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#3ABFB8;stop-opacity:1"/>
+            <stop offset="50%" style="stop-color:#2A9A94;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#1a7a75;stop-opacity:1"/>
+          </linearGradient>
+        </defs>
+        <!-- Shield -->
+        <path d="M50 4 L94 18 L94 62 Q94 95 50 112 Q6 95 6 62 L6 18 Z" fill="url(#scanGrad)" stroke="#3ABFB8" stroke-width="1.5"/>
+        <!-- Inner shield -->
+        <path d="M50 12 L86 24 L86 61 Q86 88 50 104 Q14 88 14 61 L14 24 Z" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+        <!-- 360° radar rings behind binoculars -->
+        <circle cx="50" cy="63" r="24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+        <circle cx="50" cy="63" r="17" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <circle cx="50" cy="63" r="10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+        <!-- Tick marks at 90° intervals -->
+        <line x1="50" y1="38" x2="50" y2="42" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+        <line x1="50" y1="84" x2="50" y2="88" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+        <line x1="25" y1="63" x2="29" y2="63" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+        <line x1="71" y1="63" x2="75" y2="63" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+        <!-- Binoculars body -->
+        <!-- Left barrel -->
+        <rect x="24" y="57" width="18" height="14" rx="7" fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <!-- Right barrel -->
+        <rect x="58" y="57" width="18" height="14" rx="7" fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <!-- Bridge connecting barrels -->
+        <rect x="42" y="60" width="16" height="8" rx="2" fill="rgba(255,255,255,0.9)"/>
+        <!-- Left lens -->
+        <circle cx="33" cy="64" r="5" fill="url(#scanGrad)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+        <circle cx="33" cy="64" r="2.5" fill="rgba(255,255,255,0.2)"/>
+        <!-- Right lens -->
+        <circle cx="67" cy="64" r="5" fill="url(#scanGrad)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+        <circle cx="67" cy="64" r="2.5" fill="rgba(255,255,255,0.2)"/>
+        <!-- Left grip notch -->
+        <rect x="25" y="59" width="3" height="10" rx="1.5" fill="rgba(0,0,0,0.1)"/>
+        <!-- Right grip notch -->
+        <rect x="72" y="59" width="3" height="10" rx="1.5" fill="rgba(0,0,0,0.1)"/>
+        <!-- AJAX text -->
+        <text x="50" y="34" font-family="Impact,sans-serif" font-size="11" fill="white" text-anchor="middle" letter-spacing="2">AJAX</text>
+        <!-- Badge label -->
+        <text x="50" y="96" font-family="Impact,sans-serif" font-size="7" fill="white" text-anchor="middle" letter-spacing="1">${label}</text>
+        <!-- Star -->
+        <polygon points="50,6 51.5,10 55.5,10 52.5,12.5 53.5,16.5 50,14 46.5,16.5 47.5,12.5 44.5,10 48.5,10" fill="white" opacity="0.9"/>
+      </svg>`;
+    }
+
+    function renderBadgeWall(badges) {
+      const wall = document.getElementById('badge-wall');
+      if (!badges.length) return;
+      wall.innerHTML = badges.map(b => {
+        let badgeSVG;
+        if (b.type === 'ball-mastery' || b.type === 'winner') {
+          badgeSVG = ballMasteryBadgeSVG();
+        } else if (b.type === 'scanning-h1') {
+          badgeSVG = scanningBadgeSVG('SCANNING · H1');
+        } else if (b.type === 'scanning-season') {
+          badgeSVG = scanningBadgeSVG('SCANNING · SEASON');
+        } else {
+          badgeSVG = scanningBadgeSVG(b.badgeName);
+        }
+        return `
+          <div class="badge-item">
+            ${badgeSVG}
+            <div class="badge-player">${b.name}</div>
+            <div class="badge-name">${b.badgeName}</div>
+            <div class="badge-date">${b.date}</div>
+          </div>`;
+      }).join('');
+    }
+
+    // Load leaderboard when Competition Hub tab is opened
+    // (handled inside switchTab below)
+
+    // Init with placeholder
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPlaceholderLB('lb-current');
+      renderPlaceholderLB('lb-season');
+    });
 
   </script>
 </body>
