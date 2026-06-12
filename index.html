@@ -1446,7 +1446,7 @@
         ? `<span class="coach-rating-deviation ${deviation > 0 ? 'dev-low' : 'dev-high'}">${deviation > 0 ? '▲ Coach rates higher' : '▼ Coach rates lower'}</span>`
         : `<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">aligned</span>`;
 
-      const commentHTML = (comment && Math.abs(deviation) >= 2)
+      const commentHTML = comment
         ? `<div class="coach-comment">${comment}</div>` : '';
 
       return `
@@ -1597,7 +1597,7 @@
     }
 
     // GOOGLE API LOGIC
-    const API_URL = "https://script.google.com/macros/s/AKfycbyIjycTm6GhdYRB2pF1BvUspA52O-ZmapObH_tkljOHmrXYUboJJomywGpMtiUQkio4/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxfINqoX5D6WPzmN7wfwc1hYWezX54xi_HnuR1F6HNVY7VMbMT-ayjo4QbEGBDa716S/exec";
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
