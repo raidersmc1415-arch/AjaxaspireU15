@@ -1148,13 +1148,13 @@
             <p style="color:var(--muted); font-size:13px; margin-bottom:18px;">Set these with intention — they will anchor your season. You won't be changing them.</p>
             <div class="input-group">
               <label>By the end of this season, I want to...</label>
-              <textarea id="goal-short" maxlength="150" placeholder="Be specific. What does success look like for you on the field this season?" style="min-height:80px;"></textarea>
-              <div style="font-size:11px; color:var(--muted); margin-top:4px; text-align:right;" id="goal-short-count">0 / 150</div>
+              <textarea id="goal-short" maxlength="300" placeholder="Be specific. What does success look like for you on the field this season?" style="min-height:80px;"></textarea>
+              <div style="font-size:11px; color:var(--muted); margin-top:4px; text-align:right;" id="goal-short-count">0 / 300</div>
             </div>
             <div class="input-group" style="margin-top:14px;">
               <label>In 2 years I see myself...</label>
-              <textarea id="goal-long" maxlength="150" placeholder="Where do you want this game to take you?" style="min-height:80px;"></textarea>
-              <div style="font-size:11px; color:var(--muted); margin-top:4px; text-align:right;" id="goal-long-count">0 / 150</div>
+              <textarea id="goal-long" maxlength="300" placeholder="Where do you want this game to take you?" style="min-height:80px;"></textarea>
+              <div style="font-size:11px; color:var(--muted); margin-top:4px; text-align:right;" id="goal-long-count">0 / 300</div>
             </div>
           </div>
 
@@ -1265,8 +1265,8 @@
             <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:6px;">💬 The One Thing</div>
             <div class="input-group">
               <label>The one thing I most want to improve this season is...</label>
-              <textarea id="goal-one-thing" maxlength="200" placeholder="Don't overthink it. What comes to mind first?" style="min-height:80px;"></textarea>
-              <div style="font-size:11px; color:var(--muted); margin-top:4px; text-align:right;" id="one-thing-count">0 / 200</div>
+              <textarea id="goal-one-thing" maxlength="400" placeholder="Don't overthink it. What comes to mind first?" style="min-height:80px;"></textarea>
+              <div style="font-size:11px; color:var(--muted); margin-top:4px; text-align:right;" id="one-thing-count">0 / 400</div>
             </div>
           </div>
 
@@ -1404,16 +1404,23 @@
     const TECH_KEYS = ['t_dribbling','t_passing','t_movement','t_duels','t_touch'];
     const TAC_KEYS  = ['tac_support','tac_restdef','tac_press','tac_attack','tac_defend'];
 
-    async function loadCoachRatings(playerName) {
+    async function loadCoachRatings(playerName, loginData) {
       try {
         const res  = await fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}`);
         const data = await res.json();
         if (!data.found) return;
 
-        // Get player's own ratings from localStorage
-        const saved = localStorage.getItem('idp_' + playerName.toLowerCase().trim());
-        if (!saved) return;
-        const playerData = JSON.parse(saved);
+        // Player's own ratings — prefer login response (Sheet), then coachRatings response,
+        // then localStorage as last resort
+        let playerData = (loginData && loginData.idpData) ? loginData.idpData
+                        : data.playerRatings ? data.playerRatings
+                        : null;
+
+        if (!playerData) {
+          const saved = localStorage.getItem('idp_' + playerName.toLowerCase().trim());
+          if (!saved) return;
+          playerData = JSON.parse(saved);
+        }
 
         // Show the section
         document.getElementById('coach-ratings-section').style.display = 'block';
@@ -1590,7 +1597,7 @@
     }
 
     // GOOGLE API LOGIC
-    const API_URL = "https://script.google.com/macros/s/AKfycbweF0q0eODK_xyROZPNNJc7yYC5J69l2YFtqsFfg6XTIOvKpeoE57lk6v6Y-yhwQm1v/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyIjycTm6GhdYRB2pF1BvUspA52O-ZmapObH_tkljOHmrXYUboJJomywGpMtiUQkio4/exec";
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
@@ -1620,9 +1627,9 @@
           document.getElementById('stat-kp').innerText = data.stats.keyPasses || 0;
           document.getElementById('stat-duels').innerText = data.stats.duels || 0;
 
-          // Check if player already has an IDP submitted
-          checkIDPSubmitted(data.name);
-          loadCoachRatings(data.name);
+          // Check if player already has an IDP submitted — use Sheet data (works on any device)
+          checkIDPSubmitted(data);
+          loadCoachRatings(data.name, data);
           loadIndividualFilm(data.name);
         } else { alert("Invalid Credentials. Check your exact spelling and PIN."); }
       } catch(err) { alert("Error connecting to the database. Please try again."); } finally { btn.innerText = originalText; }
@@ -1655,7 +1662,7 @@
 
     // Character counters for textareas
     function initCharCounters() {
-      [['goal-short','goal-short-count',150],['goal-long','goal-long-count',150],['goal-one-thing','one-thing-count',200]].forEach(([id, countId, max]) => {
+      [['goal-short','goal-short-count',300],['goal-long','goal-long-count',300],['goal-one-thing','one-thing-count',400]].forEach(([id, countId, max]) => {
         const el = document.getElementById(id);
         const counter = document.getElementById(countId);
         if (el && counter) {
@@ -1664,8 +1671,18 @@
       });
     }
 
-    // Check if this player already submitted their IDP (stored in localStorage by name)
-    function checkIDPSubmitted(name) {
+    // Check if this player already submitted their IDP
+    // Primary source: Sheet (IDP_Submitted column, via login response)
+    // Fallback: localStorage (covers the moment right after a fresh submit)
+    function checkIDPSubmitted(loginData) {
+      const name = loginData.name;
+      if (loginData.idpSubmitted && loginData.idpData) {
+        // Sync to localStorage so other functions on this device stay consistent
+        localStorage.setItem('idp_' + name.toLowerCase().trim(), JSON.stringify(loginData.idpData));
+        showIDPReadOnly(loginData.idpData);
+        return;
+      }
+      // Fallback — local device may have a submission not yet reflected in Sheet
       const saved = localStorage.getItem('idp_' + name.toLowerCase().trim());
       if (saved) {
         try {
@@ -1764,10 +1781,11 @@
       // Save locally so it persists across sessions
       localStorage.setItem('idp_' + name.toLowerCase().trim(), JSON.stringify(data));
 
-      // Post to Google Sheet
+      // Post to Google Sheet — idpData written to Player_IDP!IDP_Submitted (col M)
       const payload = {
         name,
-        reflection: `[IDP SUBMISSION]\nOwnership: ${data.ownership}/5\nShort-Term: ${goalShort}\nLong-Term: ${goalLong}\nOne Thing: ${oneThing}\nTechnical — Dribbling:${data.t_dribbling} Passing:${data.t_passing} Movement:${data.t_movement} Duels:${data.t_duels} Touch:${data.t_touch}\nTactical — Support:${data.tac_support} RestDef:${data.tac_restdef} Press:${data.tac_press} Attack:${data.tac_attack} Defend:${data.tac_defend}`
+        reflection: `[IDP SUBMISSION]\nOwnership: ${data.ownership}/5\nShort-Term: ${goalShort}\nLong-Term: ${goalLong}\nOne Thing: ${oneThing}\nTechnical — Dribbling:${data.t_dribbling} Passing:${data.t_passing} Movement:${data.t_movement} Duels:${data.t_duels} Touch:${data.t_touch}\nTactical — Support:${data.tac_support} RestDef:${data.tac_restdef} Press:${data.tac_press} Attack:${data.tac_attack} Defend:${data.tac_defend}`,
+        idpData: data
       };
 
       try {
