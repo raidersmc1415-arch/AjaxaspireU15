@@ -258,6 +258,15 @@
  .stat-val { font-size: 2rem; font-family: 'Bebas Neue', cursive; color: var(--teal); }
  .coach-notes { background: rgba(58,191,184,0.08); padding: 20px; border-left: 4px solid var(--teal); border-radius: 4px; margin: 20px 0; font-style: italic; color: var(--white); }
 
+ /* COUNTDOWN */
+ #countdown-card { background: linear-gradient(135deg, rgba(30,92,56,0.3), rgba(13,27,42,0.95)); border: 1px solid rgba(58,191,184,0.25); border-radius: 6px; padding: 18px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+ .countdown-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 4px; }
+ .countdown-event { font-family: 'Bebas Neue', cursive; font-size: 20px; color: var(--white); }
+ .countdown-units { display: flex; gap: 12px; }
+ .countdown-unit { text-align: center; background: rgba(13,27,42,0.8); border: 1px solid var(--border); border-radius: 4px; padding: 8px 14px; min-width: 52px; }
+ .countdown-num { font-family: 'Bebas Neue', cursive; font-size: 32px; color: var(--teal); line-height: 1; }
+ .countdown-unit-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
  /* MESSAGE FROM COACH */
  #coach-message-card { display: none; background: linear-gradient(135deg, rgba(200,169,81,0.12), rgba(13,27,42,0.9)); border: 1px solid rgba(200,169,81,0.3); border-left: 4px solid var(--gold); border-radius: 6px; padding: 22px 28px; margin-bottom: 20px; }
  .coach-message-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
@@ -322,6 +331,28 @@
         <div class="section-desc">Our core principles, team goals, and season information.</div>
       </div>
 
+      <!-- COUNTDOWN TO FIRST TOURNAMENT -->
+      <div id="countdown-card">
+        <div>
+          <div class="countdown-label">⚽ First Tournament</div>
+          <div class="countdown-event">Stanford Strikers Summer Classic D1 — August 1, 2026</div>
+        </div>
+        <div class="countdown-units">
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cd-days">--</div>
+            <div class="countdown-unit-label">Days</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cd-hours">--</div>
+            <div class="countdown-unit-label">Hours</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cd-mins">--</div>
+            <div class="countdown-unit-label">Mins</div>
+          </div>
+        </div>
+      </div>
+
       <!-- MESSAGE FROM COACH — populated from Sheet, hidden if empty -->
       <div id="coach-message-card">
         <div class="coach-message-label">📣 Message from Coach</div>
@@ -359,13 +390,13 @@
                 <div class="principle-chevron">▶</div>
               </div>
               <div class="principle-depth">
-                <div class="principle-depth-inner">If it's on, play it. If not, keep the ball and reset. <span class="principle-pullquote">"Patience creates the moment, bravery takes it."</span> We're not in a hurry to go forward — we're in a hurry to go forward <em>correctly</em>.</div>
+                <div class="principle-depth-inner">If it's on, play it. If not, keep the ball and reset. <span class="principle-pullquote">"Patience creates the moment, bravery takes it."</span> We're not in a hurry to go forward — we're in a hurry to go forward correctly. Example: the #6 receives and turns to play — is the weak-side #7 or #11 open to start forward play? If not, combine with the attacking mids #8 or #10.</div>
               </div>
             </div>
 
             <div class="principle-card" onclick="this.classList.toggle('expanded')">
               <div class="principle-headline">
-                <div class="principle-headline-text"><span class="principle-num" style="color:var(--green-lt);">2</span> Never Stand in the Same Line</div>
+                <div class="principle-headline-text"><span class="principle-num" style="color:var(--green-lt);">2</span> Avoid Standing in the Same Line</div>
                 <div class="principle-chevron">▶</div>
               </div>
               <div class="principle-depth">
@@ -389,7 +420,7 @@
                 <div class="principle-chevron">▶</div>
               </div>
               <div class="principle-depth">
-                <div class="principle-depth-inner">Quality over volume. We don't force chances — we earn them. When the opportunity comes, we finish it. Ten quiet, controlled passes that lead to one clean strike beats five rushed passes that lead to nothing.</div>
+                <div class="principle-depth-inner">Quality over volume. We don't force chances — we earn them. Calm and good decision-making keeps the ball, recycles possession, moves the defense to our will, and creates goal scoring opportunities. When the moment comes, we finish it.</div>
               </div>
             </div>
           </div>
@@ -460,12 +491,12 @@
 
                   <div style="background:var(--navy-mid); border:1px solid var(--border); border-top:3px solid var(--gold); border-radius:4px; padding:14px;">
                     <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:var(--gold); margin-bottom:8px;">🔁 Combination Play (Progression)</div>
-                    <div style="font-size:12px; color:var(--muted); line-height:1.7;">Quick passing through the lines. 8 and 10 occupy different vertical planes — never flat — to create passing triangles. 7 and 11 provide width. 6 anchors and recycles. This is where most of our possession lives.</div>
+                    <div style="font-size:12px; color:var(--muted); line-height:1.7;">Quick passing through the lines. 8 and 10 occupy different vertical planes — never flat — to create passing triangles. 7 and 11 provide width. 6 anchors and recycles. This is where most of our possession lives. The #2 and #3 recognize when to join the attack on the overlap — reading the trigger when a winger cuts inside and the wide channel opens.</div>
                   </div>
 
                   <div style="background:var(--navy-mid); border:1px solid var(--border); border-top:3px solid #e05555; border-radius:4px; padding:14px;">
                     <div style="font-family:'Bebas Neue',cursive; font-size:16px; color:#e05555; margin-bottom:8px;">🚀 Direct Attack (Penetration)</div>
-                    <div style="font-size:12px; color:var(--muted); line-height:1.7;">Five-second urgency, but in the other direction. 9 pins the line, 7 or 11 runs in behind, and the first line-breaking pass goes immediately. We don't wait to set up — we exploit the moment before they recover their shape.</div>
+                    <div style="font-size:12px; color:var(--muted); line-height:1.7;">5 second urgency to quickly expand and stretch the field — #7 and #11 create width, #9 creates depth. The first line-breaking pass goes immediately. We don't wait to set up — we exploit the moment before they recover their shape.</div>
                   </div>
 
                 </div>
@@ -702,26 +733,132 @@
         <div class="section-desc">Select a position on the field to view specific expectations.</div>
       </div>
       
-      <div class="field">
-        <div class="field-row">
-          <button class="pos-btn" onclick="showPos('pos-w', this)">11<span>Wing</span></button>
-          <button class="pos-btn" onclick="showPos('pos-st', this)">9<span>ST</span></button>
-          <button class="pos-btn" onclick="showPos('pos-w', this)">7<span>Wing</span></button>
-        </div>
-        <div class="field-row">
-          <button class="pos-btn" onclick="showPos('pos-8-10', this)">8/10<span>AM</span></button>
-          <button class="pos-btn" onclick="showPos('pos-6', this)">6<span>CDM</span></button>
-         <button class="pos-btn" onclick="showPos('pos-8-10', this)">8/10<span>AM</span></button>
-        </div>
-        <div class="field-row">
-          <button class="pos-btn" onclick="showPos('pos-3', this)">3<span>LB</span></button>
-          <button class="pos-btn" onclick="showPos('pos-cb', this)">5<span>CB</span></button>
-          <button class="pos-btn" onclick="showPos('pos-cb', this)">4<span>CB</span></button>
-          <button class="pos-btn" onclick="showPos('pos-2', this)">2<span>RB</span></button>
-        </div>
-        <div class="field-row">
-          <button class="pos-btn" onclick="showPos('pos-gk', this)">1<span>GK</span></button>
-        </div>
+      <!-- FORMATION SVG — realistic 4-3-3 showing triangles -->
+      <div style="position:relative; margin-bottom:18px;">
+        <svg viewBox="0 0 320 480" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:360px; display:block; margin:0 auto; border-radius:8px;">
+          <!-- Field background -->
+          <rect width="320" height="480" fill="#0c3d1c" rx="8"/>
+          <!-- Field markings -->
+          <rect x="20" y="20" width="280" height="440" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <!-- Halfway line -->
+          <line x1="20" y1="240" x2="300" y2="240" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+          <!-- Centre circle -->
+          <circle cx="160" cy="240" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <circle cx="160" cy="240" r="2" fill="rgba(255,255,255,0.2)"/>
+          <!-- Top penalty area -->
+          <rect x="80" y="20" width="160" height="70" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <!-- Top goal area -->
+          <rect x="115" y="20" width="90" height="25" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <!-- Bottom penalty area -->
+          <rect x="80" y="390" width="160" height="70" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <!-- Bottom goal area -->
+          <rect x="115" y="455" width="90" height="25" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+          <!-- TRIANGLE LINES (subtle, behind dots) -->
+          <!-- Back 4 to 6 triangle -->
+          <line x1="110" y1="375" x2="160" y2="320" stroke="rgba(58,191,184,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="210" y1="375" x2="160" y2="320" stroke="rgba(58,191,184,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+          <!-- Fullbacks to CBs diagonal -->
+          <line x1="40" y1="345" x2="110" y2="375" stroke="rgba(58,191,184,0.12)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="280" y1="345" x2="210" y2="375" stroke="rgba(58,191,184,0.12)" stroke-width="1" stroke-dasharray="4,4"/>
+          <!-- Fullbacks to midfielders triangle -->
+          <line x1="40" y1="345" x2="90" y2="250" stroke="rgba(58,191,184,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="280" y1="345" x2="230" y2="250" stroke="rgba(58,191,184,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+          <!-- 6 to 8/10 triangles -->
+          <line x1="160" y1="320" x2="90" y2="250" stroke="rgba(58,191,184,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="160" y1="320" x2="230" y2="250" stroke="rgba(58,191,184,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="90" y1="250" x2="230" y2="250" stroke="rgba(58,191,184,0.12)" stroke-width="1" stroke-dasharray="4,4"/>
+          <!-- 8/10 to wide players -->
+          <line x1="90" y1="250" x2="40" y2="160" stroke="rgba(58,191,184,0.12)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="230" y1="250" x2="280" y2="160" stroke="rgba(58,191,184,0.12)" stroke-width="1" stroke-dasharray="4,4"/>
+          <!-- 9 connections -->
+          <line x1="160" y1="125" x2="90" y2="250" stroke="rgba(58,191,184,0.12)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="160" y1="125" x2="230" y2="250" stroke="rgba(58,191,184,0.12)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="160" y1="125" x2="40" y2="160" stroke="rgba(58,191,184,0.1)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="160" y1="125" x2="280" y2="160" stroke="rgba(58,191,184,0.1)" stroke-width="1" stroke-dasharray="4,4"/>
+
+          <!-- PLAYER POSITIONS -->
+          <!-- GK -->
+          <g onclick="showPos('pos-gk', null)" style="cursor:pointer">
+            <circle cx="160" cy="440" r="18" fill="#1E5C38" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="160" y="444" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">1</text>
+            <text x="160" y="463" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">GK</text>
+          </g>
+
+          <!-- CB 5 (right side from our POV, left on field) -->
+          <g onclick="showPos('pos-cb', null)" style="cursor:pointer">
+            <circle cx="110" cy="375" r="18" fill="#1E5C38" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="110" y="379" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">5</text>
+            <text x="110" y="398" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">CB</text>
+          </g>
+
+          <!-- CB 4 -->
+          <g onclick="showPos('pos-cb', null)" style="cursor:pointer">
+            <circle cx="210" cy="375" r="18" fill="#1E5C38" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="210" y="379" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">4</text>
+            <text x="210" y="398" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">CB</text>
+          </g>
+
+          <!-- LB 3 -->
+          <g onclick="showPos('pos-3', null)" style="cursor:pointer">
+            <circle cx="40" cy="345" r="18" fill="#1E5C38" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="40" y="349" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">3</text>
+            <text x="40" y="368" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">LB</text>
+          </g>
+
+          <!-- RB 2 -->
+          <g onclick="showPos('pos-2', null)" style="cursor:pointer">
+            <circle cx="280" cy="345" r="18" fill="#1E5C38" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="280" y="349" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">2</text>
+            <text x="280" y="368" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">RB</text>
+          </g>
+
+          <!-- CDM 6 -->
+          <g onclick="showPos('pos-6', null)" style="cursor:pointer">
+            <circle cx="160" cy="315" r="18" fill="#1a4a2e" stroke="#C8A951" stroke-width="2"/>
+            <text x="160" y="319" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">6</text>
+            <text x="160" y="338" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">CDM</text>
+          </g>
+
+          <!-- 8 (left CM) -->
+          <g onclick="showPos('pos-8-10', null)" style="cursor:pointer">
+            <circle cx="90" cy="250" r="18" fill="#1a4a2e" stroke="#C8A951" stroke-width="2"/>
+            <text x="90" y="254" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">8</text>
+            <text x="90" y="273" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">CM</text>
+          </g>
+
+          <!-- 10 (right CM) -->
+          <g onclick="showPos('pos-8-10', null)" style="cursor:pointer">
+            <circle cx="230" cy="250" r="18" fill="#1a4a2e" stroke="#C8A951" stroke-width="2"/>
+            <text x="230" y="254" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">10</text>
+            <text x="230" y="273" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">CM</text>
+          </g>
+
+          <!-- LW 11 -->
+          <g onclick="showPos('pos-w', null)" style="cursor:pointer">
+            <circle cx="40" cy="160" r="18" fill="#1E5C38" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="40" y="164" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">11</text>
+            <text x="40" y="183" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">LW</text>
+          </g>
+
+          <!-- ST 9 -->
+          <g onclick="showPos('pos-st', null)" style="cursor:pointer">
+            <circle cx="160" cy="125" r="18" fill="#1E5C38" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="160" y="129" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">9</text>
+            <text x="160" y="148" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">ST</text>
+          </g>
+
+          <!-- RW 7 -->
+          <g onclick="showPos('pos-w', null)" style="cursor:pointer">
+            <circle cx="280" cy="160" r="18" fill="#1E5C38" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="280" y="164" text-anchor="middle" font-family="DM Mono, monospace" font-size="11" font-weight="bold" fill="white">7</text>
+            <text x="280" y="183" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">RW</text>
+          </g>
+
+          <!-- Formation label -->
+          <text x="160" y="14" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="11" fill="rgba(255,255,255,0.4)" letter-spacing="2">4 — 3 — 3</text>
+        </svg>
+        <p style="text-align:center; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:1px; margin-top:8px;">TAP A POSITION TO VIEW ROLE &amp; RESPONSIBILITIES</p>
       </div>
       
       <div id="pos-gk" class="pos-detail">
@@ -1730,8 +1867,13 @@
     function showPos(posId, btn) {
       document.querySelectorAll('.pos-detail').forEach(d => d.classList.remove('active'));
       document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+      // Reset SVG circles
+      document.querySelectorAll('#pos svg circle[data-pos]').forEach(c => {
+        c.style.stroke = c.getAttribute('data-default-stroke') || '#3ABFB8';
+        c.style.strokeWidth = c.getAttribute('data-default-sw') || '1.5';
+      });
       document.getElementById(posId).classList.add('active');
-      btn.classList.add('active');
+      if (btn) btn.classList.add('active');
     }
 
     // COMMUNICATION MODAL LOGIC
@@ -2545,6 +2687,29 @@
           </div>`;
       }).join('');
     }
+
+    // ═══════════════════════════════════════════════
+    // COUNTDOWN — Stanford Strikers Tournament Aug 1
+    // ═══════════════════════════════════════════════
+    function updateCountdown() {
+      const target = new Date('2026-08-01T08:00:00');
+      const now    = new Date();
+      const diff   = target - now;
+      if (diff <= 0) {
+        document.getElementById('cd-days').textContent  = '0';
+        document.getElementById('cd-hours').textContent = '0';
+        document.getElementById('cd-mins').textContent  = '0';
+        return;
+      }
+      const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      document.getElementById('cd-days').textContent  = days;
+      document.getElementById('cd-hours').textContent = hours;
+      document.getElementById('cd-mins').textContent  = mins;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 60000);
 
     // ═══════════════════════════════════════════════
     // MESSAGE FROM COACH
