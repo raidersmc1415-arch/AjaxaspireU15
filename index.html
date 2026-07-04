@@ -267,6 +267,16 @@
  .countdown-num { font-family: 'Bebas Neue', cursive; font-size: 32px; color: var(--teal); line-height: 1; }
  .countdown-unit-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
 
+ /* MOMENTS THAT MATTER */
+ .moment-card { background:var(--card); border:1px solid var(--border); border-left:4px solid var(--teal); border-radius:6px; padding:18px 22px; margin-bottom:14px; transition:border-color 0.2s; }
+ .moment-card:hover { border-left-color:var(--gold); }
+ .moment-card-header { display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
+ .moment-avatar { width:40px; height:40px; background:var(--green); border:2px solid var(--teal); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',cursive; font-size:16px; color:white; flex-shrink:0; }
+ .moment-player { font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); line-height:1; }
+ .moment-number { font-family:'DM Mono',monospace; font-size:12px; color:var(--teal); }
+ .moment-date { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; color:var(--muted); margin-left:auto; }
+ .moment-message { font-size:14px; color:var(--text); line-height:1.7; }
+
  /* MESSAGE FROM COACH */
  #coach-message-card { display: none; background: linear-gradient(135deg, rgba(200,169,81,0.12), rgba(13,27,42,0.9)); border: 1px solid rgba(200,169,81,0.3); border-left: 4px solid var(--gold); border-radius: 6px; padding: 22px 28px; margin-bottom: 20px; }
  .coach-message-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
@@ -319,6 +329,7 @@
     <button class="tab-btn" onclick="switchTab('glossary', this)">📖 Glossary</button>
     <button class="tab-btn" onclick="switchTab('competition', this)" style="color: var(--gold);">🏆 Competition Hub</button>
     <button class="tab-btn" onclick="switchTab('parents', this)">Parent Hub</button>
+    <button class="tab-btn" onclick="switchTab('moments', this)">⭐ Moments</button>
     <button class="tab-btn" onclick="switchTab('portal', this)" style="color: var(--gold);">🔒 Player Portal</button>
   </nav>
 
@@ -1152,6 +1163,7 @@
             Active Challenge
           </div>
           <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--white); margin-bottom:4px;" id="ch-title">Ball Mastery Challenge</div>
+          <input type="hidden" id="ch-id" value="ball-mastery-2026"/>
           <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--gold); letter-spacing:2px;" id="ch-dates">July 4 – July 13, 2026  ·  10 Days</div>
           <div style="font-size:14px; color:var(--muted); margin-top:10px; line-height:1.6;" id="ch-desc">Complete the ball mastery routine and daily fitness circuit every day for 10 days. One submission per day. Log it, own it, compete for it. The gold AJAX Ball Mastery badge goes to the challenge winner.</div>
         </div>
@@ -1364,6 +1376,49 @@
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
       </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- MOMENTS THAT MATTER                                 -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="moments" class="section">
+      <div class="section-header">
+        <div class="section-label">Ajax Aspire U15</div>
+        <div class="section-title">Moments That Matter</div>
+        <div class="section-desc">Recognizing the players and moments that define who we are — on the ball and off it.</div>
+      </div>
+
+      <!-- PLAYER OF THE WEEK -->
+      <div id="potw-section" style="display:none; margin-bottom:28px;">
+        <div style="background:linear-gradient(135deg, rgba(200,169,81,0.15), rgba(13,27,42,0.95)); border:1px solid rgba(200,169,81,0.35); border-radius:8px; padding:28px 32px; position:relative; overflow:hidden;">
+          <!-- background star -->
+          <div style="position:absolute; top:-10px; right:20px; font-size:120px; opacity:0.04; line-height:1; pointer-events:none;">⭐</div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:14px;">⭐ Player of the Week</div>
+          <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+            <div style="width:64px; height:64px; background:var(--green); border:3px solid var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <span id="potw-initial" style="font-family:'Bebas Neue',cursive; font-size:28px; color:white;"></span>
+            </div>
+            <div>
+              <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;">
+                <div id="potw-name" style="font-family:'Bebas Neue',cursive; font-size:36px; color:var(--white); line-height:1;"></div>
+                <div id="potw-number" style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--gold);"></div>
+              </div>
+              <div id="potw-reason" style="font-size:14px; color:var(--text); line-height:1.7; margin-top:8px; max-width:560px;"></div>
+              <div id="potw-updated" style="font-size:11px; color:var(--muted); margin-top:8px; font-style:italic;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECOGNITION WALL -->
+      <div style="margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white);">Recognition Wall</div>
+        <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:rgba(58,191,184,0.1); color:var(--teal); border:1px solid rgba(58,191,184,0.25); padding:3px 10px; border-radius:2px;">Season 26/27</span>
+      </div>
+
+      <div id="wall-loading" style="text-align:center; padding:40px; color:var(--muted); font-size:13px; font-style:italic;">Loading moments...</div>
+      <div id="wall-empty" style="display:none; text-align:center; padding:40px; color:var(--muted); font-size:13px; font-style:italic;">No moments posted yet — check back soon.</div>
+      <div id="wall-feed"></div>
     </div>
 
     <div id="portal" class="section">
@@ -1861,6 +1916,7 @@
       document.getElementById(tabId).classList.add('active');
       btn.classList.add('active');
       if (tabId === 'competition') loadCompetitionLeaderboard();
+      if (tabId === 'moments')     loadMoments();
     }
 
     // POSITIONS LOGIC
@@ -1887,7 +1943,7 @@
     }
 
     // GOOGLE API LOGIC
-    const API_URL = "https://script.google.com/macros/s/AKfycbz5gp-kxUWl0cpWj_bnIXaJA4i9oTkOIankbLFZ4v-jtyHrDCDhEGpQ8ZqAzN3FfEPx/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxzeWTvgXVe6CQHwfelzLgPLMNwWAtfLl8j2cOz9BGJ2dZ3MUFTHQgn4qlvsnOC9z8J/exec";
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
@@ -2177,24 +2233,25 @@
       // ── BUILD OUT PLAN A ──────────────────────────────────────────────
       'buildA': {
         title: 'Build Out — Plan A',
-        situation: 'Opponent overloads the press but leaves our fullbacks unmarked. GK plays to CB, CB switches wide to the free fullback, fullback advances into midfield.',
-        notes: '<strong style="color:var(--teal)">Pass 1 — GK → CB:</strong> CB splits wide to the edge of the box, forcing opponent strikers to commit to a long press run.<br><br><strong style="color:var(--teal)">Pass 2 — CB → FB (wide):</strong> FB is positioned wide to the touchline, body open and facing forward to receive.<br><br><strong style="color:var(--teal)">Pass 3a — FB → 6 (relief valve):</strong> If the central lane is contested, FB plays to 6 checking in as the pivot outlet.<br><br><strong style="color:var(--teal)">Pass 3b — FB skip pass → 8 or 10:</strong> If the half-space is open, the FB skips a line and plays directly into 8 or 10 between the lines.<br><br><strong style="color:var(--teal)">Pass 4 — Line Breaker:</strong> Receiving mid scans 360°, turns, and plays immediately to 7, 11, or 9.',
+        situation: 'Opponent overloads the center press but leaves our fullbacks unmarked. Release wide to the free fullback, then advance through midfield.',
+        notes: '<strong style="color:var(--teal)">THE SPINE: 6 shows, 8 goes opposite, 10 stays high.</strong> This applies in every plan — get this right first.<br><br><strong style="color:var(--teal)">GK → CB:</strong> CB splits wide to the edge of the box. Forces the opponent\'s striker to commit to a long press run — buying time for the fullback to be free.<br><br><strong style="color:var(--teal)">CB → FB (wide):</strong> FB must already be high, wide, and facing forward before the CB receives. First touch forward — never hold it.<br><br><strong style="color:var(--teal)">FB → 8 or 10 (preferred):</strong> If the half-space is open, skip a line — play directly into #8 or #10 between the lines. This is the first look, not the last resort.<br><br><strong style="color:var(--teal)">FB → 6 (relief valve):</strong> If the skip is blocked, #6 checks short as the outlet. 6 receives, turns, plays forward immediately.<br><br><strong style="color:var(--teal)">#10 stays high:</strong> Never drops to help. 10\'s job is to BE the target once the ball escapes — searching the pocket between the opponent\'s lines.',
         players: {
-          p1:{x:200,y:520},
-          p2:{x:382,y:390}, p3:{x:18,y:390},
-          p4:{x:270,y:455}, p5:{x:130,y:455},
-          p6:{x:200,y:340},
-          p8:{x:305,y:245},
-          p10:{x:130,y:210},
-          p7:{x:382,y:165}, p11:{x:18,y:165},
-          p9:{x:200,y:110}
+          p1:{x:200,y:520},                       // GK deep
+          p2:{x:382,y:480}, p3:{x:18,y:480},    // FBs wide, slightly ahead of CBs
+          p4:{x:268,y:505}, p5:{x:132,y:505},   // CBs level with GK
+          p6:{x:200,y:420},                       // 6 checks short from deep
+          p8:{x:295,y:340},                       // 8 opposite half-space
+          p10:{x:118,y:280},                      // 10 high pocket, never drops
+          p7:{x:368,y:262}, p11:{x:32,y:262},   // 7 & 11 just beyond halfway
+          p9:{x:200,y:255}                        // 9 pins the back line
         },
         arrows: [
-          {from:{x:200,y:520}, to:{x:270,y:455}, color:'#3ABFB8', dash:false, label:'GK → CB'},
-          {from:{x:270,y:455}, to:{x:382,y:390}, color:'#3ABFB8', dash:false, label:'CB → FB wide'},
-          {from:{x:382,y:390}, to:{x:200,y:340}, color:'#C8A951', dash:true,  label:'FB → 6 relief'},
-          {from:{x:382,y:390}, to:{x:305,y:245}, color:'#C8A951', dash:false, label:'FB skip → 8'},
-          {from:{x:305,y:245}, to:{x:200,y:110}, color:'#2A7A4B', dash:false, label:'8 breaks line → 9'}
+          {from:{x:200,y:520}, to:{x:268,y:505}, color:'#3ABFB8', dash:false, label:'GK → CB'},
+          {from:{x:268,y:505}, to:{x:382,y:480}, color:'#3ABFB8', dash:false, label:'CB → FB wide'},
+          {from:{x:382,y:480}, to:{x:295,y:340}, color:'#C8A951', dash:false, label:'FB skip → 8 (first look)'},
+          {from:{x:382,y:480}, to:{x:118,y:280}, color:'#C8A951', dash:true,  label:'FB → 10 (alt skip)'},
+          {from:{x:382,y:480}, to:{x:200,y:420}, color:'rgba(90,122,146,0.6)', dash:true, label:'FB → 6 (relief)'},
+          {from:{x:295,y:340}, to:{x:200,y:255}, color:'#2A7A4B', dash:false, label:'8 breaks line → 9'}
         ]
       },
 
@@ -2204,8 +2261,8 @@
       // 7/11/9 just into opponent half pinning the back line.
       'buildB': {
         title: 'Build Out — Plan B',
-        situation: 'Opponent leaves our #6 unmarked in the pivot. Most direct route up the pitch — GK goes straight to the pivot, 6 turns and attacks immediately.',
-        notes: '<strong style="color:var(--teal)">Pass 1 — GK → 6 (Pivot):</strong> GK identifies the unmarked 6 and plays directly. 6 checks short into space to receive.<br><br><strong style="color:var(--teal)">6 receives on the half-turn:</strong> Body open, already scanning before the ball arrives. Receive on the back foot to face forward immediately.<br><br><strong style="color:var(--teal)">Pass 2 — 6 → 8:</strong> 8 sits just below the 10 — the engine ready to receive and drive. 6 plays into feet and 8 carries forward.<br><br><strong style="color:var(--teal)">Pass 3 — 8 → 10 (diagonal):</strong> 10 sits at the bottom of the centre circle, searching for the pocket between lines. 8 plays the diagonal pass forward into that window.<br><br><strong style="color:var(--teal)">Key:</strong> 7, 11, and 9 stay on or just beyond halfway to pin the opponent back line deep — creating the space and depth for 8 and 10 to operate in.',
+        situation: 'Opponent leaves our #6 unmarked in the pivot. Most direct route — GK goes straight to 6, who receives, turns, and attacks immediately.',
+        notes: '<strong style="color:var(--teal)">THE SPINE: 6 shows, 8 goes opposite, 10 stays high.</strong> In Plan B, 6 is the entry point — 8 and 10 must already be in their correct positions BEFORE the ball arrives at 6.<br><br><strong style="color:var(--teal)">GK → 6:</strong> GK identifies the free pivot and plays directly. Firm pass — not lofted. 6 checks short, receives on the back foot with an open body, already scanning before the ball arrives.<br><br><strong style="color:var(--teal)">6 → 8 (primary):</strong> 8 sits in the opposite half-space from where 6 showed — ready to receive and drive. 6 plays into 8\'s feet. 8\'s first touch is always away from pressure and toward goal.<br><br><strong style="color:var(--teal)">8 → 10 (diagonal):</strong> 10 sits in the pocket between lines, searching laterally. 8 plays the diagonal forward. 10 receives on the half-turn and penetrates immediately.<br><br><strong style="color:var(--teal)">Role switch — if ball goes to 8\'s side:</strong> 8 lifts into the 10 window (high pocket). 10 drops into the 8 half-space role. Same jobs, different players — always one player in the pocket, one in the half-space.<br><br><strong style="color:var(--teal)">9 pins the back line:</strong> Non-negotiable. If 9 drops to help, their CBs step up and close the pocket where 10 operates.',
         players: {
           p1:{x:200,y:520},                       // GK deep
           p2:{x:355,y:470}, p3:{x:45,y:470},    // FBs wide and deep
@@ -2219,9 +2276,9 @@
         arrows: [
           {from:{x:200,y:520}, to:{x:200,y:435}, color:'#3ABFB8', dash:false, label:'GK → 6 (Pivot)'},
           {from:{x:200,y:420}, to:{x:265,y:372}, color:'#C8A951', dash:false, label:'6 → 8'},
-          {from:{x:265,y:362}, to:{x:368,y:265}, color:'#2A7A4B', dash:false, label:'8 → 7 (first look)'},
-          {from:{x:265,y:362}, to:{x:200,y:258}, color:'#2A7A4B', dash:false, label:'8 → 9'},
-          {from:{x:265,y:362}, to:{x:150,y:345}, color:'#C8A951', dash:true,  label:'8 → 10 (third option)'}
+          {from:{x:265,y:362}, to:{x:148,y:345}, color:'#C8A951', dash:false, label:'8 → 10 diagonal (primary)'},
+          {from:{x:265,y:362}, to:{x:368,y:265}, color:'#2A7A4B', dash:true,  label:'8 → 7 (alt)'},
+          {from:{x:265,y:362}, to:{x:200,y:258}, color:'#2A7A4B', dash:true,  label:'8 → 9 (alt)'}
         ]
       },
 
@@ -2231,8 +2288,8 @@
       // 8 below 10 at y=362. 7/11/9 pin the back line just beyond halfway.
       'buildC': {
         title: 'Build Out — Plan C',
-        situation: 'Opponent plays high press — marking our back 4 AND our pivot. Build out is blocked. We go over the press into the 10 pocket. Must win the second ball.',
-        notes: '<strong style="color:var(--teal)">6 — Decoy only:</strong> 6 checks in as normal to draw the press and pull a marker. They will NOT receive the ball.<br><br><strong style="color:var(--teal)">Pass 1 — GK → CB (#5 splits wide):</strong> CB receives at the edge of the box, forcing the opponent striker to commit to a long press run.<br><br><strong style="color:var(--teal)">Pass 2 — CB over press → 10 pocket:</strong> As the striker closes, CB plays a firm vertical ball over them. The 10 sits at the bottom of the centre circle — the window between the opponent\'s forwards and midfielders. Clearly below 9, searching for the pocket.<br><br><strong style="color:var(--teal)">Pass 3 — 10 turns and penetrates:</strong> 10 scans 360° before the ball arrives, receives on the back foot, turns and immediately plays a line-breaker to 7, 11, or 9.<br><br><strong style="color:var(--teal)">7, 11, 9 — Pin the back line:</strong> Stay on or just beyond halfway. Their depth creates the space and pocket for 10 to operate in. Second ball is critical — 8 competes.',
+        situation: 'Opponent plays high press — marking our back 4 AND our #6. Everything is blocked. We go over the press into the #10 pocket. The second ball decides it.',
+        notes: '<strong style="color:var(--teal)">#6 — DECOY ONLY:</strong> 6 checks in as normal, identical to Plan B. This drags the opponent\'s holding mid forward and opens the pocket behind them. 6 does NOT receive. 6 holds the run until the ball clearly goes over the press.<br><br><strong style="color:var(--teal)">GK → CB (over press):</strong> CB receives at the edge of the box. As the opponent\'s striker closes, CB plays a DRIVEN vertical ball over them — not a punt, a controlled pass aimed at the pocket between their lines.<br><br><strong style="color:var(--teal)">#10 — THE TARGET:</strong> Sits between the opponent\'s midfield and back lines. Clearly below #9. Searches laterally — never stops moving. The CB\'s pass is aimed at you. First touch must create separation.<br><br><strong style="color:var(--teal)">#8 — Second ball:</strong> 5-10 yards behind 10\'s pocket, central channel. Every Plan C that doesn\'t land cleanly at 10\'s feet produces a second ball — 8 wins it. This is non-negotiable.<br><br><strong style="color:var(--teal)">Bounce pass escape:</strong> If 6 receives and is pressed immediately — no time to turn — play a first-time bounce pass back to the CB. CB switches to the opposite side or back to GK. The press has committed — the far side is open.',
         players: {
           p1:{x:200,y:520},                       // GK deep
           p2:{x:355,y:470}, p3:{x:45,y:470},    // FBs wide and deep
@@ -2305,25 +2362,38 @@
         arrows: []
       },
 
-      // ── 4-3-3 HIGH PRESS ──────────────────────────────────────────────
-      // Whole team pushed up — back 4 just behind halfway, mid ahead of halfway
       'press': {
         title: '4-3-3 Press — Forcing the Trigger',
-        situation: 'Opponent GK or CB has the ball. We want to win it high. Front three close passing lanes and force a mistake or a long ball we can compete for.',
-        notes: '<strong style="color:var(--teal)">9 leads and angles the press:</strong> Approaches on an angle to cut off the pass back to the GK — forces play to one side. Never sprint straight at the CB.<br><br><strong style="color:var(--teal)">7 closes strong-side CB:</strong> Engages the CB on the pressed side. Cuts off the switch across the back.<br><br><strong style="color:var(--teal)">11 tucks inside:</strong> Does NOT press wide. Stays inside to intercept any attempted switch of play.<br><br><strong style="color:var(--teal)">Midfield pushes into opponent half:</strong> 6, 8, and 10 step ahead of the halfway line — cutting passing lanes into the opponent\'s midfielders. No space to play through our lines.<br><br><strong style="color:var(--teal)">Back 4 hold a high line:</strong> Sits just behind halfway — compressing space, keeping the team compact. Hold the line and don\'t drop.<br><br><strong style="color:var(--teal)">Pressing triggers:</strong> GK in hands, bad first touch, facing own goal, slow square pass. When triggered — commit fully. Half-pressing is worse than not pressing.',
+        situation: 'Full team commits to a high press in the opponent\'s defensive third. Front five engage directly — #9, #7, #11 press the back line, #10 and #6 mark tight centrally. Only the deepest line stays organized behind it.',
+        notes: '<strong style="color:var(--teal)">#9 — Crashes toward their weak-side CB:</strong> Angles the run to press the far CB (#4), cutting the switch and forcing the play back toward our overload. This is the trigger that starts everything.<br><br><strong style="color:var(--teal)">#7 — Presses the wide CB/fullback:</strong> Pushes all the way up to engage on the strong side — no space in behind for the opponent to play out from the back.<br><br><strong style="color:var(--teal)">#11 — Closes down their #2:</strong> Steps out wide to press their outlet fullback directly — denying the simple way out down that flank.<br><br><strong style="color:var(--teal)">#10 & #6 — Mark tight centrally:</strong> Both step right into the box area, marking their #6 and screening the central outlet. This is aggressive and high — there is no easy out-ball through the middle.<br><br><strong style="color:var(--teal)">#8 — Sits just behind the front group:</strong> The connector between the committed press and the rest of the team. Ready to step into any second ball or cut a pass that breaks the first line.<br><br><strong style="color:var(--teal)">Back line — Stays compact and organized:</strong> #2, #3, #4, #5, and #1 hold their shape well forward but do not chase individually. They are the safety net if the press is beaten — not part of the press itself.<br><br><strong style="color:var(--teal)">Pressing triggers:</strong> Bad first touch — slow pass — opponent facing their own goal — GK with ball in hands. When the trigger fires, the front five commit fully and immediately. Half-pressing is worse than not pressing.',
         players: {
-          p1:{x:200,y:520},
-          p2:{x:340,y:355}, p3:{x:60,y:355},    // back 4 high — just behind halfway
-          p4:{x:262,y:365}, p5:{x:138,y:365},
-          p6:{x:200,y:255}, p8:{x:300,y:235}, p10:{x:118,y:248}, // mid ahead of halfway
-          p7:{x:318,y:120},
-          p11:{x:148,y:155},
-          p9:{x:218,y:85}
+          p1:{x:160,y:445},
+          p3:{x:75,y:215},
+          p2:{x:285,y:205}, p4:{x:230,y:250},
+          p6:{x:155,y:170}, p8:{x:225,y:160},
+          p10:{x:175,y:120}, p11:{x:95,y:100},
+          p7:{x:230,y:78},
+          p9:{x:140,y:68},
+          p5:{x:165,y:250}
         },
         arrows: [
-          {from:{x:218,y:85},  to:{x:218,y:55},  color:'#3ABFB8', dash:false, label:'9 angles press'},
-          {from:{x:318,y:120}, to:{x:348,y:75},  color:'#C8A951', dash:false, label:'7 closes CB'},
-          {from:{x:148,y:155}, to:{x:185,y:125}, color:'#2A7A4B', dash:true,  label:'11 cuts switch'}
+          {from:{x:140,y:68},  to:{x:105,y:58},  color:'#3ABFB8', dash:false, label:'9 crashes toward their 4'},
+          {from:{x:230,y:78},  to:{x:213,y:58},  color:'#C8A951', dash:false, label:'7 presses their 5'},
+          {from:{x:95,y:100},  to:{x:55,y:95},   color:'#C8A951', dash:false, label:'11 closes their 2'},
+          {from:{x:175,y:120}, to:{x:185,y:122}, color:'#2A7A4B', dash:false, label:'10 marks tight'}
+        ],
+        opponents: [
+          {x:155, y:50,  label:'1'},
+          {x:100, y:62,  label:'4'},
+          {x:213, y:62,  label:'5'},
+          {x:275, y:90,  label:'3'},
+          {x:185, y:120, label:'6'},
+          {x:35,  y:100, label:'2'},
+          {x:155, y:160, label:'8'},
+          {x:237, y:155, label:'10'},
+          {x:273, y:195, label:'11'},
+          {x:45,  y:230, label:'7'},
+          {x:185, y:244, label:'9'}
         ]
       }
     };
@@ -2337,16 +2407,25 @@
       document.getElementById('tac-situation-text').textContent = t.situation;
       document.getElementById('tac-title').textContent = t.title;
       document.getElementById('tac-notes').innerHTML = t.notes;
-      renderPlayers(t.players, t.arrows || []);
+      renderPlayers(t.players, t.arrows || [], t.opponents || []);
     }
 
-    function renderPlayers(positions, arrows) {
+    function renderPlayers(positions, arrows, opponents) {
       const pg = document.getElementById('tac-players');
       const ag = document.getElementById('tac-arrows');
       pg.innerHTML = '';
       ag.innerHTML = '';
 
-      // Draw arrows first
+      // Draw opponent markers first (so they sit behind our players/arrows visually if overlapping)
+      (opponents || []).forEach(o => {
+        ag.innerHTML += `
+          <circle cx="${o.x}" cy="${o.y}" r="13" fill="rgba(224,85,85,0.18)" stroke="#e05555" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="${o.x}" y="${o.y+1}" text-anchor="middle" dominant-baseline="middle"
+            font-family="'DM Mono',monospace" font-size="9" font-weight="bold" fill="#e05555">${o.label || ''}</text>
+        `;
+      });
+
+      // Draw arrows next
       arrows.forEach(a => {
         const dx = a.to.x - a.from.x;
         const dy = a.to.y - a.from.y;
@@ -2484,7 +2563,7 @@
       const payload = {
         action:     'challengeCheckin',
         name, pin,
-        challenge:  document.getElementById('ch-title').innerText,
+        challenge:  document.getElementById('ch-id').value,
         date:       today,
         videoComplete: checkinState.vid === 'yes',
         fitComplete:   checkinState.fit === 'yes',
@@ -2710,6 +2789,59 @@
     }
     updateCountdown();
     setInterval(updateCountdown, 60000);
+
+    // ═══════════════════════════════════════════════
+    // MOMENTS THAT MATTER
+    // ═══════════════════════════════════════════════
+
+    let momentsLoaded = false;
+
+    async function loadMoments() {
+      if (momentsLoaded) return; // only fetch once per session
+      try {
+        const res  = await fetch(`${API_URL}?action=moments`);
+        const data = await res.json();
+
+        document.getElementById('wall-loading').style.display = 'none';
+
+        // Player of the Week
+        if (data.potw && data.potw.name) {
+          const potw = data.potw;
+          document.getElementById('potw-initial').textContent  = potw.name.charAt(0).toUpperCase();
+          document.getElementById('potw-name').textContent     = potw.name;
+          document.getElementById('potw-number').textContent   = potw.number ? '#' + potw.number : '';
+          document.getElementById('potw-reason').textContent   = potw.reason;
+          document.getElementById('potw-updated').textContent  = potw.updated ? 'Named ' + potw.updated : '';
+          document.getElementById('potw-section').style.display = 'block';
+        }
+
+        // Recognition Wall
+        const wall = data.wall || [];
+        if (!wall.length) {
+          document.getElementById('wall-empty').style.display = 'block';
+          return;
+        }
+
+        document.getElementById('wall-feed').innerHTML = wall.map(m => `
+          <div class="moment-card">
+            <div class="moment-card-header">
+              <div class="moment-avatar">${m.name.charAt(0).toUpperCase()}</div>
+              <div>
+                <div class="moment-player">${m.name}</div>
+                <div class="moment-number">${m.number ? '#' + m.number : ''}</div>
+              </div>
+              <div class="moment-date">${m.date}</div>
+            </div>
+            <div class="moment-message">${m.message}</div>
+          </div>
+        `).join('');
+
+        momentsLoaded = true;
+      } catch(err) {
+        document.getElementById('wall-loading').style.display = 'none';
+        document.getElementById('wall-empty').style.display = 'block';
+      }
+    }
 
     // ═══════════════════════════════════════════════
     // MESSAGE FROM COACH
