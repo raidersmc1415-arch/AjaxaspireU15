@@ -122,6 +122,15 @@
       </div>
     </div>
     <div style="margin-top:24px">
+      <div class="form-section-title">Field Space Available</div>
+      <div class="pill-group" id="fieldGroup">
+        <div class="pill" data-val="quarter">Quarter Field</div>
+        <div class="pill active" data-val="half">Half Field</div>
+        <div class="pill" data-val="threequarter">¾ Field</div>
+        <div class="pill" data-val="full">Full Field</div>
+      </div>
+    </div>
+    <div style="margin-top:24px">
       <div class="form-section-title">Game Moment</div>
       <div class="pill-group" id="momentGroup">
         <div class="pill active" data-val="attacking">Attacking / In Possession</div>
@@ -231,6 +240,7 @@
     const duration    = document.getElementById('duration').value;
     const players     = document.getElementById('players').value;
     const week        = document.getElementById('week').value;
+    const fieldSpace  = getSelected('fieldGroup');
     const moment      = getSelected('momentGroup');
     const load        = getSelected('loadGroup');
     const defense     = getSelected('defenseGroup');
@@ -414,12 +424,85 @@ Rules:
 - The DIAGRAM must reflect what you wrote in Rules & Constraints — same shape, same numbers, same pattern.
 
 Example — "Box Rondo 4v2, #6 and #8 combine to escape to #10":
-DIAGRAM: {"field":"quarter","players":[{"n":"6","x":25,"y":75,"ball":true},{"n":"8","x":75,"y":75},{"n":"10","x":50,"y":30},{"n":"7","x":50,"y":85}],"opponents":[{"n":"9","x":45,"y":55},{"n":"11","x":55,"y":58}],"arrows":[{"from":[25,73],"to":[73,75],"type":"pass"},{"from":[75,72],"to":[52,33],"type":"pass"},{"from":[50,32],"to":[50,15],"type":"move"}]}`;
+DIAGRAM: {"field":"quarter","players":[{"n":"6","x":25,"y":75,"ball":true},{"n":"8","x":75,"y":75},{"n":"10","x":50,"y":30},{"n":"7","x":50,"y":85}],"opponents":[{"n":"9","x":45,"y":55},{"n":"11","x":55,"y":58}],"arrows":[{"from":[25,73],"to":[73,75],"type":"pass"},{"from":[75,72],"to":[52,33],"type":"pass"},{"from":[50,32],"to":[50,15],"type":"move"}]}
 
+═══════════════════════════════════════════════
+FIELD SPACE — HARD CONSTRAINT
+═══════════════════════════════════════════════
+The coach tells you the MAXIMUM field space available. Every activity must fit within it. Warm-up uses the smallest portion; the final game uses the full available space; nothing exceeds the max. The DIAGRAM "field" value must never be larger than the space given. If you only have a quarter field, an 8v8 on a full pitch is impossible — scale the final game to fit (smaller-sided, or a game that fits the quarter). Respect the space you're given.
+
+═══════════════════════════════════════════════
+GOLD STANDARD — MATCH THIS SHAPE AND TONE EXACTLY
+═══════════════════════════════════════════════
+This is what a perfect Coach Shawn session looks like. Match this density, voice, and format precisely. Notice: short lines, position numbers, guided-discovery questions, tight scaling notes, a diagram per activity.
+
+SESSION OVERVIEW
+Today we fix the midfield crowding. #6 shows, #8 goes opposite, #10 stays high — we rep it until it's automatic.
+
+OBJECTIVES
+- #8 and #10 occupy different lines every time we build
+- Break the first line of pressure with a clean pass into the #10 pocket
+
+COACHING POINTS
+- #6 shows first — everyone reacts to where 6 goes
+- #8 opposite half-space, never the same line as 6
+- #10 stays high — never drop to help, be the target
+
+PRINCIPLES ADDRESSED
+Look Forward First · Avoid Standing in the Same Line · Build Patient Finish Ruthless
+
+CONFIDENCE MOMENT
+Final game — every player who breaks a line with a pass into the pocket gets called out by name.
+
+---ACTIVITY: WARM-UP---
+Name: Box Rondo 4v2 — First Touch Out of Pressure
+Duration: 12 min | Players: 6 per box | Setup: 12x12 yd boxes (quarter)
+Scoring: 6 consecutive passes = 1 point
+Rules & Constraints: 4 attackers keep it from 2 defenders. First touch must go away from pressure. Rotate defenders every 90 seconds.
+Coaching Focus:
+- Open your body before you receive
+- #6 checks to the ball, #8 shows opposite
+- Scan before the ball arrives
+When to Intervene: What did you see before you received that pass?
+Scaling Notes: 15-16: two boxes | 17: two boxes + 1 rotating | 18-19: three boxes
+DIAGRAM: {"field":"quarter","players":[{"n":"6","x":22,"y":78,"ball":true},{"n":"8","x":78,"y":78},{"n":"10","x":50,"y":25},{"n":"7","x":50,"y":88}],"opponents":[{"n":"9","x":45,"y":55},{"n":"11","x":58,"y":55}],"arrows":[{"from":[22,76],"to":[76,78],"type":"pass"},{"from":[78,75],"to":[52,28],"type":"pass"},{"from":[50,27],"to":[50,12],"type":"move"}]}
+
+---ACTIVITY: ACTIVITY 1---
+Name: 3-Zone Build — 6/8/10 Stagger
+Duration: 18 min | Players: 8-10 | Setup: 30x25 yd, 3 vertical zones (half)
+Objective: #8 and #10 never occupy the same zone as each other or #6
+Scoring: Ball travels through all 3 zones in order = 1 point
+Rules & Constraints: Max one of 6/8/10 per zone. If two land in the same zone, possession resets. Build from the back zone forward.
+Coaching Focus:
+- #6 shows, #8 lifts opposite, #10 holds the top zone
+- Recognize the empty zone and fill it before the ball
+- Pass then move — don't admire it
+When to Intervene: Whose job was it to move when the ball went wide?
+Progression: Add one passive defender per zone
+Scaling Notes: 15-16: one grid 8v2 | 17: one grid + rotating joker | 18-19: two grids
+DIAGRAM: {"field":"half","players":[{"n":"5","x":30,"y":85,"ball":true},{"n":"4","x":70,"y":85},{"n":"6","x":50,"y":68},{"n":"8","x":72,"y":48},{"n":"10","x":32,"y":28},{"n":"7","x":80,"y":22}],"opponents":[{"n":"9","x":48,"y":58},{"n":"6","x":55,"y":42}],"arrows":[{"from":[30,83],"to":[50,70],"type":"pass"},{"from":[50,66],"to":[70,50],"type":"pass"},{"from":[72,46],"to":[34,30],"type":"pass"}]}
+
+Note: continue this exact density for Activity 2 and Activity 3. Never pad. Never exceed the limits.
+
+═══════════════════════════════════════════════
+SELF-CHECK BEFORE YOU FINISH
+═══════════════════════════════════════════════
+Before returning your answer, verify every item. If any fails, fix it before responding:
+1. Position NUMBERS everywhere, never position names
+2. Every section within its stated limit — cut if over
+3. Every activity has a DIAGRAM line with valid JSON matching the drill
+4. No activity exceeds the coach's available field space
+5. Each activity builds on the last — Activity 2 adds ONE constraint to Activity 1
+6. Every "When to Intervene" is a question, not a command
+7. Scaling notes present for all three bands on every activity
+8. The tone is Coach Shawn — direct, punchy, no textbook padding`;
+
+    const fieldLabels = {quarter:'QUARTER FIELD', half:'HALF FIELD', threequarter:'THREE-QUARTER FIELD', full:'FULL FIELD'};
     const userPrompt = `Build me a complete session plan:
 
 Duration: ${duration} minutes
 Full Roster: 19 players | Today's Attendance: ${playersToday || 'unknown — plan for 15-19'}
+FIELD SPACE AVAILABLE: ${fieldLabels[fieldSpace] || 'HALF FIELD'} — this is the MAXIMUM space I have. Every activity must fit within it. The warm-up uses the smallest portion, the final activity uses the full available space, but NOTHING exceeds ${fieldLabels[fieldSpace] || 'HALF FIELD'}. Set every DIAGRAM field value to match — never larger than "${fieldSpace}".
 Season Phase: ${week}
 Game Moment: ${moment}
 Training Load: ${load}
@@ -430,7 +513,7 @@ ${opponent ? `Upcoming Opponent: ${opponent}` : ''}
 ${missing ? `Missing Players / Notes: ${missing}` : ''}
 ${lastSession ? `Last Session Notes: ${lastSession}` : ''}
 
-Connect every activity directly to our game model. Use our positional numbering. Include Scaling Notes for every activity.`;
+Connect every activity directly to our game model. Use our positional numbering. Include Scaling Notes and a DIAGRAM line for every activity. Keep every activity within the available field space.`;
 
     try {
       const response = await fetch('/.netlify/functions/session-planner', {
