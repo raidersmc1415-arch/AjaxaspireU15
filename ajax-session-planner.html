@@ -367,6 +367,7 @@ Rules & Constraints: [3 sentences max]
 Coaching Focus: [3 bullets, one line each, position numbers]
 When to Intervene: [one guided discovery question]
 Scaling Notes: 15-16: [one line] | 17: [one line] | 18-19: [one line]
+DIAGRAM: {field:"quarter", players:[...], opponents:[...], arrows:[...]}
 
 ---ACTIVITY: ACTIVITY 1---
 Name: [shape + focus]
@@ -378,6 +379,7 @@ Coaching Focus: [3 bullets, one line each, position numbers]
 When to Intervene: [one guided discovery question]
 Progression: [one sentence — one new constraint only]
 Scaling Notes: 15-16: [one line] | 17: [one line] | 18-19: [one line]
+DIAGRAM: {field:"half", players:[...], opponents:[...], arrows:[...]}
 
 ---ACTIVITY: ACTIVITY 2---
 [same format, larger space, one new constraint from Activity 1]
@@ -389,7 +391,30 @@ HALF-TIME / REST NOTES
 [2 bullets max]
 
 POST-SESSION REFLECTION QUESTIONS
-[2 guided discovery questions]`;
+[2 guided discovery questions]
+
+═══════════════════════════════════════════════
+DIAGRAM DATA — CRITICAL, ONE PER ACTIVITY
+═══════════════════════════════════════════════
+Every activity MUST end with a DIAGRAM: line containing valid JSON that draws the EXACT drill you described. This renders a visual for the coach. Follow this spec precisely.
+
+Coordinate system: a 0-100 grid. x:0=left touchline, x:100=right touchline. y:0=TOP (attacking goal / where our team attacks toward), y:100=BOTTOM (our own goal). Our team attacks UPWARD (toward y:0).
+
+Format:
+DIAGRAM: {"field":"half","players":[{"n":"6","x":50,"y":70,"ball":true}],"opponents":[{"n":"9","x":50,"y":40}],"arrows":[{"from":[50,70],"to":[50,45],"type":"pass"}]}
+
+Rules:
+- field: one of "quarter", "half", "threequarter", "full" — match the activity's actual space
+- players: OUR players (blue). n = position number as string ("6","8","10") or a label. x/y = 0-100. ball:true on the ONE player starting with the ball.
+- opponents: THEIR players (red). n = number, x/y = 0-100. Omit or use [] if the drill is unopposed.
+- arrows: the core pattern. type is one of: "pass" (gold solid), "move" (blue dashed run), "dribble" (blue solid). from/to are [x,y] coordinates. Include 2-4 arrows max showing the KEY pattern only — not every possible pass.
+- Place players to encourage TRIANGLES and staggered lines, never flat rows. Diamonds over flat 4s. This is a coaching standard.
+- Match the numbers to the drill: a 4v2 rondo has exactly 4 players + 2 opponents. An 8v8 has 8 each. Don't add players the drill doesn't have.
+- Keep all coordinates between 5 and 95 so nothing clips the edge.
+- The DIAGRAM must reflect what you wrote in Rules & Constraints — same shape, same numbers, same pattern.
+
+Example — "Box Rondo 4v2, #6 and #8 combine to escape to #10":
+DIAGRAM: {"field":"quarter","players":[{"n":"6","x":25,"y":75,"ball":true},{"n":"8","x":75,"y":75},{"n":"10","x":50,"y":30},{"n":"7","x":50,"y":85}],"opponents":[{"n":"9","x":45,"y":55},{"n":"11","x":55,"y":58}],"arrows":[{"from":[25,73],"to":[73,75],"type":"pass"},{"from":[75,72],"to":[52,33],"type":"pass"},{"from":[50,32],"to":[50,15],"type":"move"}]}`;
 
     const userPrompt = `Build me a complete session plan:
 
@@ -457,7 +482,16 @@ Connect every activity directly to our game model. Use our positional numbering.
       const trimmed = line.trim();
       if (trimmed.startsWith('---ACTIVITY:')) {
         if (current) sections.push(current);
-        current = { type:'activity', title:trimmed.replace(/---ACTIVITY:\s*/,'').replace(/---/,'').trim(), content:'' };
+        current = { type:'activity', title:trimmed.replace(/---ACTIVITY:\s*/,'').replace(/---/,'').trim(), content:'', diagramData:null };
+        return;
+      }
+      // Capture the DIAGRAM data line — store it, don't render it as text
+      if (trimmed.startsWith('DIAGRAM:')) {
+        if (current) {
+          const jsonStr = trimmed.replace(/^DIAGRAM:\s*/,'').trim();
+          try { current.diagramData = JSON.parse(jsonStr); }
+          catch(e) { current.diagramData = null; }
+        }
         return;
       }
       if (mainHeaders.includes(trimmed)) {
@@ -470,6 +504,34 @@ Connect every activity directly to our game model. Use our positional numbering.
     });
     if (current) sections.push(current);
     return sections.filter(s => s.content.trim());
+  }
+
+  // Auto-detect the best diagram type + field size from the activity's text
+  function detectDiagram(text) {
+    const t = text.toLowerCase();
+    let type = 'open', size = 'half';
+
+    // Type detection — order matters, most specific first
+    if (/\b(11v11|11 v 11|full team|full field match)\b/.test(t)) { type='11v11'; size='full'; }
+    else if (/\b(8v8|8 v 8|9v9|9 v 9|7v7|7 v 7)\b/.test(t)) { type='8v8'; size='threequarter'; }
+    else if (/\bpress|pressing|counter-press|win it back|hunt\b/.test(t)) { type='pressing'; size='half'; }
+    else if (/\bbuild.?out|build.?up|playing out|out of the back|plan a|plan b|plan c\b/.test(t)) { type='buildout'; size='half'; }
+    else if (/\bcircle rondo|rondo circle\b/.test(t)) { type='rondo-circle'; size='quarter'; }
+    else if (/\brondo|keep.?away|possession box|4v2|4v1|5v2\b/.test(t)) { type='rondo-box'; size='quarter'; }
+    else if (/\b1v1|1 v 1\b/.test(t)) { type='1v1'; size='quarter'; }
+    else if (/\b2v2|2 v 2\b/.test(t)) { type='2v2'; size='quarter'; }
+    else if (/\b3v3|3 v 3\b/.test(t)) { type='3v3'; size='half'; }
+    else if (/\b4v4|4 v 4|5v5|5 v 5|6v6|6 v 6\b/.test(t)) { type='4v4'; size='half'; }
+    else if (/\bvertical channel|v-channel|wide channel|lanes\b/.test(t)) { type='vert'; size='half'; }
+    else if (/\bhorizontal channel|h-channel|thirds|zones|bands\b/.test(t)) { type='horiz'; size='half'; }
+
+    // Size override — explicit field mentions win
+    if (/\bfull field\b/.test(t)) size='full';
+    else if (/\b(three.?quarter|3\/4|¾)\b/.test(t)) size='threequarter';
+    else if (/\bhalf field\b/.test(t)) size='half';
+    else if (/\bquarter field\b/.test(t)) size='quarter';
+
+    return { type, size };
   }
 
   function renderBlock(section) {
@@ -489,33 +551,49 @@ Connect every activity directly to our game model. Use our positional numbering.
     const blockId = 'block-' + Math.random().toString(36).substr(2,6);
     let diagramHTML = '';
     if (isActivity) {
+      // Auto-detect from the activity name + content (used as the template fallback)
+      const detected = detectDiagram(title + ' ' + section.content);
+      const hasAIData = section.diagramData && Array.isArray(section.diagramData.players) && section.diagramData.players.length > 0;
+      diagStates[blockId] = { size: detected.size, type: detected.type, aiData: section.diagramData || null, mode: hasAIData ? 'ai' : 'template' };
+      const act = (t) => detected.type === t ? ' active' : '';
+      const actSize = (s) => detected.size === s ? ' active' : '';
+      // Initial canvas — AI data if present, else template
+      const initialSvg = hasAIData ? drawFromData(section.diagramData) : drawDiagram(detected.size, detected.type);
+      const modeToggle = hasAIData
+        ? `<div class="diagram-control-group" style="margin-left:auto;">
+             <span class="diag-pill active" onclick="setDiagMode('${blockId}','ai',this)">This Drill</span>
+             <span class="diag-pill" onclick="setDiagMode('${blockId}','template',this)">Template</span>
+           </div>` : '';
       diagramHTML = `
         <div class="diagram-controls">
           <div class="diagram-control-group">
             <span class="diagram-control-label">Field</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','size','quarter',this)">Quarter</span>
-            <span class="diag-pill active" onclick="setDiagram('${blockId}','size','half',this)">Half</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','size','threequarter',this)">¾</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','size','full',this)">Full</span>
+            <span class="diag-pill${actSize('quarter')}" onclick="setDiagram('${blockId}','size','quarter',this)">Quarter</span>
+            <span class="diag-pill${actSize('half')}" onclick="setDiagram('${blockId}','size','half',this)">Half</span>
+            <span class="diag-pill${actSize('threequarter')}" onclick="setDiagram('${blockId}','size','threequarter',this)">¾</span>
+            <span class="diag-pill${actSize('full')}" onclick="setDiagram('${blockId}','size','full',this)">Full</span>
           </div>
+          ${modeToggle}
+        </div>
+        <div class="diagram-controls" id="typerow-${blockId}" style="${hasAIData ? 'display:none;' : ''}">
           <div class="diagram-control-group">
             <span class="diagram-control-label">Type</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','horiz',this)">H-Channel</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','vert',this)">V-Channel</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','rondo-box',this)">Box Rondo</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','rondo-circle',this)">Circle Rondo</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','1v1',this)">1v1</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','2v2',this)">2v2</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','3v3',this)">3v3</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','4v4',this)">4v4</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','buildout',this)">Build Out</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','pressing',this)">Pressing</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','8v8',this)">8v8</span>
-            <span class="diag-pill" onclick="setDiagram('${blockId}','type','11v11',this)">11v11</span>
-            <span class="diag-pill active" onclick="setDiagram('${blockId}','type','open',this)">Open</span>
+            <span class="diag-pill${act('horiz')}" onclick="setDiagram('${blockId}','type','horiz',this)">H-Channel</span>
+            <span class="diag-pill${act('vert')}" onclick="setDiagram('${blockId}','type','vert',this)">V-Channel</span>
+            <span class="diag-pill${act('rondo-box')}" onclick="setDiagram('${blockId}','type','rondo-box',this)">Box Rondo</span>
+            <span class="diag-pill${act('rondo-circle')}" onclick="setDiagram('${blockId}','type','rondo-circle',this)">Circle Rondo</span>
+            <span class="diag-pill${act('1v1')}" onclick="setDiagram('${blockId}','type','1v1',this)">1v1</span>
+            <span class="diag-pill${act('2v2')}" onclick="setDiagram('${blockId}','type','2v2',this)">2v2</span>
+            <span class="diag-pill${act('3v3')}" onclick="setDiagram('${blockId}','type','3v3',this)">3v3</span>
+            <span class="diag-pill${act('4v4')}" onclick="setDiagram('${blockId}','type','4v4',this)">4v4</span>
+            <span class="diag-pill${act('buildout')}" onclick="setDiagram('${blockId}','type','buildout',this)">Build Out</span>
+            <span class="diag-pill${act('pressing')}" onclick="setDiagram('${blockId}','type','pressing',this)">Pressing</span>
+            <span class="diag-pill${act('8v8')}" onclick="setDiagram('${blockId}','type','8v8',this)">8v8</span>
+            <span class="diag-pill${act('11v11')}" onclick="setDiagram('${blockId}','type','11v11',this)">11v11</span>
+            <span class="diag-pill${act('open')}" onclick="setDiagram('${blockId}','type','open',this)">Open</span>
           </div>
         </div>
-        <div class="diagram-canvas" id="canvas-${blockId}">${drawDiagram('half','open')}</div>`;
+        <div class="diagram-canvas" id="canvas-${blockId}">${initialSvg}</div>`;
     }
     block.innerHTML = `
       <div class="session-block-header">
@@ -537,6 +615,61 @@ Connect every activity directly to our game model. Use our positional numbering.
     pill.classList.add('active');
     const canvas = document.getElementById('canvas-' + blockId);
     if (canvas) canvas.innerHTML = drawDiagram(diagStates[blockId].size, diagStates[blockId].type);
+  }
+
+  // Toggle between AI-generated "This Drill" diagram and the generic template
+  function setDiagMode(blockId, mode, pill) {
+    const st = diagStates[blockId];
+    if (!st) return;
+    st.mode = mode;
+    pill.parentElement.querySelectorAll('.diag-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    const typeRow = document.getElementById('typerow-' + blockId);
+    const canvas = document.getElementById('canvas-' + blockId);
+    if (mode === 'ai' && st.aiData) {
+      if (typeRow) typeRow.style.display = 'none';
+      if (canvas) canvas.innerHTML = drawFromData(st.aiData);
+    } else {
+      if (typeRow) typeRow.style.display = '';
+      if (canvas) canvas.innerHTML = drawDiagram(st.size, st.type);
+    }
+  }
+
+  // Render a diagram directly from AI-supplied coordinate data (0-100 grid)
+  function drawFromData(data) {
+    const dims = { quarter:{w:400,h:280,label:'Quarter Field'}, half:{w:400,h:360,label:'Half Field'}, threequarter:{w:400,h:460,label:'¾ Field'}, full:{w:400,h:560,label:'Full Field'} };
+    const size = (data.field && dims[data.field]) ? data.field : 'half';
+    const d = dims[size];
+    const W = d.w, H = d.h;
+    // Map 0-100 grid to field pixels, keeping inside the border margin
+    const mx = (x) => 12 + (Math.max(0,Math.min(100,x))/100) * (W-24);
+    const my = (y) => 12 + (Math.max(0,Math.min(100,y))/100) * (H-24);
+
+    let s = fieldBase(W, H, size);
+
+    // Arrows first (behind players)
+    (data.arrows || []).forEach(a => {
+      if (!a.from || !a.to) return;
+      const x1=mx(a.from[0]), y1=my(a.from[1]), x2=mx(a.to[0]), y2=my(a.to[1]);
+      if (a.type === 'move') s += moveArrow(x1,y1,x2,y2,'#60a5fa');
+      else if (a.type === 'dribble') s += passArrow(x1,y1,x2,y2,'#60a5fa');
+      else s += passArrow(x1,y1,x2,y2,'#fbbf24'); // pass = gold
+    });
+
+    // Opponents (red)
+    (data.opponents || []).forEach(o => {
+      if (typeof o.x !== 'number' || typeof o.y !== 'number') return;
+      s += oppCircle(mx(o.x), my(o.y), String(o.n||''));
+    });
+
+    // Our players (blue triangles)
+    (data.players || []).forEach(p => {
+      if (typeof p.x !== 'number' || typeof p.y !== 'number') return;
+      s += playerTriangle(mx(p.x), my(p.y), String(p.n||''), !!p.ball);
+    });
+
+    s += fieldLabel(W, H, d.label, 'This Drill');
+    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;width:100%;">${s}</svg>`;
   }
 
   function drawDiagram(size, type) {
@@ -606,21 +739,72 @@ Connect every activity directly to our game model. Use our positional numbering.
     let s=''; const cx=w/2;
     switch(type) {
       case 'open':
-        if(size==='quarter'){s+=playerTriangle(cx-60,h*0.7,'▲',false);s+=playerTriangle(cx,h*0.7,'▲',true);s+=playerTriangle(cx+60,h*0.7,'▲',false);s+=playerTriangle(cx-30,h*0.45,'▲',false);s+=playerTriangle(cx+30,h*0.45,'▲',false);}
+        if(size==='quarter'){s+=playerTriangle(cx-60,h*0.7,'8',false);s+=playerTriangle(cx,h*0.7,'6',true);s+=playerTriangle(cx+60,h*0.7,'10',false);s+=playerTriangle(cx-30,h*0.45,'11',false);s+=playerTriangle(cx+30,h*0.45,'7',false);}
         else{s+=playerTriangle(cx,h*0.85,'1',false);s+=playerTriangle(cx-80,h*0.72,'2',false);s+=playerTriangle(cx+80,h*0.72,'3',false);s+=playerTriangle(cx-40,h*0.72,'5',false);s+=playerTriangle(cx+40,h*0.72,'4',false);s+=playerTriangle(cx,h*0.56,'6',true);s+=playerTriangle(cx-55,h*0.42,'8',false);s+=playerTriangle(cx+55,h*0.42,'10',false);s+=playerTriangle(cx-90,h*0.28,'11',false);s+=playerTriangle(cx+90,h*0.28,'7',false);s+=playerTriangle(cx,h*0.18,'9',false);}
         break;
       case 'horiz':{const z1=h*0.33,z2=h*0.66;s+=zoneFill(8,8,w-16,z1-8,'rgba(34,211,238,0.06)');s+=zoneFill(8,z1,w-16,z2-z1,'rgba(255,255,255,0.04)');s+=zoneFill(8,z2,w-16,h-z2-8,'rgba(22,163,74,0.06)');s+=zoneLine(8,z1,w-8,z1);s+=zoneLine(8,z2,w-8,z2);s+=`<text x="${w-14}" y="${z1*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(34,211,238,0.7)">FINAL</text>`;s+=`<text x="${w-14}" y="${(z1+z2)*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">MID</text>`;s+=`<text x="${w-14}" y="${(z2+h)*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(22,163,74,0.7)">BUILD</text>`;s+=playerTriangle(cx-60,h*0.82,'4',false);s+=playerTriangle(cx+60,h*0.82,'5',false);s+=playerTriangle(cx,h*0.82,'1',false);s+=playerTriangle(cx,h*0.5,'6',true);s+=playerTriangle(cx-50,h*0.18,'10',false);s+=playerTriangle(cx+50,h*0.18,'7',false);}break;
-      case 'vert':{const v1=w*0.33,v2=w*0.67;s+=zoneFill(8,8,v1-8,h-16,'rgba(34,211,238,0.05)');s+=zoneFill(v1,8,v2-v1,h-16,'rgba(255,255,255,0.04)');s+=zoneFill(v2,8,w-v2-8,h-16,'rgba(22,163,74,0.05)');s+=zoneLine(v1,8,v1,h-8);s+=zoneLine(v2,8,v2,h-8);s+=`<text x="${v1*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(34,211,238,0.7)">LEFT</text>`;s+=`<text x="${(v1+v2)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">CENTER</text>`;s+=`<text x="${(v2+w)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(22,163,74,0.7)">RIGHT</text>`;s+=playerTriangle(v1*0.5,h*0.3,'3',false);s+=playerTriangle(v1*0.5,h*0.7,'11',false);s+=playerTriangle((v1+v2)*0.5,h*0.4,'6',true);s+=playerTriangle((v1+v2)*0.5-25,h*0.65,'5',false);s+=playerTriangle((v1+v2)*0.5+25,h*0.65,'4',false);s+=playerTriangle((v2+w)*0.5,h*0.3,'2',false);s+=playerTriangle((v2+w)*0.5,h*0.7,'7',false);s+=oppCircle((v2+w)*0.5,h*0.45,'▼');}break;
-      case 'rondo-box':{const bx=w*0.2,by=h*0.2,bw=w*0.6,bh=h*0.6;s+=`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="rgba(34,211,238,0.06)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;s+=cone(bx,by);s+=cone(bx+bw,by);s+=cone(bx,by+bh);s+=cone(bx+bw,by+bh);s+=playerTriangle(bx,by,'▲',false);s+=playerTriangle(bx+bw,by,'▲',false);s+=playerTriangle(bx,by+bh,'▲',true);s+=playerTriangle(bx+bw,by+bh,'▲',false);s+=playerTriangle(cx,by-20,'▲',false);s+=playerTriangle(cx,by+bh+20,'▲',false);s+=oppCircle(cx-18,h*0.47,'▼');s+=oppCircle(cx+18,h*0.53,'▼');s+=passArrow(bx+18,by,bx+bw-18,by,'white');s+=passArrow(bx,by+18,bx,by+bh-18,'white');}break;
-      case 'rondo-circle':{const r=Math.min(w,h)*0.32;s+=`<circle cx="${cx}" cy="${h*0.5}" r="${r}" fill="rgba(34,211,238,0.05)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;[0,60,120,180,240,300].forEach((deg,i)=>{const rad=(deg-90)*Math.PI/180,px=cx+r*Math.cos(rad),py=h*0.5+r*Math.sin(rad);s+=playerTriangle(px,py,'▲',i===0);});s+=oppCircle(cx-20,h*0.47,'▼');s+=oppCircle(cx+20,h*0.53,'▼');}break;
-      case '1v1':s+=cone(cx-40,h*0.15);s+=cone(cx+40,h*0.15);s+=cone(cx-40,h*0.85);s+=cone(cx+40,h*0.85);s+=`<text x="${cx}" y="${h*0.12}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;s+=`<text x="${cx}" y="${h*0.96}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;s+=playerTriangle(cx-20,h*0.65,'▲',true);s+=oppCircle(cx+20,h*0.38,'▼');s+=moveArrow(cx-15,h*0.62,cx+15,h*0.42,'#60a5fa');break;
-      case '2v2':s+=miniGoal(cx,h*0.1,true);s+=miniGoal(cx,h*0.9,true);s+=playerTriangle(cx-25,h*0.68,'▲',true);s+=playerTriangle(cx+25,h*0.72,'▲',false);s+=oppCircle(cx-25,h*0.33,'▼');s+=oppCircle(cx+25,h*0.37,'▼');s+=moveArrow(cx-20,h*0.65,cx-20,h*0.38,'#60a5fa');break;
-      case '3v3':s+=miniGoal(cx,h*0.1,true);s+=miniGoal(cx,h*0.9,true);s+=playerTriangle(cx-40,h*0.68,'▲',false);s+=playerTriangle(cx,h*0.72,'▲',true);s+=playerTriangle(cx+40,h*0.68,'▲',false);s+=oppCircle(cx-40,h*0.33,'▼');s+=oppCircle(cx,h*0.28,'▼');s+=oppCircle(cx+40,h*0.33,'▼');s+=passArrow(cx-5,h*0.7,cx-35,h*0.35,'white');break;
-      case '4v4':s+=miniGoal(cx,h*0.1,true);s+=miniGoal(cx,h*0.9,true);s+=playerTriangle(cx-55,h*0.72,'▲',false);s+=playerTriangle(cx-18,h*0.68,'▲',true);s+=playerTriangle(cx+18,h*0.68,'▲',false);s+=playerTriangle(cx+55,h*0.72,'▲',false);s+=oppCircle(cx-55,h*0.3,'▼');s+=oppCircle(cx-18,h*0.28,'▼');s+=oppCircle(cx+18,h*0.28,'▼');s+=oppCircle(cx+55,h*0.3,'▼');s+=passArrow(cx-15,h*0.66,cx-50,h*0.34,'white');break;
-      case 'buildout':s+=playerTriangle(cx,h*0.88,'1',false);s+=playerTriangle(cx-70,h*0.78,'5',false);s+=playerTriangle(cx+70,h*0.78,'4',false);s+=playerTriangle(cx-110,h*0.72,'3',false);s+=playerTriangle(cx+110,h*0.72,'2',false);s+=playerTriangle(cx,h*0.62,'6',true);s+=playerTriangle(cx+55,h*0.48,'8',false);s+=playerTriangle(cx-55,h*0.38,'10',false);s+=playerTriangle(cx-90,h*0.22,'11',false);s+=playerTriangle(cx+90,h*0.22,'7',false);s+=playerTriangle(cx,h*0.18,'9',false);s+=oppCircle(cx-20,h*0.52,'▼');s+=oppCircle(cx+20,h*0.44,'▼');s+=passArrow(cx,h*0.86,cx,h*0.65,'white');s+=passArrow(cx,h*0.6,cx+50,h*0.5,'white');s+=moveArrow(cx+50,h*0.46,cx-50,h*0.4,'#60a5fa');break;
-      case 'pressing':s+=playerTriangle(cx,h*0.9,'1',false);s+=playerTriangle(cx-100,h*0.68,'3',false);s+=playerTriangle(cx-38,h*0.7,'5',false);s+=playerTriangle(cx+38,h*0.7,'4',false);s+=playerTriangle(cx+100,h*0.68,'2',false);s+=playerTriangle(cx-45,h*0.52,'8',false);s+=playerTriangle(cx,h*0.5,'6',false);s+=playerTriangle(cx+45,h*0.52,'10',false);s+=playerTriangle(cx-90,h*0.28,'11',false);s+=playerTriangle(cx,h*0.22,'9',true);s+=playerTriangle(cx+90,h*0.28,'7',false);s+=oppCircle(cx-60,h*0.12,'5');s+=oppCircle(cx+60,h*0.12,'4');s+=oppCircle(cx,h*0.08,'1');s+=moveArrow(cx,h*0.24,cx,h*0.12,'#ef4444');s+=moveArrow(cx+85,h*0.3,cx+65,h*0.16,'#ef4444');s+=moveArrow(cx-85,h*0.3,cx-65,h*0.16,'#ef4444');break;
-      case '8v8':s+=playerTriangle(cx,h*0.9,'1',false);s+=playerTriangle(cx-80,h*0.78,'3',false);s+=playerTriangle(cx-30,h*0.78,'5',false);s+=playerTriangle(cx+30,h*0.78,'4',false);s+=playerTriangle(cx+80,h*0.78,'2',false);s+=playerTriangle(cx-40,h*0.62,'8',false);s+=playerTriangle(cx,h*0.6,'6',true);s+=playerTriangle(cx+40,h*0.62,'10',false);s+=playerTriangle(cx,h*0.38,'9',false);s+=oppCircle(cx-70,h*0.22,'▼');s+=oppCircle(cx,h*0.18,'▼');s+=oppCircle(cx+70,h*0.22,'▼');s+=oppCircle(cx-35,h*0.32,'▼');s+=oppCircle(cx+35,h*0.32,'▼');s+=fullGoal(w*0.35,2,w*0.3);break;
-      case '11v11':s+=playerTriangle(cx,h*0.92,'1',false);s+=playerTriangle(cx-95,h*0.8,'3',false);s+=playerTriangle(cx-35,h*0.8,'5',false);s+=playerTriangle(cx+35,h*0.8,'4',false);s+=playerTriangle(cx+95,h*0.8,'2',false);s+=playerTriangle(cx-50,h*0.65,'8',false);s+=playerTriangle(cx,h*0.63,'6',true);s+=playerTriangle(cx+50,h*0.65,'10',false);s+=playerTriangle(cx-95,h*0.48,'11',false);s+=playerTriangle(cx,h*0.45,'9',false);s+=playerTriangle(cx+95,h*0.48,'7',false);s+=oppCircle(cx,h*0.08,'1');s+=oppCircle(cx-95,h*0.2,'▼');s+=oppCircle(cx-35,h*0.2,'▼');s+=oppCircle(cx+35,h*0.2,'▼');s+=oppCircle(cx+95,h*0.2,'▼');s+=oppCircle(cx-50,h*0.35,'▼');s+=oppCircle(cx,h*0.37,'▼');s+=oppCircle(cx+50,h*0.35,'▼');s+=oppCircle(cx-95,h*0.5,'▼');s+=oppCircle(cx,h*0.52,'▼');s+=oppCircle(cx+95,h*0.5,'▼');break;
+      case 'vert':{const v1=w*0.33,v2=w*0.67;s+=zoneFill(8,8,v1-8,h-16,'rgba(34,211,238,0.05)');s+=zoneFill(v1,8,v2-v1,h-16,'rgba(255,255,255,0.04)');s+=zoneFill(v2,8,w-v2-8,h-16,'rgba(22,163,74,0.05)');s+=zoneLine(v1,8,v1,h-8);s+=zoneLine(v2,8,v2,h-8);s+=`<text x="${v1*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(34,211,238,0.7)">LEFT</text>`;s+=`<text x="${(v1+v2)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">CENTER</text>`;s+=`<text x="${(v2+w)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(22,163,74,0.7)">RIGHT</text>`;s+=playerTriangle(v1*0.5,h*0.3,'3',false);s+=playerTriangle(v1*0.5,h*0.7,'11',false);s+=playerTriangle((v1+v2)*0.5,h*0.4,'6',true);s+=playerTriangle((v1+v2)*0.5-25,h*0.65,'5',false);s+=playerTriangle((v1+v2)*0.5+25,h*0.65,'4',false);s+=playerTriangle((v2+w)*0.5,h*0.3,'2',false);s+=playerTriangle((v2+w)*0.5,h*0.7,'7',false);s+=oppCircle((v2+w)*0.5,h*0.45,'9');}break;
+      case 'rondo-box':{const bx=w*0.2,by=h*0.2,bw=w*0.6,bh=h*0.6;s+=`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="rgba(34,211,238,0.06)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;s+=cone(bx,by);s+=cone(bx+bw,by);s+=cone(bx,by+bh);s+=cone(bx+bw,by+bh);s+=playerTriangle(bx,by,'6',false);s+=playerTriangle(bx+bw,by,'8',false);s+=playerTriangle(bx,by+bh,'10',true);s+=playerTriangle(bx+bw,by+bh,'7',false);s+=playerTriangle(cx,by-20,'4',false);s+=playerTriangle(cx,by+bh+20,'5',false);s+=oppCircle(cx-18,h*0.47,'9');s+=oppCircle(cx+18,h*0.53,'11');s+=passArrow(bx+16,by+bh-16,bx+bw-16,by+bh-16,'#fbbf24');s+=passArrow(bx+bw-14,by+bh-18,bx+bw-14,by+18,'#fbbf24');s+=passArrow(bx+bw-16,by+14,bx+16,by+14,'#fbbf24');}break;
+      case 'rondo-circle':{const r=Math.min(w,h)*0.32;s+=`<circle cx="${cx}" cy="${h*0.5}" r="${r}" fill="rgba(34,211,238,0.05)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;const nums=['6','8','10','7','11','2'];[0,60,120,180,240,300].forEach((deg,i)=>{const rad=(deg-90)*Math.PI/180,px=cx+r*Math.cos(rad),py=h*0.5+r*Math.sin(rad);s+=playerTriangle(px,py,nums[i],i===0);});s+=oppCircle(cx-20,h*0.47,'9');s+=oppCircle(cx+20,h*0.53,'6');const p0=[-90,-30].map(d=>d*Math.PI/180);s+=passArrow(cx+r*Math.cos(p0[0])+6,h*0.5+r*Math.sin(p0[0])+6,cx+r*Math.cos(p0[1])-6,h*0.5+r*Math.sin(p0[1])-6,'#fbbf24');}break;
+      case '1v1':s+=cone(cx-40,h*0.15);s+=cone(cx+40,h*0.15);s+=cone(cx-40,h*0.85);s+=cone(cx+40,h*0.85);s+=`<text x="${cx}" y="${h*0.12}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;s+=`<text x="${cx}" y="${h*0.96}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;s+=playerTriangle(cx-20,h*0.65,'7',true);s+=oppCircle(cx+20,h*0.38,'4');s+=moveArrow(cx-12,h*0.6,cx+15,h*0.42,'#60a5fa');break;
+      case '2v2':s+=miniGoal(cx,h*0.1,true);s+=miniGoal(cx,h*0.9,true);s+=playerTriangle(cx-25,h*0.68,'10',true);s+=playerTriangle(cx+25,h*0.72,'9',false);s+=oppCircle(cx-25,h*0.33,'4');s+=oppCircle(cx+25,h*0.37,'5');s+=passArrow(cx-18,h*0.66,cx+18,h*0.7,'#fbbf24');s+=moveArrow(cx+25,h*0.68,cx+25,h*0.4,'#60a5fa');break;
+      case '3v3':s+=miniGoal(cx,h*0.1,true);s+=miniGoal(cx,h*0.9,true);s+=playerTriangle(cx-40,h*0.68,'8',false);s+=playerTriangle(cx,h*0.72,'6',true);s+=playerTriangle(cx+40,h*0.68,'10',false);s+=oppCircle(cx-40,h*0.33,'4');s+=oppCircle(cx,h*0.28,'6');s+=oppCircle(cx+40,h*0.33,'5');s+=passArrow(cx-5,h*0.7,cx-35,h*0.35,'#fbbf24');s+=moveArrow(cx+40,h*0.64,cx+40,h*0.4,'#60a5fa');break;
+      case '4v4':s+=miniGoal(cx,h*0.1,true);s+=miniGoal(cx,h*0.9,true);s+=playerTriangle(cx,h*0.78,'6',true);s+=playerTriangle(cx-50,h*0.6,'8',false);s+=playerTriangle(cx+50,h*0.6,'10',false);s+=playerTriangle(cx,h*0.42,'9',false);s+=oppCircle(cx,h*0.24,'6');s+=oppCircle(cx-50,h*0.36,'8');s+=oppCircle(cx+50,h*0.36,'10');s+=oppCircle(cx,h*0.54,'9');s+=passArrow(cx-8,h*0.75,cx-45,h*0.62,'#fbbf24');s+=passArrow(cx-50,h*0.56,cx-8,h*0.44,'#fbbf24');s+=moveArrow(cx+50,h*0.56,cx+20,h*0.46,'#60a5fa');break;
+      case 'buildout':{
+        // Plan B build-out — GK to free 6, 6 to 8, 8 diagonal to 10. Opponent pressing.
+        // Our team (blue triangles)
+        s+=playerTriangle(cx,h*0.90,'1',false);
+        s+=playerTriangle(cx-58,h*0.80,'5',false);
+        s+=playerTriangle(cx+58,h*0.80,'4',false);
+        s+=playerTriangle(cx-100,h*0.70,'3',false);
+        s+=playerTriangle(cx+100,h*0.70,'2',false);
+        s+=playerTriangle(cx,h*0.62,'6',true);
+        s+=playerTriangle(cx+52,h*0.46,'8',false);
+        s+=playerTriangle(cx-52,h*0.34,'10',false);
+        s+=playerTriangle(cx-88,h*0.20,'11',false);
+        s+=playerTriangle(cx+88,h*0.20,'7',false);
+        s+=playerTriangle(cx,h*0.14,'9',false);
+        // Opponent press (2 forwards + holding mid)
+        s+=oppCircle(cx-30,h*0.50,'9');
+        s+=oppCircle(cx+30,h*0.50,'11');
+        s+=oppCircle(cx,h*0.40,'6');
+        // Pattern: GK->6 (pass), 6->8 (pass), 8->10 diagonal (pass)
+        s+=passArrow(cx,h*0.87,cx,h*0.66,'#fbbf24');
+        s+=passArrow(cx+8,h*0.60,cx+48,h*0.49,'#fbbf24');
+        s+=passArrow(cx+45,h*0.44,cx-45,h*0.36,'#fbbf24');
+        // 10 movement to find pocket (dashed)
+        s+=moveArrow(cx-52,h*0.30,cx-30,h*0.24,'#60a5fa');
+        break;
+      }
+      case 'pressing':{
+        // High press — opponent building from GK to strong-side CB, we press ball-side as a unit
+        // Our team (blue) pushed high
+        s+=playerTriangle(cx,h*0.92,'1',false);
+        s+=playerTriangle(cx-95,h*0.72,'3',false);
+        s+=playerTriangle(cx-32,h*0.74,'5',false);
+        s+=playerTriangle(cx+40,h*0.72,'4',false);
+        s+=playerTriangle(cx+98,h*0.70,'2',false);
+        s+=playerTriangle(cx+48,h*0.54,'8',false);
+        s+=playerTriangle(cx-40,h*0.56,'6',false);
+        s+=playerTriangle(cx-70,h*0.40,'10',false);
+        s+=playerTriangle(cx-100,h*0.26,'11',false);
+        s+=playerTriangle(cx-8,h*0.28,'9',true);
+        s+=playerTriangle(cx+60,h*0.34,'7',false);
+        // Opponent building out (red, numbered) — strong side (their right / our left)
+        s+=oppCircle(cx,h*0.10,'1');
+        s+=oppCircle(cx-55,h*0.16,'5');
+        s+=oppCircle(cx+55,h*0.16,'4');
+        s+=oppCircle(cx-95,h*0.30,'3');
+        s+=oppCircle(cx-58,h*0.40,'6');
+        // Press arrows — who presses whom
+        s+=moveArrow(cx-8,h*0.24,cx-45,h*0.15,'#ef4444');      // 9 -> their weak-side CB
+        s+=moveArrow(cx-100,h*0.30,cx-95,h*0.22,'#ef4444');    // 11 -> their FB
+        s+=moveArrow(cx+55,h*0.30,cx+55,h*0.20,'#ef4444');     // 7 -> their strong CB
+        s+=moveArrow(cx-70,h*0.36,cx-60,h*0.30,'#fbbf24');     // 10 -> shadow their 6
+        break;
+      }
+      case '8v8':s+=playerTriangle(cx,h*0.9,'1',false);s+=playerTriangle(cx-80,h*0.78,'3',false);s+=playerTriangle(cx-30,h*0.78,'5',false);s+=playerTriangle(cx+30,h*0.78,'4',false);s+=playerTriangle(cx+80,h*0.78,'2',false);s+=playerTriangle(cx-40,h*0.62,'8',false);s+=playerTriangle(cx,h*0.6,'6',true);s+=playerTriangle(cx+40,h*0.62,'10',false);s+=playerTriangle(cx,h*0.38,'9',false);s+=oppCircle(cx-70,h*0.22,'2');s+=oppCircle(cx,h*0.18,'4');s+=oppCircle(cx+70,h*0.22,'3');s+=oppCircle(cx-35,h*0.32,'6');s+=oppCircle(cx+35,h*0.32,'8');s+=fullGoal(w*0.35,2,w*0.3);s+=passArrow(cx,h*0.57,cx+38,h*0.63,'#fbbf24');s+=moveArrow(cx,h*0.36,cx-30,h*0.24,'#60a5fa');break;
+      case '11v11':s+=playerTriangle(cx,h*0.92,'1',false);s+=playerTriangle(cx-95,h*0.8,'3',false);s+=playerTriangle(cx-35,h*0.8,'5',false);s+=playerTriangle(cx+35,h*0.8,'4',false);s+=playerTriangle(cx+95,h*0.8,'2',false);s+=playerTriangle(cx-50,h*0.65,'8',false);s+=playerTriangle(cx,h*0.63,'6',true);s+=playerTriangle(cx+50,h*0.65,'10',false);s+=playerTriangle(cx-95,h*0.48,'11',false);s+=playerTriangle(cx,h*0.45,'9',false);s+=playerTriangle(cx+95,h*0.48,'7',false);s+=oppCircle(cx,h*0.08,'1');s+=oppCircle(cx-95,h*0.2,'2');s+=oppCircle(cx-35,h*0.2,'5');s+=oppCircle(cx+35,h*0.2,'4');s+=oppCircle(cx+95,h*0.2,'3');s+=oppCircle(cx-50,h*0.35,'8');s+=oppCircle(cx,h*0.37,'6');s+=oppCircle(cx+50,h*0.35,'10');s+=oppCircle(cx-95,h*0.5,'11');s+=oppCircle(cx,h*0.52,'9');s+=oppCircle(cx+95,h*0.5,'7');break;
     }
     return s;
   }
