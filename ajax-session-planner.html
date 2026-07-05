@@ -6,591 +6,80 @@
 <title>Ajax Aspire · Session Planner</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
-
-  :root {
-    --green: #16a34a;
-    --cyan: #22d3ee;
-    --gold: #d4a017;
-    --dark: #0f1117;
-    --dark2: #161b24;
-    --dark3: #1e2530;
-    --border: rgba(255,255,255,0.08);
-    --text: #e2e8f0;
-    --muted: #64748b;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--dark);
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    min-height: 100vh;
-    font-size: 15px;
-  }
-
-  /* HEADER */
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--dark2);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .logo {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
-
-  .logo-ajax {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 22px;
-    color: var(--green);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .logo-aspire {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 22px;
-    color: var(--cyan);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .logo-tag {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  .badge {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--cyan);
-    border: 1px solid rgba(34,211,238,0.3);
-    padding: 4px 10px;
-    border-radius: 2px;
-  }
-
-  /* MAIN */
-  main {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-  }
-
-  /* PAGE TITLE */
-  .page-title {
-    margin-bottom: 36px;
-  }
-
-  .page-title h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 42px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    line-height: 1;
-    color: var(--text);
-  }
-
-  .page-title h1 span {
-    color: var(--cyan);
-  }
-
-  .page-title p {
-    margin-top: 8px;
-    color: var(--muted);
-    font-size: 14px;
-    letter-spacing: 1px;
-  }
-
-  /* FORM CARD */
-  .form-card {
-    background: var(--dark2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 32px;
-    margin-bottom: 32px;
-  }
-
-  .form-section-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--cyan);
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  .form-grid.three {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .form-group.full {
-    grid-column: 1 / -1;
-  }
-
-  label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  select, input, textarea {
-    background: var(--dark3);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    font-size: 14px;
-    padding: 10px 14px;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-    -webkit-appearance: none;
-  }
-
-  select:focus, input:focus, textarea:focus {
-    border-color: rgba(34,211,238,0.5);
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 80px;
-  }
-
-  select {
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
-  }
-
-  /* PILL SELECTOR */
-  .pill-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .pill {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    cursor: pointer;
-    color: var(--muted);
-    background: var(--dark3);
-    transition: all 0.15s;
-    user-select: none;
-  }
-
-  .pill:hover {
-    border-color: rgba(34,211,238,0.4);
-    color: var(--cyan);
-  }
-
-  .pill.active {
-    background: rgba(34,211,238,0.1);
-    border-color: var(--cyan);
-    color: var(--cyan);
-  }
-
-  .pill.active.green {
-    background: rgba(22,163,74,0.1);
-    border-color: var(--green);
-    color: var(--green);
-  }
-
-  /* GENERATE BUTTON */
-  .btn-generate {
-    width: 100%;
-    background: var(--green);
-    color: #fff;
-    border: none;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    padding: 16px;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 28px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-generate:hover:not(:disabled) {
-    background: #15803d;
-    transform: translateY(-1px);
-  }
-
-  .btn-generate:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  /* LOADING */
-  .loading-bar {
-    display: none;
-    height: 3px;
-    background: var(--dark3);
-    border-radius: 2px;
-    margin-top: 12px;
-    overflow: hidden;
-  }
-
-  .loading-bar.active {
-    display: block;
-  }
-
-  .loading-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green), var(--cyan));
-    border-radius: 2px;
-    animation: loading 2s ease-in-out infinite;
-    width: 40%;
-  }
-
-  @keyframes loading {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(350%); }
-  }
-
-  .loading-text {
-    display: none;
-    text-align: center;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--cyan);
-    margin-top: 10px;
-  }
-
-  .loading-text.active {
-    display: block;
-  }
-
-  /* OUTPUT */
-  #output {
-    display: none;
-    animation: fadeIn 0.4s ease;
-  }
-
-  #output.visible {
-    display: block;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .output-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .output-header h2 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 28px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-  }
-
-  .output-header h2 span {
-    color: var(--cyan);
-  }
-
-  .btn-copy, .btn-print {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 8px 16px;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: all 0.15s;
-    border: 1px solid var(--border);
-    background: var(--dark3);
-    color: var(--muted);
-  }
-
-  .btn-copy:hover, .btn-print:hover {
-    border-color: var(--cyan);
-    color: var(--cyan);
-  }
-
-  .btn-actions {
-    display: flex;
-    gap: 8px;
-  }
-
-  /* SESSION OUTPUT BLOCKS */
-  .session-meta {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-  }
-
-  .meta-chip {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 5px 12px;
-    border-radius: 2px;
-    background: var(--dark3);
-    border: 1px solid var(--border);
-    color: var(--muted);
-  }
-
-  .meta-chip strong {
-    color: var(--text);
-  }
-
-  .session-block {
-    background: var(--dark2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-
-  .session-block-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .block-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .block-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .dot-cyan { background: var(--cyan); }
-  .dot-green { background: var(--green); }
-  .dot-gold { background: var(--gold); }
-  .dot-muted { background: var(--muted); }
-
-  .block-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 800;
-    font-size: 14px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .block-duration {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .session-block-body {
-    padding: 20px;
-    font-size: 14px;
-    line-height: 1.7;
-    color: #cbd5e1;
-    white-space: pre-wrap;
-  }
-
-  .session-block-body strong {
-    color: var(--cyan);
-    font-weight: 600;
-  }
-
-  /* DIAGRAM SELECTORS */
-  .diagram-controls {
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--dark3);
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .diagram-control-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .diagram-control-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    flex-shrink: 0;
-  }
-
-  .diag-pill {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    cursor: pointer;
-    color: var(--muted);
-    background: var(--dark2);
-    transition: all 0.15s;
-    user-select: none;
-  }
-
-  .diag-pill:hover { border-color: rgba(34,211,238,0.4); color: var(--cyan); }
-  .diag-pill.active { background: rgba(34,211,238,0.1); border-color: var(--cyan); color: var(--cyan); }
-
-  /* DIAGRAM CANVAS */
-  .diagram-canvas {
-    padding: 16px 20px;
-    background: var(--dark2);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: center;
-  }
-
-  .diagram-canvas svg {
-    width: 100%;
-    max-width: 520px;
-    display: block;
-  }
-
-  .diagram-empty {
-    text-align: center;
-    padding: 20px;
-    color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-
-  .coaching-points {
-    margin-top: 12px;
-    padding: 14px 16px;
-    background: rgba(34,211,238,0.04);
-    border-left: 3px solid var(--cyan);
-    border-radius: 0 2px 2px 0;
-    font-size: 13px;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  /* PRINCIPLE TAG */
-  .principle-tag {
-    display: inline-block;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 1px;
-    margin-right: 6px;
-    margin-bottom: 6px;
-  }
-
-  .tag-attack { background: rgba(22,163,74,0.15); color: var(--green); border: 1px solid rgba(22,163,74,0.3); }
-  .tag-defend { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
-  .tag-transition { background: rgba(212,160,23,0.1); color: var(--gold); border: 1px solid rgba(212,160,23,0.2); }
-  .tag-technical { background: rgba(34,211,238,0.1); color: var(--cyan); border: 1px solid rgba(34,211,238,0.2); }
-
-  /* DIVIDER */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 32px 0;
-  }
-
-  /* RESPONSIVE */
-  @media (max-width: 640px) {
-    .form-grid { grid-template-columns: 1fr; }
-    .form-grid.three { grid-template-columns: 1fr 1fr; }
-    header { padding: 14px 16px; }
-    main { padding: 24px 16px 60px; }
-    .form-card { padding: 20px; }
-  }
-
-  /* PRINT */
-  @media print {
-    header, .form-card, .btn-actions, .btn-generate, .loading-bar, .loading-text { display: none !important; }
-    body { background: white; color: black; }
-    .session-block { border: 1px solid #ccc; }
-    .block-name, .output-header h2 { color: black; }
-  }
+  :root{--green:#16a34a;--cyan:#22d3ee;--gold:#d4a017;--dark:#0f1117;--dark2:#161b24;--dark3:#1e2530;--border:rgba(255,255,255,0.08);--text:#e2e8f0;--muted:#64748b}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--dark);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;font-size:15px}
+  header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--dark2);position:sticky;top:0;z-index:100}
+  .logo{display:flex;align-items:baseline;gap:8px}
+  .logo-ajax{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;color:var(--green);letter-spacing:2px;text-transform:uppercase}
+  .logo-aspire{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase}
+  .logo-tag{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+  .badge{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);border:1px solid rgba(34,211,238,0.3);padding:4px 10px;border-radius:2px}
+  main{max-width:900px;margin:0 auto;padding:40px 24px 80px}
+  .page-title{margin-bottom:36px}
+  .page-title h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:42px;text-transform:uppercase;letter-spacing:2px;line-height:1;color:var(--text)}
+  .page-title h1 span{color:var(--cyan)}
+  .page-title p{margin-top:8px;color:var(--muted);font-size:14px;letter-spacing:1px}
+  .form-card{background:var(--dark2);border:1px solid var(--border);border-radius:4px;padding:32px;margin-bottom:32px}
+  .form-section-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .form-grid.three{grid-template-columns:1fr 1fr 1fr}
+  .form-group{display:flex;flex-direction:column;gap:8px}
+  .form-group.full{grid-column:1/-1}
+  label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  select,input,textarea{background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;padding:10px 14px;outline:none;transition:border-color 0.2s;width:100%;-webkit-appearance:none}
+  select:focus,input:focus,textarea:focus{border-color:rgba(34,211,238,0.5)}
+  textarea{resize:vertical;min-height:80px}
+  select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+  .pill-group{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);border-radius:2px;cursor:pointer;color:var(--muted);background:var(--dark3);transition:all 0.15s;user-select:none}
+  .pill:hover{border-color:rgba(34,211,238,0.4);color:var(--cyan)}
+  .pill.active{background:rgba(34,211,238,0.1);border-color:var(--cyan);color:var(--cyan)}
+  .pill.active.green{background:rgba(22,163,74,0.1);border-color:var(--green);color:var(--green)}
+  .btn-generate{width:100%;background:var(--green);color:#fff;border:none;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:3px;text-transform:uppercase;padding:16px;border-radius:3px;cursor:pointer;transition:all 0.2s;margin-top:28px;position:relative;overflow:hidden}
+  .btn-generate:hover:not(:disabled){background:#15803d;transform:translateY(-1px)}
+  .btn-generate:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+  .loading-bar{display:none;height:3px;background:var(--dark3);border-radius:2px;margin-top:12px;overflow:hidden}
+  .loading-bar.active{display:block}
+  .loading-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:2px;animation:loading 2s ease-in-out infinite;width:40%}
+  @keyframes loading{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+  .loading-text{display:none;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-top:10px}
+  .loading-text.active{display:block}
+  #output{display:none;animation:fadeIn 0.4s ease}
+  #output.visible{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+  .output-header h2{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;text-transform:uppercase;letter-spacing:2px}
+  .output-header h2 span{color:var(--cyan)}
+  .btn-copy,.btn-print{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-radius:2px;cursor:pointer;transition:all 0.15s;border:1px solid var(--border);background:var(--dark3);color:var(--muted)}
+  .btn-copy:hover,.btn-print:hover{border-color:var(--cyan);color:var(--cyan)}
+  .btn-actions{display:flex;gap:8px}
+  .session-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+  .meta-chip{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:2px;background:var(--dark3);border:1px solid var(--border);color:var(--muted)}
+  .meta-chip strong{color:var(--text)}
+  .session-block{background:var(--dark2);border:1px solid var(--border);border-radius:4px;margin-bottom:16px;overflow:hidden}
+  .session-block-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
+  .block-label{display:flex;align-items:center;gap:10px}
+  .block-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .dot-cyan{background:var(--cyan)}.dot-green{background:var(--green)}.dot-gold{background:var(--gold)}.dot-muted{background:var(--muted)}
+  .block-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:2px;text-transform:uppercase}
+  .block-duration{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  .session-block-body{padding:20px;font-size:14px;line-height:1.7;color:#cbd5e1;white-space:pre-wrap}
+  .session-block-body strong{color:var(--cyan);font-weight:600}
+  .diagram-controls{padding:12px 20px;border-bottom:1px solid var(--border);background:var(--dark3);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  .diagram-control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .diagram-control-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+  .diag-pill{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--border);border-radius:2px;cursor:pointer;color:var(--muted);background:var(--dark2);transition:all 0.15s;user-select:none}
+  .diag-pill:hover{border-color:rgba(34,211,238,0.4);color:var(--cyan)}
+  .diag-pill.active{background:rgba(34,211,238,0.1);border-color:var(--cyan);color:var(--cyan)}
+  .diagram-canvas{padding:16px 20px;background:var(--dark2);border-bottom:1px solid var(--border);display:flex;justify-content:center}
+  .diagram-canvas svg{width:100%;max-width:520px;display:block}
+  .divider{height:1px;background:var(--border);margin:32px 0}
+  @media(max-width:640px){.form-grid{grid-template-columns:1fr}.form-grid.three{grid-template-columns:1fr 1fr}header{padding:14px 16px}main{padding:24px 16px 60px}.form-card{padding:20px}}
+  @media print{header,.form-card,.btn-actions,.btn-generate,.loading-bar,.loading-text{display:none !important}body{background:white;color:black}.session-block{border:1px solid #ccc}.block-name,.output-header h2{color:black}}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">
     <span class="logo-ajax">Ajax</span>
@@ -599,17 +88,13 @@
   </div>
   <div class="badge">U15 · GA Aspire</div>
 </header>
-
 <main>
-
   <div class="page-title">
     <h1>Build Your <span>Session</span></h1>
     <p>AJAX ASPIRE · COACH SHAWN CRAIG · SEASON 26/27</p>
   </div>
-
   <div class="form-card">
     <div class="form-section-title">Session Parameters</div>
-
     <div class="form-grid three">
       <div class="form-group">
         <label>Session Duration</label>
@@ -636,8 +121,7 @@
         </select>
       </div>
     </div>
-
-    <div style="margin-top: 24px;">
+    <div style="margin-top:24px">
       <div class="form-section-title">Game Moment</div>
       <div class="pill-group" id="momentGroup">
         <div class="pill active" data-val="attacking">Attacking / In Possession</div>
@@ -647,8 +131,7 @@
         <div class="pill" data-val="set_pieces">Set Pieces</div>
       </div>
     </div>
-
-    <div style="margin-top: 24px;">
+    <div style="margin-top:24px">
       <div class="form-section-title">Training Load (3-Load Model)</div>
       <div class="pill-group" id="loadGroup">
         <div class="pill" data-val="low">Low — Recovery / Technical</div>
@@ -656,16 +139,14 @@
         <div class="pill" data-val="high">High — Match Intensity</div>
       </div>
     </div>
-
-    <div style="margin-top: 24px;">
+    <div style="margin-top:24px">
       <div class="form-section-title">Session Focus</div>
       <div class="form-group">
         <label>Specific Focus or Game Situation</label>
         <textarea id="focus" placeholder="e.g. Breaking lines in the final third — timing the run in behind, #7 L-shaped run, #10 through ball. Or: Building out under pressure from the back 4..."></textarea>
       </div>
-
-      <div style="margin-top: 16px;">
-        <label style="display:block; margin-bottom: 8px;">Defensive Context (if relevant)</label>
+      <div style="margin-top:16px">
+        <label style="display:block;margin-bottom:8px">Defensive Context (if relevant)</label>
         <div class="pill-group" id="defenseGroup">
           <div class="pill" data-val="high_press">High Press</div>
           <div class="pill" data-val="mid_block">Mid Block 4-4-2</div>
@@ -674,8 +155,7 @@
         </div>
       </div>
     </div>
-
-    <div style="margin-top: 24px;">
+    <div style="margin-top:24px">
       <div class="form-section-title">Context (Optional)</div>
       <div class="form-grid">
         <div class="form-group">
@@ -688,15 +168,28 @@
         </div>
       </div>
     </div>
-
-    <button class="btn-generate" id="generateBtn" onclick="generateSession()">
-      Generate Session Plan
-    </button>
+    <div style="margin-top:24px">
+      <div class="form-section-title">Roster (Optional)</div>
+      <div class="form-grid three">
+        <div class="form-group">
+          <label>Players Today</label>
+          <input type="number" id="playersToday" min="8" max="22" placeholder="e.g. 17">
+        </div>
+        <div class="form-group">
+          <label>Missing Players / Notes</label>
+          <input type="text" id="missing" placeholder="e.g. Missing both starting CBs">
+        </div>
+        <div class="form-group">
+          <label>Last Session Notes</label>
+          <input type="text" id="lastSession" placeholder="e.g. 8/10 crowding the 6 again">
+        </div>
+      </div>
+    </div>
+    <button class="btn-generate" id="generateBtn" onclick="generateSession()">Generate Session Plan</button>
     <div class="loading-bar" id="loadingBar"><div class="loading-fill"></div></div>
     <div class="loading-text" id="loadingText">Building your session...</div>
   </div>
 
-  <!-- OUTPUT -->
   <div id="output">
     <div class="divider"></div>
     <div class="output-header">
@@ -709,24 +202,17 @@
     <div id="sessionMeta" class="session-meta"></div>
     <div id="sessionContent"></div>
   </div>
-
 </main>
 
 <script>
-  // PILL SELECTION (single select per group)
+  // PILL SELECTION
   document.querySelectorAll('.pill-group').forEach(group => {
     group.querySelectorAll('.pill').forEach(pill => {
       pill.addEventListener('click', () => {
-        group.querySelectorAll('.pill').forEach(p => p.classList.remove('active', 'green'));
-        pill.classList.add('active');
-        // Moment pills stay cyan; load and defense use green where relevant
         const groupId = group.id;
-        if (groupId === 'loadGroup' || groupId === 'defenseGroup') {
-          pill.classList.add('green');
-          pill.classList.remove('active');
-          group.querySelectorAll('.pill').forEach(p => p.classList.remove('active','green'));
-          pill.classList.add('active','green');
-        }
+        group.querySelectorAll('.pill').forEach(p => p.classList.remove('active','green'));
+        pill.classList.add('active');
+        if (groupId === 'loadGroup' || groupId === 'defenseGroup') pill.classList.add('green');
       });
     });
   });
@@ -742,15 +228,18 @@
     const loadingText = document.getElementById('loadingText');
     const output = document.getElementById('output');
 
-    const duration = document.getElementById('duration').value;
-    const players = document.getElementById('players').value;
-    const week = document.getElementById('week').value;
-    const moment = getSelected('momentGroup');
-    const load = getSelected('loadGroup');
-    const defense = getSelected('defenseGroup');
-    const focus = document.getElementById('focus').value;
-    const issue = document.getElementById('issue').value;
-    const opponent = document.getElementById('opponent').value;
+    const duration    = document.getElementById('duration').value;
+    const players     = document.getElementById('players').value;
+    const week        = document.getElementById('week').value;
+    const moment      = getSelected('momentGroup');
+    const load        = getSelected('loadGroup');
+    const defense     = getSelected('defenseGroup');
+    const focus       = document.getElementById('focus').value;
+    const issue       = document.getElementById('issue').value;
+    const opponent    = document.getElementById('opponent').value;
+    const playersToday = document.getElementById('playersToday').value;
+    const missing     = document.getElementById('missing').value;
+    const lastSession = document.getElementById('lastSession').value;
 
     btn.disabled = true;
     btn.textContent = 'Building Session...';
@@ -758,144 +247,178 @@
     loadingText.classList.add('active');
     output.classList.remove('visible');
 
-    const systemPrompt = `You are Coach Shawn Craig's personal session planning assistant for the Ajax Aspire U15 Girls Academy team, Season 26/27.
+    const systemPrompt = `You are Coach Shawn Craig's personal session planning assistant for the Ajax Aspire U15 Girls Academy, Season 26/27. You know this team, this coach, and this game model inside out. Every session you write must be immediately usable on a clipboard on the sideline — not a coaching manual, not a textbook. If it can't be read in 10 seconds per section, it's too long.
 
-COACHING IDENTITY:
-Our identity is built on reading the game and solving the problem in front of us:
-- If we have to sit deep and counter-attack → Italian
-- If we win the ball with no immediate counter → Spanish  
-- If the fastest solution is forward → German
+COACH'S VOICE — WRITE LIKE THIS, NOT LIKE A TEXTBOOK:
+Direct. High-standard. No fluff. Punchy one-liners that land.
+Good: "If #6 is pressed — bounce it back. Don't force it."
+Bad: "When the #6 player finds themselves under pressure, they should consider playing a first-time return pass."
+Good: "Compete on every rep. No casual standards."
+Bad: "We encourage players to maintain high levels of effort throughout all activities."
+The players are 14-15 year old girls. They respond to clarity, confidence, and being trusted with real information. They shut down under vague instruction or yelling.
+
+THIS TEAM — KNOW IT:
+- U15 Girls Academy, Girls Academy Aspire league, Season 26/27
+- 19 rostered players, 15-19 at any given session
+- Universal team gap: Duels / 1v1s — every player rated themselves 2-3
+- Universal team theme: Confidence — named by every player and every parent independently
+- Midfield crowding problem: #8 and #10 both drop near #6, killing build-out — this is the team's biggest in-possession problem
+- Players respond to recognition and being trusted with tactical responsibility
+- Several players shut down when yelled at — guided discovery works better than commands
+- Every session needs at least one moment where players succeed visibly in front of teammates
 
 GAME MODEL — IN POSSESSION:
-1. Look Forward First — play it if it's on, reset if not
-2. Create Superiority Off the Ball — never stand in the same line as a teammate, every run opens space
-3. Recognize the Moment and Commit — when space opens behind their line, take it. Be brave in 1v1s
-4. Build Until the Moment Arrives. Then Be Ruthless — quality over volume
+1. Look Forward First — play it if it's on, reset if not. "Patience creates the moment, bravery takes it." Example: #6 receives — is weak-side #7 or #11 open? If not, combine with #8/#10.
+2. Avoid Standing in the Same Line — every run opens space for you or a teammate
+3. See It, Take It — space opens behind their line, take it. Hesitation is the only mistake.
+4. Build Patient, Finish Ruthless — calm decision-making moves the defense, creates the moment
+
+MIDFIELD SPINE (4-3-3) — critical, this is the team's biggest problem:
+- #6 shows first — checks to ball, everyone reacts to where #6 goes
+- #8 goes opposite — lifts into opposite half-space from #6, NEVER same line, NEVER following the ball
+- #10 stays high — pocket between opponent's last two lines, NEVER drops below their midfield line
+- Role switch: ball goes to #8's side → #8 lifts into #10 window, #10 drops into #8 half-space. Jobs stay the same, players switch.
+- Crowding fix: if #8 and #10 are in the same patch, the press wins. Separation is the job.
+
+BUILD-OUT PLANS:
+- Plan A (Wide): GK → CB → FB wide → skip to #8 or #10 (first look), or #6 as relief
+- Plan B (Pivot): GK → free #6 → #8 → #10 diagonal
+- Plan C (Over): #6 decoys, CB drives ball over press → #10 pocket, #8 wins second ball
+- Bounce escape: #6 pressed immediately → first-time bounce to CB → CB switches side
 
 GAME MODEL — OUT OF POSSESSION:
-1. Defending Starts at the Front — every player is a defender immediately
-2. Five Seconds. Hunt — counter-press in the first 5 seconds after losing the ball
-3. Defend as One Body — compact, no daylight between lines
-4. Know Your Role in the Moment — Pressure, Cover, or Balance. Read it.
+1. Everyone Defends — the moment we lose it, every player is a defender
+2. Five Seconds, Hunt — counter-press as a unit immediately. Not one player chasing alone.
+3. Defend as One Body — compact, connected, no gaps between lines
+4. Know Your Job: Pressure, Cover, or Balance — read it, own it, say it out loud
 
 DEFENSIVE SPECTRUM:
-- High Press: Trigger-based, coordinated. Triggers: bad first touch, slow pass, opponent facing own goal, GK with ball. Commit fully or hold shape.
-- Mid Block (4-4-2): Zonal compactness. Two connected banks. Force play into predictable corridors. Move as a unit.
-- Emergency / Box Defense: Zonal is over — grab your mark. Clear your lines. No heroics.
+- High Press: trigger-based. Triggers: bad touch, slow pass, opponent facing own goal, GK in hands. Commit fully or hold. Half-pressing is worse than not pressing.
+- Mid Block (4-4-2): two connected banks, zonal, force into predictable corridors, move as unit
+- Emergency / Box Defense: zonal is over, grab your mark, clear your lines, no heroics
 
-OFFENSIVE SPECTRUM:
-- Build Out (Constructive): Patient build from the back through the thirds. GK reads the press and selects Plan A (around — FB wide), Plan B (through — #6 pivot unmarked), or Plan C (over — CB plays over press into #10 pocket). Never forced, always read.
-- Combination Play (Progression): Quick connecting passes to advance through lines. 1-2s, overlaps, underlaps, give-and-go's in the half spaces. #8 and #10 operate between lines on different vertical planes. #7 and #11 provide width, #6 anchors the triangle. Move the ball with purpose, not just possession.
-- Direct / Transition Attack (Penetration): When we win the ball with space in behind, go immediately — same five-second urgency as the counter-press but in the other direction. #9 pins the defensive line, #7 or #11 makes the run in behind, #6 or #8 plays the line-breaker. No hesitation. This is the fastest solution forward.
+ATTACKING SPECTRUM:
+- Build Out: patient, Plan A/B/C
+- Combination Play: quick passing through lines, #8/#10 on different vertical planes, #2/#3 overlap when winger cuts inside
+- Direct Attack: 5-second urgency, #7/#11 create width, #9 creates depth
 
-POSITIONAL SYSTEM (4-3-3 / 4-2-3-1):
-- #1 GK, #2 & #3 Full Backs, #4 & #5 Center Backs, #6 CDM, #8 & #10 Attacking Mids, #7 & #11 Wide Forwards, #9 Centre Forward
-- #7: L-shaped runs in behind to pull defenders, brave 1v1s, cross low to front post
-- #10: Half-space positioning as visual cue, line-breaking passes, freedom to create
-- #9: Hold the line, focal point, drop to create mid-diamond shape when needed, don't allow switch of play
-- #6: Relief valve, bottom of triangle, win second balls on punts
+POSITIONAL SYSTEM (4-3-3) — ALWAYS use numbers, NEVER position names:
+#1 GK | #2 RB | #3 LB | #4 CB | #5 CB | #6 CDM | #8 CM | #10 CM | #7 RW | #11 LW | #9 ST
+- #7: L-shaped runs in behind, brave 1v1s, low cross to front post
+- #10: half-space positioning, line-breaking passes, freedom to create
+- #9: pins the back line, focal point, never drops to help build unless planned
+- #6: relief valve, bottom of triangle, wins second balls
+- #2/#3: ahead of CBs, diagonal passing lane, overlap when winger cuts inside
 
-SESSION FORMAT (US Soccer C-Course style):
-- Arrival/Warm-Up Activity (SSG or technical)
-- Activity 1: Establish the pattern (unopposed or semi-opposed)
-- Activity 2: Add opposition/constraints
-- Activity 3: Game application (8v8 or similar)
-- Each activity includes: objective, field size, players, scoring, duration, reps/sets, coaching points, when/how to intervene
+ROSTER SCALING — MANDATORY FOR EVERY ACTIVITY:
+Full roster: 19. Typical attendance: 15-19. Include Scaling Notes for every single activity.
+Decide the band at warm-up when you see who showed up — don't re-decide mid-session.
+Preferred methods: parallel grids, extra target players, joker roles, rolling subs. Never idle players.
 
-PLAYER STANDARDS:
-High fives, encouragement, energy. Be coachable. Compete on every rep. No casual standards.
+SESSION FORMAT (C-Course — US Soccer):
+1. Warm-Up — SSG or technical, SMALLEST space
+2. Activity 1 — Establish the pattern, MEDIUM space
+3. Activity 2 — Add opposition and ONE new constraint, LARGER space
+4. Activity 3 — Game application 8v8, LARGEST space
+Spatial progression is non-negotiable. Equipment transitions remove cones, never add them.
+Name every activity with its shape: "Box Rondo 4v2 — Pressing Triggers" not just "Pressing."
 
-FIELD & EQUIPMENT REALITY:
-Coach has access to quarter field, half field, or full field — never assumes a full field is available. Equipment: full size goals, 9v9 goals, mini goals, and cones. Design sessions with spatial progression — each activity expands from the previous one. Warm-up uses the smallest space. Activities 1 and 2 expand outward. Final game activity uses the largest space. Equipment transitions should remove cones rather than add them. Name each activity with the drill shape included e.g. "Horizontal Channel — Build Out Progression" or "Box Rondo 4v1 — Pressing Triggers" or "Half Field 8v8 — Defensive Shape".
+U15 DEVELOPMENTAL REQUIREMENTS — NON-NEGOTIABLE:
+1. Every activity must have a built-in success mechanism — players feel competent before constraint increases
+2. Coaching intervention tone is ALWAYS guided discovery — "What did you see?" not "Do it this way"
+3. High load sessions must note rest intervals explicitly
+4. Confidence thread: name exactly where in the session a player succeeds visibly in front of teammates
+5. Activity 2 adds only ONE new constraint from Activity 1 — never a complete redesign
 
-OUTPUT CONSTRAINTS — CRITICAL:
-- This plan will be read on a clipboard on the sideline. Be concise and scannable.
-- SESSION OVERVIEW: 2-3 sentences max. Coach's voice, no fluff.
-- OBJECTIVES: 2 bullet points only.
-- COACHING POINTS: 3 bullet points max. One line each.
-- Each activity RULES & CONSTRAINTS: 2-3 sentences only. Key constraints, nothing more.
-- Each activity COACHING FOCUS: 3 bullet points max. One line each.
-- Each activity WHEN TO INTERVENE: One sentence only.
-- PROGRESSION: One sentence only.
-- HALF-TIME NOTES: 2 bullet points max.
+OUTPUT FORMAT — CLIPBOARD RULES. IF YOU EXCEED THESE LIMITS, CUT CONTENT, NEVER EXPAND:
+- SESSION OVERVIEW: 2 sentences max. Coach's voice. No motivation speech.
+- OBJECTIVES: 2 bullets. One line each.
+- COACHING POINTS: 3 bullets MAX. One sharp phrase each.
+- RULES & CONSTRAINTS: 3 sentences max per activity.
+- COACHING FOCUS: 3 bullets max per activity. One line each. Position numbers only.
+- WHEN TO INTERVENE: One guided discovery question per activity. Not a command.
+- PROGRESSION: One sentence per activity.
+- SCALING NOTES: One line per band per activity.
+- HALF-TIME NOTES: 2 bullets max.
 - REFLECTION QUESTIONS: 2 questions max.
-- Use position numbers (#7, #9, etc.) not position names.
-- No padding, no repetition, no restating what was already said.
 
-OUTPUT FORMAT:
-Return a structured session plan in this exact format with these section headers:
+OUTPUT STRUCTURE — use these exact headers:
 
 SESSION OVERVIEW
-[2-3 sentences max]
+[2 sentences max]
 
 OBJECTIVES
-[2 bullet points]
+[2 bullets]
 
 COACHING POINTS
-[3 bullet points max, one line each]
+[3 bullets max]
 
 PRINCIPLES ADDRESSED
-[List: In Possession / Out of Possession + specific sub-principles]
+[list]
+
+CONFIDENCE MOMENT
+[one sentence — where does a player succeed visibly?]
 
 ---ACTIVITY: WARM-UP---
-Name: [creative drill name]
-Duration: [X min] | Players: [X] | Setup: [field size/shape]
+Name: [shape + focus]
+Duration: [X min] | Players: [X] | Setup: [field size — always smallest]
 Scoring: [one line]
-Rules & Constraints: [2-3 sentences]
-Coaching Focus: [3 bullets max, one line each]
-When to Intervene: [one sentence]
+Rules & Constraints: [3 sentences max]
+Coaching Focus: [3 bullets, one line each, position numbers]
+When to Intervene: [one guided discovery question]
+Scaling Notes: 15-16: [one line] | 17: [one line] | 18-19: [one line]
 
 ---ACTIVITY: ACTIVITY 1---
-Name: [creative drill name]
-Duration: [X min] | Players: [X] | Setup: [field size/shape]
+Name: [shape + focus]
+Duration: [X min] | Players: [X] | Setup: [medium field size]
 Objective: [one line]
 Scoring: [one line]
-Rules & Constraints: [2-3 sentences]
-Coaching Focus: [3 bullets max, one line each]
-When to Intervene: [one sentence]
-Progression: [one sentence]
+Rules & Constraints: [3 sentences max]
+Coaching Focus: [3 bullets, one line each, position numbers]
+When to Intervene: [one guided discovery question]
+Progression: [one sentence — one new constraint only]
+Scaling Notes: 15-16: [one line] | 17: [one line] | 18-19: [one line]
 
 ---ACTIVITY: ACTIVITY 2---
-[same format]
+[same format, larger space, one new constraint from Activity 1]
 
 ---ACTIVITY: ACTIVITY 3 (GAME)---
-[same format, 8v8 or similar match scenario]
+[same format, largest space, 8v8]
 
 HALF-TIME / REST NOTES
-[2 bullet points max]
+[2 bullets max]
 
 POST-SESSION REFLECTION QUESTIONS
-[2 guided discovery questions]
+[2 guided discovery questions]`;
 
-Write in Coach Shawn's voice: direct, high-standard, tactically intelligent. Reference specific position numbers. No fluff.`;
-
-    const userPrompt = `Build me a complete session plan with these parameters:
+    const userPrompt = `Build me a complete session plan:
 
 Duration: ${duration} minutes
-Players: ${players}
+Full Roster: 19 players | Today's Attendance: ${playersToday || 'unknown — plan for 15-19'}
 Season Phase: ${week}
 Game Moment: ${moment}
 Training Load: ${load}
 Defensive Context: ${defense}
-${focus ? `Session Focus / Game Situation: ${focus}` : ''}
+${focus ? `Session Focus: ${focus}` : ''}
 ${issue ? `Recent Issue to Address: ${issue}` : ''}
 ${opponent ? `Upcoming Opponent: ${opponent}` : ''}
+${missing ? `Missing Players / Notes: ${missing}` : ''}
+${lastSession ? `Last Session Notes: ${lastSession}` : ''}
 
-Make sure all activities connect directly to our game model principles and use our positional numbering system. The session should feel like it was written by a licensed coach who knows this team.`;
+Connect every activity directly to our game model. Use our positional numbering. Include Scaling Notes for every activity.`;
 
     try {
-      const response = await fetch("/.netlify/functions/session-planner", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/.netlify/functions/session-planner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ systemPrompt, userPrompt })
       });
 
       const data = await response.json();
       const text = data.text || data.error || 'No response received.';
-
       renderSession(text, { duration, players, week, moment, load });
 
-    } catch (err) {
+    } catch(err) {
       document.getElementById('sessionContent').innerHTML = `<div style="color:#f87171;padding:20px;">Error generating session. Please try again.</div>`;
       output.classList.add('visible');
     }
@@ -910,64 +433,41 @@ Make sure all activities connect directly to our game model principles and use o
     const output = document.getElementById('output');
     const metaEl = document.getElementById('sessionMeta');
     const contentEl = document.getElementById('sessionContent');
-
-    // META CHIPS
-    const weekLabels = { preseason:'Preseason', early:'Early Season', mid:'Mid Season', late:'Late Season', preGame:'Pre-Match Week' };
-    const momentLabels = { attacking:'Attacking', defending:'Defending', transition:'Transition', technical:'Technical', set_pieces:'Set Pieces' };
-    const loadLabels = { low:'Low Load', medium:'Medium Load', high:'High Load' };
-
+    const weekLabels = {preseason:'Preseason',early:'Early Season',mid:'Mid Season',late:'Late Season',preGame:'Pre-Match Week'};
+    const momentLabels = {attacking:'Attacking',defending:'Defending',transition:'Transition',technical:'Technical',set_pieces:'Set Pieces'};
+    const loadLabels = {low:'Low Load',medium:'Medium Load',high:'High Load'};
     metaEl.innerHTML = `
       <div class="meta-chip"><strong>${params.duration} min</strong></div>
       <div class="meta-chip"><strong>${params.players}</strong> players</div>
-      <div class="meta-chip"><strong>${momentLabels[params.moment] || params.moment}</strong></div>
-      <div class="meta-chip"><strong>${loadLabels[params.load] || params.load}</strong></div>
-      <div class="meta-chip">${weekLabels[params.week] || params.week}</div>
-    `;
-
-    // PARSE AND RENDER
+      <div class="meta-chip"><strong>${momentLabels[params.moment]||params.moment}</strong></div>
+      <div class="meta-chip"><strong>${loadLabels[params.load]||params.load}</strong></div>
+      <div class="meta-chip">${weekLabels[params.week]||params.week}</div>`;
     contentEl.innerHTML = '';
-
-    // Split into sections by activity markers and main sections
-    const sections = parseSessionText(text);
-    sections.forEach(section => {
-      contentEl.appendChild(renderBlock(section));
-    });
-
+    parseSessionText(text).forEach(section => contentEl.appendChild(renderBlock(section)));
     output.classList.add('visible');
-    output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    output.scrollIntoView({ behavior:'smooth', block:'start' });
   }
 
   function parseSessionText(text) {
     const lines = text.split('\n');
     const sections = [];
     let current = null;
-
+    const mainHeaders = ['SESSION OVERVIEW','OBJECTIVES','COACHING POINTS','PRINCIPLES ADDRESSED','HALF-TIME / REST NOTES','POST-SESSION REFLECTION QUESTIONS'];
     lines.forEach(line => {
       const trimmed = line.trim();
-
-      // Detect activity headers
       if (trimmed.startsWith('---ACTIVITY:')) {
         if (current) sections.push(current);
-        const name = trimmed.replace(/---ACTIVITY:\s*/,'').replace(/---/,'').trim();
-        current = { type: 'activity', title: name, content: '' };
+        current = { type:'activity', title:trimmed.replace(/---ACTIVITY:\s*/,'').replace(/---/,'').trim(), content:'' };
         return;
       }
-
-      // Detect main section headers (all caps lines or known headers)
-      const mainHeaders = ['SESSION OVERVIEW', 'OBJECTIVES', 'COACHING POINTS', 'PRINCIPLES ADDRESSED', 'HALF-TIME / REST NOTES', 'POST-SESSION REFLECTION QUESTIONS'];
       if (mainHeaders.includes(trimmed)) {
         if (current) sections.push(current);
-        current = { type: 'info', title: trimmed, content: '' };
+        current = { type:'info', title:trimmed, content:'' };
         return;
       }
-
-      if (current) {
-        current.content += line + '\n';
-      } else if (trimmed) {
-        current = { type: 'info', title: 'SESSION', content: line + '\n' };
-      }
+      if (current) current.content += line + '\n';
+      else if (trimmed) current = { type:'info', title:'SESSION', content:line + '\n' };
     });
-
     if (current) sections.push(current);
     return sections.filter(s => s.content.trim());
   }
@@ -975,23 +475,18 @@ Make sure all activities connect directly to our game model principles and use o
   function renderBlock(section) {
     const block = document.createElement('div');
     block.className = 'session-block';
-
-    const isActivity = section.type === 'activity';
     const title = section.title;
-
+    const isActivity = section.type === 'activity';
     let dotClass = 'dot-muted';
     let nameColor = '';
-    if (title.includes('WARM-UP')) { dotClass = 'dot-cyan'; }
-    else if (title.includes('ACTIVITY 1')) { dotClass = 'dot-green'; }
-    else if (title.includes('ACTIVITY 2')) { dotClass = 'dot-gold'; }
-    else if (title.includes('GAME') || title.includes('ACTIVITY 3')) { dotClass = 'dot-cyan'; nameColor = 'color: var(--cyan)'; }
-    else if (title.includes('OVERVIEW')) { dotClass = 'dot-cyan'; }
-    else if (title.includes('OBJECTIVES') || title.includes('COACHING')) { dotClass = 'dot-green'; }
-    else if (title.includes('REFLECTION') || title.includes('HALF')) { dotClass = 'dot-gold'; }
-
-    const blockId = 'block-' + Math.random().toString(36).substr(2, 6);
-
-    // Build diagram controls only for activities
+    if (title.includes('WARM-UP')) dotClass = 'dot-cyan';
+    else if (title.includes('ACTIVITY 1')) dotClass = 'dot-green';
+    else if (title.includes('ACTIVITY 2')) dotClass = 'dot-gold';
+    else if (title.includes('GAME') || title.includes('ACTIVITY 3')) { dotClass = 'dot-cyan'; nameColor = 'color:var(--cyan)'; }
+    else if (title.includes('OVERVIEW')) dotClass = 'dot-cyan';
+    else if (title.includes('OBJECTIVES') || title.includes('COACHING')) dotClass = 'dot-green';
+    else if (title.includes('REFLECTION') || title.includes('HALF')) dotClass = 'dot-gold';
+    const blockId = 'block-' + Math.random().toString(36).substr(2,6);
     let diagramHTML = '';
     if (isActivity) {
       diagramHTML = `
@@ -1020,11 +515,8 @@ Make sure all activities connect directly to our game model principles and use o
             <span class="diag-pill active" onclick="setDiagram('${blockId}','type','open',this)">Open</span>
           </div>
         </div>
-        <div class="diagram-canvas" id="canvas-${blockId}">
-          ${drawDiagram('half','open')}
-        </div>`;
+        <div class="diagram-canvas" id="canvas-${blockId}">${drawDiagram('half','open')}</div>`;
     }
-
     block.innerHTML = `
       <div class="session-block-header">
         <div class="block-label">
@@ -1033,492 +525,114 @@ Make sure all activities connect directly to our game model principles and use o
         </div>
       </div>
       ${diagramHTML}
-      <div class="session-block-body">${formatContent(section.content)}</div>
-    `;
-
-    // Store state
-    if (isActivity) {
-      block._diagState = { size: 'half', type: 'open' };
-      block._blockId = blockId;
-    }
-
+      <div class="session-block-body">${formatContent(section.content)}</div>`;
     return block;
   }
 
-  // Track diagram state per block
   const diagStates = {};
-
   function setDiagram(blockId, key, val, pill) {
-    if (!diagStates[blockId]) diagStates[blockId] = { size: 'half', type: 'open' };
+    if (!diagStates[blockId]) diagStates[blockId] = { size:'half', type:'open' };
     diagStates[blockId][key] = val;
-
-    // Update pill active state within the same group
-    const group = pill.parentElement;
-    group.querySelectorAll('.diag-pill').forEach(p => p.classList.remove('active'));
+    pill.parentElement.querySelectorAll('.diag-pill').forEach(p => p.classList.remove('active'));
     pill.classList.add('active');
-
-    // Re-render diagram
     const canvas = document.getElementById('canvas-' + blockId);
     if (canvas) canvas.innerHTML = drawDiagram(diagStates[blockId].size, diagStates[blockId].type);
   }
 
-  // ═══════════════════════════════════════════════════════
-  // SVG DIAGRAM LIBRARY — US Soccer Diagramming Standards
-  // Your team = blue filled triangles (attack UP)
-  // Opposition = red filled circles (attack DOWN)
-  // Passes = solid line + arrowhead
-  // Dribble = wavy line + arrowhead
-  // Movement without ball = dashed line + arrowhead
-  // Tactical = solid red line
-  // ═══════════════════════════════════════════════════════
-
   function drawDiagram(size, type) {
-    // Field dimensions based on size
-    const dims = {
-      quarter:     { w: 400, h: 280, label: 'Quarter Field' },
-      half:        { w: 400, h: 360, label: 'Half Field' },
-      threequarter:{ w: 400, h: 460, label: '¾ Field' },
-      full:        { w: 400, h: 560, label: 'Full Field' }
-    };
+    const dims = { quarter:{w:400,h:280,label:'Quarter Field'}, half:{w:400,h:360,label:'Half Field'}, threequarter:{w:400,h:460,label:'¾ Field'}, full:{w:400,h:560,label:'Full Field'} };
     const d = dims[size] || dims.half;
-
-    // Build SVG
-    let svg = `<svg viewBox="0 0 ${d.w} ${d.h}" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;width:100%;">`;
-    svg += fieldBase(d.w, d.h, size);
-    svg += diagramContent(type, d.w, d.h, size);
-    svg += fieldLabel(d.w, d.h, d.label, type);
-    svg += `</svg>`;
-    return svg;
+    return `<svg viewBox="0 0 ${d.w} ${d.h}" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;width:100%;">${fieldBase(d.w,d.h,size)}${diagramContent(type,d.w,d.h,size)}${fieldLabel(d.w,d.h,d.label,type)}</svg>`;
   }
 
   function fieldBase(w, h, size) {
-    // Green field with horizontal stripes
     let s = `<rect width="${w}" height="${h}" fill="#2d6a2d" rx="4"/>`;
-
-    // Horizontal shadow stripes
-    const stripeH = h / 8;
-    for (let i = 0; i < 8; i++) {
-      if (i % 2 === 0) s += `<rect x="0" y="${i * stripeH}" width="${w}" height="${stripeH}" fill="rgba(0,0,0,0.06)"/>`;
-    }
-
-    // Field border
+    const sh = h/8;
+    for (let i=0;i<8;i++) if(i%2===0) s+=`<rect x="0" y="${i*sh}" width="${w}" height="${sh}" fill="rgba(0,0,0,0.06)"/>`;
     s += `<rect x="8" y="8" width="${w-16}" height="${h-16}" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
-
-    // Field lines based on size
-    if (size === 'full') {
-      // Halfway line
-      s += `<line x1="8" y1="${h/2}" x2="${w-8}" y2="${h/2}" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>`;
-      // Centre circle
-      s += `<circle cx="${w/2}" cy="${h/2}" r="45" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
-      s += `<circle cx="${w/2}" cy="${h/2}" r="3" fill="rgba(255,255,255,0.7)"/>`;
-      // Top penalty box
-      s += `<rect x="${w*0.25}" y="8" width="${w*0.5}" height="${h*0.14}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
-      // Top 6-yard
-      s += `<rect x="${w*0.36}" y="8" width="${w*0.28}" height="${h*0.055}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
-      // Top goal
-      s += `<rect x="${w*0.4}" y="2" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
-      // Bottom penalty box
-      s += `<rect x="${w*0.25}" y="${h-8-h*0.14}" width="${w*0.5}" height="${h*0.14}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
-      // Bottom 6-yard
-      s += `<rect x="${w*0.36}" y="${h-8-h*0.055}" width="${w*0.28}" height="${h*0.055}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
-      // Bottom goal
-      s += `<rect x="${w*0.4}" y="${h-12}" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
-      // Penalty spots
-      s += `<circle cx="${w/2}" cy="${h*0.12}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
-      s += `<circle cx="${w/2}" cy="${h*0.88}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
-
-    } else if (size === 'threequarter') {
-      // Attacking end full box
-      s += `<rect x="${w*0.25}" y="8" width="${w*0.5}" height="${h*0.18}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
-      s += `<rect x="${w*0.36}" y="8" width="${w*0.28}" height="${h*0.07}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
-      s += `<rect x="${w*0.4}" y="2" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
-      s += `<circle cx="${w/2}" cy="${h*0.15}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
-      // Halfway-ish line at bottom
-      s += `<line x1="8" y1="${h*0.82}" x2="${w-8}" y2="${h*0.82}" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="6,4"/>`;
-
-    } else if (size === 'half') {
-      // One penalty box at top
-      s += `<rect x="${w*0.25}" y="8" width="${w*0.5}" height="${h*0.22}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
-      s += `<rect x="${w*0.36}" y="8" width="${w*0.28}" height="${h*0.085}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
-      s += `<rect x="${w*0.4}" y="2" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
-      s += `<circle cx="${w/2}" cy="${h*0.18}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
-      // Half line at bottom
-      s += `<line x1="8" y1="${h-8}" x2="${w-8}" y2="${h-8}" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
-      // Half circle
-      s += `<path d="M ${w*0.25} ${h-8} A 60 60 0 0 0 ${w*0.75} ${h-8}" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>`;
-
+    if (size==='full') {
+      s+=`<line x1="8" y1="${h/2}" x2="${w-8}" y2="${h/2}" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>`;
+      s+=`<circle cx="${w/2}" cy="${h/2}" r="45" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      s+=`<circle cx="${w/2}" cy="${h/2}" r="3" fill="rgba(255,255,255,0.7)"/>`;
+      s+=`<rect x="${w*0.25}" y="8" width="${w*0.5}" height="${h*0.14}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      s+=`<rect x="${w*0.36}" y="8" width="${w*0.28}" height="${h*0.055}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      s+=`<rect x="${w*0.4}" y="2" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
+      s+=`<rect x="${w*0.25}" y="${h-8-h*0.14}" width="${w*0.5}" height="${h*0.14}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      s+=`<rect x="${w*0.36}" y="${h-8-h*0.055}" width="${w*0.28}" height="${h*0.055}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      s+=`<rect x="${w*0.4}" y="${h-12}" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
+      s+=`<circle cx="${w/2}" cy="${h*0.12}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
+      s+=`<circle cx="${w/2}" cy="${h*0.88}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
+    } else if (size==='threequarter') {
+      s+=`<rect x="${w*0.25}" y="8" width="${w*0.5}" height="${h*0.18}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      s+=`<rect x="${w*0.36}" y="8" width="${w*0.28}" height="${h*0.07}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      s+=`<rect x="${w*0.4}" y="2" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
+      s+=`<circle cx="${w/2}" cy="${h*0.15}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
+      s+=`<line x1="8" y1="${h*0.82}" x2="${w-8}" y2="${h*0.82}" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="6,4"/>`;
+    } else if (size==='half') {
+      s+=`<rect x="${w*0.25}" y="8" width="${w*0.5}" height="${h*0.22}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+      s+=`<rect x="${w*0.36}" y="8" width="${w*0.28}" height="${h*0.085}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      s+=`<rect x="${w*0.4}" y="2" width="${w*0.2}" height="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>`;
+      s+=`<circle cx="${w/2}" cy="${h*0.18}" r="2.5" fill="rgba(255,255,255,0.7)"/>`;
+      s+=`<line x1="8" y1="${h-8}" x2="${w-8}" y2="${h-8}" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
+      s+=`<path d="M ${w*0.25} ${h-8} A 60 60 0 0 0 ${w*0.75} ${h-8}" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>`;
     } else {
-      // Quarter field — just border and maybe mini goals
-      s += `<line x1="8" y1="${h-8}" x2="${w-8}" y2="${h-8}" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>`;
+      s+=`<line x1="8" y1="${h-8}" x2="${w-8}" y2="${h-8}" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>`;
     }
-
     return s;
   }
 
-  // Blue triangle for our players (attack UP)
-  function playerTriangle(x, y, num, hasball) {
-    const size = 14;
-    const pts = `${x},${y-size} ${x-size*0.85},${y+size*0.5} ${x+size*0.85},${y+size*0.5}`;
-    let s = `<polygon points="${pts}" fill="${hasball ? '#1d4ed8' : '#2563eb'}" stroke="white" stroke-width="1.5"/>`;
-    s += `<text x="${x}" y="${y+6}" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="white">${num}</text>`;
-    return s;
+  function playerTriangle(x,y,num,hasball) {
+    const sz=14, pts=`${x},${y-sz} ${x-sz*0.85},${y+sz*0.5} ${x+sz*0.85},${y+sz*0.5}`;
+    return `<polygon points="${pts}" fill="${hasball?'#1d4ed8':'#2563eb'}" stroke="white" stroke-width="1.5"/><text x="${x}" y="${y+6}" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="white">${num}</text>`;
   }
-
-  // Red circle for opposition (attack DOWN)
-  function oppCircle(x, y, num) {
-    let s = `<circle cx="${x}" cy="${y}" r="14" fill="#dc2626" stroke="white" stroke-width="1.5"/>`;
-    s += `<text x="${x}" y="${y+4}" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="white">${num}</text>`;
-    return s;
+  function oppCircle(x,y,num) {
+    return `<circle cx="${x}" cy="${y}" r="14" fill="#dc2626" stroke="white" stroke-width="1.5"/><text x="${x}" y="${y+4}" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="white">${num}</text>`;
   }
-
-  // Cone marker
-  function cone(x, y) {
-    return `<polygon points="${x},${y-8} ${x-6},${y+5} ${x+6},${y+5}" fill="#f59e0b" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>`;
+  function cone(x,y) { return `<polygon points="${x},${y-8} ${x-6},${y+5} ${x+6},${y+5}" fill="#f59e0b" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>`; }
+  function miniGoal(x,y,horiz) { return horiz?`<rect x="${x-20}" y="${y-4}" width="40" height="8" fill="none" stroke="white" stroke-width="2"/>`:`<rect x="${x-4}" y="${y-20}" width="8" height="40" fill="none" stroke="white" stroke-width="2"/>`; }
+  function fullGoal(x,y,w) { return `<rect x="${x}" y="${y}" width="${w}" height="10" fill="none" stroke="white" stroke-width="2"/>`; }
+  function passArrow(x1,y1,x2,y2,color) {
+    color=color||'white'; const id='arr'+Math.random().toString(36).substr(2,4);
+    return `<defs><marker id="${id}" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="${color}"/></marker></defs><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.8" marker-end="url(#${id})"/>`;
   }
-
-  // Mini goal
-  function miniGoal(x, y, horiz) {
-    if (horiz) return `<rect x="${x-20}" y="${y-4}" width="40" height="8" fill="none" stroke="white" stroke-width="2"/>`;
-    return `<rect x="${x-4}" y="${y-20}" width="8" height="40" fill="none" stroke="white" stroke-width="2"/>`;
+  function moveArrow(x1,y1,x2,y2,color) {
+    color=color||'white'; const id='arr'+Math.random().toString(36).substr(2,4);
+    return `<defs><marker id="${id}" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="${color}"/></marker></defs><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#${id})"/>`;
   }
+  function zoneLine(x1,y1,x2,y2) { return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-dasharray="8,5"/>`; }
+  function zoneFill(x,y,w,h,color) { return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${color||'rgba(255,255,255,0.06)'}"/>`; }
 
-  // Full goal (horizontal at top/bottom)
-  function fullGoal(x, y, w) {
-    return `<rect x="${x}" y="${y}" width="${w}" height="10" fill="none" stroke="white" stroke-width="2"/>`;
-  }
-
-  // Pass arrow (solid)
-  function passArrow(x1, y1, x2, y2, color) {
-    color = color || 'white';
-    const id = 'arr' + Math.random().toString(36).substr(2,4);
-    return `<defs><marker id="${id}" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="${color}"/></marker></defs>
-    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.8" marker-end="url(#${id})"/>`;
-  }
-
-  // Movement arrow (dashed)
-  function moveArrow(x1, y1, x2, y2, color) {
-    color = color || 'white';
-    const id = 'arr' + Math.random().toString(36).substr(2,4);
-    return `<defs><marker id="${id}" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="${color}"/></marker></defs>
-    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#${id})"/>`;
-  }
-
-  // Zone line
-  function zoneLine(x1, y1, x2, y2) {
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-dasharray="8,5"/>`;
-  }
-
-  // Zone fill
-  function zoneFill(x, y, w, h, color) {
-    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${color || 'rgba(255,255,255,0.06)'}"/>`;
-  }
-
-  function diagramContent(type, w, h, size) {
-    let s = '';
-    const cx = w / 2;
-
+  function diagramContent(type,w,h,size) {
+    let s=''; const cx=w/2;
     switch(type) {
-
       case 'open':
-        // Blank open field — just players in neutral positions
-        if (size === 'quarter') {
-          s += playerTriangle(cx-60, h*0.7, '▲', false);
-          s += playerTriangle(cx, h*0.7, '▲', true);
-          s += playerTriangle(cx+60, h*0.7, '▲', false);
-          s += playerTriangle(cx-30, h*0.45, '▲', false);
-          s += playerTriangle(cx+30, h*0.45, '▲', false);
-        } else {
-          s += playerTriangle(cx, h*0.85, '1', false);
-          s += playerTriangle(cx-80, h*0.72, '2', false);
-          s += playerTriangle(cx+80, h*0.72, '3', false);
-          s += playerTriangle(cx-40, h*0.72, '5', false);
-          s += playerTriangle(cx+40, h*0.72, '4', false);
-          s += playerTriangle(cx, h*0.56, '6', true);
-          s += playerTriangle(cx-55, h*0.42, '8', false);
-          s += playerTriangle(cx+55, h*0.42, '10', false);
-          s += playerTriangle(cx-90, h*0.28, '11', false);
-          s += playerTriangle(cx+90, h*0.28, '7', false);
-          s += playerTriangle(cx, h*0.18, '9', false);
-        }
+        if(size==='quarter'){s+=playerTriangle(cx-60,h*0.7,'▲',false);s+=playerTriangle(cx,h*0.7,'▲',true);s+=playerTriangle(cx+60,h*0.7,'▲',false);s+=playerTriangle(cx-30,h*0.45,'▲',false);s+=playerTriangle(cx+30,h*0.45,'▲',false);}
+        else{s+=playerTriangle(cx,h*0.85,'1',false);s+=playerTriangle(cx-80,h*0.72,'2',false);s+=playerTriangle(cx+80,h*0.72,'3',false);s+=playerTriangle(cx-40,h*0.72,'5',false);s+=playerTriangle(cx+40,h*0.72,'4',false);s+=playerTriangle(cx,h*0.56,'6',true);s+=playerTriangle(cx-55,h*0.42,'8',false);s+=playerTriangle(cx+55,h*0.42,'10',false);s+=playerTriangle(cx-90,h*0.28,'11',false);s+=playerTriangle(cx+90,h*0.28,'7',false);s+=playerTriangle(cx,h*0.18,'9',false);}
         break;
-
-      case 'horiz':
-        // 3 Horizontal channel grid — bands running across width
-        {
-          const z1 = h * 0.33; const z2 = h * 0.66;
-          s += zoneFill(8, 8, w-16, z1-8, 'rgba(34,211,238,0.06)');
-          s += zoneFill(8, z1, w-16, z2-z1, 'rgba(255,255,255,0.04)');
-          s += zoneFill(8, z2, w-16, h-z2-8, 'rgba(22,163,74,0.06)');
-          s += zoneLine(8, z1, w-8, z1);
-          s += zoneLine(8, z2, w-8, z2);
-          // Labels
-          s += `<text x="${w-14}" y="${z1*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(34,211,238,0.7)" letter-spacing="1">FINAL</text>`;
-          s += `<text x="${w-14}" y="${(z1+z2)*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)" letter-spacing="1">MID</text>`;
-          s += `<text x="${w-14}" y="${(z2+h)*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(22,163,74,0.7)" letter-spacing="1">BUILD</text>`;
-          // Players in channels
-          s += playerTriangle(cx-60, h*0.82, '4', false);
-          s += playerTriangle(cx+60, h*0.82, '5', false);
-          s += playerTriangle(cx, h*0.82, '1', false);
-          s += playerTriangle(cx, h*0.5, '6', true);
-          s += playerTriangle(cx-50, h*0.18, '10', false);
-          s += playerTriangle(cx+50, h*0.18, '7', false);
-        }
-        break;
-
-      case 'vert':
-        // 3 Vertical channel grid — lanes running top to bottom
-        {
-          const v1 = w * 0.33; const v2 = w * 0.67;
-          s += zoneFill(8, 8, v1-8, h-16, 'rgba(34,211,238,0.05)');
-          s += zoneFill(v1, 8, v2-v1, h-16, 'rgba(255,255,255,0.04)');
-          s += zoneFill(v2, 8, w-v2-8, h-16, 'rgba(22,163,74,0.05)');
-          s += zoneLine(v1, 8, v1, h-8);
-          s += zoneLine(v2, 8, v2, h-8);
-          // Labels
-          s += `<text x="${v1*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(34,211,238,0.7)" letter-spacing="1">LEFT</text>`;
-          s += `<text x="${(v1+v2)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)" letter-spacing="1">CENTER</text>`;
-          s += `<text x="${(v2+w)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(22,163,74,0.7)" letter-spacing="1">RIGHT</text>`;
-          // Players
-          s += playerTriangle(v1*0.5, h*0.3, '3', false);
-          s += playerTriangle(v1*0.5, h*0.7, '11', false);
-          s += playerTriangle((v1+v2)*0.5, h*0.4, '6', true);
-          s += playerTriangle((v1+v2)*0.5-25, h*0.65, '5', false);
-          s += playerTriangle((v1+v2)*0.5+25, h*0.65, '4', false);
-          s += playerTriangle((v2+w)*0.5, h*0.3, '2', false);
-          s += playerTriangle((v2+w)*0.5, h*0.7, '7', false);
-          // Opposition in right channel
-          s += oppCircle((v2+w)*0.5, h*0.45, '▼');
-        }
-        break;
-
-      case 'rondo-box':
-        // Box rondo — 4v1 or 4v2, players on corners + sides
-        {
-          const bx = w*0.2; const by = h*0.2;
-          const bw = w*0.6; const bh = h*0.6;
-          // Draw box
-          s += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="rgba(34,211,238,0.06)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;
-          // Corner cones
-          s += cone(bx, by); s += cone(bx+bw, by);
-          s += cone(bx, by+bh); s += cone(bx+bw, by+bh);
-          // Outer players (blue triangles) on corners/sides
-          s += playerTriangle(bx, by, '▲', false);
-          s += playerTriangle(bx+bw, by, '▲', false);
-          s += playerTriangle(bx, by+bh, '▲', true);
-          s += playerTriangle(bx+bw, by+bh, '▲', false);
-          s += playerTriangle(cx, by-20, '▲', false);
-          s += playerTriangle(cx, by+bh+20, '▲', false);
-          // Inner defenders (red circles) — 4v2 default
-          s += oppCircle(cx-18, h*0.47, '▼');
-          s += oppCircle(cx+18, h*0.53, '▼');
-          // Pass arrows around the box
-          s += passArrow(bx+18, by, bx+bw-18, by, 'white');
-          s += passArrow(bx, by+18, bx, by+bh-18, 'white');
-        }
-        break;
-
-      case 'rondo-circle':
-        // Circle rondo — players around outside, defenders inside
-        {
-          const r = Math.min(w, h) * 0.32;
-          s += `<circle cx="${cx}" cy="${h*0.5}" r="${r}" fill="rgba(34,211,238,0.05)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;
-          // Outer players at positions around the circle
-          const positions = [0, 60, 120, 180, 240, 300];
-          positions.forEach((deg, i) => {
-            const rad = (deg - 90) * Math.PI / 180;
-            const px = cx + r * Math.cos(rad);
-            const py = h*0.5 + r * Math.sin(rad);
-            s += playerTriangle(px, py, '▲', i===0);
-          });
-          // Inner defenders
-          s += oppCircle(cx-20, h*0.47, '▼');
-          s += oppCircle(cx+20, h*0.53, '▼');
-        }
-        break;
-
-      case '1v1':
-        // 1v1 — quarter field, cone gates, one each end
-        {
-          s += cone(cx-40, h*0.15); s += cone(cx+40, h*0.15);
-          s += cone(cx-40, h*0.85); s += cone(cx+40, h*0.85);
-          s += `<text x="${cx}" y="${h*0.12}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;
-          s += `<text x="${cx}" y="${h*0.96}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;
-          s += playerTriangle(cx-20, h*0.65, '▲', true);
-          s += oppCircle(cx+20, h*0.38, '▼');
-          s += moveArrow(cx-15, h*0.62, cx+15, h*0.42, '#60a5fa');
-        }
-        break;
-
-      case '2v2':
-        {
-          s += miniGoal(cx, h*0.1, true);
-          s += miniGoal(cx, h*0.9, true);
-          s += playerTriangle(cx-25, h*0.68, '▲', true);
-          s += playerTriangle(cx+25, h*0.72, '▲', false);
-          s += oppCircle(cx-25, h*0.33, '▼');
-          s += oppCircle(cx+25, h*0.37, '▼');
-          s += moveArrow(cx-20, h*0.65, cx-20, h*0.38, '#60a5fa');
-        }
-        break;
-
-      case '3v3':
-        {
-          s += miniGoal(cx, h*0.1, true);
-          s += miniGoal(cx, h*0.9, true);
-          s += playerTriangle(cx-40, h*0.68, '▲', false);
-          s += playerTriangle(cx, h*0.72, '▲', true);
-          s += playerTriangle(cx+40, h*0.68, '▲', false);
-          s += oppCircle(cx-40, h*0.33, '▼');
-          s += oppCircle(cx, h*0.28, '▼');
-          s += oppCircle(cx+40, h*0.33, '▼');
-          s += passArrow(cx-5, h*0.7, cx-35, h*0.35, 'white');
-        }
-        break;
-
-      case '4v4':
-        {
-          s += miniGoal(cx, h*0.1, true);
-          s += miniGoal(cx, h*0.9, true);
-          s += playerTriangle(cx-55, h*0.72, '▲', false);
-          s += playerTriangle(cx-18, h*0.68, '▲', true);
-          s += playerTriangle(cx+18, h*0.68, '▲', false);
-          s += playerTriangle(cx+55, h*0.72, '▲', false);
-          s += oppCircle(cx-55, h*0.3, '▼');
-          s += oppCircle(cx-18, h*0.28, '▼');
-          s += oppCircle(cx+18, h*0.28, '▼');
-          s += oppCircle(cx+55, h*0.3, '▼');
-          s += passArrow(cx-15, h*0.66, cx-50, h*0.34, 'white');
-        }
-        break;
-
-      case 'buildout':
-        // Build out — GK + back line deep, midfield checking, forwards pinning
-        {
-          // GK
-          s += playerTriangle(cx, h*0.88, '1', false);
-          // CBs split wide
-          s += playerTriangle(cx-70, h*0.78, '5', false);
-          s += playerTriangle(cx+70, h*0.78, '4', false);
-          // FBs wide
-          s += playerTriangle(cx-110, h*0.72, '3', false);
-          s += playerTriangle(cx+110, h*0.72, '2', false);
-          // 6 checking in
-          s += playerTriangle(cx, h*0.62, '6', true);
-          // 8 and 10 staggered
-          s += playerTriangle(cx+55, h*0.48, '8', false);
-          s += playerTriangle(cx-55, h*0.38, '10', false);
-          // Forwards pinning
-          s += playerTriangle(cx-90, h*0.22, '11', false);
-          s += playerTriangle(cx+90, h*0.22, '7', false);
-          s += playerTriangle(cx, h*0.18, '9', false);
-          // Opposition pressing
-          s += oppCircle(cx-20, h*0.52, '▼');
-          s += oppCircle(cx+20, h*0.44, '▼');
-          // Pass arrows — Plan B
-          s += passArrow(cx, h*0.86, cx, h*0.65, 'white');
-          s += passArrow(cx, h*0.6, cx+50, h*0.5, 'white');
-          s += moveArrow(cx+50, h*0.46, cx-50, h*0.4, '#60a5fa');
-        }
-        break;
-
-      case 'pressing':
-        // 4-3-3 pressing shape — compact, team pushed up
-        {
-          // GK deep
-          s += playerTriangle(cx, h*0.9, '1', false);
-          // Back 4 just behind halfway
-          s += playerTriangle(cx-100, h*0.68, '3', false);
-          s += playerTriangle(cx-38, h*0.7, '5', false);
-          s += playerTriangle(cx+38, h*0.7, '4', false);
-          s += playerTriangle(cx+100, h*0.68, '2', false);
-          // Mid ahead of halfway
-          s += playerTriangle(cx-45, h*0.52, '8', false);
-          s += playerTriangle(cx, h*0.5, '6', false);
-          s += playerTriangle(cx+45, h*0.52, '10', false);
-          // Front 3 pressing high
-          s += playerTriangle(cx-90, h*0.28, '11', false);
-          s += playerTriangle(cx, h*0.22, '9', true);
-          s += playerTriangle(cx+90, h*0.28, '7', false);
-          // Opposition in build-out
-          s += oppCircle(cx-60, h*0.12, '5');
-          s += oppCircle(cx+60, h*0.12, '4');
-          s += oppCircle(cx, h*0.08, '1');
-          // Press arrows
-          s += moveArrow(cx, h*0.24, cx, h*0.12, '#ef4444');
-          s += moveArrow(cx+85, h*0.3, cx+65, h*0.16, '#ef4444');
-          s += moveArrow(cx-85, h*0.3, cx-65, h*0.16, '#ef4444');
-        }
-        break;
-
-      case '8v8':
-        // 8v8 three-quarter field
-        {
-          s += playerTriangle(cx, h*0.9, '1', false);
-          s += playerTriangle(cx-80, h*0.78, '3', false);
-          s += playerTriangle(cx-30, h*0.78, '5', false);
-          s += playerTriangle(cx+30, h*0.78, '4', false);
-          s += playerTriangle(cx+80, h*0.78, '2', false);
-          s += playerTriangle(cx-40, h*0.62, '8', false);
-          s += playerTriangle(cx, h*0.6, '6', true);
-          s += playerTriangle(cx+40, h*0.62, '10', false);
-          s += playerTriangle(cx, h*0.38, '9', false);
-          // Opposition
-          s += oppCircle(cx-70, h*0.22, '▼');
-          s += oppCircle(cx, h*0.18, '▼');
-          s += oppCircle(cx+70, h*0.22, '▼');
-          s += oppCircle(cx-35, h*0.32, '▼');
-          s += oppCircle(cx+35, h*0.32, '▼');
-          // Full size goal at top (opposition end)
-          s += fullGoal(w*0.35, 2, w*0.3);
-        }
-        break;
-
-      case '11v11':
-        // Full field 11v11
-        {
-          // Your team (attack up)
-          s += playerTriangle(cx, h*0.92, '1', false);
-          s += playerTriangle(cx-95, h*0.8, '3', false);
-          s += playerTriangle(cx-35, h*0.8, '5', false);
-          s += playerTriangle(cx+35, h*0.8, '4', false);
-          s += playerTriangle(cx+95, h*0.8, '2', false);
-          s += playerTriangle(cx-50, h*0.65, '8', false);
-          s += playerTriangle(cx, h*0.63, '6', true);
-          s += playerTriangle(cx+50, h*0.65, '10', false);
-          s += playerTriangle(cx-95, h*0.48, '11', false);
-          s += playerTriangle(cx, h*0.45, '9', false);
-          s += playerTriangle(cx+95, h*0.48, '7', false);
-          // Opposition (attack down)
-          s += oppCircle(cx, h*0.08, '1');
-          s += oppCircle(cx-95, h*0.2, '▼');
-          s += oppCircle(cx-35, h*0.2, '▼');
-          s += oppCircle(cx+35, h*0.2, '▼');
-          s += oppCircle(cx+95, h*0.2, '▼');
-          s += oppCircle(cx-50, h*0.35, '▼');
-          s += oppCircle(cx, h*0.37, '▼');
-          s += oppCircle(cx+50, h*0.35, '▼');
-          s += oppCircle(cx-95, h*0.5, '▼');
-          s += oppCircle(cx, h*0.52, '▼');
-          s += oppCircle(cx+95, h*0.5, '▼');
-        }
-        break;
-
-      default:
-        break;
+      case 'horiz':{const z1=h*0.33,z2=h*0.66;s+=zoneFill(8,8,w-16,z1-8,'rgba(34,211,238,0.06)');s+=zoneFill(8,z1,w-16,z2-z1,'rgba(255,255,255,0.04)');s+=zoneFill(8,z2,w-16,h-z2-8,'rgba(22,163,74,0.06)');s+=zoneLine(8,z1,w-8,z1);s+=zoneLine(8,z2,w-8,z2);s+=`<text x="${w-14}" y="${z1*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(34,211,238,0.7)">FINAL</text>`;s+=`<text x="${w-14}" y="${(z1+z2)*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">MID</text>`;s+=`<text x="${w-14}" y="${(z2+h)*0.5+5}" text-anchor="end" font-family="Arial" font-size="9" fill="rgba(22,163,74,0.7)">BUILD</text>`;s+=playerTriangle(cx-60,h*0.82,'4',false);s+=playerTriangle(cx+60,h*0.82,'5',false);s+=playerTriangle(cx,h*0.82,'1',false);s+=playerTriangle(cx,h*0.5,'6',true);s+=playerTriangle(cx-50,h*0.18,'10',false);s+=playerTriangle(cx+50,h*0.18,'7',false);}break;
+      case 'vert':{const v1=w*0.33,v2=w*0.67;s+=zoneFill(8,8,v1-8,h-16,'rgba(34,211,238,0.05)');s+=zoneFill(v1,8,v2-v1,h-16,'rgba(255,255,255,0.04)');s+=zoneFill(v2,8,w-v2-8,h-16,'rgba(22,163,74,0.05)');s+=zoneLine(v1,8,v1,h-8);s+=zoneLine(v2,8,v2,h-8);s+=`<text x="${v1*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(34,211,238,0.7)">LEFT</text>`;s+=`<text x="${(v1+v2)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">CENTER</text>`;s+=`<text x="${(v2+w)*0.5}" y="22" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(22,163,74,0.7)">RIGHT</text>`;s+=playerTriangle(v1*0.5,h*0.3,'3',false);s+=playerTriangle(v1*0.5,h*0.7,'11',false);s+=playerTriangle((v1+v2)*0.5,h*0.4,'6',true);s+=playerTriangle((v1+v2)*0.5-25,h*0.65,'5',false);s+=playerTriangle((v1+v2)*0.5+25,h*0.65,'4',false);s+=playerTriangle((v2+w)*0.5,h*0.3,'2',false);s+=playerTriangle((v2+w)*0.5,h*0.7,'7',false);s+=oppCircle((v2+w)*0.5,h*0.45,'▼');}break;
+      case 'rondo-box':{const bx=w*0.2,by=h*0.2,bw=w*0.6,bh=h*0.6;s+=`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="rgba(34,211,238,0.06)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;s+=cone(bx,by);s+=cone(bx+bw,by);s+=cone(bx,by+bh);s+=cone(bx+bw,by+bh);s+=playerTriangle(bx,by,'▲',false);s+=playerTriangle(bx+bw,by,'▲',false);s+=playerTriangle(bx,by+bh,'▲',true);s+=playerTriangle(bx+bw,by+bh,'▲',false);s+=playerTriangle(cx,by-20,'▲',false);s+=playerTriangle(cx,by+bh+20,'▲',false);s+=oppCircle(cx-18,h*0.47,'▼');s+=oppCircle(cx+18,h*0.53,'▼');s+=passArrow(bx+18,by,bx+bw-18,by,'white');s+=passArrow(bx,by+18,bx,by+bh-18,'white');}break;
+      case 'rondo-circle':{const r=Math.min(w,h)*0.32;s+=`<circle cx="${cx}" cy="${h*0.5}" r="${r}" fill="rgba(34,211,238,0.05)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-dasharray="6,4"/>`;[0,60,120,180,240,300].forEach((deg,i)=>{const rad=(deg-90)*Math.PI/180,px=cx+r*Math.cos(rad),py=h*0.5+r*Math.sin(rad);s+=playerTriangle(px,py,'▲',i===0);});s+=oppCircle(cx-20,h*0.47,'▼');s+=oppCircle(cx+20,h*0.53,'▼');}break;
+      case '1v1':s+=cone(cx-40,h*0.15);s+=cone(cx+40,h*0.15);s+=cone(cx-40,h*0.85);s+=cone(cx+40,h*0.85);s+=`<text x="${cx}" y="${h*0.12}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;s+=`<text x="${cx}" y="${h*0.96}" text-anchor="middle" font-family="Arial" font-size="9" fill="rgba(255,255,255,0.5)">GATE</text>`;s+=playerTriangle(cx-20,h*0.65,'▲',true);s+=oppCircle(cx+20,h*0.38,'▼');s+=moveArrow(cx-15,h*0.62,cx+15,h*0.42,'#60a5fa');break;
+      case '2v2':s+=miniGoal(cx,h*0.1,true);s+=miniGoal(cx,h*0.9,true);s+=playerTriangle(cx-25,h*0.68,'▲',true);s+=playerTriangle(cx+25,h*0.72,'▲',false);s+=oppCircle(cx-25,h*0.33,'▼');s+=oppCircle(cx+25,h*0.37,'▼');s+=moveArrow(cx-20,h*0.65,cx-20,h*0.38,'#60a5fa');break;
+      case '3v3':s+=miniGoal(cx,h*0.1,true);s+=miniGoal(cx,h*0.9,true);s+=playerTriangle(cx-40,h*0.68,'▲',false);s+=playerTriangle(cx,h*0.72,'▲',true);s+=playerTriangle(cx+40,h*0.68,'▲',false);s+=oppCircle(cx-40,h*0.33,'▼');s+=oppCircle(cx,h*0.28,'▼');s+=oppCircle(cx+40,h*0.33,'▼');s+=passArrow(cx-5,h*0.7,cx-35,h*0.35,'white');break;
+      case '4v4':s+=miniGoal(cx,h*0.1,true);s+=miniGoal(cx,h*0.9,true);s+=playerTriangle(cx-55,h*0.72,'▲',false);s+=playerTriangle(cx-18,h*0.68,'▲',true);s+=playerTriangle(cx+18,h*0.68,'▲',false);s+=playerTriangle(cx+55,h*0.72,'▲',false);s+=oppCircle(cx-55,h*0.3,'▼');s+=oppCircle(cx-18,h*0.28,'▼');s+=oppCircle(cx+18,h*0.28,'▼');s+=oppCircle(cx+55,h*0.3,'▼');s+=passArrow(cx-15,h*0.66,cx-50,h*0.34,'white');break;
+      case 'buildout':s+=playerTriangle(cx,h*0.88,'1',false);s+=playerTriangle(cx-70,h*0.78,'5',false);s+=playerTriangle(cx+70,h*0.78,'4',false);s+=playerTriangle(cx-110,h*0.72,'3',false);s+=playerTriangle(cx+110,h*0.72,'2',false);s+=playerTriangle(cx,h*0.62,'6',true);s+=playerTriangle(cx+55,h*0.48,'8',false);s+=playerTriangle(cx-55,h*0.38,'10',false);s+=playerTriangle(cx-90,h*0.22,'11',false);s+=playerTriangle(cx+90,h*0.22,'7',false);s+=playerTriangle(cx,h*0.18,'9',false);s+=oppCircle(cx-20,h*0.52,'▼');s+=oppCircle(cx+20,h*0.44,'▼');s+=passArrow(cx,h*0.86,cx,h*0.65,'white');s+=passArrow(cx,h*0.6,cx+50,h*0.5,'white');s+=moveArrow(cx+50,h*0.46,cx-50,h*0.4,'#60a5fa');break;
+      case 'pressing':s+=playerTriangle(cx,h*0.9,'1',false);s+=playerTriangle(cx-100,h*0.68,'3',false);s+=playerTriangle(cx-38,h*0.7,'5',false);s+=playerTriangle(cx+38,h*0.7,'4',false);s+=playerTriangle(cx+100,h*0.68,'2',false);s+=playerTriangle(cx-45,h*0.52,'8',false);s+=playerTriangle(cx,h*0.5,'6',false);s+=playerTriangle(cx+45,h*0.52,'10',false);s+=playerTriangle(cx-90,h*0.28,'11',false);s+=playerTriangle(cx,h*0.22,'9',true);s+=playerTriangle(cx+90,h*0.28,'7',false);s+=oppCircle(cx-60,h*0.12,'5');s+=oppCircle(cx+60,h*0.12,'4');s+=oppCircle(cx,h*0.08,'1');s+=moveArrow(cx,h*0.24,cx,h*0.12,'#ef4444');s+=moveArrow(cx+85,h*0.3,cx+65,h*0.16,'#ef4444');s+=moveArrow(cx-85,h*0.3,cx-65,h*0.16,'#ef4444');break;
+      case '8v8':s+=playerTriangle(cx,h*0.9,'1',false);s+=playerTriangle(cx-80,h*0.78,'3',false);s+=playerTriangle(cx-30,h*0.78,'5',false);s+=playerTriangle(cx+30,h*0.78,'4',false);s+=playerTriangle(cx+80,h*0.78,'2',false);s+=playerTriangle(cx-40,h*0.62,'8',false);s+=playerTriangle(cx,h*0.6,'6',true);s+=playerTriangle(cx+40,h*0.62,'10',false);s+=playerTriangle(cx,h*0.38,'9',false);s+=oppCircle(cx-70,h*0.22,'▼');s+=oppCircle(cx,h*0.18,'▼');s+=oppCircle(cx+70,h*0.22,'▼');s+=oppCircle(cx-35,h*0.32,'▼');s+=oppCircle(cx+35,h*0.32,'▼');s+=fullGoal(w*0.35,2,w*0.3);break;
+      case '11v11':s+=playerTriangle(cx,h*0.92,'1',false);s+=playerTriangle(cx-95,h*0.8,'3',false);s+=playerTriangle(cx-35,h*0.8,'5',false);s+=playerTriangle(cx+35,h*0.8,'4',false);s+=playerTriangle(cx+95,h*0.8,'2',false);s+=playerTriangle(cx-50,h*0.65,'8',false);s+=playerTriangle(cx,h*0.63,'6',true);s+=playerTriangle(cx+50,h*0.65,'10',false);s+=playerTriangle(cx-95,h*0.48,'11',false);s+=playerTriangle(cx,h*0.45,'9',false);s+=playerTriangle(cx+95,h*0.48,'7',false);s+=oppCircle(cx,h*0.08,'1');s+=oppCircle(cx-95,h*0.2,'▼');s+=oppCircle(cx-35,h*0.2,'▼');s+=oppCircle(cx+35,h*0.2,'▼');s+=oppCircle(cx+95,h*0.2,'▼');s+=oppCircle(cx-50,h*0.35,'▼');s+=oppCircle(cx,h*0.37,'▼');s+=oppCircle(cx+50,h*0.35,'▼');s+=oppCircle(cx-95,h*0.5,'▼');s+=oppCircle(cx,h*0.52,'▼');s+=oppCircle(cx+95,h*0.5,'▼');break;
     }
-
     return s;
   }
 
-  function fieldLabel(w, h, sizeLabel, typeLabel) {
-    return `<text x="12" y="${h-12}" font-family="Arial,sans-serif" font-size="9" fill="rgba(255,255,255,0.4)" letter-spacing="1" text-transform="uppercase">${sizeLabel.toUpperCase()} · ${typeLabel.toUpperCase()}</text>
-    <text x="${w-12}" y="${h-12}" text-anchor="end" font-family="Arial,sans-serif" font-size="8" fill="rgba(255,255,255,0.3)">▲ YOUR TEAM · ● OPPOSITION</text>`;
+  function fieldLabel(w,h,sizeLabel,typeLabel) {
+    return `<text x="12" y="${h-12}" font-family="Arial,sans-serif" font-size="9" fill="rgba(255,255,255,0.4)">${sizeLabel.toUpperCase()} · ${typeLabel.toUpperCase()}</text><text x="${w-12}" y="${h-12}" text-anchor="end" font-family="Arial,sans-serif" font-size="8" fill="rgba(255,255,255,0.3)">▲ YOUR TEAM · ● OPPOSITION</text>`;
   }
 
   function formatContent(text) {
     return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/(Name:|Duration:|Players:|Setup:|Objective:|Scoring:|Rules & Constraints:|Coaching Focus:|When to Intervene:|Progression:)/g, '<strong>$1</strong>');
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/(Name:|Duration:|Players:|Setup:|Objective:|Scoring:|Rules & Constraints:|Coaching Focus:|When to Intervene:|Progression:|Scaling Notes:)/g,'<strong>$1</strong>');
   }
 
   function copySession() {
@@ -1531,6 +645,5 @@ Make sure all activities connect directly to our game model principles and use o
     });
   }
 </script>
-
 </body>
 </html>
