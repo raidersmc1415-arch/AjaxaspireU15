@@ -525,6 +525,12 @@ Connect every activity directly to our game model. Use our positional numbering.
       const data = await response.json();
       const text = data.text || data.error || 'No response received.';
       renderSession(text, { duration, players, week, moment, load });
+      if (data.finishReason === 'MAX_TOKENS') {
+        const warn = document.createElement('div');
+        warn.style.cssText = 'background:rgba(212,160,23,0.12);border:1px solid var(--gold);border-radius:4px;padding:12px 16px;margin-top:16px;color:var(--gold);font-size:13px;';
+        warn.textContent = 'Note: the session was longer than the output limit and may be cut off at the end. Try narrowing the Session Focus or reducing duration for a complete plan.';
+        document.getElementById('sessionContent').appendChild(warn);
+      }
 
     } catch(err) {
       document.getElementById('sessionContent').innerHTML = `<div style="color:#f87171;padding:20px;">Error generating session. Please try again.</div>`;
