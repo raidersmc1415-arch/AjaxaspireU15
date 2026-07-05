@@ -67,6 +67,12 @@
   .session-block-body{padding:20px;font-size:14px;line-height:1.7;color:#cbd5e1;white-space:pre-wrap}
   .session-block-body strong{color:var(--cyan);font-weight:600}
   .diagram-controls{padding:12px 20px;border-bottom:1px solid var(--border);background:var(--dark3);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  .redo-bar{display:flex;gap:8px;padding:12px 20px;border-top:1px solid var(--border);background:var(--dark3);align-items:center;flex-wrap:wrap}
+  .redo-input{flex:1;min-width:200px;background:var(--dark);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:8px 12px;outline:none}
+  .redo-input:focus{border-color:rgba(34,211,238,0.5)}
+  .redo-btn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 18px;border-radius:3px;cursor:pointer;transition:all 0.15s;border:1px solid var(--cyan);background:rgba(34,211,238,0.1);color:var(--cyan);white-space:nowrap}
+  .redo-btn:hover:not(:disabled){background:rgba(34,211,238,0.2)}
+  .redo-btn:disabled{opacity:0.5;cursor:not-allowed}
   .diagram-control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .diagram-control-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0}
   .diag-pill{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--border);border-radius:2px;cursor:pointer;color:var(--muted);background:var(--dark2);transition:all 0.15s;user-select:none}
@@ -524,6 +530,13 @@ Connect every activity directly to our game model. Use our positional numbering.
 
       const data = await response.json();
       const text = data.text || data.error || 'No response received.';
+      // Store full session state so individual activities can be refined later
+      window.SESSION_STATE = {
+        systemPrompt: systemPrompt,
+        userPrompt: userPrompt,
+        fullText: text,
+        params: { duration, players, week, moment, load }
+      };
       renderSession(text, { duration, players, week, moment, load });
       if (data.finishReason === 'MAX_TOKENS') {
         const warn = document.createElement('div');
@@ -684,6 +697,16 @@ Connect every activity directly to our game model. Use our positional numbering.
         </div>
         <div class="diagram-canvas" id="canvas-${blockId}">${initialSvg}</div>`;
     }
+    // Redo control — only on activities
+    let redoHTML = '';
+    if (isActivity) {
+      block.setAttribute('data-activity-title', title);
+      redoHTML = `
+        <div class="redo-bar" id="redo-${blockId}">
+          <input type="text" class="redo-input" id="redoinput-${blockId}" placeholder="Optional: tell it what to change (e.g. less equipment, more 1v1s)…">
+          <button class="redo-btn" onclick="refineActivity('${blockId}', ${JSON.stringify(title).replace(/"/g,'&quot;')})">🔄 Redo</button>
+        </div>`;
+    }
     block.innerHTML = `
       <div class="session-block-header">
         <div class="block-label">
@@ -692,11 +715,84 @@ Connect every activity directly to our game model. Use our positional numbering.
         </div>
       </div>
       ${diagramHTML}
-      <div class="session-block-body">${formatContent(section.content)}</div>`;
+      <div class="session-block-body">${formatContent(section.content)}</div>
+      ${redoHTML}`;
     return block;
   }
 
   const diagStates = {};
+
+  // Refine a single activity — regenerate just this block, keep everything else
+  async function refineActivity(blockId, activityTitle) {
+    const state = window.SESSION_STATE;
+    if (!state) return;
+    const bar = document.getElementById('redo-' + blockId);
+    const btn = bar ? bar.querySelector('.redo-btn') : null;
+    const noteInput = document.getElementById('redoinput-' + blockId);
+    const note = noteInput ? noteInput.value.trim() : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Working…'; }
+
+    const refinePrompt = `Here is a full training session you generated:
+
+${state.fullText}
+
+The coach wants to REPLACE only the activity titled "${activityTitle}". Keep it consistent with the rest of the session (same game model, same flow, same field space, same format).
+${note ? `Coach's specific request for the replacement: ${note}` : 'Generate a fresh alternative for this activity — a different drill that hits the same objective.'}
+
+Return ONLY that one activity block, starting with its ---ACTIVITY: ...--- header and including its DIAGRAM line. Do not return any other activities, overview, or notes. Same strict format and limits as before.`;
+
+    try {
+      const response = await fetch('/.netlify/functions/session-planner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ systemPrompt: state.systemPrompt, userPrompt: refinePrompt })
+      });
+      const data = await response.json();
+      const text = data.text || '';
+      const sections = parseSessionText(text);
+      const newSection = sections.find(s => s.type === 'activity');
+      if (!newSection) throw new Error('no activity returned');
+
+      // Build the replacement block and swap it in place
+      const newBlock = renderBlock(newSection);
+      const oldBlock = document.querySelector(`[data-activity-title="${cssEscape(activityTitle)}"]`);
+      if (oldBlock && oldBlock.parentNode) {
+        oldBlock.parentNode.replaceChild(newBlock, oldBlock);
+        // Update stored full text so future refines/copy reflect the change
+        updateStoredActivity(activityTitle, text);
+      }
+    } catch(err) {
+      if (btn) { btn.disabled = false; btn.textContent = '🔄 Redo'; }
+      if (noteInput) noteInput.placeholder = 'Something went wrong — try again.';
+    }
+  }
+
+  // Escape a string for use in a CSS attribute selector
+  function cssEscape(str) {
+    return String(str).replace(/["\\]/g, '\\$&');
+  }
+
+  // Replace the matching activity's text inside SESSION_STATE.fullText
+  function updateStoredActivity(activityTitle, newActivityText) {
+    const state = window.SESSION_STATE;
+    if (!state) return;
+    const lines = state.fullText.split('\n');
+    const out = [];
+    let skipping = false;
+    for (const line of lines) {
+      const t = line.trim();
+      if (t.startsWith('---ACTIVITY:')) {
+        const thisTitle = t.replace(/---ACTIVITY:\s*/,'').replace(/---/,'').trim();
+        if (thisTitle === activityTitle) { skipping = true; out.push(newActivityText.trim()); continue; }
+        else skipping = false;
+      } else if (t.match(/^(HALF-TIME|POST-SESSION|SESSION OVERVIEW|OBJECTIVES|COACHING POINTS|PRINCIPLES|CONFIDENCE)/)) {
+        skipping = false;
+      }
+      if (!skipping) out.push(line);
+    }
+    state.fullText = out.join('\n');
+  }
+
   function setDiagram(blockId, key, val, pill) {
     if (!diagStates[blockId]) diagStates[blockId] = { size:'half', type:'open' };
     diagStates[blockId][key] = val;
