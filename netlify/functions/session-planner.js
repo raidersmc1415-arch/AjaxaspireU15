@@ -19,9 +19,9 @@ exports.handler = async function(event, context) {
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`;
 
-    // Call Gemini 3.1 Pro securely
+    // Call Gemini 2.5 Pro securely
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
