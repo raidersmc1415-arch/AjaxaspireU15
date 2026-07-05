@@ -26,7 +26,7 @@ exports.handler = async function(event, context) {
           contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
           generationConfig: {
             temperature: 0.35,
-            maxOutputTokens: 2048,
+            maxOutputTokens: 8192,
           }
         })
       }
@@ -42,7 +42,10 @@ exports.handler = async function(event, context) {
       };
     }
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // Gemini may split output across multiple parts — join them all
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const text = parts.map(p => p.text || '').join('');
+    const finishReason = data.candidates?.[0]?.finishReason || 'STOP';
 
     return {
       statusCode: 200,
@@ -50,7 +53,7 @@ exports.handler = async function(event, context) {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text, finishReason })
     };
 
   } catch (err) {
