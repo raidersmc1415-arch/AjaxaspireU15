@@ -237,6 +237,57 @@
     return active ? active.dataset.val : null;
   }
 
+  // ═══════════════════════════════════════════════
+  // SESSION PERSISTENCE — survive refresh, tab close, stepping away
+  // ═══════════════════════════════════════════════
+  const STORAGE_KEY = 'ajax_session_planner_draft';
+
+  function saveSessionToStorage() {
+    try {
+      if (!window.SESSION_STATE) return;
+      const payload = { state: window.SESSION_STATE, savedAt: Date.now() };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch(e) { /* storage full or unavailable — fail silently */ }
+  }
+
+  function clearSavedSession() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  }
+
+  function restoreSessionFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const payload = JSON.parse(raw);
+      if (!payload || !payload.state || !payload.state.fullText) return false;
+
+      window.SESSION_STATE = payload.state;
+      renderSession(payload.state.fullText, payload.state.params);
+
+      // Show a small banner confirming restoration
+      const ageMin = Math.round((Date.now() - (payload.savedAt || Date.now())) / 60000);
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:rgba(34,211,238,0.1);border:1px solid var(--cyan);border-radius:4px;padding:12px 16px;margin-bottom:20px;color:var(--cyan);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;';
+      banner.innerHTML = `<span>↩ Restored your last session${ageMin > 0 ? ` (from ${ageMin} min ago)` : ''}.</span>`;
+      const dismissBtn = document.createElement('button');
+      dismissBtn.textContent = 'Start Fresh Instead';
+      dismissBtn.style.cssText = 'font-family:"Barlow Condensed",sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:2px;cursor:pointer;border:1px solid var(--cyan);background:transparent;color:var(--cyan);white-space:nowrap;';
+      dismissBtn.onclick = () => {
+        clearSavedSession();
+        document.getElementById('output').classList.remove('visible');
+        document.getElementById('sessionContent').innerHTML = '';
+        banner.remove();
+      };
+      banner.appendChild(dismissBtn);
+      const output = document.getElementById('output');
+      output.insertBefore(banner, output.firstChild.nextSibling);
+      return true;
+    } catch(e) { return false; }
+  }
+
+  // Restore on page load if a draft exists
+  window.addEventListener('DOMContentLoaded', () => { restoreSessionFromStorage(); });
+
   async function generateSession() {
     const btn = document.getElementById('generateBtn');
     const loadingBar = document.getElementById('loadingBar');
@@ -537,6 +588,7 @@ Connect every activity directly to our game model. Use our positional numbering.
         fullText: text,
         params: { duration, players, week, moment, load }
       };
+      saveSessionToStorage();
       renderSession(text, { duration, players, week, moment, load });
       if (data.finishReason === 'MAX_TOKENS') {
         const warn = document.createElement('div');
@@ -791,6 +843,7 @@ Return ONLY that one activity block, starting with its ---ACTIVITY: ...--- heade
       if (!skipping) out.push(line);
     }
     state.fullText = out.join('\n');
+    saveSessionToStorage();
   }
 
   function setDiagram(blockId, key, val, pill) {
