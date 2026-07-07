@@ -1761,6 +1761,13 @@
     const TAC_KEYS  = ['tac_support','tac_restdef','tac_press','tac_attack','tac_defend'];
 
     async function loadCoachRatings(playerName, loginData) {
+      // ALWAYS reset first — prevents a previous login's ratings from
+      // showing for a player who has none (stale DOM bug)
+      const section = document.getElementById('coach-ratings-section');
+      section.style.display = 'none';
+      document.getElementById('coach-technical-ratings').innerHTML = '';
+      document.getElementById('coach-tactical-ratings').innerHTML = '';
+
       try {
         const res  = await fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}`);
         const data = await res.json();
@@ -1779,7 +1786,7 @@
         }
 
         // Show the section
-        document.getElementById('coach-ratings-section').style.display = 'block';
+        section.style.display = 'block';
 
         document.getElementById('coach-technical-ratings').innerHTML =
           TECH_KEYS.map(k => renderRatingRow(k, playerData, data.ratings, data.comments)).join('');
@@ -1828,6 +1835,9 @@
 
     // Load the player's past reflections + coach replies from Reflections_Log
     async function loadReflections(playerName) {
+      // Reset first so a previous login's reflections never linger
+      document.getElementById('reflections-history-section').style.display = 'none';
+      document.getElementById('reflections-history').innerHTML = '';
       try {
         const res  = await fetch(`${API_URL}?action=reflections&name=${encodeURIComponent(playerName)}`);
         const data = await res.json();
