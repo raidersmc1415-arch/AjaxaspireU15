@@ -267,6 +267,15 @@
  .countdown-num { font-family: 'Bebas Neue', cursive; font-size: 32px; color: var(--teal); line-height: 1; }
  .countdown-unit-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
 
+ /* REFLECTIONS + COACH REPLIES */
+ .refl-card { background:var(--card); border:1px solid var(--border); border-radius:6px; padding:16px 20px; margin-bottom:14px; }
+ .refl-date { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; color:var(--muted); margin-bottom:8px; text-transform:uppercase; }
+ .refl-text { font-size:13px; color:var(--text); line-height:1.7; white-space:pre-wrap; }
+ .refl-reply { margin-top:12px; background:linear-gradient(135deg, rgba(200,169,81,0.10), rgba(13,27,42,0.6)); border-left:3px solid var(--gold); border-radius:4px; padding:12px 16px; }
+ .refl-reply-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
+ .refl-reply-text { font-size:13px; color:var(--white); line-height:1.7; }
+ .refl-pending { margin-top:10px; font-size:11px; color:var(--muted); font-style:italic; }
+
  /* MOMENTS THAT MATTER */
  .moment-card { background:var(--card); border:1px solid var(--border); border-left:4px solid var(--teal); border-radius:6px; padding:18px 22px; margin-bottom:14px; transition:border-color 0.2s; }
  .moment-card:hover { border-left-color:var(--gold); }
@@ -1689,6 +1698,13 @@
           <div class="input-group"><label>Submit your thoughts</label><textarea id="reflection-text" placeholder="What went well? What is your focus area for next practice?"></textarea></div>
           <button class="btn" onclick="submitNetlifyReflection()">Submit Reflection</button>
         </div>
+
+        <!-- MY REFLECTIONS + COACH REPLIES -->
+        <div id="reflections-history-section" style="display:none; margin-top:30px;">
+          <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--gold); margin-bottom:6px;">My Reflections &amp; Coach Replies</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">Your submissions, newest first. Coach Shawn replies right here — check back after you submit.</p>
+          <div id="reflections-history"></div>
+        </div>
       </div>
     </div>
   </main>
@@ -1809,6 +1825,35 @@
     // ═══════════════════════════════════════════════
     // INDIVIDUAL FILM ROOM
     // ═══════════════════════════════════════════════
+
+    // Load the player's past reflections + coach replies from Reflections_Log
+    async function loadReflections(playerName) {
+      try {
+        const res  = await fetch(`${API_URL}?action=reflections&name=${encodeURIComponent(playerName)}`);
+        const data = await res.json();
+        const list = data.reflections || [];
+        if (!list.length) return; // nothing to show — section stays hidden
+
+        const MAX_SHOWN = 10;
+        document.getElementById('reflections-history').innerHTML = list.slice(0, MAX_SHOWN).map(r => `
+          <div class="refl-card">
+            <div class="refl-date">${r.date}</div>
+            <div class="refl-text">${escapeHtml(r.reflection)}</div>
+            ${r.coachReply
+              ? `<div class="refl-reply">
+                   <div class="refl-reply-label">💬 Coach Shawn</div>
+                   <div class="refl-reply-text">${escapeHtml(r.coachReply)}</div>
+                 </div>`
+              : `<div class="refl-pending">Coach reply coming — check back soon.</div>`}
+          </div>
+        `).join('');
+        document.getElementById('reflections-history-section').style.display = 'block';
+      } catch(err) { /* silent — section stays hidden */ }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
 
     async function loadIndividualFilm(playerName) {
       const section = document.getElementById('individual-film');
@@ -1943,7 +1988,7 @@
     }
 
     // GOOGLE API LOGIC
-    const API_URL = "https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxfINqoX5D6WPzmN7wfwc1hYWezX54xi_HnuR1F6HNVY7VMbMT-ayjo4QbEGBDa716S/exec";
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
@@ -1977,6 +2022,7 @@
           checkIDPSubmitted(data);
           loadCoachRatings(data.name, data);
           loadIndividualFilm(data.name);
+          loadReflections(data.name);
         } else { alert("Invalid Credentials. Check your exact spelling and PIN."); }
       } catch(err) { alert("Error connecting to the database. Please try again."); } finally { btn.innerText = originalText; }
     }
