@@ -1167,18 +1167,19 @@
       <!-- CURRENT CHALLENGE CARD -->
       <div class="challenge-card" id="current-challenge-card">
         <div class="challenge-header">
-          <div class="challenge-live-badge">
+          <div class="challenge-live-badge" id="ch-live-badge">
             <div class="challenge-live-dot"></div>
             Active Challenge
           </div>
           <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--white); margin-bottom:4px;" id="ch-title">Ball Mastery Challenge</div>
           <input type="hidden" id="ch-id" value="ball-mastery-2026"/>
+          <input type="hidden" id="ch-active" value="false"/>
           <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--gold); letter-spacing:2px;" id="ch-dates">July 4 – July 13, 2026  ·  10 Days</div>
-          <div style="font-size:14px; color:var(--muted); margin-top:10px; line-height:1.6;" id="ch-desc">Complete the ball mastery routine and daily fitness circuit every day for 10 days. One submission per day. Log it, own it, compete for it. The gold AJAX Ball Mastery badge goes to the challenge winner.</div>
+          <div style="font-size:14px; color:var(--muted); margin-top:10px; line-height:1.6;" id="ch-desc">Ball Mastery ran July 4–13. 8 players hit a perfect 10/10 — badges are posted on the leaderboard below. Next challenge coming soon.</div>
         </div>
 
-        <!-- VIDEO EMBED -->
-        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:var(--navy);">
+        <!-- VIDEO EMBED — only shown while a challenge is active -->
+        <div id="ch-video-wrap" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:var(--navy); display:none;">
           <iframe id="ch-video"
             src="https://www.youtube.com/embed/nHxClhfQjlM?rel=0&modestbranding=1"
             style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
@@ -1186,9 +1187,25 @@
             allowfullscreen>
           </iframe>
         </div>
+        <script>
+          // Show/hide the live badge and video strictly from the ch-active flag above.
+          // To launch a NEW challenge: update ch-title, ch-id, ch-dates, ch-desc,
+          // ch-video src, set ch-active to "true", and un-hide ch-video-wrap below.
+          (function() {
+            var active = document.getElementById('ch-active').value === 'true';
+            var badge  = document.getElementById('ch-live-badge');
+            var video  = document.getElementById('ch-video-wrap');
+            if (!active) {
+              if (badge) badge.style.display = 'none';
+              if (video) video.style.display = 'none';
+            } else {
+              if (video) video.style.display = 'block';
+            }
+          })();
+        </script>
 
-        <!-- FITNESS CIRCUIT SCHEDULE -->
-        <div style="padding:20px 24px; border-top:1px solid rgba(200,169,81,0.2);">
+        <!-- FITNESS CIRCUIT SCHEDULE (Ball Mastery specific — hidden for other challenges) -->
+        <div id="ch-circuit-section" style="padding:20px 24px; border-top:1px solid rgba(200,169,81,0.2);">
           <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:14px;">Daily Fitness Circuit — After the Ball Work</div>
           <div class="circuit-grid">
             <div class="circuit-day">
@@ -1211,7 +1228,7 @@
         </div>
 
         <!-- CHECK-IN FORM -->
-        <div style="padding:20px 24px; border-top:1px solid rgba(200,169,81,0.2); background:rgba(13,27,42,0.5);">
+        <div id="ch-checkin-section" style="padding:20px 24px; border-top:1px solid rgba(200,169,81,0.2); background:rgba(13,27,42,0.5);">
           <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:6px;">Log Today's Completion</div>
           <div style="font-size:13px; color:var(--muted); margin-bottom:18px;">One submission per day. Enter your name and PIN to log your entry.</div>
 
@@ -2671,11 +2688,59 @@
         renderLeaderboard('lb-current', data.current || [], 'pts');
         renderLeaderboard('lb-season',  data.season  || [], 'pts');
         if (data.badges && data.badges.length) renderBadgeWall(data.badges);
+        if (data.challenge) renderChallengeCard(data.challenge);
       } catch(e) {
         // Show placeholder on error
         renderPlaceholderLB('lb-current');
         renderPlaceholderLB('lb-season');
       }
+    }
+
+    // Populate the challenge card entirely from the Sheet:
+    // challenges tab — A=title, B=id, C=start, D=end, E=description, F=video_url
+    function renderChallengeCard(ch) {
+      const badge  = document.getElementById('ch-live-badge');
+      const vWrap  = document.getElementById('ch-video-wrap');
+      const vFrame = document.getElementById('ch-video');
+      const checkin = document.getElementById('ch-checkin-section');
+
+      document.getElementById('ch-title').textContent = ch.title || 'Team Challenge';
+      document.getElementById('ch-id').value = ch.id || '';
+      document.getElementById('ch-dates').textContent =
+        `${ch.startDate} – ${ch.endDate}` + (ch.active ? '' : '  ·  COMPLETE');
+      if (ch.description) document.getElementById('ch-desc').textContent = ch.description;
+
+      // Video: only if a URL is in the Sheet AND the challenge is active
+      let embed = '';
+      if (ch.active && ch.video) {
+        embed = toYouTubeEmbed(ch.video);
+      }
+      if (embed && vWrap && vFrame) {
+        vFrame.src = embed;
+        vWrap.style.display = 'block';
+      } else if (vWrap) {
+        vWrap.style.display = 'none';
+        if (vFrame) vFrame.src = '';
+      }
+
+      // Live badge + check-in form only while active
+      if (badge)   badge.style.display   = ch.active ? '' : 'none';
+      if (checkin) checkin.style.display = ch.active ? '' : 'none';
+
+      // Fitness circuit is Ball Mastery-specific
+      const circuit = document.getElementById('ch-circuit-section');
+      if (circuit) circuit.style.display = (ch.active && ch.id === 'ball-mastery-2026') ? '' : 'none';
+    }
+
+    // Accepts youtube.com/watch?v=, youtu.be/, or already-embed URLs
+    function toYouTubeEmbed(url) {
+      url = String(url).trim();
+      let id = '';
+      let m = url.match(/youtu\.be\/([\w-]{6,})/);
+      if (m) id = m[1];
+      if (!id) { m = url.match(/[?&]v=([\w-]{6,})/); if (m) id = m[1]; }
+      if (!id) { m = url.match(/embed\/([\w-]{6,})/); if (m) id = m[1]; }
+      return id ? `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` : '';
     }
 
     function renderLeaderboard(elId, rows, unit) {
