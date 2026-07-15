@@ -17,7 +17,7 @@
  --green: #1E5C38; --green-lt: #2A7A4B; --teal: #3ABFB8;
  --navy: #0D1B2A; --navy-mid: #122030; --card: #172535;
  --border: #1E3348; --white: #FFFFFF; --text: #D8E8F0;
- --muted: #5A7A92; --gold: #C8A951;
+ --muted: #7B98AD; --gold: #C8A951;
  }
 
  * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,6 +34,10 @@
  /* TABS */
  .nav-tabs { background: var(--navy-mid); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; display: flex; justify-content: center; flex-wrap: wrap; }
  .tab-btn { background: none; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.4px; color: var(--muted); padding: 15px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
+ .more-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 200; min-width: 190px; overflow: hidden; }
+ .more-menu.open { display: block; }
+ .more-item { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 13px 18px; cursor: pointer; transition: background 0.15s; }
+ .more-item:hover { background: rgba(58,191,184,0.1); color: var(--teal); }
  .tab-btn:hover { color: var(--text); }
  .tab-btn.active { color: var(--teal); border-bottom-color: var(--teal); }
 
@@ -268,6 +272,10 @@
  .countdown-unit-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
 
  /* REFLECTIONS + COACH REPLIES */
+ .idp-resource { margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px dashed var(--border); }
+ .idp-resource span { font-size: 12px; color: var(--muted); }
+ .idp-resource-link { background: rgba(58,191,184,0.1); border: 1px solid rgba(58,191,184,0.3); color: var(--teal); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+ .idp-resource-link:hover { background: rgba(58,191,184,0.2); }
  .refl-card { background:var(--card); border:1px solid var(--border); border-radius:6px; padding:16px 20px; margin-bottom:14px; }
  .refl-date { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; color:var(--muted); margin-bottom:8px; text-transform:uppercase; }
  .refl-text { font-size:13px; color:var(--text); line-height:1.7; white-space:pre-wrap; }
@@ -329,17 +337,22 @@
     <p style="font-size: 14px; color: var(--muted); margin-top: 14px;">Team Hub · Game Model · Player Development &nbsp;|&nbsp; Coach Shawn Craig</p>
   </div>
 
-  <nav class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('hub', this)">Team Hub</button>
-    <button class="tab-btn" onclick="switchTab('pos', this)">Positions</button>
-    <button class="tab-btn" onclick="switchTab('comm', this)">Communication</button>
-    <button class="tab-btn" onclick="switchTab('film', this)">Film Room</button>
-    <button class="tab-btn" onclick="switchTab('tactics', this)">⚙️ Tactics Board</button>
-    <button class="tab-btn" onclick="switchTab('glossary', this)">📖 Glossary</button>
-    <button class="tab-btn" onclick="switchTab('competition', this)" style="color: var(--gold);">🏆 Competition Hub</button>
-    <button class="tab-btn" onclick="switchTab('parents', this)">Parent Hub</button>
-    <button class="tab-btn" onclick="switchTab('moments', this)">⭐ Moments</button>
-    <button class="tab-btn" onclick="switchTab('portal', this)" style="color: var(--gold);">🔒 Player Portal</button>
+  <nav class="nav-tabs" role="navigation" aria-label="Main navigation">
+    <button class="tab-btn active" onclick="switchTab('hub', this)" aria-label="Team Hub">Team Hub</button>
+    <button class="tab-btn" onclick="switchTab('portal', this)" style="color: var(--gold);" aria-label="Player Portal">🔒 My Portal</button>
+    <button class="tab-btn" onclick="switchTab('competition', this)" style="color: var(--gold);" aria-label="Competition Hub">🏆 Compete</button>
+    <button class="tab-btn" onclick="switchTab('moments', this)" aria-label="Moments That Matter">⭐ Moments</button>
+    <div class="tab-more" style="position:relative; display:inline-block;">
+      <button class="tab-btn" onclick="toggleMoreMenu(event)" aria-haspopup="true" aria-expanded="false" id="more-btn">More ▾</button>
+      <div id="more-menu" class="more-menu" role="menu" aria-label="More pages">
+        <button class="more-item" onclick="switchTab('pos', this)" role="menuitem">Positions</button>
+        <button class="more-item" onclick="switchTab('film', this)" role="menuitem">Film Room</button>
+        <button class="more-item" onclick="switchTab('tactics', this)" role="menuitem">⚙️ Tactics Board</button>
+        <button class="more-item" onclick="switchTab('glossary', this)" role="menuitem">📖 Glossary</button>
+        <button class="more-item" onclick="switchTab('comm', this)" role="menuitem">Communication</button>
+        <button class="more-item" onclick="switchTab('parents', this)" role="menuitem">Parent Hub</button>
+      </div>
+    </div>
   </nav>
 
   <main class="main">
@@ -1064,6 +1077,14 @@
         <div class="section-desc">Select a formation or pattern to see player positions, movement, and when to use each system.</div>
       </div>
 
+      <!-- WEEKLY SCENARIO (fix #11 — scenario-based thinking) -->
+      <div style="background:linear-gradient(135deg, rgba(200,169,81,0.12), rgba(13,27,42,0.7)); border:1px solid rgba(200,169,81,0.35); border-radius:8px; padding:20px 24px; margin-bottom:24px;">
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:10px;">🧠 Scenario of the Week — Read the Game</div>
+        <div id="scenario-question" style="font-size:16px; color:var(--white); line-height:1.6; margin-bottom:14px;"></div>
+        <button class="btn btn-outline" style="font-size:13px; padding:8px 16px;" onclick="revealScenario()">Show the Answer</button>
+        <div id="scenario-answer" style="display:none; margin-top:14px; padding-top:14px; border-top:1px dashed rgba(200,169,81,0.3); font-size:14px; color:var(--text); line-height:1.7;"></div>
+      </div>
+
       <!-- SCENARIO BUTTONS -->
       <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px; margin-bottom:20px;">
         <button class="tac-btn active" onclick="setTactic('433',this)">4-3-3 Attacking</button>
@@ -1477,6 +1498,25 @@
           <button class="btn btn-outline" onclick="logoutPortal()" style="margin-left: auto;">Log Out</button>
         </div>
 
+        <!-- NEW REPLY BANNER (shown only when an unread coach reply exists) -->
+        <div id="new-reply-banner" style="display:none; background:linear-gradient(135deg, rgba(200,169,81,0.18), rgba(13,27,42,0.6)); border:1px solid var(--gold); border-radius:8px; padding:14px 18px; margin-top:16px; cursor:pointer;" onclick="scrollToReplies()">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:1px; color:var(--gold);">💬 NEW REPLY FROM COACH SHAWN</span>
+          <span style="font-size:13px; color:var(--text); margin-left:8px;">Tap to read →</span>
+        </div>
+
+        <!-- THIS WEEK STRIP -->
+        <div style="background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin-top:16px;">
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:10px;">📋 This Week</div>
+          <div style="display:flex; flex-wrap:wrap; gap:10px 22px; font-size:14px; color:var(--text);">
+            <span>1 · Submit your reflection</span>
+            <span>2 · Watch your assigned clip</span>
+            <span>3 · Log the daily challenge</span>
+          </div>
+        </div>
+
+        <!-- PRIVACY LINE -->
+        <p style="font-size:12px; color:var(--muted); margin-top:12px; font-style:italic;">🔒 Your reflections and self-ratings are seen by you and Coach Shawn only.</p>
+
         <!-- COACH FEEDBACK -->
         <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--gold); margin-top:20px;">Coach Shawn's Notes</h3>
         <div class="coach-notes" id="display-notes">Loading notes...</div>
@@ -1717,7 +1757,7 @@
         <!-- POST-MATCH REFLECTION -->
         <div style="background:var(--card); border:1px solid var(--border); padding:25px; border-radius:8px; margin-top:30px;">
           <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white); margin-bottom:15px;">Post-Match Reflection</h3>
-          <div class="input-group"><label>Submit your thoughts</label><textarea id="reflection-text" placeholder="What went well? What is your focus area for next practice?"></textarea></div>
+          <div class="input-group"><label>Submit your thoughts</label><textarea id="reflection-text" style="font-size:14px;" placeholder="What went well? What is your focus area for next practice?"></textarea></div>
           <button class="btn" onclick="submitNetlifyReflection()">Submit Reflection</button>
         </div>
 
@@ -1834,6 +1874,18 @@
       const commentHTML = comment
         ? `<div class="coach-comment">${comment}</div>` : '';
 
+      // IDP -> resource pathway (fix #9): when this is a growth area
+      // (coach rates 3 or below, or coach rates lower than player), point
+      // the player to the relevant hub content so a rating becomes a next step.
+      const isGrowthArea = coachVal <= 3 || deviation < 0;
+      const resource = SKILL_RESOURCES[key];
+      const resourceHTML = (isGrowthArea && resource)
+        ? `<div class="idp-resource">
+             <span>Want to grow here?</span>
+             <button class="idp-resource-link" onclick="goToResource('${resource.tab}','${resource.focus || ''}')">${resource.label} →</button>
+           </div>`
+        : '';
+
       return `
         <div class="coach-rating-row">
           <div class="coach-rating-skill"><span>${label}</span>${devBadge}</div>
@@ -1848,8 +1900,37 @@
             <span class="rating-num coach">${coachVal}</span>
           </div>
           ${commentHTML}
+          ${resourceHTML}
         </div>`;
     }
+
+    // Maps each IDP skill to the hub content that helps develop it
+    const SKILL_RESOURCES = {
+      T_Dribbling: { label: 'Watch 1v1 dribbling in Film Room', tab: 'film' },
+      T_Passing:   { label: 'See our build-out patterns', tab: 'tactics' },
+      T_Movement:  { label: 'Review off-ball movement in Positions', tab: 'pos' },
+      T_Duels:     { label: 'Study winning duels in Film Room', tab: 'film' },
+      T_Touch:     { label: 'First-touch work in Film Room', tab: 'film' },
+      Tac_Support: { label: 'See support angles on the Tactics Board', tab: 'tactics' },
+      Tac_RestDef: { label: 'Learn rest defense in the Glossary', tab: 'glossary' },
+      Tac_Press:   { label: 'See our press on the Tactics Board', tab: 'tactics' },
+      Tac_Attack:  { label: 'Review attacking principles in Film Room', tab: 'film' },
+      Tac_Defend:  { label: 'Defensive principles in the Glossary', tab: 'glossary' }
+    };
+
+    function goToResource(tabId) {
+      // Find the matching nav button (primary or in the More menu) and switch
+      const btns = document.querySelectorAll('.tab-btn, .more-item');
+      let target = null;
+      btns.forEach(b => {
+        const oc = b.getAttribute('onclick') || '';
+        if (oc.indexOf("'" + tabId + "'") !== -1) target = b;
+      });
+      if (target) target.click();
+      else switchTab(tabId, null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
 
     // ═══════════════════════════════════════════════
     // INDIVIDUAL FILM ROOM
@@ -1860,6 +1941,8 @@
       // Reset first so a previous login's reflections never linger
       document.getElementById('reflections-history-section').style.display = 'none';
       document.getElementById('reflections-history').innerHTML = '';
+      const banner = document.getElementById('new-reply-banner');
+      if (banner) banner.style.display = 'none';
       try {
         const res  = await fetch(`${API_URL}?action=reflections&name=${encodeURIComponent(playerName)}`);
         const data = await res.json();
@@ -1880,11 +1963,56 @@
           </div>
         `).join('');
         document.getElementById('reflections-history-section').style.display = 'block';
+
+        // Show "new reply" banner if the newest reply hasn't been seen on this device
+        const withReply = list.filter(r => r.coachReply);
+        if (withReply.length) {
+          const latest = withReply[0].date + '|' + withReply[0].coachReply.slice(0,20);
+          const seenKey = 'ajax_seen_reply_' + normNameJS(playerName);
+          let seen = '';
+          try { seen = localStorage.getItem(seenKey) || ''; } catch(e) {}
+          if (seen !== latest && banner) {
+            banner.style.display = 'block';
+            banner.dataset.seenKey = seenKey;
+            banner.dataset.latest  = latest;
+          }
+        }
       } catch(err) { /* silent — section stays hidden */ }
+    }
+
+    function normNameJS(s) {
+      return String(s||'').replace(/,/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
+    }
+
+    function scrollToReplies() {
+      const banner = document.getElementById('new-reply-banner');
+      if (banner && banner.dataset.seenKey) {
+        try { localStorage.setItem(banner.dataset.seenKey, banner.dataset.latest); } catch(e) {}
+        banner.style.display = 'none';
+      }
+      const section = document.getElementById('reflections-history-section');
+      if (section) section.scrollIntoView({ behavior:'smooth', block:'start' });
     }
 
     function escapeHtml(str) {
       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // Rotating reflection prompts tied to our principles (engagement fix)
+    const REFLECTION_PROMPTS = [
+      "What went well today? What's your focus for next practice?",
+      "Where did you see pressure, cover, or balance today — yours or a teammate's?",
+      "Describe one 1v1 duel from today. What would you do differently next time?",
+      "When did you look forward first? When did you play it safe instead?",
+      "What's one moment you were brave on the ball today?",
+      "Did you avoid standing in the same line as a teammate? Give one example.",
+      "When we lost the ball, how fast did you react? Did we hunt it back within 5 seconds?"
+    ];
+    function setRotatingPrompt() {
+      const ta = document.getElementById('reflection-text');
+      if (!ta) return;
+      const idx = Math.floor(Math.random() * REFLECTION_PROMPTS.length);
+      ta.placeholder = REFLECTION_PROMPTS[idx];
     }
 
     async function loadIndividualFilm(playerName) {
@@ -1991,10 +2119,72 @@
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
+      // If clicked from the More menu, highlight the More button instead
+      if (btn && btn.classList.contains('more-item')) {
+        const moreBtn = document.getElementById('more-btn');
+        if (moreBtn) moreBtn.classList.add('active');
+      } else if (btn) {
+        btn.classList.add('active');
+      }
+      closeMoreMenu();
       if (tabId === 'competition') loadCompetitionLeaderboard();
       if (tabId === 'moments')     loadMoments();
+      if (tabId === 'tactics')     loadScenario();
     }
+
+    // Weekly tactical scenario — rotates by ISO week so it changes each week
+    const SCENARIOS = [
+      { q: "You're the #6. The ball is with your right CB (#4), and their striker is pressing across to cut the pass to your other CB. Where do you go?",
+        a: "Show to the ball-side, opening your body to receive on the half-turn. If you're marked, your movement drags the striker with you and opens the lane for #4 to drive forward or hit #8. Never stand still and never hide behind the striker." },
+      { q: "You're the #8. #6 has just dropped and received on the left side. Where should you be?",
+        a: "Lift into the opposite (right) half-space — never the same line as #6. Your job is to be the forward option on the other side so we're not all bunched around the ball. If the ball comes to your side, you push up into the #10 window." },
+      { q: "You're the #7. Their fullback steps up to press our #3 who has the ball. What's your run?",
+        a: "Make the L-shaped run in behind — attack the space their fullback just left. #3 looks for you first (the penetrating pass) before anything sideways. Be brave: if it's on, take it." },
+      { q: "We just lost the ball in their half. You're the closest player. What happens in the next 5 seconds?",
+        a: "Counter-press immediately — everyone defends the moment we lose it. Don't chase alone; press to force a bad pass while teammates collapse to win the second ball. If we don't win it in 5 seconds, we drop into our 4-4-2 shape together." },
+      { q: "You're the #10. The ball is being built on the left. Where do you position, and what are you watching?",
+        a: "Stay high, in the pocket between their midfield and back lines — never drop below their midfielders. Watch their #6: if they get pulled wide or ball-watch, that's your cue to show for the line-breaking pass and turn." },
+      { q: "Their team is sitting in a low block. You're a wide player. How do you help break it down?",
+        a: "Create width to stretch them, then look for the overlap or underlap with your fullback when you cut inside. Patience — move them side to side, and when a gap opens between their defenders, that's when we finish ruthless." }
+    ];
+    function isoWeek(d) {
+      d = new Date(d.getTime());
+      d.setHours(0,0,0,0);
+      d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+      const week1 = new Date(d.getFullYear(), 0, 4);
+      return 1 + Math.round(((d - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+    }
+    function loadScenario() {
+      const idx = isoWeek(new Date()) % SCENARIOS.length;
+      const s = SCENARIOS[idx];
+      const q = document.getElementById('scenario-question');
+      const a = document.getElementById('scenario-answer');
+      if (q) q.textContent = s.q;
+      if (a) { a.textContent = s.a; a.style.display = 'none'; }
+    }
+    function revealScenario() {
+      const a = document.getElementById('scenario-answer');
+      if (a) a.style.display = a.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleMoreMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('more-menu');
+      const btn  = document.getElementById('more-btn');
+      const open = menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    function closeMoreMenu() {
+      const menu = document.getElementById('more-menu');
+      const btn  = document.getElementById('more-btn');
+      if (menu) menu.classList.remove('open');
+      if (btn)  btn.setAttribute('aria-expanded', 'false');
+    }
+    // Close the More menu when clicking anywhere else
+    document.addEventListener('click', function(e) {
+      const more = document.querySelector('.tab-more');
+      if (more && !more.contains(e.target)) closeMoreMenu();
+    });
 
     // POSITIONS LOGIC
     function showPos(posId, btn) {
@@ -2055,6 +2245,7 @@
           loadCoachRatings(data.name, data);
           loadIndividualFilm(data.name);
           loadReflections(data.name);
+          setRotatingPrompt();
         } else { alert("Invalid Credentials. Check your exact spelling and PIN."); }
       } catch(err) { alert("Error connecting to the database. Please try again."); } finally { btn.innerText = originalText; }
     }
