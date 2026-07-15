@@ -1174,7 +1174,7 @@
           <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--white); margin-bottom:4px;" id="ch-title">Ball Mastery Challenge</div>
           <input type="hidden" id="ch-id" value="ball-mastery-2026"/>
           <input type="hidden" id="ch-active" value="false"/>
-          <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--gold); letter-spacing:2px;" id="ch-dates">July 4 – July 13, 2026  ·  10 Days</div>
+          <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--gold); letter-spacing:2px;" id="ch-dates">July 4 – July 13, 2026  ·  COMPLETE</div>
           <div style="font-size:14px; color:var(--muted); margin-top:10px; line-height:1.6;" id="ch-desc">Ball Mastery ran July 4–13. 8 players hit a perfect 10/10 — badges are posted on the leaderboard below. Next challenge coming soon.</div>
         </div>
 
@@ -1188,20 +1188,25 @@
           </iframe>
         </div>
         <script>
-          // Show/hide the live badge and video strictly from the ch-active flag above.
-          // To launch a NEW challenge: update ch-title, ch-id, ch-dates, ch-desc,
-          // ch-video src, set ch-active to "true", and un-hide ch-video-wrap below.
-          (function() {
-            var active = document.getElementById('ch-active').value === 'true';
-            var badge  = document.getElementById('ch-live-badge');
-            var video  = document.getElementById('ch-video-wrap');
+          // STATIC DEFAULTS from the ch-active flag above — applies even if the
+          // Sheet fetch fails. renderChallengeCard() overrides with live data.
+          // To launch a challenge the Sheet-driven way: add a row to the
+          // challenges tab (title | id | start | end | description | video_url).
+          document.addEventListener('DOMContentLoaded', function() {
+            var active  = document.getElementById('ch-active').value === 'true';
+            var badge   = document.getElementById('ch-live-badge');
+            var video   = document.getElementById('ch-video-wrap');
+            var checkin = document.getElementById('ch-checkin-section');
+            var circuit = document.getElementById('ch-circuit-section');
             if (!active) {
-              if (badge) badge.style.display = 'none';
-              if (video) video.style.display = 'none';
+              if (badge)   badge.style.display   = 'none';
+              if (video)   video.style.display   = 'none';
+              if (checkin) checkin.style.display = 'none';
+              if (circuit) circuit.style.display = 'none';
             } else {
               if (video) video.style.display = 'block';
             }
-          })();
+          });
         </script>
 
         <!-- FITNESS CIRCUIT SCHEDULE (Ball Mastery specific — hidden for other challenges) -->
