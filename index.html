@@ -1472,11 +1472,11 @@
           <thead>
             <tr>
               <th style="text-align:left;">Player</th>
-              <th>GP</th><th>Min</th><th>G</th><th>A</th><th>SOT</th><th>SOFF</th><th>Fouls</th>
+              <th>GP</th><th>Min</th><th>G</th><th>A</th><th>SOT</th><th>SOFF</th><th>CS</th><th>Win %</th><th>Fouls</th>
             </tr>
           </thead>
           <tbody id="ts-tbody">
-            <tr><td colspan="8" style="text-align:center; color:var(--muted); font-style:italic; padding:30px;">Loading team stats...</td></tr>
+            <tr><td colspan="10" style="text-align:center; color:var(--muted); font-style:italic; padding:30px;">Loading team stats...</td></tr>
           </tbody>
         </table>
       </div>
@@ -2230,24 +2230,42 @@
         const players = (data.players || []).filter(p => p.gp > 0 || p.mins > 0);
         if (!players.length) {
           document.getElementById('ts-tbody').innerHTML =
-            '<tr><td colspan="8" style="text-align:center; color:var(--muted); font-style:italic; padding:30px;">No stats yet — check back after our first match.</td></tr>';
+            '<tr><td colspan="10" style="text-align:center; color:var(--muted); font-style:italic; padding:30px;">No stats yet — check back after our first match.</td></tr>';
           return;
         }
 
-        // Team totals
-        const tot = players.reduce((a,p) => ({
-          goals: a.goals + p.goals, assists: a.assists + p.assists,
-          shotsOn: a.shotsOn + p.shotsOn, shotsOff: a.shotsOff + p.shotsOff,
-          fouls: a.fouls + p.fouls
-        }), { goals:0, assists:0, shotsOn:0, shotsOff:0, fouls:0 });
-        const gp = Math.max(...players.map(p => p.gp));
-
-        document.getElementById('ts-totals').innerHTML = `
-          <div class="ts-total-card"><div class="ts-total-num">${gp}</div><div class="ts-total-label">Games</div></div>
-          <div class="ts-total-card"><div class="ts-total-num">${tot.goals}</div><div class="ts-total-label">Goals</div></div>
-          <div class="ts-total-card"><div class="ts-total-num">${tot.assists}</div><div class="ts-total-label">Assists</div></div>
-          <div class="ts-total-card"><div class="ts-total-num">${tot.shotsOn}</div><div class="ts-total-label">Shots On</div></div>
-          <div class="ts-total-card"><div class="ts-total-num">${tot.shotsOff}</div><div class="ts-total-label">Shots Off</div></div>`;
+        // Team cards — driven by the team aggregate line from the stats export
+        const tm = data.team;
+        if (tm) {
+          document.getElementById('ts-totals').innerHTML = `
+            <div class="ts-total-card"><div class="ts-total-num">${tm.won}-${tm.tied}-${tm.lost}</div><div class="ts-total-label">Record</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tm.winPct}%</div><div class="ts-total-label">Win %</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tm.goals}</div><div class="ts-total-label">Goals For</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tm.ga}</div><div class="ts-total-label">Goals Against</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tm.gd > 0 ? '+' : ''}${tm.gd}</div><div class="ts-total-label">Goal Diff</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tm.cs}</div><div class="ts-total-label">Clean Sheets</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tm.shots}</div><div class="ts-total-label">Shots</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tm.shotAcc}%</div><div class="ts-total-label">Shot Accuracy</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tm.conv}%</div><div class="ts-total-label">Goal Conversion</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tm.corners}</div><div class="ts-total-label">Corners</div></div>`;
+        } else {
+          // Fallback: compute from player rows if no team line found
+          const tot = players.reduce((a,p) => ({
+            goals: a.goals + p.goals, assists: a.assists + p.assists,
+            shotsOn: a.shotsOn + p.shotsOn, shotsOff: a.shotsOff + p.shotsOff
+          }), { goals:0, assists:0, shotsOn:0, shotsOff:0 });
+          const gp = Math.max(...players.map(p => p.gp));
+          const teamWin = Math.max(...players.map(p => p.winPct || 0));
+          const teamCS  = Math.max(...players.map(p => p.cs || 0));
+          document.getElementById('ts-totals').innerHTML = `
+            <div class="ts-total-card"><div class="ts-total-num">${gp}</div><div class="ts-total-label">Games</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${teamWin}%</div><div class="ts-total-label">Win %</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tot.goals}</div><div class="ts-total-label">Goals</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tot.assists}</div><div class="ts-total-label">Assists</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${teamCS}</div><div class="ts-total-label">Clean Sheets</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tot.shotsOn}</div><div class="ts-total-label">Shots On</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${tot.shotsOff}</div><div class="ts-total-label">Shots Off</div></div>`;
+        }
 
         // Category leaders (positive stats only)
         const leaderOf = (key, label, unit) => {
@@ -2263,6 +2281,7 @@
           leaderOf('goals','⚽ Top Scorer','goals') +
           leaderOf('assists','🎯 Most Assists','assists') +
           leaderOf('shotsOn','🥅 Most Shots on Target','on target') +
+          leaderOf('cs','🧤 Clean Sheets','clean sheets') +
           leaderOf('mins','⏱️ Most Minutes','minutes');
 
         // Full table — sorted by goals, then assists, then minutes
@@ -2271,13 +2290,13 @@
           <tr>
             <td>${p.name}</td>
             <td>${p.gp}</td><td>${p.mins}</td><td>${p.goals}</td><td>${p.assists}</td>
-            <td>${p.shotsOn}</td><td>${p.shotsOff}</td><td>${p.fouls}</td>
+            <td>${p.shotsOn}</td><td>${p.shotsOff}</td><td>${p.cs}</td><td>${p.winPct}%</td><td>${p.fouls}</td>
           </tr>`).join('');
 
         teamStatsLoaded = true;
       } catch(err) {
         document.getElementById('ts-tbody').innerHTML =
-          '<tr><td colspan="8" style="text-align:center; color:var(--muted); font-style:italic; padding:30px;">Could not load stats — try again shortly.</td></tr>';
+          '<tr><td colspan="10" style="text-align:center; color:var(--muted); font-style:italic; padding:30px;">Could not load stats — try again shortly.</td></tr>';
       }
     }
 
