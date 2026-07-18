@@ -271,6 +271,20 @@
  .countdown-num { font-family: 'Bebas Neue', cursive; font-size: 32px; color: var(--teal); line-height: 1; }
  .countdown-unit-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
 
+ /* TEAM STATS */
+ .ts-table { width:100%; border-collapse:collapse; font-size:14px; }
+ .ts-table th { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); padding:10px 12px; text-align:center; border-bottom:1px solid var(--border); }
+ .ts-table td { padding:11px 12px; text-align:center; color:var(--text); border-bottom:1px solid rgba(255,255,255,0.04); }
+ .ts-table td:first-child { text-align:left; color:var(--white); font-weight:600; white-space:nowrap; }
+ .ts-table tbody tr:hover { background:rgba(58,191,184,0.05); }
+ .ts-total-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px 12px; text-align:center; }
+ .ts-total-num { font-family:'Bebas Neue',cursive; font-size:34px; color:var(--teal); line-height:1; }
+ .ts-total-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-top:6px; }
+ .ts-leader-card { background:var(--card); border:1px solid var(--border); border-left:3px solid var(--gold); border-radius:6px; padding:14px 18px; }
+ .ts-leader-cat { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+ .ts-leader-name { font-family:'Bebas Neue',cursive; font-size:20px; color:var(--white); line-height:1.2; }
+ .ts-leader-val { font-size:13px; color:var(--teal); margin-top:2px; }
+
  /* REFLECTIONS + COACH REPLIES */
  .idp-resource { margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px dashed var(--border); }
  .idp-resource span { font-size: 12px; color: var(--muted); }
@@ -346,6 +360,7 @@
       <button class="tab-btn" onclick="toggleMoreMenu(event)" aria-haspopup="true" aria-expanded="false" id="more-btn">More ▾</button>
       <div id="more-menu" class="more-menu" role="menu" aria-label="More pages">
         <button class="more-item" onclick="switchTab('pos', this)" role="menuitem">Positions</button>
+        <button class="more-item" onclick="switchTab('teamstats', this)" role="menuitem">📊 Team Stats</button>
         <button class="more-item" onclick="switchTab('film', this)" role="menuitem">Film Room</button>
         <button class="more-item" onclick="switchTab('tactics', this)" role="menuitem">⚙️ Tactics Board</button>
         <button class="more-item" onclick="switchTab('glossary', this)" role="menuitem">📖 Glossary</button>
@@ -1433,6 +1448,40 @@
     <!-- ═══════════════════════════════════════════════════ -->
     <!-- MOMENTS THAT MATTER                                 -->
     <!-- ═══════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- TEAM STATS                                          -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="teamstats" class="section">
+      <div class="section-header">
+        <div class="section-label">Season 26/27</div>
+        <div class="section-title">Team Stats</div>
+        <div class="section-desc">Season numbers across the squad — updated after each match sync.</div>
+      </div>
+
+      <!-- TEAM TOTALS -->
+      <div id="ts-totals" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px,1fr)); gap:12px; margin-bottom:28px;"></div>
+
+      <!-- CATEGORY LEADERS -->
+      <div style="font-family:'Bebas Neue',cursive; font-size:26px; color:var(--white); margin-bottom:14px;">Category Leaders</div>
+      <div id="ts-leaders" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:14px; margin-bottom:32px;"></div>
+
+      <!-- FULL TABLE -->
+      <div style="font-family:'Bebas Neue',cursive; font-size:26px; color:var(--white); margin-bottom:14px;">Full Squad</div>
+      <div style="overflow-x:auto;">
+        <table class="ts-table" id="ts-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Player</th>
+              <th>GP</th><th>Min</th><th>G</th><th>A</th><th>SOT</th><th>SOFF</th><th>Fouls</th>
+            </tr>
+          </thead>
+          <tbody id="ts-tbody">
+            <tr><td colspan="8" style="text-align:center; color:var(--muted); font-style:italic; padding:30px;">Loading team stats...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div id="moments" class="section">
       <div class="section-header">
         <div class="section-label">Ajax Aspire U15</div>
@@ -1754,9 +1803,9 @@
           </div>
         </div>
 
-        <!-- POST-MATCH Or PRACTICE REFLECTION -->
+        <!-- POST-MATCH REFLECTION -->
         <div style="background:var(--card); border:1px solid var(--border); padding:25px; border-radius:8px; margin-top:30px;">
-          <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white); margin-bottom:15px;">Post-Match or Practice Reflection</h3>
+          <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white); margin-bottom:15px;">Post-Match Reflection</h3>
           <div class="input-group"><label>Submit your thoughts</label><textarea id="reflection-text" style="font-size:14px;" placeholder="What went well? What is your focus area for next practice?"></textarea></div>
           <button class="btn" onclick="submitNetlifyReflection()">Submit Reflection</button>
         </div>
@@ -2130,6 +2179,7 @@
       if (tabId === 'competition') loadCompetitionLeaderboard();
       if (tabId === 'moments')     loadMoments();
       if (tabId === 'tactics')     loadScenario();
+      if (tabId === 'teamstats')   loadTeamStats();
     }
 
     // Weekly tactical scenario — rotates by ISO week so it changes each week
@@ -2165,6 +2215,70 @@
     function revealScenario() {
       const a = document.getElementById('scenario-answer');
       if (a) a.style.display = a.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // ═══════════════════════════════════════════════
+    // TEAM STATS
+    // ═══════════════════════════════════════════════
+    let teamStatsLoaded = false;
+
+    async function loadTeamStats() {
+      if (teamStatsLoaded) return;
+      try {
+        const res  = await fetch(`${API_URL}?action=teamStats`);
+        const data = await res.json();
+        const players = (data.players || []).filter(p => p.gp > 0 || p.mins > 0);
+        if (!players.length) {
+          document.getElementById('ts-tbody').innerHTML =
+            '<tr><td colspan="8" style="text-align:center; color:var(--muted); font-style:italic; padding:30px;">No stats yet — check back after our first match.</td></tr>';
+          return;
+        }
+
+        // Team totals
+        const tot = players.reduce((a,p) => ({
+          goals: a.goals + p.goals, assists: a.assists + p.assists,
+          shotsOn: a.shotsOn + p.shotsOn, shotsOff: a.shotsOff + p.shotsOff,
+          fouls: a.fouls + p.fouls
+        }), { goals:0, assists:0, shotsOn:0, shotsOff:0, fouls:0 });
+        const gp = Math.max(...players.map(p => p.gp));
+
+        document.getElementById('ts-totals').innerHTML = `
+          <div class="ts-total-card"><div class="ts-total-num">${gp}</div><div class="ts-total-label">Games</div></div>
+          <div class="ts-total-card"><div class="ts-total-num">${tot.goals}</div><div class="ts-total-label">Goals</div></div>
+          <div class="ts-total-card"><div class="ts-total-num">${tot.assists}</div><div class="ts-total-label">Assists</div></div>
+          <div class="ts-total-card"><div class="ts-total-num">${tot.shotsOn}</div><div class="ts-total-label">Shots On</div></div>
+          <div class="ts-total-card"><div class="ts-total-num">${tot.shotsOff}</div><div class="ts-total-label">Shots Off</div></div>`;
+
+        // Category leaders (positive stats only)
+        const leaderOf = (key, label, unit) => {
+          const top = [...players].sort((a,b) => b[key] - a[key])[0];
+          if (!top || !top[key]) return '';
+          return `<div class="ts-leader-card">
+                    <div class="ts-leader-cat">${label}</div>
+                    <div class="ts-leader-name">${top.name}</div>
+                    <div class="ts-leader-val">${top[key]} ${unit}</div>
+                  </div>`;
+        };
+        document.getElementById('ts-leaders').innerHTML =
+          leaderOf('goals','⚽ Top Scorer','goals') +
+          leaderOf('assists','🎯 Most Assists','assists') +
+          leaderOf('shotsOn','🥅 Most Shots on Target','on target') +
+          leaderOf('mins','⏱️ Most Minutes','minutes');
+
+        // Full table — sorted by goals, then assists, then minutes
+        const sorted = [...players].sort((a,b) => b.goals - a.goals || b.assists - a.assists || b.mins - a.mins);
+        document.getElementById('ts-tbody').innerHTML = sorted.map(p => `
+          <tr>
+            <td>${p.name}</td>
+            <td>${p.gp}</td><td>${p.mins}</td><td>${p.goals}</td><td>${p.assists}</td>
+            <td>${p.shotsOn}</td><td>${p.shotsOff}</td><td>${p.fouls}</td>
+          </tr>`).join('');
+
+        teamStatsLoaded = true;
+      } catch(err) {
+        document.getElementById('ts-tbody').innerHTML =
+          '<tr><td colspan="8" style="text-align:center; color:var(--muted); font-style:italic; padding:30px;">Could not load stats — try again shortly.</td></tr>';
+      }
     }
 
     function toggleMoreMenu(e) {
