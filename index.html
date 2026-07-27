@@ -224,6 +224,13 @@
  .film-card-note-text { font-size:13px; color:var(--text); line-height:1.6; }
  .film-card-video { position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:var(--navy); }
  .film-card-video iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+ .film-card-watch { display:flex; align-items:center; gap:16px; padding:22px 20px; background:linear-gradient(135deg, rgba(58,191,184,0.06), rgba(13,27,42,0.7)); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+ .film-card-watch-icon { font-size:32px; line-height:1; flex-shrink:0; }
+ .film-card-watch-copy { flex:1; min-width:140px; }
+ .film-card-watch-provider { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); }
+ .film-card-watch-help { font-size:12px; color:var(--muted); margin-top:3px; }
+ .film-card-watch-btn { background:var(--teal); color:var(--navy); font-family:'Bebas Neue',cursive; font-size:16px; letter-spacing:1.5px; padding:11px 22px; border-radius:4px; text-decoration:none; white-space:nowrap; transition:transform 0.15s, box-shadow 0.15s; }
+ .film-card-watch-btn:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(58,191,184,0.3); }
  .film-card-feedback { padding:16px 18px; }
  .film-card-feedback-title { font-size:13px; font-weight:600; color:var(--white); margin-bottom:10px; }
 
@@ -959,7 +966,7 @@
       <div style="margin-bottom: 12px;">
         <div style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 6px;">Now Reviewing</div>
         <!-- FILM ROOM: update the title below when you change the video -->
-        <div id="film-title" style="font-family: 'Bebas Neue', cursive; font-size: 30px; color: var(--white);">Team Film Review</div>
+        <div id="film-title" style="font-family: 'Bebas Neue', cursive; font-size: 30px; color: var(--white);">Preseason — Attacking Principles Install</div>
         <div id="film-date" style="font-size: 13px; color: var(--muted); margin-top: 4px;">Posted by Coach Shawn Craig</div>
       </div>
 
@@ -2046,7 +2053,21 @@
     }
 
     function buildFilmCard(video, index, playerName) {
-      const embedUrl = convertToEmbed(video.url);
+      const info = classifyVideo(video.url);
+      // Embeddable providers get the inline iframe; the rest get a
+      // "Watch Clip" card that opens the source in a new tab.
+      const playerHTML = info.embeddable
+        ? `<div class="film-card-video">
+             <iframe src="${info.embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+           </div>`
+        : `<div class="film-card-watch">
+             <div class="film-card-watch-icon">${info.icon}</div>
+             <div class="film-card-watch-copy">
+               <div class="film-card-watch-provider">${info.providerLabel}</div>
+               <div class="film-card-watch-help">Opens in a new tab.</div>
+             </div>
+             <a class="film-card-watch-btn" href="${video.url}" target="_blank" rel="noopener">▶ Watch Clip</a>
+           </div>`;
       return `
         <div class="film-card">
           <div class="film-card-header">
@@ -2058,9 +2079,7 @@
             <div class="film-card-note-label">Coach Shawn</div>
             <div class="film-card-note-text">${video.coach_note}</div>
           </div>` : ''}
-          <div class="film-card-video">
-            <iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-          </div>
+          ${playerHTML}
           <div class="film-card-feedback">
             <div class="film-card-feedback-title">Your Response</div>
             <div class="input-group" style="margin-bottom:10px;">
@@ -2078,19 +2097,34 @@
         </div>`;
     }
 
-    function convertToEmbed(url) {
+    // Detect the video source and return either an embed URL (for
+    // providers that permit iframes) or metadata for a Watch Clip card.
+    function classifyVideo(rawUrl) {
+      const url = String(rawUrl || '').trim();
+      // YouTube — full watch URL
       if (url.includes('youtube.com/watch')) {
-        try { const id = new URL(url).searchParams.get('v'); return id ? `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` : url; } catch(e) { return url; }
+        try {
+          const id = new URL(url).searchParams.get('v');
+          if (id) return { embeddable:true, embedUrl:`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` };
+        } catch(e) {}
       }
+      // YouTube — short URL
       if (url.includes('youtu.be/')) {
-        const id = url.split('youtu.be/')[1].split('?')[0];
-        return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
+        const id = url.split('youtu.be/')[1].split('?')[0].split('/')[0];
+        if (id) return { embeddable:true, embedUrl:`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` };
       }
+      // Google Drive video file
       if (url.includes('drive.google.com/file/d/')) {
-        const id = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        return id ? `https://drive.google.com/file/d/${id[1]}/preview` : url;
+        const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (m) return { embeddable:true, embedUrl:`https://drive.google.com/file/d/${m[1]}/preview` };
       }
-      return url;
+      // Veo — no public embed, open in tab
+      if (url.includes('veo.co') || url.includes('app.veo.co')) {
+        return { embeddable:false, providerLabel:'Veo clip', icon:'🎥' };
+      }
+      // Anything else that came through — treat as external link (Hudl,
+      // Vimeo private, TeamSnap, direct .mp4 host, etc.)
+      return { embeddable:false, providerLabel:'External clip', icon:'🎥' };
     }
 
     async function submitIndividualFilmFeedback(btn) {
