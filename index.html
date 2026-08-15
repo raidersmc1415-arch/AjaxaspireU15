@@ -3206,24 +3206,26 @@
    MAN CITY Tournament Aug 29
     // ═══════════════════════════════════════════════
     function updateCountdown() {
-      const target = new Date('2026-08-29T10:45:00');
-      const now    = new Date();
-      const diff   = target - now;
-      if (diff <= 0) {
-        document.getElementById('cd-days').textContent  = '0';
-        document.getElementById('cd-hours').textContent = '0';
-        document.getElementById('cd-mins').textContent  = '0';
-        return;
-      }
-      const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      document.getElementById('cd-days').textContent  = days;
-      document.getElementById('cd-hours').textContent = hours;
-      document.getElementById('cd-mins').textContent  = mins;
-    }
-    updateCountdown();
-    setInterval(updateCountdown, 60000);
+  const d = document.getElementById('cd-days');
+  const h = document.getElementById('cd-hours');
+  const m = document.getElementById('cd-mins');
+  if (!d) return false;              // card not on the page yet
+
+  const target = new Date('2026-08-29T10:45:00');
+  const diff = target - new Date();
+  if (diff <= 0) { d.textContent = h.textContent = m.textContent = '0'; return true; }
+
+  d.textContent = Math.floor(diff / 86400000);
+  h.textContent = Math.floor(diff / 3600000) % 24;
+  m.textContent = Math.floor(diff / 60000) % 60;
+  return true;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  updateCountdown();
+  setInterval(updateCountdown, 60000);
+});
+
 
     // ═══════════════════════════════════════════════
     // MOMENTS THAT MATTER
