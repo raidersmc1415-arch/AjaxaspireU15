@@ -1419,7 +1419,7 @@
           <div class="phrase-desc">Review the framework, mission, and player pathway.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
-        <div class="phrase-card" onclick="window.open('https://drive.google.com/file/d/1ymfeTMy5BDaXx88bNSEOjrIYLcfxc690/view?usp=sharing','_blank')">
+        <div class="phrase-card" onclick="window.open('https://drive..com/file/d/1ymfeTMy5BDaXx88bNSEOjrIYLcfxc690/view?usp=sharing','_blank')">
           <div class="phrase-word" style="color:var(--green-lt)">AJAX Parent Policy and Concussions</div>
           <div class="phrase-desc">Read our expectations for sideline behavior.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
@@ -2164,10 +2164,10 @@
         const id = url.split('youtu.be/')[1].split('?')[0].split('/')[0];
         if (id) return { embeddable:true, embedUrl:`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` };
       }
-      // Google Drive video file
-      if (url.includes('drive.google.com/file/d/')) {
+      //  Drive video file
+      if (url.includes('drive..com/file/d/')) {
         const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (m) return { embeddable:true, embedUrl:`https://drive.google.com/file/d/${m[1]}/preview` };
+        if (m) return { embeddable:true, embedUrl:`https://drive..com/file/d/${m[1]}/preview` };
       }
       // Veo — no public embed, open in tab
       if (url.includes('veo.co') || url.includes('app.veo.co')) {
