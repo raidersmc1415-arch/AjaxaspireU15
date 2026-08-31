@@ -950,25 +950,28 @@
       <div class="section-header">
         <div class="section-label">Video Review</div>
         <div class="section-title">Film Room</div>
-        <div class="section-desc">Watch the clip, then submit your feedback below. Coach Shawn reviews all responses.</div>
+        <div class="section-desc">Watch the clips and match moments below. When you send a response, enter your name and PIN once and it's used for everything on the page.</div>
       </div>
 
-      <!-- FILM ROOM PASSWORD GATE -->
-      <div id="film-gate" style="max-width: 420px; margin: 40px auto; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 40px 32px; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 16px;">🎬</div>
-        <div style="font-family: 'Bebas Neue', cursive; font-size: 30px; color: var(--white); margin-bottom: 8px;">Film Room Access</div>
-        <p style="color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 8px;">Enter the team code to unlock the Film Room.</p>
-        <p style="color: var(--teal); font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 1px; margin-bottom: 24px;">Hint: It's a defending principle — three words, no spaces.</p>
-        <div class="input-group" style="text-align: left;">
-          <label>Team Code</label>
-          <input type="password" id="film-code" placeholder="entercode" onkeydown="if(event.key==='Enter') unlockFilm()">
+      <!-- SHARED IDENTITY BAR (verify once, used by every submission) -->
+      <div id="film-identity" style="background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; margin-bottom: 24px;">
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:12px;">🔑 Sign in once to respond</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+          <div class="input-group" style="flex:1; min-width:160px; margin:0;">
+            <label>Your Name</label>
+            <input type="text" id="film-id-name" placeholder="First Last">
+          </div>
+          <div class="input-group" style="flex:0 0 130px; min-width:110px; margin:0;">
+            <label>PIN</label>
+            <input type="password" id="film-id-pin" placeholder="Your portal PIN">
+          </div>
+          <button class="btn" style="width:auto; padding:11px 22px;" onclick="verifyFilmIdentity()">Sign In →</button>
         </div>
-        <button class="btn" onclick="unlockFilm()" style="margin-top: 8px;">Unlock →</button>
-        <div id="film-code-error" style="display:none; color:#e05555; font-size:13px; margin-top:12px;">Incorrect code — check with your teammates 👀</div>
+        <div id="film-id-status" style="font-size:13px; margin-top:10px;"></div>
       </div>
 
-      <!-- FILM ROOM CONTENT (hidden until unlocked) -->
-      <div id="film-content" style="display:none;">
+      <!-- FILM ROOM CONTENT (always visible) -->
+      <div id="film-content">
 
       <!-- ═══════════════════════════════════════════════════ -->
       <!-- VEO MATCH MOMENTS (Sheet-driven: film_moments tab)  -->
@@ -1037,12 +1040,7 @@
       <!-- PLAYER FEEDBACK FORM -->
       <div class="card">
         <h3 style="font-family: 'Bebas Neue', cursive; font-size: 22px; color: var(--white); margin-bottom: 6px;">Your Film Feedback</h3>
-        <p style="color: var(--muted); font-size: 13px; margin-bottom: 20px;">After watching, answer the questions below. This goes straight to Coach Shawn.</p>
-
-        <div class="input-group">
-          <label>Your Name</label>
-          <input type="text" id="film-player-name" placeholder="First Last">
-        </div>
+        <p style="color: var(--muted); font-size: 13px; margin-bottom: 20px;">After watching, answer the questions below. Sign in at the top of the page first, then this goes straight to Coach Shawn.</p>
 
         <div class="input-group">
           <label>Describe what you saw in this video?</label>
@@ -1823,28 +1821,42 @@
   </div>
 
   <script>
-    // FILM ROOM PASSWORD
-    function unlockFilm() {
-      const code = document.getElementById('film-code').value.trim().toLowerCase().replace(/\s/g,'');
-      if (code === 'delaydirectdeny') {
-        document.getElementById('film-gate').style.display = 'none';
-        document.getElementById('film-content').style.display = 'block';
-        sessionStorage.setItem('filmUnlocked', 'true');
-        loadVeoMoments();
-      } else {
-        document.getElementById('film-code-error').style.display = 'block';
-        document.getElementById('film-code').value = '';
-        document.getElementById('film-code').focus();
+    // FILM ROOM IDENTITY — verify name + PIN once, reuse for all submissions
+    let FILM_VERIFIED_NAME = null;
+
+    async function verifyFilmIdentity() {
+      const name = (document.getElementById('film-id-name').value || '').trim();
+      const pin  = (document.getElementById('film-id-pin').value || '').trim();
+      const status = document.getElementById('film-id-status');
+      if (!name || !pin) {
+        status.style.color = '#e05555';
+        status.textContent = 'Enter both your name and PIN.';
+        return;
+      }
+      status.style.color = 'var(--muted)';
+      status.textContent = 'Checking…';
+      try {
+        const res = await fetch(`${API_URL}?action=verifyPin&name=${encodeURIComponent(name)}&pin=${encodeURIComponent(pin)}`);
+        const data = await res.json();
+        if (data.valid) {
+          FILM_VERIFIED_NAME = data.name || name;
+          status.style.color = 'var(--teal)';
+          status.textContent = '✓ Signed in as ' + FILM_VERIFIED_NAME + '. You can send responses now.';
+          document.getElementById('film-id-pin').value = '';
+        } else {
+          FILM_VERIFIED_NAME = null;
+          status.style.color = '#e05555';
+          status.textContent = "Name and PIN don't match. Check your portal login.";
+        }
+      } catch(err) {
+        status.style.color = '#e05555';
+        status.textContent = 'Something went wrong. Try again in a moment.';
       }
     }
 
-    // Keep film unlocked within the same session (so switching tabs doesn't re-lock it)
+    // Load Veo moments as soon as the Film Room is on the page
     document.addEventListener('DOMContentLoaded', function() {
-      if (sessionStorage.getItem('filmUnlocked') === 'true') {
-        document.getElementById('film-gate').style.display = 'none';
-        document.getElementById('film-content').style.display = 'block';
-        loadVeoMoments();
-      }
+      loadVeoMoments();
     });
 
     // ═══════════════════════════════════════════════
@@ -2608,14 +2620,13 @@
     }
 
     async function submitVeoMoment(i, time, phase) {
-      const name = (document.getElementById('film-player-name').value || '').trim();
+      if (!FILM_VERIFIED_NAME) { filmNeedsSignIn(); return; }
       const box  = document.getElementById('vm-resp-' + i);
       const text = (box.value || '').trim();
-      if (!name) { alert("Add your name in the Film Feedback section below, then send."); return; }
       if (!text) { alert("Write what you saw before sending."); return; }
 
       const payload = {
-        name,
+        name: FILM_VERIFIED_NAME,
         reflection: `[VEO MOMENT — ${time}${phase ? ' · ' + phase : ''}]\n\n${text}`
       };
       try {
@@ -2626,18 +2637,27 @@
       } catch(err) { alert("That didn't send. Try again in a moment."); }
     }
 
+    // Nudge the player to the sign-in bar if they try to send unverified
+    function filmNeedsSignIn() {
+      const bar = document.getElementById('film-identity');
+      const status = document.getElementById('film-id-status');
+      status.style.color = '#e05555';
+      status.textContent = 'Sign in with your name and PIN first, then send.';
+      bar.scrollIntoView({ behavior:'smooth', block:'center' });
+      document.getElementById('film-id-name').focus();
+    }
+
     async function submitFilmFeedback() {
-      const name = document.getElementById('film-player-name').value.trim();
+      if (!FILM_VERIFIED_NAME) { filmNeedsSignIn(); return; }
       const q1   = document.getElementById('film-q1').value.trim();
       const q2   = document.getElementById('film-q2').value.trim();
       const q3   = document.getElementById('film-q3').value.trim();
       const title = document.getElementById('film-title').innerText;
 
-      if (!name) { alert("Please enter your name before submitting."); return; }
       if (!q1 && !q2 && !q3) { alert("Please answer at least one question."); return; }
 
       const payload = {
-        name,
+        name: FILM_VERIFIED_NAME,
         reflection: `[FILM FEEDBACK — ${title}]\n\nShape/positioning: ${q1}\n\nWhat I'd do differently: ${q2}\n\nApply in training: ${q3}`
       };
 
