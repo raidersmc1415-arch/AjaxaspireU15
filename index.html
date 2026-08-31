@@ -269,15 +269,6 @@
  .stat-val { font-size: 2rem; font-family: 'Bebas Neue', cursive; color: var(--teal); }
  .coach-notes { background: rgba(58,191,184,0.08); padding: 20px; border-left: 4px solid var(--teal); border-radius: 4px; margin: 20px 0; font-style: italic; color: var(--white); }
 
- /* COUNTDOWN */
- #countdown-card { background: linear-gradient(135deg, rgba(30,92,56,0.3), rgba(13,27,42,0.95)); border: 1px solid rgba(58,191,184,0.25); border-radius: 6px; padding: 18px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
- .countdown-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 4px; }
- .countdown-event { font-family: 'Bebas Neue', cursive; font-size: 20px; color: var(--white); }
- .countdown-units { display: flex; gap: 12px; }
- .countdown-unit { text-align: center; background: rgba(13,27,42,0.8); border: 1px solid var(--border); border-radius: 4px; padding: 8px 14px; min-width: 52px; }
- .countdown-num { font-family: 'Bebas Neue', cursive; font-size: 32px; color: var(--teal); line-height: 1; }
- .countdown-unit-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
-
  /* TEAM STATS */
  .ts-table { width:100%; border-collapse:collapse; font-size:14px; }
  .ts-table th { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); padding:10px 12px; text-align:center; border-bottom:1px solid var(--border); }
@@ -398,27 +389,7 @@
         <div class="section-desc">Our core principles, team goals, and season information.</div>
       </div>
 
-      <!-- COUNTDOWN TO FIRST TOURNAMENT -->
-      <div id="countdown-card">
-        <div>
-          <div class="countdown-label">⚽ First Tournament</div>
-          <div class="countdown-event">Manchester City Cup — San Diego · August 29, 2026</div>
-        </div>
-        <div class="countdown-units">
-          <div class="countdown-unit">
-            <div class="countdown-num" id="cd-days">--</div>
-            <div class="countdown-unit-label">Days</div>
-          </div>
-          <div class="countdown-unit">
-            <div class="countdown-num" id="cd-hours">--</div>
-            <div class="countdown-unit-label">Hours</div>
-          </div>
-          <div class="countdown-unit">
-            <div class="countdown-num" id="cd-mins">--</div>
-            <div class="countdown-unit-label">Mins</div>
-          </div>
-        </div>
-      </div>
+
 
       <!-- MESSAGE FROM COACH — populated from Sheet, hidden if empty -->
       <div id="coach-message-card">
@@ -646,7 +617,7 @@
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
             <span style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; background: rgba(58,191,184,0.1); color: var(--teal); border: 1px solid rgba(58,191,184,0.25); padding: 3px 10px; border-radius: 2px;">Short Term</span>
           </div>
-          <p style="color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 14px;">Preseason fitness, technical load, and defending and attacking principles of play install.</p>
+          <p style="color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 14px;">Tactical Learning: sharpening our defending and attacking principles of play, technical detail, and game-speed decision making.</p>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
             <div style="background: var(--navy-mid); border: 1px solid var(--border); border-left: 3px solid var(--teal); border-radius: 4px; padding: 14px;">
               <div style="font-family: 'Bebas Neue', cursive; font-size: 16px; color: var(--teal); margin-bottom: 8px;">⛨ Defending Principles</div>
@@ -1419,7 +1390,7 @@
           <div class="phrase-desc">Review the framework, mission, and player pathway.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
-        <div class="phrase-card" onclick="window.open('https://drive..com/file/d/1ymfeTMy5BDaXx88bNSEOjrIYLcfxc690/view?usp=sharing','_blank')">
+        <div class="phrase-card" onclick="window.open('https://drive.google.com/file/d/1ymfeTMy5BDaXx88bNSEOjrIYLcfxc690/view?usp=sharing','_blank')">
           <div class="phrase-word" style="color:var(--green-lt)">AJAX Parent Policy and Concussions</div>
           <div class="phrase-desc">Read our expectations for sideline behavior.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
@@ -2164,10 +2135,10 @@
         const id = url.split('youtu.be/')[1].split('?')[0].split('/')[0];
         if (id) return { embeddable:true, embedUrl:`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` };
       }
-      //  Drive video file
-      if (url.includes('drive..com/file/d/')) {
+      // Google Drive video file
+      if (url.includes('drive.google.com/file/d/')) {
         const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (m) return { embeddable:true, embedUrl:`https://drive..com/file/d/${m[1]}/preview` };
+        if (m) return { embeddable:true, embedUrl:`https://drive.google.com/file/d/${m[1]}/preview` };
       }
       // Veo — no public embed, open in tab
       if (url.includes('veo.co') || url.includes('app.veo.co')) {
@@ -3316,29 +3287,6 @@
           </div>`;
       }).join('');
     }
-
-    // ═══════════════════════════════════════════════
-    // COUNTDOWN — Stanford Strikers Tournament Aug 1
-    // ═══════════════════════════════════════════════
-    function updateCountdown() {
-      const target = new Date('2026-08-29T10:45:00');
-      const now    = new Date();
-      const diff   = target - now;
-      if (diff <= 0) {
-        document.getElementById('cd-days').textContent  = '0';
-        document.getElementById('cd-hours').textContent = '0';
-        document.getElementById('cd-mins').textContent  = '0';
-        return;
-      }
-      const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      document.getElementById('cd-days').textContent  = days;
-      document.getElementById('cd-hours').textContent = hours;
-      document.getElementById('cd-mins').textContent  = mins;
-    }
-    updateCountdown();
-    setInterval(updateCountdown, 60000);
 
     // ═══════════════════════════════════════════════
     // MOMENTS THAT MATTER
