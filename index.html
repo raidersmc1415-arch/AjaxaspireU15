@@ -305,6 +305,18 @@
  .refl-reply-text { font-size:13px; color:var(--white); line-height:1.7; }
  .refl-pending { margin-top:10px; font-size:11px; color:var(--muted); font-style:italic; }
 
+ /* VEO MATCH MOMENTS */
+ .vm-card { background:rgba(13,27,42,.55); border:1px solid var(--border); border-radius:8px; padding:14px 16px; margin-bottom:10px; }
+ .vm-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+ .vm-time { font-family:'Bebas Neue',cursive; font-size:22px; color:var(--gold); letter-spacing:1px; line-height:1; }
+ .vm-phase { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--teal); background:rgba(58,191,184,.1); border:1px solid rgba(58,191,184,.28); padding:3px 9px; border-radius:3px; }
+ .vm-prompt { font-size:14px; color:var(--text); line-height:1.5; margin-bottom:10px; }
+ .vm-input { width:100%; background:var(--navy); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; padding:10px 12px; min-height:64px; outline:none; resize:vertical; }
+ .vm-input:focus { border-color:rgba(58,191,184,.5); }
+ .vm-actions { display:flex; align-items:center; gap:10px; margin-top:9px; flex-wrap:wrap; }
+ .vm-btn { width:auto !important; padding:9px 20px !important; font-size:13px !important; }
+ .vm-sent { display:none; color:var(--teal); font-size:13px; }
+
  /* MOMENTS THAT MATTER */
  .moment-card { background:var(--card); border:1px solid var(--border); border-left:4px solid var(--teal); border-radius:6px; padding:18px 22px; margin-bottom:14px; transition:border-color 0.2s; }
  .moment-card:hover { border-left-color:var(--gold); }
@@ -386,11 +398,11 @@
         <div class="section-desc">Our core principles, team goals, and season information.</div>
       </div>
 
-      <!-- COUNTDOWN TO MAANCHESTER CITY TOURNAMENT -->
+      <!-- COUNTDOWN TO FIRST TOURNAMENT -->
       <div id="countdown-card">
         <div>
-          <div class="countdown-label">⚽ MAN CITY Tournament</div>
-          <div class="countdown-event">San Diego Manchester City Tournament — August 29, 2026</div>
+          <div class="countdown-label">⚽ First Tournament</div>
+          <div class="countdown-event">Manchester City Cup — San Diego · August 29, 2026</div>
         </div>
         <div class="countdown-units">
           <div class="countdown-unit">
@@ -958,6 +970,22 @@
       <!-- FILM ROOM CONTENT (hidden until unlocked) -->
       <div id="film-content" style="display:none;">
 
+      <!-- ═══════════════════════════════════════════════════ -->
+      <!-- VEO MATCH MOMENTS (Sheet-driven: film_moments tab)  -->
+      <!-- ═══════════════════════════════════════════════════ -->
+      <div id="veo-moments-card" style="display:none; background:linear-gradient(135deg, rgba(58,191,184,.10), rgba(13,27,42,.6)); border:1px solid rgba(58,191,184,.4); border-radius:10px; padding:24px; margin-bottom:28px;">
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:8px;">🎥 Match Film Moments</div>
+        <div id="veo-match-name" style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); line-height:1.1;"></div>
+        <p style="font-size:14px; color:var(--text); margin:10px 0 16px; max-width:580px;">
+          Open the <strong style="color:var(--teal)">full match on Veo</strong>, watch each moment below, and tell me what you saw. I'm not giving you the answer. I want to know what you notice.
+        </p>
+        <a id="veo-open-btn" href="#" target="_blank" rel="noopener"
+           style="display:inline-block; background:var(--teal); color:var(--navy); font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:1.5px; padding:12px 28px; border-radius:5px; text-decoration:none;">
+          ▶ Open Match Film on Veo
+        </a>
+        <div id="veo-moments-list" style="margin-top:22px; padding-top:18px; border-top:1px dashed rgba(58,191,184,.3);"></div>
+      </div>
+
       <div style="background: rgba(200,169,81,0.08); border: 1px solid rgba(200,169,81,0.25); padding: 14px 18px; border-radius: 4px; color: var(--gold); margin-bottom: 20px; font-size: 13px; line-height: 1.6;">
         <strong>📌 Coach Shawn — Adding new videos:</strong> Upload to your <a href="https://www.youtube.com/playlist?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw" target="_blank" style="color:var(--teal);">YouTube playlist ↗</a> and it appears here automatically. No file updates or Netlify re-uploads needed. Update the title, date, and focus points below to match your latest clip.
       </div>
@@ -966,7 +994,7 @@
       <div style="margin-bottom: 12px;">
         <div style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 6px;">Now Reviewing</div>
         <!-- FILM ROOM: update the title below when you change the video -->
-        <div id="film-title" style="font-family: 'Bebas Neue', cursive; font-size: 30px; color: var(--white);">Preseason — Attacking Principles Install</div>
+        <div id="film-title" style="font-family: 'Bebas Neue', cursive; font-size: 30px; color: var(--white);">Team Film Review — Embrace the Challenge</div>
         <div id="film-date" style="font-size: 13px; color: var(--muted); margin-top: 4px;">Posted by Coach Shawn Craig</div>
       </div>
 
@@ -988,12 +1016,21 @@
       <!-- COACHING FOCUS POINTS -->
       <div class="card" style="margin-bottom: 20px;">
         <h3 style="font-family: 'Bebas Neue', cursive; font-size: 22px; color: var(--teal); margin-bottom: 14px;">What to Watch For</h3>
-        <!-- FILM ROOM: update these focus points to match each new video -->
-        <ul id="film-focus" style="color: var(--muted); font-size: 14px; line-height: 2; padding-left: 20px;">
-          <li>Watch when we pass negative, was that a good option to secure the ball or could we have played forward first?</li>
-          <li>Watch the off ball movement of the supporting players. Focus on the weakside, are we standing still or moving with the play and checking our surroundings?</li>
-          <li>Observe the angle of support from #8 and #10 after the #6 receives, how did our midfield 3 support in securing the ball and advancing the ball?</li>
-          <li>In our final entry into the box, how well were we positioned to score?</li>
+
+        <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">In Possession</div>
+        <ul style="color: var(--muted); font-size: 14px; line-height: 1.9; padding-left: 20px; margin-bottom: 18px;">
+          <li>Watch the shape of the back 4 during build-out. Are they providing the right width and depth in support?</li>
+          <li>How is our midfield movement during possession? Are we forming a triangle and providing angles of support?</li>
+          <li>Are the forwards creating the right width and height to stretch the opponent's back line?</li>
+          <li>When we win the ball in transition, if we can play forward are we positioned to do so? If we can't, are we forcing the ball on the dribble or forcing it up the field?</li>
+        </ul>
+
+        <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">Out of Possession</div>
+        <ul style="color: var(--muted); font-size: 14px; line-height: 1.9; padding-left: 20px;">
+          <li>Is our press set up correctly on opponent goal kicks?</li>
+          <li>Are we recognizing the pressing triggers and responding as a pack?</li>
+          <li>When the press has been beaten, are we getting into our compact defensive shape?</li>
+          <li>How is our back 4 movement? Are we connected and balanced?</li>
         </ul>
       </div>
 
@@ -1008,8 +1045,8 @@
         </div>
 
         <div class="input-group">
-          <label>What did you notice about our shape in this clip?</label>
-          <textarea id="film-q1" placeholder="Describe what you saw — good or areas to fix..." style="min-height: 80px;"></textarea>
+          <label>Describe what you saw in this video?</label>
+          <textarea id="film-q1" placeholder="What stood out — good or areas to fix..." style="min-height: 80px;"></textarea>
         </div>
 
         <div class="input-group">
@@ -1028,11 +1065,11 @@
         </div>
       </div>
 
-      <!-- VEO LINK -->
-      <div style="background: rgba(58,191,184,0.06); border: 1px solid rgba(58,191,184,0.2); padding: 14px 18px; border-radius: 4px; color: var(--text); margin-top: 20px; font-size: 13px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-        <span>🎥</span>
-        <span><strong>Full Game Film on Veo:</strong> All home games uploaded within 48 hours.</span>
-        <a href="https://app.veo.co/clubs/ajax-50ad2f70/teams/ajax-2012g/recordings/" target="_blank" style="color: var(--teal); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; text-decoration:none; border:1px solid rgba(58,191,184,0.3); padding:4px 12px; border-radius:2px;">Open Veo ↗</a>
+      <!-- ALL GAME FILM (archive) -->
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 13px 18px; border-radius: 4px; color: var(--muted); margin-top: 20px; font-size: 13px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <span>🗄️</span>
+        <span>Every match we've recorded, uploaded within 48 hours.</span>
+        <a href="https://app.veo.co/clubs/ajax-50ad2f70/teams/ajax-2012g/recordings/" target="_blank" style="color: var(--teal); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; text-decoration:none; border:1px solid rgba(58,191,184,0.3); padding:4px 12px; border-radius:2px;">Full Film Archive ↗</a>
       </div>
 
       </div><!-- end film-content -->
@@ -1793,6 +1830,7 @@
         document.getElementById('film-gate').style.display = 'none';
         document.getElementById('film-content').style.display = 'block';
         sessionStorage.setItem('filmUnlocked', 'true');
+        loadVeoMoments();
       } else {
         document.getElementById('film-code-error').style.display = 'block';
         document.getElementById('film-code').value = '';
@@ -1805,6 +1843,7 @@
       if (sessionStorage.getItem('filmUnlocked') === 'true') {
         document.getElementById('film-gate').style.display = 'none';
         document.getElementById('film-content').style.display = 'block';
+        loadVeoMoments();
       }
     });
 
@@ -2530,6 +2569,63 @@
 
 
 
+    // ═══════════════════════════════════════════════
+    // VEO MATCH MOMENTS (Sheet-driven: film_moments tab)
+    // ═══════════════════════════════════════════════
+    let veoMomentsLoaded = false;
+
+    async function loadVeoMoments() {
+      if (veoMomentsLoaded) return;
+      try {
+        const res  = await fetch(`${API_URL}?action=filmMoments`);
+        const data = await res.json();
+        const moments = data.moments || [];
+        if (!moments.length) return; // no active moments: card stays hidden
+
+        document.getElementById('veo-match-name').textContent = data.match || 'Latest Match';
+        const btn = document.getElementById('veo-open-btn');
+        if (data.veoUrl) btn.href = data.veoUrl;
+        else btn.style.display = 'none';
+
+        document.getElementById('veo-moments-list').innerHTML = moments.map((m, i) => `
+          <div class="vm-card">
+            <div class="vm-head">
+              <span class="vm-time">${m.time}</span>
+              ${m.phase ? `<span class="vm-phase">${m.phase}</span>` : ''}
+            </div>
+            ${m.prompt ? `<div class="vm-prompt">${m.prompt}</div>` : ''}
+            <textarea id="vm-resp-${i}" class="vm-input" placeholder="What did you see in this moment?"></textarea>
+            <div class="vm-actions">
+              <button class="btn vm-btn" onclick="submitVeoMoment(${i}, '${m.time.replace(/'/g,"")}', '${(m.phase||'').replace(/'/g,"")}')">Send to Coach →</button>
+              <span id="vm-msg-${i}" class="vm-sent">✅ Sent to Coach Shawn</span>
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('veo-moments-card').style.display = 'block';
+        veoMomentsLoaded = true;
+      } catch(err) { /* stay hidden on error */ }
+    }
+
+    async function submitVeoMoment(i, time, phase) {
+      const name = (document.getElementById('film-player-name').value || '').trim();
+      const box  = document.getElementById('vm-resp-' + i);
+      const text = (box.value || '').trim();
+      if (!name) { alert("Add your name in the Film Feedback section below, then send."); return; }
+      if (!text) { alert("Write what you saw before sending."); return; }
+
+      const payload = {
+        name,
+        reflection: `[VEO MOMENT — ${time}${phase ? ' · ' + phase : ''}]\n\n${text}`
+      };
+      try {
+        await fetch(API_URL, { method:'POST', body: JSON.stringify(payload) });
+        document.getElementById('vm-msg-' + i).style.display = 'inline';
+        box.value = '';
+        box.placeholder = 'Sent. Rewatch and add more anytime.';
+      } catch(err) { alert("That didn't send. Try again in a moment."); }
+    }
+
     async function submitFilmFeedback() {
       const name = document.getElementById('film-player-name').value.trim();
       const q1   = document.getElementById('film-q1').value.trim();
@@ -3202,30 +3298,27 @@
     }
 
     // ═══════════════════════════════════════════════
-    // COUNTDOWN — S
-   MAN CITY Tournament Aug 29
+    // COUNTDOWN — Stanford Strikers Tournament Aug 1
     // ═══════════════════════════════════════════════
     function updateCountdown() {
-  const d = document.getElementById('cd-days');
-  const h = document.getElementById('cd-hours');
-  const m = document.getElementById('cd-mins');
-  if (!d) return false;              // card not on the page yet
-
-  const target = new Date('2026-08-29T10:45:00');
-  const diff = target - new Date();
-  if (diff <= 0) { d.textContent = h.textContent = m.textContent = '0'; return true; }
-
-  d.textContent = Math.floor(diff / 86400000);
-  h.textContent = Math.floor(diff / 3600000) % 24;
-  m.textContent = Math.floor(diff / 60000) % 60;
-  return true;
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  updateCountdown();
-  setInterval(updateCountdown, 60000);
-});
-
+      const target = new Date('2026-08-29T10:45:00');
+      const now    = new Date();
+      const diff   = target - now;
+      if (diff <= 0) {
+        document.getElementById('cd-days').textContent  = '0';
+        document.getElementById('cd-hours').textContent = '0';
+        document.getElementById('cd-mins').textContent  = '0';
+        return;
+      }
+      const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      document.getElementById('cd-days').textContent  = days;
+      document.getElementById('cd-hours').textContent = hours;
+      document.getElementById('cd-mins').textContent  = mins;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 60000);
 
     // ═══════════════════════════════════════════════
     // MOMENTS THAT MATTER
