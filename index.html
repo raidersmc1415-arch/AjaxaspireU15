@@ -1064,18 +1064,31 @@
       </div>
 
       <!-- SCENARIO BUTTONS -->
-      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px; margin-bottom:20px;">
-        <button class="tac-btn active" onclick="setTactic('433',this)">4-3-3 Attacking</button>
-        <button class="tac-btn" onclick="setTactic('overlap',this)">Winger Cuts / Overlap</button>
-        <button class="tac-btn" onclick="setTactic('buildA',this)">Build Out — Plan A</button>
-        <button class="tac-btn" onclick="setTactic('buildB',this)">Build Out — Plan B</button>
-        <button class="tac-btn" onclick="setTactic('buildC',this)">Build Out — Plan C</button>
-        <button class="tac-btn" onclick="setTactic('back4attack',this)">Back 4 — Attacking Roles</button>
-        <button class="tac-btn" onclick="setTactic('442block',this)">4-4-2 Mid Block</button>
-        <button class="tac-btn" onclick="setTactic('press',this)">4-3-3 Press</button>
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">4-3-3 · Our Primary System</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-bottom:18px;">
+          <button class="tac-btn active" onclick="setTactic('433',this)">Attacking Shape</button>
+          <button class="tac-btn" onclick="setTactic('overlap',this)">Movements — Overlap</button>
+          <button class="tac-btn" onclick="setTactic('buildA',this)">Build Out — Plan A</button>
+          <button class="tac-btn" onclick="setTactic('buildB',this)">Build Out — Plan B</button>
+          <button class="tac-btn" onclick="setTactic('buildC',this)">Build Out — Plan C</button>
+          <button class="tac-btn" onclick="setTactic('back4attack',this)">Back 4 — Attacking</button>
+          <button class="tac-btn" onclick="setTactic('442block',this)">Mid Block</button>
+          <button class="tac-btn" onclick="setTactic('press',this)">Press</button>
+        </div>
+
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:8px;">4-4-2 · Alternate System — Compact Block &amp; Direct Threat</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px;">
+          <button class="tac-btn" onclick="setTactic('442shape',this)">Attacking Shape</button>
+          <button class="tac-btn" onclick="setTactic('442movements',this)">Movements — Strike Pair</button>
+          <button class="tac-btn" onclick="setTactic('442planA',this)">Build Out — Plan A</button>
+          <button class="tac-btn" onclick="setTactic('442planB',this)">Build Out — Plan B</button>
+          <button class="tac-btn" onclick="setTactic('442planC',this)">Build Out — Plan C</button>
+        </div>
       </div>
 
       <!-- SITUATION CARD -->
+      <div id="tac-situation-anchor"></div>
       <div id="tac-situation" style="background:rgba(58,191,184,0.07); border:1px solid rgba(58,191,184,0.2); border-left:4px solid var(--teal); border-radius:4px; padding:12px 16px; margin-bottom:16px; display:flex; align-items:flex-start; gap:12px;">
         <span style="font-size:20px; flex-shrink:0;">🎯</span>
         <div>
@@ -2867,6 +2880,131 @@
           {x:273, y:195, label:'11'},
           {x:45,  y:230, label:'7'},
           {x:185, y:244, label:'9'}
+        ]
+      },
+
+      // ══════════════════════════════════════════════════════════════════
+      // 4-4-2 SYSTEM — Compact block (Simeone) + direct threat (Ferguson)
+      //                + build-up trap-setting (De Zerbi)
+      // ══════════════════════════════════════════════════════════════════
+
+      // ── 4-4-2 ATTACKING SHAPE ─────────────────────────────────────────
+      '442shape': {
+        title: '4-4-2 Attacking Shape',
+        situation: 'Two banks of four with a staggered strike pair on top. Wide players are MIDFIELDERS here — not forwards. Compactness is the identity: 6–8 yards between players in each line, denying central channels while staying connected for quick vertical attacks.',
+        notes: '<strong style="color:var(--teal)">Two connected banks of four:</strong> Back four (2,4,5,3) and midfield four (7,6,8,11). Keep the lines tight — 25–30 yards between banks vertically, no more than 6–8 yards between players in a line.<br><br><strong style="color:var(--teal)">7 & 11 are WIDE MIDS, not wingers:</strong> This is the key difference from our 4-3-3. In possession they provide width and cross; out of possession they tuck into the central line to complete the bank of four. Two jobs — hold both.<br><br><strong style="color:var(--teal)">6 & 8 — Central equilibrium:</strong> Never both forward. 6 controls tempo and recycles; 8 is the box-to-box engine. When one steps up, the other anchors — this locks down counter-attacks.<br><br><strong style="color:var(--teal)">9 & 10 — Staggered pair, never the same line:</strong> One (target) checks short to link and attract a center back; the other (runner) stretches the back line with blind-side runs. They constantly rotate who links and who runs — but always staggered.<br><br><strong style="color:var(--teal)">2 & 3 — Fullbacks provide the attacking width:</strong> Overlap outside the wide mid or underlap into the half-space to deliver crosses. Relentless up-and-back engine.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:355,y:445}, p3:{x:45,y:445},   // fullbacks
+          p4:{x:255,y:470}, p5:{x:145,y:470},   // center backs — tight pair
+          p7:{x:375,y:300}, p11:{x:25,y:300},   // WIDE MIDS
+          p6:{x:235,y:335}, p8:{x:165,y:325},   // central mid pair (6 slightly deeper)
+          p9:{x:215,y:150},                       // target — checks short (higher/link)
+          p10:{x:180,y:105}                       // runner — stretches line (staggered, different line)
+        },
+        arrows: []
+      },
+
+      // ── 4-4-2 MOVEMENTS — STRIKE PAIR STAGGER ─────────────────────────
+      '442movements': {
+        title: '4-4-2 Movements — Strike Pair & Central Mids',
+        situation: 'The engine of the 4-4-2: the strike pair stagger (one drops, one runs) and the central-mid balance (one steps, one anchors). These two rotations, timed together, are what make the system dangerous going forward while staying safe behind.',
+        notes: '<strong style="color:var(--teal)">Strike pair — one drops, one runs:</strong> 9 checks short into the pocket to link (attracting a CB out), and 10 immediately attacks the blind-side channel behind the line the 9 just vacated. Never both short, never both on the same line.<br><br><strong style="color:var(--teal)">Mirror it:</strong> When the 10 drops to link instead, the 9 makes the penetrating run. Whoever drops, the other runs central and deep — keeping depth, staggered off the dropper.<br><br><strong style="color:var(--teal)">8 arrives late (box-to-box):</strong> As the strike pair combines, the 8 drives forward to crash the box or support the second ball. This is our extra runner from midfield.<br><br><strong style="color:var(--teal)">6 anchors — always:</strong> When the 8 goes, the 6 sits as the single pivot in front of the back four. This is non-negotiable — it locks the counter. Central-mid equilibrium: one up, one back, every time.<br><br><strong style="color:var(--teal)">Wide mids feed the box:</strong> 7 and 11 attack near post, far post, and the top of the box as the ball goes wide — coordinated box occupation.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:355,y:440}, p3:{x:45,y:440},
+          p4:{x:255,y:470}, p5:{x:145,y:470},
+          p7:{x:375,y:250}, p11:{x:25,y:280},
+          p6:{x:200,y:360},                       // 6 anchors central
+          p8:{x:250,y:270},                       // 8 driving forward
+          p9:{x:215,y:230},                       // 9 checks short (dropping to link)
+          p10:{x:180,y:105}                        // 10 runs blind-side channel
+        },
+        arrows: [
+          {from:{x:215,y:180}, to:{x:215,y:235}, color:'#C8A951', dash:false, label:'9 checks short to link'},
+          {from:{x:180,y:170}, to:{x:180,y:100}, color:'#3ABFB8', dash:false, label:'10 runs in behind'},
+          {from:{x:250,y:320}, to:{x:250,y:270}, color:'#2A7A4B', dash:false, label:'8 arrives late'},
+          {from:{x:230,y:360}, to:{x:200,y:360}, color:'rgba(90,122,146,0.7)', dash:true, label:'6 anchors'}
+        ]
+      },
+
+      // ── 4-4-2 BUILD OUT PLAN A — WIDE, FREE FULLBACK (De Zerbi) ───────
+      '442planA': {
+        title: '4-4-2 Build Out — Plan A (Free Fullback)',
+        situation: 'The 8 checks in to drag a marker, but the ball bypasses him to the UNMARKED fullback (2). The fullback then has two ways forward or a square ball back inside to the 8 to start a quick switch. Finding the free man.',
+        notes: '<strong style="color:var(--teal)">8 checks in — as a DECOY:</strong> The 8 drops toward the ball to pull his marker with him. He is not the first receiver. His movement opens the passing lane and occupies the presser.<br><br><strong style="color:var(--teal)">Ball → the free 2:</strong> With the 8 dragging his mark inside, the fullback (2) is unmarked. GK/CB plays into the 2, who receives facing forward with time.<br><br><strong style="color:var(--teal)">The 2 now has three choices:</strong> advance up the line to the 7, play the diagonal into the 10 in the half-space, or the square ball back inside to the 8 who checked in.<br><br><strong style="color:var(--teal)">The square back to the 8 = quick switch:</strong> Because the 8 checked into space, that inside ball lets us instantly change the point of attack to the far side before their block can shift across.<br><br><strong style="color:var(--gold)">Board shows one side — if the ball is played to the opposite center back, the board flips.</strong>',
+        players: {
+          p1:{x:200,y:520},
+          p3:{x:40,y:455},
+          p4:{x:262,y:490}, p5:{x:150,y:490},
+          p6:{x:200,y:330},                       // 6 higher, central
+          p8:{x:250,y:410},                       // 8 checks in from DEEPER
+          p2:{x:378,y:360},                       // 2 free, receives
+          p7:{x:378,y:230},                       // advancing option up the line
+          p11:{x:28,y:260},
+          p10:{x:150,y:230},                      // diagonal option in half-space
+          p9:{x:235,y:150}
+        },
+        arrows: [
+          {from:{x:262,y:490}, to:{x:378,y:372}, color:'#3ABFB8', dash:false, label:'CB → free 2 (bypass the 8)'},
+          {from:{x:275,y:435}, to:{x:252,y:415}, color:'rgba(90,122,146,0.7)', dash:true, label:'8 checks in (decoy)'},
+          {from:{x:378,y:360}, to:{x:378,y:245}, color:'#C8A951', dash:false, label:'2 → 7 up the line'},
+          {from:{x:378,y:360}, to:{x:165,y:235}, color:'#C8A951', dash:true, label:'2 → 10 diagonal'},
+          {from:{x:378,y:360}, to:{x:262,y:410}, color:'#2A7A4B', dash:false, label:'2 → 8 square (start switch)'}
+        ],
+        opponents: [
+          {x:238, y:390, label:'M'}
+        ]
+      },
+
+      // ── 4-4-2 BUILD OUT PLAN B — BALL-SIDE MID CHECKS IN, 3 ROUTES ────
+      '442planB': {
+        title: '4-4-2 Build Out — Plan B (Ball-Side Pivot)',
+        situation: 'The ball-side central mid checks in and receives. Ball to the 4 (right CB) → the 8 checks in. On the half-turn inside, the 8 has three direct routes forward: the 6, the 11, and the 7.',
+        notes: '<strong style="color:var(--teal)">Ball-side mid checks in:</strong> When the ball is on the right CB (4), the 8 checks in to receive. The 6 stays a little more central on an angle of support, available the moment the 8 gets it.<br><br><strong style="color:var(--teal)">Receive on the half-turn, inside:</strong> The 8 opens his body as he receives so he\'s facing infield and forward, not square. This unlocks the three forward routes.<br><br><strong style="color:var(--teal)">Three direct routes for the 8:</strong> <span style="color:var(--gold)">the 6</span> (central support to switch or recycle), <span style="color:var(--gold)">the 11</span> (far-side wide mid, the switch), and <span style="color:var(--gold)">the 7</span> (ball-side wide mid, down the line or into the channel).<br><br><strong style="color:var(--teal)">6 provides the safety and the switch:</strong> If the forward routes are covered, the 8 lays into the 6, who reverses the play.<br><br><strong style="color:var(--gold)">Board shows one side. If the ball is played to the opposite center back (5), the board flips — the 6 checks in and the routes mirror.</strong>',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:360,y:445}, p3:{x:40,y:445},
+          p4:{x:262,y:485}, p5:{x:138,y:485},
+          p8:{x:258,y:398},                       // 8 checks in, a little lower
+          p6:{x:185,y:360},                       // 6 central angle of support
+          p7:{x:378,y:250},                       // route: ball-side wide mid
+          p11:{x:25,y:250},                       // route: far wide mid (switch)
+          p9:{x:200,y:212},                       // 9 just above top of center circle
+          p10:{x:278,y:300}                        // 10 dropping just below the half line
+        },
+        arrows: [
+          {from:{x:262,y:485}, to:{x:258,y:412}, color:'#3ABFB8', dash:false, label:'4 → 8 checks in'},
+          {from:{x:258,y:398}, to:{x:195,y:362}, color:'#C8A951', dash:false, label:'8 → 6'},
+          {from:{x:258,y:398}, to:{x:45,y:255},  color:'#C8A951', dash:false, label:'8 → 11 (switch)'},
+          {from:{x:258,y:398}, to:{x:365,y:262}, color:'#C8A951', dash:false, label:'8 → 7'}
+        ]
+      },
+
+      // ── 4-4-2 BUILD OUT PLAN C — DOUBLE DECOY, OVER THE TOP ───────────
+      '442planC': {
+        title: '4-4-2 Build Out — Plan C (Over the Top)',
+        situation: 'Both central mids check in to drag their markers short, vacating the pocket. The keeper or 5 reads it and plays OVER the first line of defenders into the space where the 9 or 10 drops to receive.',
+        notes: '<strong style="color:var(--teal)">6 AND 8 both check in:</strong> Both central mids drop toward the ball to pull their markers with them. This is a coordinated decoy — the point is not to receive, it\'s to empty the pocket between the opponent\'s lines.<br><br><strong style="color:var(--teal)">The pocket opens:</strong> With both markers dragged short, the space in front of the opponent\'s back line is now free.<br><br><strong style="color:var(--teal)">Keeper or 5 plays OVER:</strong> Reading the vacated space, the GK or the 5 clips the ball over the first line of pressure — not through it — into the pocket.<br><br><strong style="color:var(--teal)">9 or 10 drops in:</strong> One striker drops off the back line into the pocket to receive the over-ball, back-to-goal, ready to lay off or turn. The other stays high to hold the line and threaten in behind.<br><br><strong style="color:var(--gold)">Board shows one side. If built from the opposite side, the board flips.</strong>',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:360,y:445}, p3:{x:40,y:445},
+          p4:{x:262,y:480}, p5:{x:150,y:480},
+          p6:{x:175,y:400},                       // 6 checks in (decoy)
+          p8:{x:250,y:400},                       // 8 checks in (decoy)
+          p7:{x:375,y:230}, p11:{x:25,y:230},
+          p9:{x:210,y:250},                       // 9 drops into pocket
+          p10:{x:270,y:150}                        // 10 stays high
+        },
+        arrows: [
+          {from:{x:178,y:400}, to:{x:185,y:448}, color:'rgba(90,122,146,0.7)', dash:true, label:'6 checks in (decoy)'},
+          {from:{x:252,y:410}, to:{x:262,y:455}, color:'rgba(90,122,146,0.7)', dash:true, label:'8 checks in (decoy)'},
+          {from:{x:150,y:480}, to:{x:210,y:268}, color:'#C8A951', dash:false, label:'5 plays OVER → pocket'},
+          {from:{x:210,y:200}, to:{x:210,y:250}, color:'#3ABFB8', dash:true, label:'9 drops into pocket'}
+        ],
+        opponents: [
+          {x:168, y:388, label:'M'},
+          {x:262, y:388, label:'M'}
         ]
       }
     };
