@@ -65,6 +65,8 @@
  .pos-btn:hover, .pos-btn.active { background: var(--green); border-color: var(--teal); transform: scale(1.1); }
  .pos-btn span { font-size: 9px; opacity: 0.8; font-weight: normal; }
  .pos-detail { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 22px; display: none; margin-top: 15px; }
+ .pos-formation-btn { background:var(--card); border:1px solid var(--border); color:var(--muted); font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:2px; padding:8px 26px; border-radius:5px; cursor:pointer; transition:all 0.15s; }
+ .pos-formation-btn.active { background:rgba(58,191,184,0.12); border-color:var(--teal); color:var(--teal); }
  .pos-detail.active { display: block; animation: fadeUp 0.3s ease; }
 
  /* TACTICS BOARD */
@@ -720,7 +722,16 @@
         <div class="section-title">Positions & Roles</div>
         <div class="section-desc">Select a position on the field to view specific expectations.</div>
       </div>
-      
+
+      <!-- FORMATION TOGGLE -->
+      <div style="display:flex; gap:10px; margin-bottom:16px;">
+        <button class="pos-formation-btn active" id="pf-433" onclick="showFormation('433')">4-3-3</button>
+        <button class="pos-formation-btn" id="pf-442" onclick="showFormation('442')">4-4-2</button>
+      </div>
+
+      <!-- 4-3-3 FORMATION WRAPPER -->
+      <div id="pos-433-wrap">
+
       <!-- FORMATION SVG — realistic 4-3-3 showing triangles -->
       <div style="position:relative; margin-bottom:18px;">
         <svg viewBox="0 0 320 480" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:360px; display:block; margin:0 auto; border-radius:8px;">
@@ -848,18 +859,129 @@
         </svg>
         <p style="text-align:center; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:1px; margin-top:8px;">TAP A POSITION TO VIEW ROLE &amp; RESPONSIBILITIES</p>
       </div>
-      
+      </div><!-- /pos-433-wrap -->
+
+      <!-- 4-4-2 FORMATION WRAPPER (hidden by default) -->
+      <div id="pos-442-wrap" style="display:none;">
+      <div style="position:relative; margin-bottom:18px;">
+        <svg viewBox="0 0 320 480" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:360px; display:block; margin:0 auto; border-radius:8px;">
+          <rect width="320" height="480" fill="#0c3d1c" rx="8"/>
+          <rect x="20" y="20" width="280" height="440" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <line x1="20" y1="240" x2="300" y2="240" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <circle cx="160" cy="240" r="45" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <circle cx="160" cy="240" r="2.5" fill="rgba(255,255,255,0.3)"/>
+          <rect x="100" y="20" width="120" height="70" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <rect x="130" y="20" width="60" height="30" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <rect x="100" y="390" width="120" height="70" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <rect x="130" y="430" width="60" height="30" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+
+          <!-- Strike pair #9 & #10 (staggered) -->
+          <g onclick="showPos('pos442-strikers', null)" style="cursor:pointer">
+            <circle cx="130" cy="110" r="17" fill="rgba(58,191,184,0.15)" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="130" y="115" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">9</text>
+            <text x="130" y="140" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">ST</text>
+          </g>
+          <g onclick="showPos('pos442-strikers', null)" style="cursor:pointer">
+            <circle cx="195" cy="145" r="17" fill="rgba(58,191,184,0.15)" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="195" y="150" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">10</text>
+            <text x="195" y="175" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">ST</text>
+          </g>
+
+          <!-- Midfield bank of four: 11, 8, 6, 7 -->
+          <g onclick="showPos('pos442-wm', null)" style="cursor:pointer">
+            <circle cx="45" cy="250" r="17" fill="rgba(58,191,184,0.15)" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="45" y="255" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">11</text>
+            <text x="45" y="280" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">LM</text>
+          </g>
+          <g onclick="showPos('pos442-cm', null)" style="cursor:pointer">
+            <circle cx="125" cy="255" r="17" fill="rgba(200,169,81,0.15)" stroke="#C8A951" stroke-width="1.5"/>
+            <text x="125" y="260" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">6</text>
+            <text x="125" y="280" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">CM</text>
+          </g>
+          <g onclick="showPos('pos442-cm', null)" style="cursor:pointer">
+            <circle cx="195" cy="255" r="17" fill="rgba(200,169,81,0.15)" stroke="#C8A951" stroke-width="1.5"/>
+            <text x="195" y="260" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">8</text>
+            <text x="195" y="280" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">CM</text>
+          </g>
+          <g onclick="showPos('pos442-wm', null)" style="cursor:pointer">
+            <circle cx="275" cy="250" r="17" fill="rgba(58,191,184,0.15)" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="275" y="255" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">7</text>
+            <text x="275" y="280" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">RM</text>
+          </g>
+
+          <!-- Back four: 3, 5, 4, 2 -->
+          <g onclick="showPos('pos442-fb', null)" style="cursor:pointer">
+            <circle cx="45" cy="370" r="17" fill="rgba(58,191,184,0.15)" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="45" y="375" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">3</text>
+            <text x="45" y="398" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">LB</text>
+          </g>
+          <g onclick="showPos('pos442-cb', null)" style="cursor:pointer">
+            <circle cx="125" cy="385" r="17" fill="rgba(58,191,184,0.15)" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="125" y="390" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">5</text>
+            <text x="125" y="410" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">CB</text>
+          </g>
+          <g onclick="showPos('pos442-cb', null)" style="cursor:pointer">
+            <circle cx="195" cy="385" r="17" fill="rgba(58,191,184,0.15)" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="195" y="390" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">4</text>
+            <text x="195" y="410" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">CB</text>
+          </g>
+          <g onclick="showPos('pos442-fb', null)" style="cursor:pointer">
+            <circle cx="275" cy="370" r="17" fill="rgba(58,191,184,0.15)" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="275" y="375" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">2</text>
+            <text x="275" y="398" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">RB</text>
+          </g>
+
+          <!-- GK -->
+          <g onclick="showPos('pos442-gk', null)" style="cursor:pointer">
+            <circle cx="160" cy="440" r="17" fill="rgba(58,191,184,0.15)" stroke="#3ABFB8" stroke-width="1.5"/>
+            <text x="160" y="445" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">1</text>
+            <text x="160" y="465" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.6)">GK</text>
+          </g>
+
+          <text x="160" y="14" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="11" fill="rgba(255,255,255,0.4)" letter-spacing="2">4 — 4 — 2</text>
+        </svg>
+        <p style="text-align:center; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:1px; margin-top:8px;">TAP A POSITION TO VIEW ROLE &amp; RESPONSIBILITIES</p>
+      </div>
+
+      <!-- 4-4-2 DETAIL PANELS -->
+      <div id="pos442-gk" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Goalkeeper · #1 · 4-4-2</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> High-level distribution is your weapon. Direct clip passes into the fullbacks and wide mids, and long throws to launch our counters. When we build short, be a calm outlet. Play with purpose — in this system we look forward first, so hit the forward option when it's on.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Command the box on crosses — this system invites wide service, so own your area. Sweep the space behind the back line when we squeeze up. Organize the two banks of four constantly; your voice sets the shape and the compactness.</p>
+      </div>
+      <div id="pos442-cb" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Center Backs · #4 & #5 · 4-4-2</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Composed on the ball. Look for the diagonal into the forwards or the wide outlet first. When the ball goes wide and a fullback commits, you shift across to cover — in this system the covering center back slides to the ball and the fullback rotates in behind you.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Dominate aerial and ground duels — this is a duel-heavy system. Delay-and-deny discipline: no rash lunges, direct the attacker away from goal. Stay tight to your partner and to the fullbacks — 6 to 8 yards, no gaps through the middle. Hold the back line of the block as one connected unit.</p>
+      </div>
+      <div id="pos442-fb" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Fullbacks · #2 & #3 · 4-4-2</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Relentless up-and-back engine. Overlap outside the wide mid or underlap into the half-space to deliver crosses — you are a real source of width and service in this system. When the wide mid holds width, you go inside; when they come inside, you go outside.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Elite 1v1 lockdown — stop service at the source. When they send an overlapping runner, stay on the ball carrier — do NOT chase the overlap. If the ball is played to the overlap, the covering center back shifts across to it and you rotate inside to fill the center back spot. On the weak side, tuck inside to keep the back four compact and balanced.</p>
+      </div>
+      <div id="pos442-cm" class="pos-detail">
+        <div class="tag tag-gold" style="margin-bottom:14px">Central Midfielders · #6 & #8 · 4-4-2</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession — #6:</strong> Ball retention, tempo control, recycling. You are the ball-side pivot in build-out — check in to receive on the half-turn when the ball is on your side, then find the forward routes. Keep us ticking and calm.<br><br><strong style="color:var(--white);">In Possession — #8:</strong> Box-to-box engine. Drive play forward and arrive late in the box for second balls and crosses. When you check in ball-side, receive facing forward and hit the wide mids or the far switch.<br><br><strong style="color:var(--white);">Central Midfield Equilibrium:</strong> Never both forward. When one of you steps up to join the attack or crash the box, the other stays behind the ball as the anchor to lock down the counter. This rule is non-negotiable.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Form an impenetrable central shield — win second balls, intercept the passing lanes into the strikers' feet. Stay tight (6 to 8 yards) and deny the middle. This is the heart of the compact block.</p>
+      </div>
+      <div id="pos442-wm" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Wide Midfielders · #7 & #11 · 4-4-2</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">Different job from the 4-3-3.</strong> Here you are a MIDFIELDER, not always a wide forward. You have two full jobs — attack and defend — and holding both is what makes this system work.<br><br><strong style="color:var(--white);">In Possession:</strong> 1v1 bravery and accurate crossing. Pin the opponent's fullback to create width, or make the diagonal inside run to find the half-space pocket. In the final third, attack the box with coordinated timing — near post, far post, edge of the 18.<br><br><strong style="color:var(--white);">Out of Possession:</strong> High work-rate is the price of admission. Track the opponent's fullback, double down out wide with your fullback to set the touchline trap, and — most important — tuck into the central line to complete the bank of four. When the ball is on the far side, you are almost a third central midfielder.</p>
+      </div>
+      <div id="pos442-strikers" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Strike Partnership · #9 & #10 · 4-4-2</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">You are a PAIR — never the same horizontal line.</strong> One checks short to link (target), one runs the channel (runner), and you constantly rotate who does which.<br><br><strong style="color:var(--white);">In Possession — Target/Link:</strong> Back-to-goal hold-up play. Receive, protect the ball, and lay it off to the runner or an arriving midfielder. Attract a center back out to open the space behind.<br><br><strong style="color:var(--white);">In Possession — Runner:</strong> Play on the shoulder of the last defender. Exploit the space behind that your partner's drop just opened. Your blind-side runs stretch the back line and are our first attacking thought when we win it.<br><br><strong style="color:var(--white);">Out of Possession — first line of defense:</strong> You set the pressing traps. Screen the opponent's holding midfielder (their 6) to block the central lane, and funnel play into the wide channels for the touchline trap. One presses the ball-carrying center back on a curved run to cut the switch; the other drops to cover.<br><br><strong style="color:var(--white);">#10 marking note:</strong> Our #10 carries the responsibility of marking the opponent's #6 unless directed otherwise. When we defend, that is your reference — deny their pivot.</p>
+      </div>
+
+      </div><!-- /pos-442-wrap -->
+
       <div id="pos-gk" class="pos-detail">
         <div class="tag tag-teal" style="margin-bottom:14px">Goalkeeper · #1</div>
         <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> You start every attack. Read the press before the ball arrives and make the decision — distribute with purpose, not panic. Be a composed outlet for back passes. Use your footwork as a weapon. Initiate attacks quickly from saves and crosses with accurate distribution to the right target.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Organize the defensive line constantly — your voice sets the shape. Cover the space behind defenders as the team pushes up. Command your box on aerial balls. Call off the back four clearly and early. Your composure and communication under pressure sets the tone for the whole team.</p>
       </div>
       <div id="pos-2" class="pos-detail">
         <div class="tag tag-teal" style="margin-bottom:14px">Right Back · #2</div>
-        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Provide width and depth on the right flank. Read when the winger cuts inside — that's your trigger to overlap into the space they've vacated. Tuck into the half-space when the ball is on the opposite side. Connect with the 6 and 8 as a third-man option in the build. Drive forward when the channel is open.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Stop crosses at the source. Stay compact and connected to the center backs. When defending your wide channel with an overlapping runner, track the runner — the center backs shift to cover the ball carrier. In the mid block, hold your zone. In emergency box defense, grab your mark and defend it.</p>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Provide width and depth on the right flank. Read when the winger cuts inside — that's your trigger to overlap into the space they've vacated. Tuck into the half-space when the ball is on the opposite side. Connect with the 6 and 8 as a third-man option in the build. Drive forward when the channel is open.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Stop crosses at the source. Stay compact and connected to the center backs. When you're defending your wide channel and they send an overlapping runner, stay on the ball carrier — do NOT chase the overlap. If the ball is played to the overlap, the covering center back shifts across to it and you rotate inside to fill the center back spot. In the mid block, hold your zone. In emergency box defense, grab your mark and defend it.</p>
       </div>
       <div id="pos-3" class="pos-detail">
         <div class="tag tag-teal" style="margin-bottom:14px">Left Back · #3</div>
-        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Provide width and depth on the left flank. Read when the winger cuts inside — that's your trigger to overlap into the vacated wide channel. Tuck into the half-space when the ball is on the opposite side. Be a reliable outlet in the build and a threat in the final third when the lane opens.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Stop crosses at the source. Stay compact and connected to the center backs. When defending your wide channel with an overlapping runner, track the runner — the center backs shift to cover the ball carrier. In the mid block, hold your zone. In emergency box defense, grab your mark and defend it.</p>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession:</strong> Provide width and depth on the left flank. Read when the winger cuts inside — that's your trigger to overlap into the vacated wide channel. Tuck into the half-space when the ball is on the opposite side. Be a reliable outlet in the build and a threat in the final third when the lane opens.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Stop crosses at the source. Stay compact and connected to the center backs. When you're defending your wide channel and they send an overlapping runner, stay on the ball carrier — do NOT chase the overlap. If the ball is played to the overlap, the covering center back shifts across to it and you rotate inside to fill the center back spot. In the mid block, hold your zone. In emergency box defense, grab your mark and defend it.</p>
       </div>
       <div id="pos-cb" class="pos-detail">
         <div class="tag tag-teal" style="margin-bottom:14px">Center Backs · #4 & #5</div>
@@ -2339,6 +2461,16 @@
     });
 
     // POSITIONS LOGIC
+    function showFormation(f) {
+      const is433 = f === '433';
+      document.getElementById('pos-433-wrap').style.display = is433 ? 'block' : 'none';
+      document.getElementById('pos-442-wrap').style.display = is433 ? 'none' : 'block';
+      document.getElementById('pf-433').classList.toggle('active', is433);
+      document.getElementById('pf-442').classList.toggle('active', !is433);
+      // Close any open detail panel when switching formations
+      document.querySelectorAll('.pos-detail').forEach(d => d.classList.remove('active'));
+    }
+
     function showPos(posId, btn) {
       document.querySelectorAll('.pos-detail').forEach(d => d.classList.remove('active'));
       document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
