@@ -427,11 +427,11 @@
 
             <div class="principle-card" onclick="this.classList.toggle('expanded')">
               <div class="principle-headline">
-                <div class="principle-headline-text"><span class="principle-num" style="color:var(--green-lt);">1</span> Look Forward First</div>
+                <div class="principle-headline-text"><span class="principle-num" style="color:var(--green-lt);">1</span> Forward First, Secure and Switch</div>
                 <div class="principle-chevron">▶</div>
               </div>
               <div class="principle-depth">
-                <div class="principle-depth-inner">If it's on, play it. If not, keep the ball and reset. <span class="principle-pullquote">"Patience creates the moment, bravery takes it."</span> We're not in a hurry to go forward — we're in a hurry to go forward correctly. Example: the #6 receives and turns to play — is the weak-side #7 or #11 open to start forward play? If not, combine with the attacking mids #8 or #10.</div>
+                <div class="principle-depth-inner">Our first look is always forward — if it's on, play it. <span class="principle-pullquote">"Patience creates the moment, bravery takes it."</span> But forward first does NOT mean force it. When the forward ball isn't there, we secure it: play the negative or lateral pass, keep possession, and switch the point of attack to find a new opening. We're not in a hurry to go forward — we're in a hurry to go forward correctly. This holds in every system we play. Example: the #6 (or the checking-in mid) receives and turns — is the forward pass on? If yes, go. If not, secure it back or square it and switch the field to attack the other side.</div>
               </div>
             </div>
 
@@ -726,12 +726,12 @@
 
       <!-- FORMATION TOGGLE -->
       <div style="display:flex; gap:10px; margin-bottom:16px;">
-        <button class="pos-formation-btn active" id="pf-433" onclick="showFormation('433')">4-3-3</button>
-        <button class="pos-formation-btn" id="pf-442" onclick="showFormation('442')">4-4-2</button>
+        <button class="pos-formation-btn active" id="pf-442" onclick="showFormation('442')">4-4-2</button>
+        <button class="pos-formation-btn" id="pf-433" onclick="showFormation('433')">4-3-3</button>
       </div>
 
       <!-- 4-3-3 FORMATION WRAPPER -->
-      <div id="pos-433-wrap">
+      <div id="pos-433-wrap" style="display:none;">
 
       <!-- FORMATION SVG — realistic 4-3-3 showing triangles -->
       <div style="position:relative; margin-bottom:18px;">
@@ -862,8 +862,8 @@
       </div>
       </div><!-- /pos-433-wrap -->
 
-      <!-- 4-4-2 FORMATION WRAPPER (hidden by default) -->
-      <div id="pos-442-wrap" style="display:none;">
+      <!-- 4-4-2 FORMATION WRAPPER -->
+      <div id="pos-442-wrap">
       <div style="position:relative; margin-bottom:18px;">
         <svg viewBox="0 0 320 480" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:360px; display:block; margin:0 auto; border-radius:8px;">
           <rect width="320" height="480" fill="#0c3d1c" rx="8"/>
@@ -1188,25 +1188,25 @@
 
       <!-- SCENARIO BUTTONS -->
       <div style="margin-bottom:20px;">
-        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">4-3-3 · Our Primary System</div>
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">4-4-2 · Our System</div>
         <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-bottom:18px;">
-          <button class="tac-btn active" onclick="setTactic('433',this)">Attacking Shape</button>
+          <button class="tac-btn active" onclick="setTactic('442shape',this)">Attacking Shape</button>
+          <button class="tac-btn" onclick="setTactic('442movements',this)">Movements — Strike Pair</button>
+          <button class="tac-btn" onclick="setTactic('442planA',this)">Build Out — Plan A</button>
+          <button class="tac-btn" onclick="setTactic('442planB',this)">Build Out — Plan B</button>
+          <button class="tac-btn" onclick="setTactic('442planC',this)">Build Out — Plan C</button>
+          <button class="tac-btn" onclick="setTactic('442block',this)">Mid Block</button>
+        </div>
+
+        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:8px;">4-3-3 · Our Growth Model — Where We're Headed</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px;">
+          <button class="tac-btn" onclick="setTactic('433',this)">Attacking Shape</button>
           <button class="tac-btn" onclick="setTactic('overlap',this)">Movements — Overlap</button>
           <button class="tac-btn" onclick="setTactic('buildA',this)">Build Out — Plan A</button>
           <button class="tac-btn" onclick="setTactic('buildB',this)">Build Out — Plan B</button>
           <button class="tac-btn" onclick="setTactic('buildC',this)">Build Out — Plan C</button>
           <button class="tac-btn" onclick="setTactic('back4attack',this)">Back 4 — Attacking</button>
-          <button class="tac-btn" onclick="setTactic('442block',this)">Mid Block</button>
           <button class="tac-btn" onclick="setTactic('press',this)">Press</button>
-        </div>
-
-        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:8px;">4-4-2 · Alternate System — Compact Block &amp; Direct Threat</div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px;">
-          <button class="tac-btn" onclick="setTactic('442shape',this)">Attacking Shape</button>
-          <button class="tac-btn" onclick="setTactic('442movements',this)">Movements — Strike Pair</button>
-          <button class="tac-btn" onclick="setTactic('442planA',this)">Build Out — Plan A</button>
-          <button class="tac-btn" onclick="setTactic('442planB',this)">Build Out — Plan B</button>
-          <button class="tac-btn" onclick="setTactic('442planC',this)">Build Out — Plan C</button>
         </div>
       </div>
 
@@ -3188,7 +3188,7 @@
 
     // Init tactics board
     document.addEventListener('DOMContentLoaded', () => {
-      setTactic('433', document.querySelector('.tac-btn.active'));
+      setTactic('442shape', document.querySelector('.tac-btn.active'));
     });
 
     // ═══════════════════════════════════════════════
