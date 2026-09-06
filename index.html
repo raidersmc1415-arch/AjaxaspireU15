@@ -299,6 +299,12 @@
  .refl-pending { margin-top:10px; font-size:11px; color:var(--muted); font-style:italic; }
 
  /* VEO MATCH MOMENTS */
+ .veo-moments-card { background:linear-gradient(135deg, rgba(58,191,184,.10), rgba(13,27,42,.6)); border:1px solid rgba(58,191,184,.4); border-radius:10px; padding:24px; margin-bottom:28px; }
+ .veo-moments-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:8px; }
+ .veo-match-name { font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); line-height:1.1; }
+ .veo-moments-desc { font-size:14px; color:var(--text); margin:10px 0 16px; max-width:580px; }
+ .veo-open-btn { display:inline-block; background:var(--teal); color:var(--navy); font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:1.5px; padding:12px 28px; border-radius:5px; text-decoration:none; }
+ .veo-moments-list { margin-top:22px; padding-top:18px; border-top:1px dashed rgba(58,191,184,.3); }
  .vm-card { background:rgba(13,27,42,.55); border:1px solid var(--border); border-radius:8px; padding:14px 16px; margin-bottom:10px; }
  .vm-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
  .vm-time { font-family:'Bebas Neue',cursive; font-size:22px; color:var(--gold); letter-spacing:1px; line-height:1; }
@@ -1069,19 +1075,9 @@
 
       <!-- ═══════════════════════════════════════════════════ -->
       <!-- VEO MATCH MOMENTS (Sheet-driven: film_moments tab)  -->
+      <!-- One card per match — each keeps its own Veo link.   -->
       <!-- ═══════════════════════════════════════════════════ -->
-      <div id="veo-moments-card" style="display:none; background:linear-gradient(135deg, rgba(58,191,184,.10), rgba(13,27,42,.6)); border:1px solid rgba(58,191,184,.4); border-radius:10px; padding:24px; margin-bottom:28px;">
-        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:8px;">🎥 Match Film Moments</div>
-        <div id="veo-match-name" style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); line-height:1.1;"></div>
-        <p style="font-size:14px; color:var(--text); margin:10px 0 16px; max-width:580px;">
-          Open the <strong style="color:var(--teal)">full match on Veo</strong>, watch each moment below, and tell me what you saw. I'm not giving you the answer. I want to know what you notice.
-        </p>
-        <a id="veo-open-btn" href="#" target="_blank" rel="noopener"
-           style="display:inline-block; background:var(--teal); color:var(--navy); font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:1.5px; padding:12px 28px; border-radius:5px; text-decoration:none;">
-          ▶ Open Match Film on Veo
-        </a>
-        <div id="veo-moments-list" style="margin-top:22px; padding-top:18px; border-top:1px dashed rgba(58,191,184,.3);"></div>
-      </div>
+      <div id="veo-moments-container"></div>
 
       <div style="background: rgba(200,169,81,0.08); border: 1px solid rgba(200,169,81,0.25); padding: 14px 18px; border-radius: 4px; color: var(--gold); margin-bottom: 20px; font-size: 13px; line-height: 1.6;">
         <strong>📌 Coach Shawn — Adding new videos:</strong> Upload to your <a href="https://www.youtube.com/playlist?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw" target="_blank" style="color:var(--teal);">YouTube playlist ↗</a> and it appears here automatically. No file updates or Netlify re-uploads needed. Update the title, date, and focus points below to match your latest clip.
@@ -2679,53 +2675,72 @@
     // VEO MATCH MOMENTS (Sheet-driven: film_moments tab)
     // ═══════════════════════════════════════════════
     let veoMomentsLoaded = false;
+    let VEO_MOMENT_INDEX = []; // flat list so each textarea/button maps back to its time+phase
 
     async function loadVeoMoments() {
       if (veoMomentsLoaded) return;
       try {
         const res  = await fetch(`${API_URL}?action=filmMoments`);
         const data = await res.json();
-        const moments = data.moments || [];
-        if (!moments.length) return; // no active moments: card stays hidden
+        const groups = data.groups || [];
+        if (!groups.length) return; // nothing active: container stays empty
 
-        document.getElementById('veo-match-name').textContent = data.match || 'Latest Match';
-        const btn = document.getElementById('veo-open-btn');
-        if (data.veoUrl) btn.href = data.veoUrl;
-        else btn.style.display = 'none';
+        VEO_MOMENT_INDEX = [];
+        let globalIdx = 0;
 
-        document.getElementById('veo-moments-list').innerHTML = moments.map((m, i) => `
-          <div class="vm-card">
-            <div class="vm-head">
-              <span class="vm-time">${m.time}</span>
-              ${m.phase ? `<span class="vm-phase">${m.phase}</span>` : ''}
-            </div>
-            ${m.prompt ? `<div class="vm-prompt">${m.prompt}</div>` : ''}
-            <textarea id="vm-resp-${i}" class="vm-input" placeholder="What did you see in this moment?"></textarea>
-            <div class="vm-actions">
-              <button class="btn vm-btn" onclick="submitVeoMoment(${i}, '${m.time.replace(/'/g,"")}', '${(m.phase||'').replace(/'/g,"")}')">Send to Coach →</button>
-              <span id="vm-msg-${i}" class="vm-sent">✅ Sent to Coach Shawn</span>
-            </div>
-          </div>
-        `).join('');
+        const cardsHTML = groups.map(group => {
+          const moments = group.moments || [];
+          const momentsHTML = moments.map(m => {
+            const idx = globalIdx++;
+            VEO_MOMENT_INDEX[idx] = { time: m.time, phase: m.phase };
+            return `
+              <div class="vm-card">
+                <div class="vm-head">
+                  <span class="vm-time">${m.time}</span>
+                  ${m.phase ? `<span class="vm-phase">${m.phase}</span>` : ''}
+                </div>
+                ${m.prompt ? `<div class="vm-prompt">${m.prompt}</div>` : ''}
+                <textarea id="vm-resp-${idx}" class="vm-input" placeholder="What did you see in this moment?"></textarea>
+                <div class="vm-actions">
+                  <button class="btn vm-btn" onclick="submitVeoMoment(${idx})">Send to Coach →</button>
+                  <span id="vm-msg-${idx}" class="vm-sent">✅ Sent to Coach Shawn</span>
+                </div>
+              </div>`;
+          }).join('');
 
-        document.getElementById('veo-moments-card').style.display = 'block';
+          const openBtnHTML = group.veoUrl
+            ? `<a href="${group.veoUrl}" target="_blank" rel="noopener" class="veo-open-btn">▶ Open Match Film on Veo</a>`
+            : '';
+
+          return `
+            <div class="veo-moments-card">
+              <div class="veo-moments-label">🎥 Match Film Moments</div>
+              <div class="veo-match-name">${group.match || 'Match Film'}</div>
+              <p class="veo-moments-desc">Open the <strong style="color:var(--teal)">full match on Veo</strong>, watch each moment below, and tell me what you saw. I'm not giving you the answer. I want to know what you notice.</p>
+              ${openBtnHTML}
+              <div class="veo-moments-list">${momentsHTML}</div>
+            </div>`;
+        }).join('');
+
+        document.getElementById('veo-moments-container').innerHTML = cardsHTML;
         veoMomentsLoaded = true;
-      } catch(err) { /* stay hidden on error */ }
+      } catch(err) { /* container stays empty on error */ }
     }
 
-    async function submitVeoMoment(i, time, phase) {
+    async function submitVeoMoment(idx) {
       if (!FILM_VERIFIED_NAME) { filmNeedsSignIn(); return; }
-      const box  = document.getElementById('vm-resp-' + i);
+      const box  = document.getElementById('vm-resp-' + idx);
       const text = (box.value || '').trim();
       if (!text) { alert("Write what you saw before sending."); return; }
 
+      const info = VEO_MOMENT_INDEX[idx] || {};
       const payload = {
         name: FILM_VERIFIED_NAME,
-        reflection: `[VEO MOMENT — ${time}${phase ? ' · ' + phase : ''}]\n\n${text}`
+        reflection: `[VEO MOMENT — ${info.time}${info.phase ? ' · ' + info.phase : ''}]\n\n${text}`
       };
       try {
         await fetch(API_URL, { method:'POST', body: JSON.stringify(payload) });
-        document.getElementById('vm-msg-' + i).style.display = 'inline';
+        document.getElementById('vm-msg-' + idx).style.display = 'inline';
         box.value = '';
         box.placeholder = 'Sent. Rewatch and add more anytime.';
       } catch(err) { alert("That didn't send. Try again in a moment."); }
