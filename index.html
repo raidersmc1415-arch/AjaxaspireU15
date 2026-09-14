@@ -10,8 +10,12 @@
 <!-- Inline favicon — stops 404 requests -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231E5C38'/><text x='50' y='68' font-size='55' text-anchor='middle'>⚽</text></svg>">
-<!-- Font display swap so text renders immediately while fonts load -->
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Fonts: display=swap renders text immediately in the fallback, and the
+     stylesheet is fetched off the critical path so it never blocks first paint.
+     The media="print" -> "all" swap is the standard async-CSS pattern. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" media="print" onload="this.media='all';this.onload=null" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"></noscript>
 <style>
  :root {
  --green: #1E5C38; --green-lt: #2A7A4B; --teal: #3ABFB8;
@@ -299,6 +303,21 @@
  .refl-pending { margin-top:10px; font-size:11px; color:var(--muted); font-style:italic; }
 
  /* VEO MATCH MOMENTS */
+ /* ── VIDEO FACADE ─────────────────────────────────────────────────
+    Lightweight stand-in for a YouTube embed. The real iframe (~1MB+ of
+    third-party JS) is only created once the viewer clicks play, so page
+    load costs nothing for videos nobody watches. */
+ .yt-embed { position:absolute; top:0; left:0; width:100%; height:100%; border:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; cursor:pointer; background:linear-gradient(150deg, #0A1520 0%, #0D2B1A 55%, #0A1520 100%); font-family:'DM Sans',sans-serif; padding:16px; text-align:center; }
+ /* Decorative sheen on the placeholder only — never over a playing video. */
+ .yt-embed:not([data-loaded="true"])::after { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 45%, rgba(58,191,184,0.10), transparent 60%); pointer-events:none; }
+ .yt-embed[data-loaded="true"] { cursor:default; background:#000; }
+ .yt-embed-play { width:64px; height:64px; flex:0 0 auto; border-radius:50%; border:2px solid rgba(58,191,184,0.55); background:rgba(58,191,184,0.14); color:var(--teal); font-size:22px; line-height:1; display:flex; align-items:center; justify-content:center; padding-left:4px; transition:transform 0.2s, background 0.2s, border-color 0.2s; }
+ .yt-embed:hover .yt-embed-play, .yt-embed:focus-visible .yt-embed-play { transform:scale(1.08); background:var(--teal); border-color:var(--teal); color:var(--navy); }
+ .yt-embed:focus-visible { outline:2px solid var(--teal); outline-offset:-2px; }
+ .yt-embed-label { font-size:13px; color:var(--text); font-weight:500; letter-spacing:0.3px; }
+ .yt-embed-hint { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+ .yt-embed iframe, .film-card-video iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+
  .veo-moments-card { background:linear-gradient(135deg, rgba(58,191,184,.10), rgba(13,27,42,.6)); border:1px solid rgba(58,191,184,.4); border-radius:10px; padding:24px; margin-bottom:28px; }
  .veo-moments-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:8px; }
  .veo-match-name { font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); line-height:1.1; }
@@ -1097,12 +1116,13 @@
       <!-- YouTube playlist and they appear here automatically.         -->
       <!-- Playlist: https://www.youtube.com/playlist?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw -->
       <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; background: var(--navy-mid);">
-        <iframe id="film-iframe"
-          src="https://www.youtube.com/embed/videoseries?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw&rel=0&modestbranding=1"
-          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-        </iframe>
+        <div class="yt-embed" id="film-iframe" role="button" tabindex="0"
+             aria-label="Play the team film playlist"
+             data-embed="https://www.youtube.com/embed/videoseries?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw&rel=0&modestbranding=1">
+          <span class="yt-embed-play" aria-hidden="true">&#9654;</span>
+          <span class="yt-embed-label">Team Film Playlist</span>
+          <span class="yt-embed-hint">Tap to play</span>
+        </div>
       </div>
       <!-- ============================================================= -->
 
@@ -1311,12 +1331,13 @@
 
         <!-- VIDEO EMBED — only shown while a challenge is active -->
         <div id="ch-video-wrap" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:var(--navy); display:none;">
-          <iframe id="ch-video"
-            src="https://www.youtube.com/embed/nHxClhfQjlM?rel=0&modestbranding=1"
-            style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen>
-          </iframe>
+          <div class="yt-embed" id="ch-video" role="button" tabindex="0"
+               aria-label="Play the challenge video"
+               data-embed="https://www.youtube.com/embed/nHxClhfQjlM?rel=0&modestbranding=1">
+            <span class="yt-embed-play" aria-hidden="true">&#9654;</span>
+            <span class="yt-embed-label">Challenge Video</span>
+            <span class="yt-embed-hint">Tap to play</span>
+          </div>
         </div>
         <script>
           // STATIC DEFAULTS from the ch-active flag above — applies even if the
@@ -1935,9 +1956,9 @@
     }
 
     // Load Veo moments as soon as the Film Room is on the page
-    document.addEventListener('DOMContentLoaded', function() {
-      loadVeoMoments();
-    });
+    // loadVeoMoments() is triggered when the Film Room tab is opened
+    // (handled in switchTab) rather than on page load, so its Apps Script
+    // request never delays first render.
 
     // ═══════════════════════════════════════════════
     // COACH RATINGS
@@ -2189,7 +2210,10 @@
       // "Watch Clip" card that opens the source in a new tab.
       const playerHTML = info.embeddable
         ? `<div class="film-card-video">
-             <iframe src="${info.embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+             <div class="yt-embed" role="button" tabindex="0" aria-label="Play clip" data-embed="${info.embedUrl}">
+               <span class="yt-embed-play" aria-hidden="true">&#9654;</span>
+               <span class="yt-embed-hint">Tap to play</span>
+             </div>
            </div>`
         : `<div class="film-card-watch">
              <div class="film-card-watch-icon">${info.icon}</div>
@@ -2279,6 +2303,80 @@
     }
 
     // TABS LOGIC
+    // ═══════════════════════════════════════════════
+    // VIDEO FACADES
+    // A YouTube iframe pulls well over a megabyte of third-party script
+    // before it will show a single frame. Every embed on this page starts
+    // as a cheap placeholder and is only upgraded to a real iframe when
+    // someone actually asks to watch, which keeps that cost off page load.
+    // ═══════════════════════════════════════════════
+    let ytWarmed = false;
+
+    // Open the connections to YouTube early, on hover/focus, so the click
+    // itself doesn't also pay for DNS + TLS.
+    function warmYouTube() {
+      if (ytWarmed) return;
+      ytWarmed = true;
+      // No crossOrigin here: the iframe document and its thumbnails are not
+      // CORS requests, so an anonymous preconnect would open a connection
+      // the embed never reuses.
+      ['https://www.youtube.com', 'https://i.ytimg.com'].forEach(href => {
+        const l = document.createElement('link');
+        l.rel = 'preconnect'; l.href = href;
+        document.head.appendChild(l);
+      });
+    }
+
+    function playFacade(el) {
+      const url = el.getAttribute('data-embed');
+      if (!url || el.dataset.loaded === 'true') return;
+      el.dataset.loaded = 'true';
+      const iframe = document.createElement('iframe');
+      iframe.src = url + (url.includes('?') ? '&' : '?') + 'autoplay=1';
+      iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('title', el.getAttribute('aria-label') || 'Video');
+      el.textContent = '';
+      el.removeAttribute('role');
+      el.removeAttribute('tabindex');
+      el.appendChild(iframe);
+    }
+
+    // Point a facade at a new video and return it to its unplayed state,
+    // so swapping the challenge video doesn't start a download.
+    function setFacadeEmbed(el, url, label) {
+      if (!el) return;
+      el.dataset.loaded = 'false';
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      if (url) {
+        el.setAttribute('data-embed', url);
+        el.innerHTML = '<span class="yt-embed-play" aria-hidden="true">&#9654;</span>'
+          + '<span class="yt-embed-label"></span>'
+          + '<span class="yt-embed-hint">Tap to play</span>';
+        el.querySelector('.yt-embed-label').textContent = label || 'Watch';
+      } else {
+        el.removeAttribute('data-embed');
+        el.textContent = '';
+      }
+    }
+
+    // Delegated, so facades rendered later from Sheet data work too.
+    document.addEventListener('click', e => {
+      const el = e.target.closest('.yt-embed');
+      if (el) playFacade(el);
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const el = e.target.closest && e.target.closest('.yt-embed[role="button"]');
+      if (el) { e.preventDefault(); playFacade(el); }
+    });
+    ['pointerenter', 'focusin'].forEach(evt =>
+      document.addEventListener(evt, e => {
+        if (e.target.closest && e.target.closest('.yt-embed')) warmYouTube();
+      }, true)
+    );
+
     function switchTab(tabId, btn) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -2291,10 +2389,14 @@
         btn.classList.add('active');
       }
       closeMoreMenu();
+      // Per-tab work is done on first open instead of on page load, so
+      // arriving at the hub doesn't pay for tabs nobody visits.
       if (tabId === 'competition') loadCompetitionLeaderboard();
       if (tabId === 'moments')     loadMoments();
-      if (tabId === 'tactics')     loadScenario();
+      if (tabId === 'tactics')   { ensureTacticsInit(); loadScenario(); }
       if (tabId === 'teamstats')   loadTeamStats();
+      if (tabId === 'film')        loadVeoMoments();
+      if (tabId === 'glossary')    ensureGlossaryInit();
     }
 
     // Weekly tactical scenario — rotates by ISO week so it changes each week
@@ -3136,6 +3238,7 @@
     let currentTactic = '433';
 
     function setTactic(key, btn) {
+      tacticsInit = true;
       currentTactic = key;
       document.querySelectorAll('.tac-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -3202,9 +3305,12 @@
     }
 
     // Init tactics board
-    document.addEventListener('DOMContentLoaded', () => {
+    // The default tactic is drawn the first time the Tactics tab is opened.
+    let tacticsInit = false;
+    function ensureTacticsInit() {
+      if (tacticsInit) return;
       setTactic('442shape', document.querySelector('.tac-btn.active'));
-    });
+    }
 
     // ═══════════════════════════════════════════════
     // GLOSSARY
@@ -3232,6 +3338,13 @@
       { term:'High Press', def:'Pressing the opponent very high up the pitch — in their defensive third — to win the ball back quickly and create goal-scoring chances. Triggered by specific cues.', tactic:'press' },
     ];
 
+    let glossaryInit = false;
+    function ensureGlossaryInit() {
+      if (glossaryInit) return;
+      glossaryInit = true;
+      buildGlossary();
+    }
+
     function buildGlossary(filter='') {
       const grid = document.getElementById('glossary-grid');
       const empty = document.getElementById('glossary-empty');
@@ -3254,11 +3367,12 @@
     function goToTactic(key) {
       const btn = [...document.querySelectorAll('.tac-btn')].find(b => b.getAttribute('onclick').includes(`'${key}'`));
       if (btn) { setTactic(key, btn); }
-      const tacTab = [...document.querySelectorAll('.tab-btn')].find(b => b.getAttribute('onclick').includes("'tactics'"));
-      if (tacTab) { switchTab('tactics', tacTab); }
+      const tacTab = [...document.querySelectorAll('.tab-btn, .more-item')]
+        .find(b => (b.getAttribute('onclick') || '').includes("'tactics'"));
+      switchTab('tactics', tacTab || null);
     }
 
-    document.addEventListener('DOMContentLoaded', () => { buildGlossary(); });
+    // Glossary cards are built the first time that tab is opened (switchTab).
 
     // ═══════════════════════════════════════════════
     // LEADERBOARD — reads from your existing Google Sheet
@@ -3379,11 +3493,11 @@
         embed = toYouTubeEmbed(ch.video);
       }
       if (embed && vWrap && vFrame) {
-        vFrame.src = embed;
+        setFacadeEmbed(vFrame, embed, ch.title || 'Challenge Video');
         vWrap.style.display = 'block';
       } else if (vWrap) {
         vWrap.style.display = 'none';
-        if (vFrame) vFrame.src = '';
+        setFacadeEmbed(vFrame, null);
       }
 
       // Live badge + check-in form only while active
@@ -3623,8 +3737,9 @@
 
     // Init with placeholder
     document.addEventListener('DOMContentLoaded', () => {
-      renderPlaceholderLB('lb-current');
-      renderPlaceholderLB('lb-season');
+      // Only the coach message belongs on load — it renders into the Team Hub,
+      // which is the tab visible on arrival. The leaderboard placeholders are
+      // drawn by loadCompetitionLeaderboard() when that tab is opened.
       loadCoachMessage();
     });
 
