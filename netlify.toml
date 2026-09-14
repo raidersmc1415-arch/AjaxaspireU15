@@ -1,8 +1,33 @@
 [build]
   functions = "netlify/functions"
 
+# Security headers apply everywhere.
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Caching is scoped to the static pages only, so it never touches the
+# function response. Browsers always revalidate, which keeps a new deploy
+# instant, while the CDN serves its cached copy during that check — repeat
+# visits get the page without waiting on the origin. Netlify invalidates
+# this cache on every deploy, so it cannot go stale.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=31536000, stale-while-revalidate=86400, durable"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=31536000, stale-while-revalidate=86400, durable"
+
+# The Apps Script proxy must never be cached at the edge.
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Cache-Control = "no-store"
