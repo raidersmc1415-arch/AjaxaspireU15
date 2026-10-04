@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AJAX U15 Match Hub</title>
+  <meta name="description" content="Match and season analytics for AJAX GA U15 and AJAX Aspire U15: results, roster stats, charts and coaching takeaways.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: {
+        brand: { 400: '#3ABFB8', 500: '#3ABFB8', 600: '#2A7A4B', 700: '#1E5C38', 800: '#1E5C38', 900: '#123A24', 950: '#0B2416' },
+        pitch: '#0D1B2A', surface: '#122030', card: '#172535', border: '#1E3348'
+      } } }
+    };
+  </script>
+  <style>
+    html, body {
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .display { font-family: 'Bebas Neue', 'DM Sans', sans-serif; letter-spacing: .5px; font-weight: 400 !important; }
+    .mono { font-family: 'DM Mono', ui-monospace, monospace; letter-spacing: .12em; }
+    ::-webkit-scrollbar { height: 4px; width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #2A4560; border-radius: 9999px; }
+    .safe-top { padding-top: max(env(safe-area-inset-top), 0.75rem); }
+    .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
+    /* Per-team accent */
+    body { --accent: #C8A951; --accent-bg: rgba(200,169,81,.16); --accent-bd: rgba(200,169,81,.38); }
+    body[data-team="aspire"] { --accent: #3ABFB8; --accent-bg: rgba(58,191,184,.15); --accent-bd: rgba(58,191,184,.38); }
+    .accent-text { color: var(--accent); }
+    .accent-chip { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-bd); }
+    .team-btn[aria-pressed="true"] { background: var(--accent-bg); border-color: var(--accent-bd); color: #fff; }
+    .team-btn[aria-pressed="true"] .team-dot { opacity: 1; }
+  </style>
+</head>
+<body data-team="ga" class="bg-pitch text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <header class="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-border safe-top px-4 pb-3 shadow-md">
+    <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center space-x-3 min-w-0">
+        <div class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center text-lg shadow-lg" style="background:linear-gradient(135deg,#1E5C38,#3ABFB8)">⚽</div>
+        <div class="min-w-0">
+          <div class="flex items-center space-x-2">
+            <h1 class="display text-2xl md:text-3xl text-white leading-none truncate"><span style="color:#2A7A4B">AJAX</span> <span style="color:#3ABFB8">U15</span> Match Hub</h1>
+          </div>
+          <p id="hdrSub" class="mono text-[10px] uppercase text-slate-400 truncate mt-1">26/27 Season</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 shrink-0">
+        <a id="hubLink" href="#" class="bg-card hover:bg-slate-800 text-slate-200 border border-border px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Back to Team Hub">
+          <span>🏠</span><span class="hidden sm:inline">Team Hub</span>
+        </a>
+        <label for="excelInput" class="cursor-pointer bg-card hover:bg-slate-800 text-slate-200 border border-border px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Import the stats export (.csv or .xlsx)">
+          <span>📁</span><span class="hidden sm:inline">Import</span>
+        </label>
+        <input type="file" id="excelInput" accept=".xlsx, .csv" class="hidden">
+        <button onclick="shareReport()" class="bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 transition active:scale-95" title="Share summary">
+          <span>📤</span><span class="hidden sm:inline">Share</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Team switcher -->
+    <div class="max-w-5xl mx-auto mt-3 grid grid-cols-2 gap-2" id="teamSwitch"></div>
+
+    <!-- Tabs -->
+    <div class="max-w-5xl mx-auto mt-2">
+      <div class="flex bg-pitch/80 p-1 rounded-xl border border-border text-xs font-medium">
+        <button onclick="switchTab('tab-overview')" id="btn-tab-overview" class="tab-btn flex-1 py-2 rounded-lg font-semibold transition">Overview</button>
+        <button onclick="switchTab('tab-roster')" id="btn-tab-roster" class="tab-btn flex-1 py-2 rounded-lg font-semibold transition">Roster</button>
+        <button onclick="switchTab('tab-charts')" id="btn-tab-charts" class="tab-btn flex-1 py-2 rounded-lg font-semibold transition">Charts</button>
+        <button onclick="switchTab('tab-tactics')" id="btn-tab-tactics" class="tab-btn flex-1 py-2 rounded-lg font-semibold transition">Takeaways</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 space-y-4 safe-bottom">
+
+    <!-- Banner -->
+    <div class="bg-gradient-to-br from-card to-surface rounded-2xl p-5 border border-border shadow-lg" style="border-top: 3px solid var(--accent)">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2" id="bannerBadges"></div>
+          <div class="mt-3 flex flex-wrap items-center gap-3">
+            <div id="teamName" class="display text-3xl md:text-4xl text-white"></div>
+            <div id="scoreLine" class="display text-4xl md:text-5xl accent-text bg-black/40 px-3 py-1 rounded-xl border border-white/10 shadow-inner"></div>
+            <div id="scoreRight" class="text-base md:text-xl font-bold text-slate-300"></div>
+          </div>
+          <p id="matchMeta" class="text-xs text-slate-400 mt-2"></p>
+          <p id="bannerSummary" class="text-xs text-slate-400 mt-1"></p>
+          <div id="filmLinks" class="mt-3 flex flex-wrap gap-2"></div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 border-t md:border-t-0 border-border pt-3 md:pt-0 shrink-0" id="pills"></div>
+      </div>
+    </div>
+
+    <!-- Overview -->
+    <div id="tab-overview" class="tab-content space-y-4">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="kpis"></div>
+      <div class="bg-card rounded-2xl p-4 border border-border">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+          <span id="leadersTitle">Top Impact Leaders</span>
+          <span class="accent-text font-medium normal-case text-[11px]">Tap for player card</span>
+        </h3>
+        <div id="leadersList" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- Roster -->
+    <div id="tab-roster" class="tab-content hidden space-y-3">
+      <div class="bg-card p-3 rounded-2xl border border-border flex flex-col sm:flex-row items-center gap-2">
+        <input type="text" id="searchInput" oninput="renderRoster()" placeholder="Search player..."
+          class="w-full sm:flex-1 bg-pitch text-sm px-3 py-2.5 rounded-xl border border-border text-white placeholder-slate-500 focus:outline-none focus:border-brand-500">
+        <select id="roleFilter" onchange="renderRoster()" class="w-full sm:w-auto bg-pitch text-sm px-3 py-2.5 rounded-xl border border-border text-slate-200 focus:outline-none focus:border-brand-500">
+          <option value="ALL">All Roles</option>
+          <option value="FWD">Attackers (CF, LW, RW)</option>
+          <option value="MID">Midfielders (CM, LM, RM)</option>
+          <option value="DEF">Defenders (CB, LB, RB)</option>
+          <option value="GK">Goalkeepers</option>
+        </select>
+      </div>
+      <div class="flex items-center space-x-2 overflow-x-auto pb-1 text-[11px] font-medium text-slate-400" id="sortBar"></div>
+      <div class="bg-card rounded-2xl border border-border overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs whitespace-nowrap">
+            <thead class="bg-pitch/60 text-slate-400 uppercase text-[10px] font-bold border-b border-border" id="rosterHead"></thead>
+            <tbody id="rosterTbody" class="divide-y divide-border/60"></tbody>
+          </table>
+        </div>
+        <div class="p-2.5 text-[10px] text-slate-500 bg-pitch/40 leading-relaxed text-center">
+          GP = games played · SOT = shots on target · Cor / Cr = corners / crosses · TO = turnovers<br>
+          💡 Tap any player for their player card
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div id="tab-charts" class="tab-content hidden space-y-4">
+      <div class="bg-card p-4 rounded-2xl border border-border">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Goal Involvements</h3>
+          <span class="text-[10px] accent-chip px-2 py-0.5 rounded border">Goals + Assists</span>
+        </div>
+        <div class="relative h-56 w-full"><canvas id="chartContributions"></canvas></div>
+        <p id="contribEmpty" class="hidden text-xs text-slate-500 text-center py-8">No goals or assists logged yet.</p>
+      </div>
+      <div class="bg-card p-4 rounded-2xl border border-border">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Player Workload (Minutes)</h3>
+          <span id="workloadTotal" class="text-[10px] text-slate-400"></span>
+        </div>
+        <div id="workloadWrap" class="relative w-full"><canvas id="chartMinutes"></canvas></div>
+      </div>
+      <div class="bg-card p-4 rounded-2xl border border-border">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Turnovers by Pitch Third</h3>
+          <span id="toBadge" class="text-[10px] text-emerald-400"></span>
+        </div>
+        <div class="relative h-52 flex items-center justify-center">
+          <canvas id="chartTurnovers"></canvas>
+          <div id="turnoverEmpty" class="hidden text-center">
+            <div class="text-4xl font-black text-emerald-400">0</div>
+            <div class="text-xs text-slate-400 mt-1">Turnovers logged</div>
+          </div>
+        </div>
+        <p id="toCaption" class="text-[11px] text-slate-400 text-center mt-2"></p>
+      </div>
+    </div>
+
+    <!-- Takeaways -->
+    <div id="tab-tactics" class="tab-content hidden space-y-4">
+      <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
+        <h3 class="font-bold text-sm accent-text flex items-center gap-2"><span>🧠</span> <span id="takeawayTitle">Key Coaching Takeaways</span></h3>
+        <div id="takeaways" class="space-y-3 text-xs leading-relaxed text-slate-300"></div>
+      </div>
+      <a id="glossaryLink" href="#" class="block bg-card p-3 rounded-2xl border border-border text-xs text-slate-300 hover:border-brand-500/50 transition">
+        📖 New to a term? See the <span class="accent-text font-semibold">Glossary</span> and <span class="accent-text font-semibold">Game Model</span> on the Team Hub →
+      </a>
+    </div>
+  </main>
+
+  <!-- Player modal -->
+  <div id="playerModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-end sm:items-center justify-center p-4" onclick="if(event.target===this) closePlayerModal()">
+    <div class="bg-surface border border-border rounded-3xl max-w-sm w-full p-5 shadow-2xl relative" role="dialog" aria-modal="true" aria-labelledby="modalName">
+      <button onclick="closePlayerModal()" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-pitch flex items-center justify-center text-slate-400 hover:text-white font-bold text-sm">✕</button>
+      <div class="flex items-center space-x-3 pb-3 border-b border-border">
+        <div id="modalAvatar" class="w-12 h-12 rounded-2xl accent-chip flex items-center justify-center font-black text-base border"></div>
+        <div>
+          <h3 id="modalName" class="font-extrabold text-base text-white"></h3>
+          <p id="modalPositions" class="text-xs accent-text font-medium"></p>
+        </div>
+      </div>
+      <div id="modalGrid" class="grid grid-cols-3 gap-2 my-3 text-center"></div>
+      <div class="space-y-2 mt-2">
+        <label for="modalNotes" class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+          <span>Coach Notes</span><span class="text-[10px] text-amber-300">Saved on this device only</span>
+        </label>
+        <textarea id="modalNotes" rows="3" placeholder="Tactical triggers, feedback, or training goals for this player..."
+          class="w-full bg-pitch text-sm p-3 rounded-xl border border-border text-white placeholder-slate-600 focus:outline-none focus:border-brand-500"></textarea>
+        <button onclick="saveCurrentNote()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-xl text-xs transition">Save Note</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none duration-300 z-50"></div>
+
+  <script>
+    /* =========================================================
+       TEAM SETTINGS — edit these for match details and notes.
+       Stats come from DATA below (or from Import).
+       ========================================================= */
+    const SEASON = "26/27";
+    const LINKS = {
+      teamHub: "/",
+      film: "https://www.youtube.com/playlist?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw",
+      veo: "https://app.veo.co/clubs/ajax-50ad2f70/teams/ajax-2012g/recordings/"
+    };
+
+    const TEAMS = [
+      {
+        id: "ga",
+        label: "GA U15",
+        name: "AJAX GA U15",
+        short: "AJAX GA",
+        league: "Girls Academy",
+        exportName: "AJAX GA U15",          // must match the "Team" column in the stats export
+        matchLength: 78,
+        // Single-game details (shown when the team has played 1 game)
+        opponent: "Opponent",               // ← opponent club name
+        date: "",                           // ← e.g. "2026-08-23"
+        venue: "",
+        homeAway: "",
+        note: "Dominant league opener",
+        takeaways: [
+          ["Build-up & Rest Defense", "No turnovers logged across the match. Both center backs <strong>Addison Lee</strong> and <strong>Madisyn Craig</strong> played the full 78 minutes with high composure, safely linking into midfielder <strong>Joselyn Nguyen</strong> to bypass the first line of pressure."],
+          ["Shot Quality & Finishing", "The team converted <strong>50% of shots into goals</strong> (7 goals from 14 attempts), and 11 shots were on target (79%). That reflects patient shot selection inside the box over low-percentage efforts from distance."],
+          ["Set Pieces", "Generated 8 corner kicks, with <strong>Kora Busam</strong> delivering 6. Keep corner routines a regular part of training to sustain box dominance."],
+          ["Rotation & Depth", "15 players saw the field across 78 minutes. The attacking rotation (Busam, Dobson, Brasil) scored 6 of the 7 goals, showing real depth and game-changing quality throughout."]
+        ]
+      },
+      {
+        id: "aspire",
+        label: "Aspire U15",
+        name: "AJAX Aspire U15",
+        short: "AJAX Aspire",
+        league: "GA Aspire",
+        exportName: "AJAX ASPIRE U15",
+        matchLength: 80,
+        opponent: "", date: "", venue: "", homeAway: "", note: "",
+        takeaways: [
+          ["Finishing Is the Gap", "Shooting accuracy is solid: <strong>16 of 24 shots on target (67%)</strong>. Only 4 became goals (17% conversion), so the next step is finishing: composure in front of goal, follow-up runs for rebounds, and picking a corner over hitting it at the keeper."],
+          ["Spread the Scoring", "<strong>Sophia Culver</strong> has 3 of the 4 goals, with 6 of her 7 shots on target from CF. <strong>Giselle Rosales</strong> has 8 shots without a goal yet, and midfield runners arriving late into the box would take pressure off the striker."],
+          ["Set Pieces & Creativity", "14 corners in 3 games, 9 of them delivered by <strong>Giselle Rosales</strong>, which is enough volume to justify a rehearsed routine or two. <strong>Scarlett Freitas</strong> leads the team with 2 assists from central midfield."],
+          ["Defending & Discipline", "6 goals against with 1 clean sheet. <strong>Sonia Vera</strong> has played every minute in goal with 8 saves. 8 fouls so far, 4 from <strong>Kendall Blair</strong>; focus on body position and timing in the tackle."]
+        ]
+      }
+    ];
+
+    /* Stats imported from Statistics_GA_Asp.csv */
+    let DATA = {"AJAX GA U15": {"totals": {"games": 1, "mins": 78, "won": 1, "tied": 0, "lost": 0, "gf": 7, "ga": 0, "shotsAgainst": 1, "saves": 0, "cleanSheets": 1, "toA": 0, "toM": 0, "toD": 0}, "players": [{"name": "Addison Lee", "roles": ["CB"], "gp": 1, "mins": 78, "goals": 0, "assists": 1, "shots": 0, "sot": 0, "corners": 2, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 1}, {"name": "Addison Leigh", "roles": [], "gp": 1, "mins": 0, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Adiana Newell", "roles": ["RB", "LB"], "gp": 1, "mins": 52, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Aliyah Moreno", "roles": ["RW", "LW"], "gp": 1, "mins": 38, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Anahí Albor", "roles": ["RM", "CF"], "gp": 1, "mins": 65, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Ariana Mallari", "roles": ["LB", "RB"], "gp": 1, "mins": 66, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Belén Vásquez", "roles": ["RM", "LM"], "gp": 1, "mins": 51, "goals": 0, "assists": 0, "shots": 2, "sot": 2, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Emery Dobson", "roles": ["LW", "RW"], "gp": 1, "mins": 52, "goals": 2, "assists": 1, "shots": 4, "sot": 2, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 1, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Emma Patino", "roles": ["LW"], "gp": 1, "mins": 39, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Evelynn Strong", "roles": ["GK"], "gp": 1, "mins": 78, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Joselyn Nguyen", "roles": ["CM"], "gp": 1, "mins": 78, "goals": 1, "assists": 0, "shots": 2, "sot": 1, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Juliana Marín", "roles": ["CF"], "gp": 1, "mins": 40, "goals": 0, "assists": 0, "shots": 1, "sot": 1, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Kaylani Brasil", "roles": ["RW", "LM"], "gp": 1, "mins": 39, "goals": 1, "assists": 1, "shots": 1, "sot": 1, "corners": 0, "crosses": 1, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Kendall Blair", "roles": ["RB"], "gp": 1, "mins": 38, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 1, "turnovers": 0, "fouls": 1, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Kora Busam", "roles": ["LM", "CF"], "gp": 1, "mins": 65, "goals": 3, "assists": 1, "shots": 4, "sot": 4, "corners": 6, "crosses": 1, "turnovers": 0, "fouls": 1, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Madisyn Craig", "roles": ["CB"], "gp": 1, "mins": 78, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Sophie Cattaleya Chiprez", "roles": [], "gp": 1, "mins": 0, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}]}, "AJAX ASPIRE U15": {"totals": {"games": 3, "mins": 244, "won": 1, "tied": 0, "lost": 2, "gf": 4, "ga": 6, "shotsAgainst": 7, "saves": 8, "cleanSheets": 1, "toA": 0, "toM": 0, "toD": 0}, "players": [{"name": "Alessandra Fernandez", "roles": ["CM", "LM"], "gp": 1, "mins": 39, "goals": 1, "assists": 0, "shots": 1, "sot": 1, "corners": 1, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Alex Marigorda", "roles": ["CB", "RB"], "gp": 3, "mins": 94, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 1, "offsides": 0}, {"name": "Alexa Chipres", "roles": ["CB", "CM"], "gp": 3, "mins": 169, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Amy Godínez Vargas", "roles": ["RB", "LB"], "gp": 3, "mins": 177, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Arriana Zamora", "roles": ["RB", "LB"], "gp": 3, "mins": 127, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Brooklyn Brewer", "roles": ["RM"], "gp": 3, "mins": 120, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 1, "saves": 0, "keyPasses": 1, "offsides": 0}, {"name": "Camila Deleon", "roles": ["CB"], "gp": 3, "mins": 177, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Carlee Gowan", "roles": ["CB"], "gp": 3, "mins": 83, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Ella Simmons", "roles": ["CF", "LM", "CM"], "gp": 3, "mins": 88, "goals": 0, "assists": 1, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Evelyn Lopez", "roles": ["CM"], "gp": 3, "mins": 91, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Giselle Rosales", "roles": ["CF", "RM", "LM"], "gp": 3, "mins": 172, "goals": 0, "assists": 0, "shots": 8, "sot": 5, "corners": 9, "crosses": 2, "turnovers": 0, "fouls": 1, "saves": 0, "keyPasses": 2, "offsides": 0}, {"name": "Grace Krimmel", "roles": ["CF", "RM", "LM"], "gp": 3, "mins": 173, "goals": 0, "assists": 0, "shots": 2, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 2, "offsides": 0}, {"name": "Kendall Blair", "roles": ["CM", "LW", "LM"], "gp": 3, "mins": 189, "goals": 0, "assists": 0, "shots": 2, "sot": 2, "corners": 1, "crosses": 0, "turnovers": 0, "fouls": 4, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "McKenzie Castro", "roles": ["LB", "RB"], "gp": 3, "mins": 173, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Nairobi Mcgadney", "roles": [], "gp": 1, "mins": 0, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 0}, {"name": "Scarlett Freitas", "roles": ["CM", "RW"], "gp": 3, "mins": 190, "goals": 0, "assists": 2, "shots": 2, "sot": 1, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 1, "offsides": 0}, {"name": "Sola Alberto", "roles": ["LM", "CF", "RM", "CM"], "gp": 3, "mins": 174, "goals": 0, "assists": 0, "shots": 2, "sot": 1, "corners": 1, "crosses": 2, "turnovers": 0, "fouls": 0, "saves": 0, "keyPasses": 0, "offsides": 1}, {"name": "Sonia Vera", "roles": ["GK"], "gp": 3, "mins": 244, "goals": 0, "assists": 0, "shots": 0, "sot": 0, "corners": 0, "crosses": 0, "turnovers": 0, "fouls": 0, "saves": 8, "keyPasses": 0, "offsides": 0}, {"name": "Sophia Culver", "roles": ["CF"], "gp": 3, "mins": 197, "goals": 3, "assists": 0, "shots": 7, "sot": 6, "corners": 2, "crosses": 0, "turnovers": 0, "fouls": 2, "saves": 0, "keyPasses": 0, "offsides": 2}]}};
+
+    /* ========================================================= */
+
+    let team = TEAMS[0];
+    let players = [];
+    let totals = {};
+    let activeSortProp = 'goals';
+    let sortAscending = false;
+    let selectedPlayer = null;
+    let activeTab = 'tab-overview';
+    let chartContrib = null, chartWorkload = null, chartZones = null;
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const sum = k => players.reduce((a, p) => a + (Number(p[k]) || 0), 0);
+    const pct = (a, b) => b > 0 ? Math.round(a / b * 100) : 0;
+    const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+    const isSeason = () => (totals.games || 0) > 1;
+    const lastName = n => n.split(' ').slice(-1)[0];
+    const shortName = n => `${n[0]}. ${lastName(n)}`;
+
+    function initials(name) { return name.split(' ').map(n => n[0]).join('').slice(0, 3).toUpperCase(); }
+    function badge(p) {
+      const variants = name => {
+        const parts = name.split(' '), first = parts[0], last = parts[parts.length - 1];
+        return [initials(name), first.slice(0, 2) + last[0], first[0] + last.slice(0, 3)];
+      };
+      const mine = variants(p.name);
+      for (let i = 0; i < mine.length; i++) {
+        if (players.filter(q => variants(q.name)[i] === mine[i]).length === 1) return mine[i];
+      }
+      return mine[mine.length - 1];
+    }
+    function formatDate(d) {
+      if (!d) return '';
+      const dt = new Date(d + 'T12:00:00');
+      return isNaN(dt) ? d : dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    /* ---------- Team switching ---------- */
+    function renderTeamSwitch() {
+      $('teamSwitch').innerHTML = TEAMS.map(t => {
+        const d = DATA[t.exportName]?.totals || {};
+        const rec = d.games ? `${d.won}W ${d.tied}D ${d.lost}L` : 'No games yet';
+        const dot = t.id === 'aspire' ? '#3ABFB8' : '#C8A951';
+        return `<button type="button" onclick="selectTeam('${t.id}')" aria-pressed="${t.id === team.id}"
+          class="team-btn text-left px-3 py-2 rounded-xl border border-border bg-pitch/60 text-slate-300 transition">
+          <div class="flex items-center gap-2 text-xs font-bold"><span class="team-dot w-2 h-2 rounded-full opacity-50" style="background:${dot}"></span>${esc(t.label)}</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">${esc(t.league)} · ${rec}</div>
+        </button>`;
+      }).join('');
+    }
+
+    function selectTeam(id, opts = {}) {
+      team = TEAMS.find(t => t.id === id) || TEAMS[0];
+      const d = DATA[team.exportName] || { totals: {}, players: [] };
+      players = d.players.map(p => ({ ...p }));
+      totals = d.totals;
+      document.body.dataset.team = team.id;
+      if (!opts.keepHash) history.replaceState(null, '', '#' + team.id);
+      try { localStorage.setItem('matchhub_team', team.id); } catch (e) {}
+      $('searchInput').value = '';
+      renderAll();
+    }
+
+    /* ---------- Banner + KPIs ---------- */
+    function pill(label, value, sub, cls = 'text-white', subCls = 'text-slate-500') {
+      return `<div class="bg-pitch/60 p-2.5 rounded-xl border border-border/80 text-center">
+        <div class="text-[10px] text-slate-400 font-medium">${label}</div>
+        <div class="display text-2xl ${cls} leading-tight">${value}</div>
+        <div class="text-[9px] ${subCls}">${sub}</div></div>`;
+    }
+    function kpi(label, value, sub, subCls = 'text-slate-400') {
+      return `<div class="bg-card p-3.5 rounded-2xl border border-border">
+        <span class="text-xs text-slate-400 font-medium block">${label}</span>
+        <span class="display text-3xl text-white mt-1 block">${value}</span>
+        <span class="text-[11px] ${subCls} font-semibold">${sub}</span></div>`;
+    }
+
+    function renderBanner() {
+      const shots = sum('shots'), sot = sum('sot'), goals = totals.gf ?? sum('goals');
+      const ga = totals.ga || 0, to = sum('turnovers');
+      const used = players.filter(p => p.mins > 0).length;
+      const season = isSeason();
+
+      document.title = `${team.name} | AJAX U15 Match Hub`;
+      $('hdrSub').textContent = `${team.name} · ${team.league} · ${SEASON}`;
+      $('hubLink').href = LINKS.teamHub;
+      $('glossaryLink').href = LINKS.teamHub + '#glossary';
+
+      const badges = [];
+      if (!totals.games) badges.push(`<span class="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">No games logged</span>`);
+      else if (season) badges.push(`<span class="accent-chip border text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Season to date · ${plural(totals.games, 'game')}</span>`);
+      else badges.push(`<span class="accent-chip border text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Full Time · ${team.matchLength} Mins</span>`);
+      if (totals.cleanSheets) badges.push(`<span class="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">🧤 ${season ? plural(totals.cleanSheets, 'Clean Sheet') : 'Clean Sheet'}</span>`);
+      badges.push(`<span class="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-bold px-2 py-0.5 rounded-full">${esc(team.league)}</span>`);
+      $('bannerBadges').innerHTML = badges.join('');
+
+      $('teamName').textContent = team.short;
+      if (season) {
+        $('scoreLine').textContent = `${totals.won}W ${totals.tied}D ${totals.lost}L`;
+        const gd = goals - ga;
+        $('scoreRight').innerHTML = `<span class="text-sm text-slate-400 font-semibold">Goals</span> ${goals} : ${ga} <span class="text-sm ${gd >= 0 ? 'text-emerald-400' : 'text-rose-400'}">(${gd > 0 ? '+' : ''}${gd})</span>`;
+        $('matchMeta').textContent = '';
+        $('bannerSummary').textContent = `${shots} shots taken · ${totals.shotsAgainst || 0} shots against · ${(goals / totals.games).toFixed(1)} goals per game`;
+      } else {
+        $('scoreLine').textContent = `${goals} - ${ga}`;
+        $('scoreRight').textContent = team.opponent || 'Opponent';
+        const meta = [formatDate(team.date), team.homeAway, team.venue].filter(Boolean);
+        $('matchMeta').textContent = meta.length ? '📅 ' + meta.join(' · ') : '';
+        $('bannerSummary').textContent = [team.note, `${shots} shots taken`, `${plural(totals.shotsAgainst || 0, 'shot')} conceded`].filter(Boolean).join(' · ');
+      }
+      $('matchMeta').classList.toggle('hidden', !$('matchMeta').textContent);
+
+      const links = [];
+      if (LINKS.veo) links.push(`<a href="${esc(LINKS.veo)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch/70 hover:bg-pitch border border-border px-2.5 py-1.5 rounded-lg text-slate-200">🎥 Watch on Veo</a>`);
+      if (LINKS.film) links.push(`<a href="${esc(LINKS.film)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch/70 hover:bg-pitch border border-border px-2.5 py-1.5 rounded-lg text-slate-200">▶ Film Room</a>`);
+      $('filmLinks').innerHTML = links.join('');
+
+      $('pills').innerHTML =
+        pill('Shots on Target', pct(sot, shots) + '%', `${sot} of ${shots} shots`, 'accent-text') +
+        pill('Conversion', pct(goals, shots) + '%', `${goals} goals / ${shots} shots`, 'text-emerald-400') +
+        (season
+          ? pill('Goals Against', (ga / totals.games).toFixed(1), 'per game', 'text-white')
+          : pill('Turnovers', to, to === 0 ? 'Clean possession' : 'Logged', 'text-white', 'text-emerald-400'));
+
+      const topCorner = [...players].sort((a, b) => b.corners - a.corners)[0];
+      const gk = [...players].filter(p => p.roles.includes('GK')).sort((a, b) => b.mins - a.mins)[0];
+      $('kpis').innerHTML =
+        kpi('Total Shots', shots, `${sot} on target (${pct(sot, shots)}%)`, 'accent-text') +
+        kpi('Opponent Shots', totals.shotsAgainst || 0, `${plural(ga, 'goal')} against`, 'text-blue-400') +
+        kpi('Corner Kicks', sum('corners'), topCorner && topCorner.corners ? `${topCorner.corners} by ${shortName(topCorner.name)}` : '') +
+        (season
+          ? kpi('Saves', totals.saves || sum('saves'), gk ? shortName(gk.name) + ' in goal' : '', 'text-emerald-400')
+          : kpi('Players Used', used, `of ${players.length} on the roster`, 'text-emerald-400'));
+    }
+
+    /* ---------- Leaders ---------- */
+    const leaderCls = ['accent-chip', 'bg-blue-500/20 text-blue-400 border-blue-500/40', 'bg-purple-500/20 text-purple-400 border-purple-500/40', 'bg-teal-500/20 text-teal-400 border-teal-500/40'];
+    function renderLeaders() {
+      const season = isSeason();
+      $('leadersTitle').textContent = season ? 'Season Impact Leaders' : 'Top Match Impact Leaders';
+      const top = [...players].filter(p => p.goals + p.assists > 0)
+        .sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists) || b.goals - a.goals || b.sot - a.sot)
+        .slice(0, 4);
+      if (!top.length) { $('leadersList').innerHTML = '<p class="text-xs text-slate-500">No goals or assists logged yet.</p>'; return; }
+      $('leadersList').innerHTML = top.map((p, i) => {
+        let tag = '';
+        if (!season && p.goals >= 3) tag = '<span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 rounded font-semibold">Hat-trick</span>';
+        else if (!season && p.goals === 2) tag = '<span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-semibold">Brace</span>';
+        else if (season && p === [...players].sort((a, b) => b.goals - a.goals)[0] && p.goals > 0) tag = '<span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 rounded font-semibold">Top scorer</span>';
+        const detail = [p.roles.slice(0, 2).join(', '), season ? `${p.gp} GP · ${p.mins} mins` : `${p.mins} mins`];
+        if (p.corners) detail.push(plural(p.corners, 'corner'));
+        else if (p.shots) detail.push(plural(p.shots, 'shot'));
+        const ga = p.goals && p.assists ? `${p.goals}G + ${p.assists}A` : p.goals ? plural(p.goals, 'Goal') : plural(p.assists, 'Assist');
+        return `<button type="button" onclick="openPlayerModal(${players.indexOf(p)})" class="w-full text-left flex items-center justify-between p-3 rounded-xl bg-surface hover:bg-[#1a2c33] active:bg-[#1f353e] transition border border-border/60">
+            <div class="flex items-center space-x-3 min-w-0">
+              <div class="w-9 h-9 shrink-0 rounded-full ${leaderCls[i]} flex items-center justify-center font-bold text-xs border">${esc(badge(p))}</div>
+              <div class="min-w-0">
+                <div class="font-bold text-sm text-white flex items-center gap-1.5 flex-wrap">${esc(p.name)} ${tag}</div>
+                <div class="text-[11px] text-slate-400 truncate">${esc(detail.join(' · '))}</div>
+              </div>
+            </div>
+            <div class="text-right shrink-0 pl-2">
+              <span class="text-sm font-black accent-text block">${ga}</span>
+              <span class="text-[10px] text-slate-500 block">${p.sot}/${p.shots} SOT</span>
+            </div>
+          </button>`;
+      }).join('');
+    }
+
+    /* ---------- Tabs ---------- */
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      $(tabId).classList.remove('hidden');
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const on = btn.id === `btn-${tabId}`;
+        btn.classList.toggle('bg-brand-600', on); btn.classList.toggle('text-white', on); btn.classList.toggle('shadow', on);
+        btn.classList.toggle('text-slate-400', !on);
+      });
+      if (tabId === 'tab-charts') setTimeout(renderCharts, 50);
+      try { localStorage.setItem('matchhub_tab', tabId); } catch (e) {}
+    }
+
+    /* ---------- Roster ---------- */
+    function sortOptions() {
+      return [['goals', 'Goals'], ['assists', 'Assists'], ['shots', 'Shots'], ['mins', 'Minutes']].concat(isSeason() ? [['gp', 'Games']] : []);
+    }
+    function changeSort(prop) {
+      if (activeSortProp === prop) sortAscending = !sortAscending;
+      else { activeSortProp = prop; sortAscending = false; }
+      renderRoster();
+    }
+    function renderRoster() {
+      const season = isSeason();
+      if (!sortOptions().some(o => o[0] === activeSortProp)) activeSortProp = 'goals';
+      $('sortBar').innerHTML = '<span class="text-slate-500 shrink-0">Sort:</span>' + sortOptions().map(([k, l]) => {
+        const on = k === activeSortProp;
+        return `<button onclick="changeSort('${k}')" class="px-2.5 py-1 rounded-lg border whitespace-nowrap ${on ? 'accent-chip' : 'bg-surface border-border text-slate-300'}">${l}${on ? (sortAscending ? ' ⬆' : ' ⬇') : ''}</button>`;
+      }).join('');
+
+      const cols = ['Player', 'Role'].concat(season ? ['GP'] : [], ['Min', 'G', 'A', 'Shots (SOT)', 'SOT%', 'Cor / Cr', 'TO', 'Fouls']);
+      $('rosterHead').innerHTML = '<tr>' + cols.map((c, i) => `<th class="py-3 ${i === 0 ? 'px-3 sticky left-0 bg-[#0f191d]' : 'px-2' + (i > 1 ? ' text-center' : '')}">${c}</th>`).join('') + '</tr>';
+
+      const search = ($('searchInput').value || '').toLowerCase().trim();
+      const roleFilter = $('roleFilter').value;
+      const groups = { FWD: ['CF', 'LW', 'RW'], MID: ['CM', 'LM', 'RM'], DEF: ['CB', 'LB', 'RB'], GK: ['GK'] };
+      const list = players.filter(p =>
+        (!search || p.name.toLowerCase().includes(search)) &&
+        (roleFilter === 'ALL' || p.roles.some(r => groups[roleFilter].includes(r)))
+      ).sort((a, b) => (sortAscending ? a[activeSortProp] - b[activeSortProp] : b[activeSortProp] - a[activeSortProp]) || b.mins - a.mins || a.name.localeCompare(b.name));
+
+      $('rosterTbody').innerHTML = list.length ? list.map(p => {
+        const roles = (p.roles.length ? p.roles : ['Bench']).map(r => `<span class="bg-pitch px-1.5 py-0.5 rounded text-[10px] text-slate-300 border border-border/80 mr-1">${esc(r)}</span>`).join('');
+        return `<tr onclick="openPlayerModal(${players.indexOf(p)})" class="hover:bg-surface/80 active:bg-surface cursor-pointer transition ${p.mins === 0 ? 'opacity-50' : ''}">
+            <td class="py-2.5 px-3 font-semibold text-white sticky left-0 bg-card">
+              <div class="flex items-center gap-2">
+                <span class="min-w-[1.75rem] h-6 px-1 rounded-lg bg-pitch flex items-center justify-center text-[10px] font-bold accent-text border border-border">${esc(badge(p))}</span>${esc(p.name)}
+              </div></td>
+            <td class="py-2.5 px-2">${roles}</td>
+            ${season ? `<td class="py-2.5 px-2 text-center">${p.gp}</td>` : ''}
+            <td class="py-2.5 px-2 text-center font-medium">${p.mins}'</td>
+            <td class="py-2.5 px-2 text-center ${p.goals ? 'accent-text font-extrabold' : 'text-slate-500'}">${p.goals}</td>
+            <td class="py-2.5 px-2 text-center ${p.assists ? 'text-sky-400 font-bold' : 'text-slate-500'}">${p.assists}</td>
+            <td class="py-2.5 px-2 text-center">${p.shots} <span class="text-slate-500">(${p.sot})</span></td>
+            <td class="py-2.5 px-2 text-center text-slate-300">${p.shots ? pct(p.sot, p.shots) + '%' : '–'}</td>
+            <td class="py-2.5 px-2 text-center">${p.corners} / ${p.crosses}</td>
+            <td class="py-2.5 px-2 text-center">${p.turnovers}</td>
+            <td class="py-2.5 px-2 text-center">${p.fouls}</td></tr>`;
+      }).join('') : `<tr><td colspan="${cols.length}" class="py-6 text-center text-slate-500">No players match that search.</td></tr>`;
+    }
+
+    /* ---------- Charts ---------- */
+    function renderCharts() {
+      if (typeof Chart === 'undefined') return;
+      const tick = { color: '#94a3b8' };
+      const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim();
+
+      const producers = players.filter(p => p.goals > 0 || p.assists > 0).sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists));
+      if (chartContrib) { chartContrib.destroy(); chartContrib = null; }
+      $('chartContributions').parentElement.classList.toggle('hidden', !producers.length);
+      $('contribEmpty').classList.toggle('hidden', !!producers.length);
+      if (producers.length) {
+        chartContrib = new Chart($('chartContributions'), {
+          type: 'bar',
+          data: { labels: producers.map(p => p.name.split(' ')[0]), datasets: [
+            { label: 'Goals', data: producers.map(p => p.goals), backgroundColor: accent, borderRadius: 4 },
+            { label: 'Assists', data: producers.map(p => p.assists), backgroundColor: '#a78bfa', borderRadius: 4 }] },
+          options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+            scales: { x: { stacked: true, ticks: tick, grid: { display: false } }, y: { stacked: true, ticks: { ...tick, stepSize: 1 }, grid: { color: '#243741' } } } }
+        });
+      }
+
+      const minPlayers = players.filter(p => p.mins > 0).sort((a, b) => b.mins - a.mins);
+      const maxMins = totals.mins || team.matchLength;
+      $('workloadWrap').style.height = Math.max(160, minPlayers.length * 24 + 40) + 'px';
+      $('workloadTotal').textContent = isSeason() ? `Team total: ${maxMins}' over ${plural(totals.games, 'game')}` : `Match length: ${maxMins}'`;
+      if (chartWorkload) chartWorkload.destroy();
+      chartWorkload = new Chart($('chartMinutes'), {
+        type: 'bar',
+        data: { labels: minPlayers.map(p => p.name), datasets: [{ label: 'Minutes', data: minPlayers.map(p => p.mins),
+          backgroundColor: minPlayers.map(p => p.mins >= maxMins ? accent : accent + '99'), borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
+          scales: { x: { min: 0, max: maxMins, ticks: tick, grid: { color: '#243741' } }, y: { ticks: { ...tick, font: { size: 10 }, autoSkip: false }, grid: { display: false } } } }
+      });
+
+      const zoneData = [totals.toA || 0, totals.toM || 0, totals.toD || 0];
+      const total = zoneData.reduce((a, b) => a + b, 0);
+      if (chartZones) { chartZones.destroy(); chartZones = null; }
+      $('toBadge').textContent = `${zoneData[2]} in defending third`;
+      $('chartTurnovers').classList.toggle('hidden', total === 0);
+      $('turnoverEmpty').classList.toggle('hidden', total !== 0);
+      $('toCaption').textContent = total === 0 ? 'No turnovers logged in any third of the pitch.'
+        : zoneData[2] === 0 ? 'Zero defensive-third turnovers: safe distribution out of the back.' : '';
+      if (total > 0) {
+        chartZones = new Chart($('chartTurnovers'), {
+          type: 'doughnut',
+          data: { labels: ['Attacking 3rd', 'Middle 3rd', 'Defending 3rd'], datasets: [{ data: zoneData, backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'], borderWidth: 0 }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12, font: { size: 11 } } } } }
+        });
+      }
+    }
+
+    /* ---------- Takeaways ---------- */
+    function renderTakeaways() {
+      $('takeawayTitle').textContent = `${isSeason() ? 'Season' : 'Match'} Takeaways: ${team.label}`;
+      $('takeaways').innerHTML = (team.takeaways || []).map(([h, body], i) =>
+        `<div class="bg-surface p-3 rounded-xl border border-border/80"><h4 class="font-bold text-white mb-1">${i + 1}. ${esc(h)}</h4><p class="text-slate-400">${body}</p></div>`
+      ).join('') || '<p class="text-slate-500">No takeaways written yet.</p>';
+    }
+
+    /* ---------- Player modal ---------- */
+    const noteKey = p => `coach_note_${team.id}_${p.name}`;
+    function openPlayerModal(idx) {
+      const p = selectedPlayer = players[idx];
+      if (!p) return;
+      const season = isSeason();
+      $('modalName').textContent = p.name;
+      $('modalAvatar').textContent = badge(p);
+      let role = p.roles.join(', ') || 'Bench';
+      if (p.mins === 0) role = 'Unused substitute';
+      else if (season) role += ` · ${plural(p.gp, 'game')}`;
+      else if (p.mins >= team.matchLength) role += ' · Full match';
+      $('modalPositions').textContent = `${team.label} · ${role}`;
+      const cell = (l, v, c = 'text-white') => `<div class="bg-pitch p-2 rounded-xl border border-border"><span class="text-[10px] text-slate-400 block">${l}</span><span class="text-base font-extrabold ${c}">${v}</span></div>`;
+      const isGK = p.roles.includes('GK');
+      $('modalGrid').innerHTML =
+        cell('Minutes', p.mins + "'") + cell('Goals', p.goals, 'accent-text') + cell('Assists', p.assists, 'text-sky-400') +
+        cell('Shots (SOT)', `${p.shots} (${p.sot})`) +
+        (isGK ? cell('Saves', p.saves) : cell('Corners / Cr', `${p.corners} / ${p.crosses}`)) +
+        (season ? cell('Fouls', p.fouls) : cell('Turnovers', p.turnovers, 'text-slate-300'));
+      let note = '';
+      try { note = localStorage.getItem(noteKey(p)) || (team.id === 'ga' ? (localStorage.getItem(`coach_note_match_${p.name}`) || localStorage.getItem(`coach_note_${p.name}`)) : '') || ''; } catch (e) {}
+      $('modalNotes').value = note;
+      $('playerModal').classList.replace('hidden', 'flex');
+      document.body.style.overflow = 'hidden';
+    }
+    function closePlayerModal() {
+      $('playerModal').classList.replace('flex', 'hidden');
+      document.body.style.overflow = '';
+    }
+    function saveCurrentNote() {
+      if (!selectedPlayer) return;
+      try { localStorage.setItem(noteKey(selectedPlayer), $('modalNotes').value); showToast(`Saved note for ${selectedPlayer.name}`); }
+      catch (e) { showToast('Could not save: browser storage is blocked'); }
+      closePlayerModal();
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayerModal(); });
+
+    /* ---------- Import (stats export with a Team column, or a simple per-player sheet) ---------- */
+    function parseExport(rows) {
+      const num = (r, ...keys) => { for (const k of keys) { const v = r[k]; if (v !== undefined && v !== '') return Number(String(v).replace('%', '')) || 0; } return 0; };
+      const out = {};
+      const byTeam = {};
+      rows.forEach(r => { const t = (r['Team'] || '').trim(); if (t) (byTeam[t] = byTeam[t] || []).push(r); });
+      for (const [t, tr] of Object.entries(byTeam)) {
+        const teamRow = tr.find(r => !r['Player']);
+        const totals = teamRow ? {
+          games: num(teamRow, 'Games Played'), mins: num(teamRow, 'Minutes Played'),
+          won: num(teamRow, 'Games Won'), tied: num(teamRow, 'Games Tied'), lost: num(teamRow, 'Games Lost'),
+          gf: num(teamRow, 'Goals'), ga: num(teamRow, 'Goals Against'), shotsAgainst: num(teamRow, 'Shots Against'),
+          saves: num(teamRow, 'Saves'), cleanSheets: num(teamRow, 'Clean Sheets'),
+          toA: num(teamRow, 'Turnover Attacking 3rd'), toM: num(teamRow, 'Turnover Middle 3rd'), toD: num(teamRow, 'Turnover Defending 3rd')
+        } : {};
+        const names = [...new Set(tr.filter(r => r['Player']).map(r => r['Player']))];
+        const players = [];
+        names.forEach(name => {
+          const pr = tr.filter(r => r['Player'] === name);
+          const tot = pr.find(r => !r['Position']) || pr[0];
+          const pos = pr.filter(r => r['Position'] && r['Position'] !== 'Sub' && num(r, 'Minutes Played') > 0)
+            .sort((a, b) => num(b, 'Minutes Played') - num(a, 'Minutes Played'));
+          if (!pos.length && !pr.some(r => r['Position'] === 'Sub')) return; // registered but never in a squad
+          players.push({
+            name, roles: pos.map(r => r['Position']),
+            gp: num(tot, 'Games Played') || Math.max(0, ...pr.map(r => num(r, 'Games Played'))),
+            mins: num(tot, 'Minutes Played'), goals: num(tot, 'Goals'), assists: num(tot, 'Assists'),
+            shots: num(tot, 'Shots'), sot: num(tot, 'Shots On Target'), corners: num(tot, 'Corner Kicks'),
+            crosses: num(tot, 'Crosses'), turnovers: num(tot, 'Turnovers'), fouls: num(tot, 'Fouls'),
+            saves: num(tot, 'Saves'), keyPasses: num(tot, 'Key Passes'), offsides: num(tot, 'Offsides')
+          });
+        });
+        out[t] = { totals, players };
+      }
+      return out;
+    }
+
+    $('excelInput').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const isCsv = /\.csv$/i.test(file.name);
+          const wb = isCsv
+            ? XLSX.read(new TextDecoder('utf-8').decode(evt.target.result).replace(/^\uFEFF/, ''), { type: 'string' })
+            : XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+          if (!rows.length) return showToast('That file has no rows.');
+          if ('Team' in rows[0]) {
+            const parsed = parseExport(rows);
+            let matched = 0;
+            TEAMS.forEach(t => {
+              const key = Object.keys(parsed).find(k => k.toLowerCase() === t.exportName.toLowerCase());
+              if (key) { DATA[t.exportName] = parsed[key]; matched++; }
+            });
+            if (!matched) return showToast('No matching team names found in that export.');
+            renderTeamSwitch();
+            selectTeam(team.id);
+            showToast(`Updated ${plural(matched, 'team')} from ${file.name}`);
+          } else {
+            showToast('Expected the stats export with a "Team" column.');
+          }
+        } catch (err) {
+          showToast('Could not read that file. Check the format.');
+        }
+        e.target.value = '';
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    /* ---------- Share ---------- */
+    function buildSummary() {
+      const shots = sum('shots'), sot = sum('sot');
+      const scorers = players.filter(p => p.goals > 0).sort((a, b) => b.goals - a.goals)
+        .map(p => `${p.name}${p.goals > 1 ? ' (' + p.goals + ')' : ''}`).join(', ');
+      const head = isSeason()
+        ? `${team.name} ${SEASON}: ${totals.won}W ${totals.tied}D ${totals.lost}L · Goals ${totals.gf}-${totals.ga}`
+        : `${team.name} ${totals.gf}-${totals.ga} ${team.opponent || 'Opponent'}${team.date ? ' (' + formatDate(team.date) + ')' : ''}`;
+      return [head, `${shots} shots, ${sot} on target (${pct(sot, shots)}%)`, scorers ? `Goals: ${scorers}` : '',
+        location.href.startsWith('http') ? location.href.split('#')[0] + '#' + team.id : ''].filter(Boolean).join('\n');
+    }
+    async function shareReport() {
+      const text = buildSummary();
+      if (navigator.share) {
+        try { await navigator.share({ title: `${team.name} Match Hub`, text }); return; } catch (e) { if (e.name === 'AbortError') return; }
+      }
+      try { await navigator.clipboard.writeText(text); }
+      catch (e) { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+      showToast('Summary copied to clipboard');
+    }
+
+    function showToast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.replace('opacity-0', 'opacity-100');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
+    }
+
+    function renderAll() {
+      renderTeamSwitch();
+      renderBanner();
+      renderLeaders();
+      renderRoster();
+      renderTakeaways();
+      switchTab(activeTab);
+    }
+
+    window.addEventListener('hashchange', () => selectTeam(location.hash.slice(1), { keepHash: true }));
+    window.addEventListener('DOMContentLoaded', () => {
+      let start = location.hash.slice(1);
+      try {
+        if (!TEAMS.some(t => t.id === start)) start = localStorage.getItem('matchhub_team') || 'ga';
+        const tab = localStorage.getItem('matchhub_tab'); if (tab && $(tab)) activeTab = tab;
+      } catch (e) { start = start || 'ga'; }
+      selectTeam(start);
+    });
+  </script>
+</body>
+</html>
