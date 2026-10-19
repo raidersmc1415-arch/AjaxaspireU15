@@ -59,6 +59,7 @@
  .card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 26px; margin-bottom: 20px; }
  .tag { display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; text-transform: uppercase; }
  .tag-teal { background: rgba(58,191,184,0.1); color: var(--teal); border: 1px solid rgba(58,191,184,0.25); }
+ .tag-gold { background: rgba(200,169,81,0.12); color: var(--gold); border: 1px solid rgba(200,169,81,0.3); }
 
  /* FIELD */
  .field { background: linear-gradient(180deg, #0c3d1c 0%, #082e13 100%); border: 2px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 20px; position: relative; min-height: 420px; display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 18px; }
@@ -85,11 +86,6 @@
  .gloss-def { font-size:13px; color:var(--muted); line-height:1.6; }
  .gloss-link { display:inline-block; margin-top:8px; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--green-lt); border:1px solid rgba(42,122,75,0.3); padding:2px 8px; border-radius:2px; cursor:pointer; }
  .gloss-link:hover { background:rgba(42,122,75,0.1); }
-
- /* STAT BOXES */
- .stat-box { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:16px; text-align:center; }
- .stat-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
- .stat-val { font-family:'Bebas Neue',cursive; font-size:40px; color:var(--teal); line-height:1; }
 
  /* LEADERBOARD ROWS */
  .lb-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
@@ -1059,8 +1055,8 @@
         <div class="phrase-card" onclick="openPhrase('One-Two!','Quick give-and-go: pass to a teammate and immediately run forward to receive the return pass.')">
           <div class="phrase-word">One-Two!</div><div class="phrase-desc">Give-and-go — pass and move now</div>
         </div>
-        <div class="phrase-card" onclick="openPhrase('Leave!','Encouraging a teammate who is marked to let the ball roll pass them to a teammate behind them unmarked.')">
-          <div class="phrase-word">Leave!</div><div class="phrase-desc">The ball rolls past one teammate to a teammate arriving in the box unmarked for a one touch finish on goall</div>
+        <div class="phrase-card" onclick="openPhrase('Leave!','Encouraging a teammate who is marked to let the ball roll past them to a teammate behind them unmarked.')">
+          <div class="phrase-word">Leave!</div><div class="phrase-desc">The ball rolls past one teammate to a teammate arriving in the box unmarked for a one-touch finish on goal</div>
         </div>
       </div>
     </div>
@@ -1538,26 +1534,34 @@
         <div class="section-desc">Important resources and club guidelines for families. Click cards to view documents.</div>
       </div>
       <div class="phrase-grid">
-        <div class="phrase-card" onclick="window.open('https://girlsacademyleague.com/aspire/','_blank')">
+        <div class="phrase-card" onclick="window.open('https://girlsacademyleague.com/aspire/','_blank','noopener')">
           <div class="phrase-word" style="color:var(--green-lt)">GA & Aspire Overview</div>
           <div class="phrase-desc">Review the framework, mission, and player pathway.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
-        <div class="phrase-card" onclick="window.open('https://drive.google.com/file/d/1ymfeTMy5BDaXx88bNSEOjrIYLcfxc690/view?usp=sharing','_blank')">
+        <div class="phrase-card" onclick="window.open('https://drive.google.com/file/d/1ymfeTMy5BDaXx88bNSEOjrIYLcfxc690/view?usp=sharing','_blank','noopener')">
           <div class="phrase-word" style="color:var(--green-lt)">AJAX Parent Policy and Concussions</div>
           <div class="phrase-desc">Read our expectations for sideline behavior.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
-        <div class="phrase-card" onclick="window.open('https://www.ussoccer.com/rap','_blank')">
+        <div class="phrase-card" onclick="window.open('https://www.ussoccer.com/rap','_blank','noopener')">
           <div class="phrase-word" style="color:var(--green-lt)">Referee Abuse Program</div>
           <div class="phrase-desc">Zero tolerance policy guidelines to protect officials.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
-        <div class="phrase-card" onclick="window.open('https://cifstate.org/governance/constitution/index','_blank')">
+        <div class="phrase-card" onclick="window.open('https://cifstate.org/governance/constitution/index','_blank','noopener')">
           <div class="phrase-word" style="color:var(--green-lt)">CIF Sports Policy</div>
           <div class="phrase-desc">High school soccer overlap and participation guidelines.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
+      </div>
+
+      <!-- U.S. SOCCER herLENS — FEMALE ATHLETE HEALTH & MATURATION -->
+      <div class="card" style="margin-top: 20px; border-left: 4px solid var(--teal); background: linear-gradient(135deg, rgba(58,191,184,0.08), rgba(23,37,53,0.95));">
+        <div style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 6px;">Athlete Wellness &amp; Development</div>
+        <h3 style="font-family: 'Bebas Neue', cursive; font-size: 28px; color: var(--white); margin-bottom: 10px;">Female Athlete Health &amp; Maturation (U.S. Soccer herLENS)</h3>
+        <p style="color: var(--text); font-size: 14px; line-height: 1.7; margin-bottom: 18px;">A comprehensive guide from U.S. Soccer on navigating the physical, hormonal, and emotional shifts of puberty. Parents, please review this to better understand post-growth-spurt 'coordination lag' and how to best support your athlete's holistic recovery, sleep, and confidence at home.</p>
+        <a href="https://www.ussoccer.com/herlens/puberty/what-is-puberty" target="_blank" rel="noopener noreferrer" class="btn" style="width: auto; background: var(--teal); color: var(--navy); text-decoration: none; font-family: 'Bebas Neue', cursive; font-size: 16px; letter-spacing: 1.5px; padding: 12px 24px;">Explore U.S. Soccer herLENS Guide ↗</a>
       </div>
     </div>
 
@@ -1622,6 +1626,14 @@
         <div class="section-desc">Secure access to your personal development plan — players only</div>
       </div>
 
+      <!-- GA SHESCORES HEALTH & WELLNESS (Main Player Portal Landing) -->
+      <div class="card" style="max-width: 680px; margin: 0 auto 28px; border-left: 4px solid var(--gold); background: linear-gradient(135deg, rgba(200,169,81,0.10), rgba(23,37,53,0.95));">
+        <div style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 6px;">Girls Academy SheScores · Female Health, Mental Health &amp; Body Positivity</div>
+        <h3 style="font-family: 'Bebas Neue', cursive; font-size: 28px; color: var(--white); margin-bottom: 10px;">GA SheScores: Own Your Wellness</h3>
+        <p style="color: var(--text); font-size: 14px; line-height: 1.7; margin-bottom: 16px;">At the elite U15 level, understanding your body is a performance advantage. Use this U.S. Soccer herLENS guide to learn about tracking your cycle, managing growth spurts, and taking care of your mental health. Health first, performance follows.</p>
+        <a href="https://www.ussoccer.com/herlens/puberty/what-is-puberty" target="_blank" rel="noopener noreferrer" class="btn" style="width: auto; background: var(--teal); color: var(--navy); text-decoration: none; font-family: 'Bebas Neue', cursive; font-size: 16px; letter-spacing: 1.5px; padding: 11px 22px;">Open U.S. Soccer herLENS Guide ↗</a>
+      </div>
+
       <div id="portal-login" class="portal-gate">
         <span class="portal-icon">🔐</span>
         <h2>Player Login</h2>
@@ -1672,6 +1684,15 @@
           <div class="stat-box"><div class="stat-label">Assists</div><div class="stat-val" id="stat-ast">0</div></div>
           <div class="stat-box"><div class="stat-label">Key Passes</div><div class="stat-val" id="stat-kp">0</div></div>
           <div class="stat-box"><div class="stat-label">Def Duels</div><div class="stat-val" id="stat-duels">0</div></div>
+        </div>
+
+        <!-- GA SHESCORES RESOURCE LINK INSIDE EACH PLAYER'S IDP PORTAL -->
+        <div style="background:linear-gradient(135deg, rgba(58,191,184,0.10), rgba(13,27,42,0.85)); border:1px solid rgba(58,191,184,0.3); border-left:4px solid var(--teal); border-radius:6px; padding:18px 22px; margin-top:24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:220px;">
+            <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:4px;">GA SheScores · Own Your Wellness</div>
+            <div style="font-size:13px; color:var(--text); line-height:1.6;">Understanding your body is a performance advantage. Track your cycle, manage growth spurts, and prioritize mental health.</div>
+          </div>
+          <a href="https://www.ussoccer.com/herlens/puberty/what-is-puberty" target="_blank" rel="noopener noreferrer" class="btn" style="width:auto; background:var(--teal); color:var(--navy); text-decoration:none; font-family:'Bebas Neue',cursive; font-size:15px; letter-spacing:1.5px; padding:10px 20px; white-space:nowrap;">herLENS Guide ↗</a>
         </div>
 
         <!-- ═══════════════════════════════════════════════ -->
@@ -2064,16 +2085,16 @@
 
     // Maps each IDP skill to the hub content that helps develop it
     const SKILL_RESOURCES = {
-      T_Dribbling: { label: 'Watch 1v1 dribbling in Film Room', tab: 'film' },
-      T_Passing:   { label: 'See our build-out patterns', tab: 'tactics' },
-      T_Movement:  { label: 'Review off-ball movement in Positions', tab: 'pos' },
-      T_Duels:     { label: 'Study winning duels in Film Room', tab: 'film' },
-      T_Touch:     { label: 'First-touch work in Film Room', tab: 'film' },
-      Tac_Support: { label: 'See support angles on the Tactics Board', tab: 'tactics' },
-      Tac_RestDef: { label: 'Learn rest defense in the Glossary', tab: 'glossary' },
-      Tac_Press:   { label: 'See our press on the Tactics Board', tab: 'tactics' },
-      Tac_Attack:  { label: 'Review attacking principles in Film Room', tab: 'film' },
-      Tac_Defend:  { label: 'Defensive principles in the Glossary', tab: 'glossary' }
+      t_dribbling: { label: 'Watch 1v1 dribbling in Film Room', tab: 'film' },
+      t_passing:   { label: 'See our build-out patterns', tab: 'tactics' },
+      t_movement:  { label: 'Review off-ball movement in Positions', tab: 'pos' },
+      t_duels:     { label: 'Study winning duels in Film Room', tab: 'film' },
+      t_touch:     { label: 'First-touch work in Film Room', tab: 'film' },
+      tac_support: { label: 'See support angles on the Tactics Board', tab: 'tactics' },
+      tac_restdef: { label: 'Learn rest defense in the Glossary', tab: 'glossary' },
+      tac_press:   { label: 'See our press on the Tactics Board', tab: 'tactics' },
+      tac_attack:  { label: 'Review attacking principles in Film Room', tab: 'film' },
+      tac_defend:  { label: 'Defensive principles in the Glossary', tab: 'glossary' }
     };
 
     function goToResource(tabId) {
@@ -2571,6 +2592,7 @@
 
     // GOOGLE API LOGIC
     const API_URL = "https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec";
+    let CURRENT_PLAYER_NAME = '';
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
@@ -2586,10 +2608,11 @@
         const data = await response.json();
 
         if (data.success) {
+          CURRENT_PLAYER_NAME = data.name;
           document.getElementById('portal-login').style.display = 'none';
           document.getElementById('portal-content').style.display = 'block';
           
-          document.getElementById('portal-welcome').innerText = `Welcome, ${data.name.split(' ')}!`;
+          document.getElementById('portal-welcome').innerText = `Welcome, ${data.name.split(' ')[0]}!`;
           document.getElementById('player-avatar').innerText = data.name.charAt(0).toUpperCase();
           document.getElementById('display-notes').innerText = `"${data.notes || 'Keep working hard. See you at training.'}"`;
           
@@ -2611,6 +2634,7 @@
     }
 
     function logoutPortal() {
+      CURRENT_PLAYER_NAME = '';
       document.getElementById('portal-content').style.display = 'none';
       document.getElementById('portal-login').style.display = 'block';
       document.getElementById('player-name').value = '';
@@ -2729,7 +2753,7 @@
     }
 
     async function submitIDP() {
-      const name = document.getElementById('portal-welcome').innerText.replace('Welcome, ','').replace('!','').trim();
+      const name = CURRENT_PLAYER_NAME || document.getElementById('portal-welcome').innerText.replace('Welcome, ','').replace('!','').replace(/,/g,' ').trim();
       const goalShort = document.getElementById('goal-short').value.trim();
       const goalLong  = document.getElementById('goal-long').value.trim();
       const oneThing  = document.getElementById('goal-one-thing').value.trim();
@@ -2885,7 +2909,7 @@
     async function submitNetlifyReflection() {
       const text = document.getElementById('reflection-text').value.trim();
       const welcomeText = document.getElementById('portal-welcome').innerText;
-      const name = welcomeText.replace("Welcome, ", "").replace("!", ""); 
+      const name = CURRENT_PLAYER_NAME || welcomeText.replace("Welcome, ", "").replace("!", "").replace(/,/g, " ");
       if(!text) { alert("Please type a reflection first."); return; }
 
       try {
