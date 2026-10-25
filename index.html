@@ -383,6 +383,11 @@
     <div class="badge">Girls Academy Aspire · U15 · Season 26/27</div>
     <h1><span class="green">AJAX</span><br><span class="teal">ASPIRE</span><br>U15</h1>
     <p style="font-size: 14px; color: var(--muted); margin-top: 14px;">Team Hub · Game Model · Player Development &nbsp;|&nbsp; Coach Shawn Craig</p>
+    <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button type="button" onclick="openCoachAuthModal()" style="display:inline-flex; align-items:center; gap:6px; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--teal); background:rgba(58,191,184,0.12); border:1px solid rgba(58,191,184,0.3); padding:6px 14px; border-radius:20px; cursor:pointer;" title="Coach Match Hub">
+        🔒 Coach Match Hub →
+      </button>
+    </div>
   </div>
 
   <nav class="nav-tabs" role="navigation" aria-label="Main navigation">
@@ -400,6 +405,10 @@
         <button class="more-item" onclick="switchTab('glossary', this)" role="menuitem">📖 Glossary</button>
         <button class="more-item" onclick="switchTab('comm', this)" role="menuitem">Communication</button>
         <button class="more-item" onclick="switchTab('parents', this)" role="menuitem">Parent Hub</button>
+        <button type="button" onclick="openCoachAuthModal()" class="more-item" role="menuitem" style="color:var(--teal); font-weight:600; background:transparent; border:none; text-align:left; width:100%; cursor:pointer; display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.08); margin-top:4px; padding-top:8px;">
+          <span>⚽ Coach Match Hub</span>
+          <span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--teal);">🔒</span>
+        </button>
       </div>
     </div>
   </nav>
@@ -1095,7 +1104,7 @@
       <div id="veo-moments-container"></div>
 
       <div style="background: rgba(200,169,81,0.08); border: 1px solid rgba(200,169,81,0.25); padding: 14px 18px; border-radius: 4px; color: var(--gold); margin-bottom: 20px; font-size: 13px; line-height: 1.6;">
-        <strong>📌 Coach Shawn — Adding new videos:</strong> Upload to your <a href="www.youtube.com/playlist?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw" target="_blank" style="color:var(--teal);">YouTube playlist ↗</a> and it appears here automatically. No file updates or Netlify re-uploads needed. Update the title, date, and focus points below to match your latest clip.
+        <strong>📌 Coach Shawn — Adding new videos:</strong> Upload to your <a href="https://www.youtube.com/playlist?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw" target="_blank" style="color:var(--teal);">YouTube playlist ↗</a> and it appears here automatically. No file updates or Netlify re-uploads needed. Update the title, date, and focus points below to match your latest clip.
       </div>
 
       <!-- VIDEO CLIP TITLE -->
@@ -1110,11 +1119,11 @@
       <!-- ============================================================= -->
       <!-- FILM ROOM: playlist is live — just add videos to the         -->
       <!-- YouTube playlist and they appear here automatically.         -->
-      <!-- Playlist: www.youtube.com/playlist?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw -->
+      <!-- Playlist: https://www.youtube.com/playlist?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw -->
       <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; background: var(--navy-mid);">
         <div class="yt-embed" id="film-iframe" role="button" tabindex="0"
              aria-label="Play the team film playlist"
-             data-embed="www.youtube.com/embed/videoseries?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw&rel=0&modestbranding=1">
+             data-embed="https://www.youtube.com/embed/videoseries?list=PLyVHaRH7I4mP2zizYV4iEB0gc4AJudLiw&rel=0&modestbranding=1">
           <span class="yt-embed-play" aria-hidden="true">&#9654;</span>
           <span class="yt-embed-label">Team Film Playlist</span>
           <span class="yt-embed-hint">Tap to play</span>
@@ -1173,7 +1182,7 @@
       <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 13px 18px; border-radius: 4px; color: var(--muted); margin-top: 20px; font-size: 13px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
         <span>🗄️</span>
         <span>Every match we've recorded, uploaded within 48 hours.</span>
-        <a href="app.veo.co/clubs/ajax-50ad2f70/teams/ajax-2012g/recordings/" target="_blank" style="color: var(--teal); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; text-decoration:none; border:1px solid rgba(58,191,184,0.3); padding:4px 12px; border-radius:2px;">Full Film Archive ↗</a>
+        <a href="https://app.veo.co/clubs/ajax-50ad2f70/teams/ajax-2012g/recordings/" target="_blank" style="color: var(--teal); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; text-decoration:none; border:1px solid rgba(58,191,184,0.3); padding:4px 12px; border-radius:2px;">Full Film Archive ↗</a>
       </div>
 
       </div><!-- end film-content -->
@@ -1329,7 +1338,7 @@
         <div id="ch-video-wrap" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:var(--navy); display:none;">
           <div class="yt-embed" id="ch-video" role="button" tabindex="0"
                aria-label="Play the challenge video"
-               data-embed="www.youtube.com/embed/nHxClhfQjlM?rel=0&modestbranding=1">
+               data-embed="https://www.youtube.com/embed/nHxClhfQjlM?rel=0&modestbranding=1">
             <span class="yt-embed-play" aria-hidden="true">&#9654;</span>
             <span class="yt-embed-label">Challenge Video</span>
             <span class="yt-embed-hint">Tap to play</span>
@@ -1534,22 +1543,22 @@
         <div class="section-desc">Important resources and club guidelines for families. Click cards to view documents.</div>
       </div>
       <div class="phrase-grid">
-        <div class="phrase-card" onclick="window.open('girlsacademyleague.com/aspire/','_blank','noopener')">
+        <div class="phrase-card" onclick="window.open('https://girlsacademyleague.com/aspire/','_blank','noopener')">
           <div class="phrase-word" style="color:var(--green-lt)">GA & Aspire Overview</div>
           <div class="phrase-desc">Review the framework, mission, and player pathway.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
-        <div class="phrase-card" onclick="window.open('drive.google.com/file/d/1ymfeTMy5BDaXx88bNSEOjrIYLcfxc690/view?usp=sharing','_blank','noopener')">
+        <div class="phrase-card" onclick="window.open('https://drive.google.com/file/d/1ymfeTMy5BDaXx88bNSEOjrIYLcfxc690/view?usp=sharing','_blank','noopener')">
           <div class="phrase-word" style="color:var(--green-lt)">AJAX Parent Policy and Concussions</div>
           <div class="phrase-desc">Read our expectations for sideline behavior.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
-        <div class="phrase-card" onclick="window.open('www.ussoccer.com/rap','_blank','noopener')">
+        <div class="phrase-card" onclick="window.open('https://www.ussoccer.com/rap','_blank','noopener')">
           <div class="phrase-word" style="color:var(--green-lt)">Referee Abuse Program</div>
           <div class="phrase-desc">Zero tolerance policy guidelines to protect officials.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
         </div>
-        <div class="phrase-card" onclick="window.open('cifstate.org/governance/constitution/index','_blank','noopener')">
+        <div class="phrase-card" onclick="window.open('https://cifstate.org/governance/constitution/index','_blank','noopener')">
           <div class="phrase-word" style="color:var(--green-lt)">CIF Sports Policy</div>
           <div class="phrase-desc">High school soccer overlap and participation guidelines.</div>
           <div style="margin-top:10px; font-size:10px; color:var(--teal);">🔗 Click to open resource</div>
@@ -1561,7 +1570,7 @@
         <div style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 6px;">Athlete Wellness &amp; Development</div>
         <h3 style="font-family: 'Bebas Neue', cursive; font-size: 28px; color: var(--white); margin-bottom: 10px;">Female Athlete Health &amp; Maturation (U.S. Soccer herLENS)</h3>
         <p style="color: var(--text); font-size: 14px; line-height: 1.7; margin-bottom: 18px;">A comprehensive guide from U.S. Soccer on navigating the physical, hormonal, and emotional shifts of puberty. Parents, please review this to better understand post-growth-spurt 'coordination lag' and how to best support your athlete's holistic recovery, sleep, and confidence at home.</p>
-        <a href="https://www.ussoccer.com/herlens" target="_blank" rel="noopener noreferrer" class="btn" style="width: auto; background: var(--teal); color: var(--navy); text-decoration: none; font-family: 'Bebas Neue', cursive; font-size: 16px; letter-spacing: 1.5px; padding: 12px 24px;">Explore U.S. Soccer herLENS Guide ↗</a>
+        <a href="https://www.ussoccer.com/herlens/puberty/what-is-puberty" target="_blank" rel="noopener noreferrer" class="btn" style="width: auto; background: var(--teal); color: var(--navy); text-decoration: none; font-family: 'Bebas Neue', cursive; font-size: 16px; letter-spacing: 1.5px; padding: 12px 24px;">Explore U.S. Soccer herLENS Guide ↗</a>
       </div>
     </div>
 
@@ -1572,10 +1581,15 @@
     <!-- TEAM STATS                                          -->
     <!-- ═══════════════════════════════════════════════════ -->
     <div id="teamstats" class="section">
-      <div class="section-header">
-        <div class="section-label">Season 26/27</div>
-        <div class="section-title">Team Stats</div>
-        <div class="section-desc">Season numbers across the squad — updated after each match sync.</div>
+      <div class="section-header" style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div>
+          <div class="section-label">Season 26/27</div>
+          <div class="section-title">Team Stats</div>
+          <div class="section-desc">Season numbers across the squad — updated after each match sync.</div>
+        </div>
+        <button type="button" onclick="openCoachAuthModal()" style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--teal); background:rgba(58,191,184,0.12); border:1px solid rgba(58,191,184,0.35); padding:8px 14px; border-radius:4px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;" title="Coach Match Hub">
+          🔒 Coach Match Hub →
+        </button>
       </div>
 
       <!-- TEAM TOTALS -->
@@ -1631,7 +1645,7 @@
         <div style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 6px;">Girls Academy SheScores · Female Health, Mental Health &amp; Body Positivity</div>
         <h3 style="font-family: 'Bebas Neue', cursive; font-size: 28px; color: var(--white); margin-bottom: 10px;">GA SheScores: Own Your Wellness</h3>
         <p style="color: var(--text); font-size: 14px; line-height: 1.7; margin-bottom: 16px;">At the elite U15 level, understanding your body is a performance advantage. Use this U.S. Soccer herLENS guide to learn about tracking your cycle, managing growth spurts, and taking care of your mental health. Health first, performance follows.</p>
-        <a href="https://www.ussoccer.com/herlens" target="_blank" rel="noopener noreferrer" class="btn" style="width: auto; background: var(--teal); color: var(--navy); text-decoration: none; font-family: 'Bebas Neue', cursive; font-size: 16px; letter-spacing: 1.5px; padding: 11px 22px;">Open U.S. Soccer herLENS Guide ↗</a>
+        <a href="https://www.ussoccer.com/herlens/puberty/what-is-puberty" target="_blank" rel="noopener noreferrer" class="btn" style="width: auto; background: var(--teal); color: var(--navy); text-decoration: none; font-family: 'Bebas Neue', cursive; font-size: 16px; letter-spacing: 1.5px; padding: 11px 22px;">Open U.S. Soccer herLENS Guide ↗</a>
       </div>
 
       <div id="portal-login" class="portal-gate">
@@ -1692,7 +1706,7 @@
             <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:4px;">GA SheScores · Own Your Wellness</div>
             <div style="font-size:13px; color:var(--text); line-height:1.6;">Understanding your body is a performance advantage. Track your cycle, manage growth spurts, and prioritize mental health.</div>
           </div>
-          <a href="https://www.ussoccer.com/herlens" target="_blank" rel="noopener noreferrer" class="btn" style="width:auto; background:var(--teal); color:var(--navy); text-decoration:none; font-family:'Bebas Neue',cursive; font-size:15px; letter-spacing:1.5px; padding:10px 20px; white-space:nowrap;">herLENS Guide ↗</a>
+          <a href="https://www.ussoccer.com/herlens/puberty/what-is-puberty" target="_blank" rel="noopener noreferrer" class="btn" style="width:auto; background:var(--teal); color:var(--navy); text-decoration:none; font-family:'Bebas Neue',cursive; font-size:15px; letter-spacing:1.5px; padding:10px 20px; white-space:nowrap;">herLENS Guide ↗</a>
         </div>
 
         <!-- ═══════════════════════════════════════════════ -->
@@ -2615,6 +2629,25 @@
           document.getElementById('portal-welcome').innerText = `Welcome, ${data.name.split(' ')[0]}!`;
           document.getElementById('player-avatar').innerText = data.name.charAt(0).toUpperCase();
           document.getElementById('display-notes').innerText = `"${data.notes || 'Keep working hard. See you at training.'}"`;
+
+          // If Coach logs in, remember Coach PIN and show direct Match Hub launch banner
+          if (data.name.toLowerCase().includes('coach')) {
+            try { localStorage.setItem('ajax_coach_pin', pin); } catch(e) {}
+            let coachHubCard = document.getElementById('coach-matchhub-banner');
+            if (!coachHubCard) {
+              coachHubCard = document.createElement('a');
+              coachHubCard.id = 'coach-matchhub-banner';
+              coachHubCard.href = 'match-hub.html#aspire';
+              coachHubCard.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:14px; text-decoration:none; margin-top:16px; padding:16px 20px; background:linear-gradient(135deg, rgba(58,191,184,0.16), rgba(13,27,42,0.9)); border:1px solid var(--teal); border-left:4px solid var(--teal); border-radius:8px;';
+              coachHubCard.innerHTML = '<div><div style="font-family:\'DM Mono\',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal);">📈 Coach Intelligence · Unlocked</div><div style="font-family:\'Bebas Neue\',cursive; font-size:24px; color:var(--white); margin-top:2px;">Open AJAX U15 Match Hub (GA &amp; Aspire)</div><div style="font-size:12px; color:var(--muted);">Live CSV stats, positional splits, turnovers by third &amp; shared coaching notes</div></div><div style="font-family:\'Bebas Neue\',cursive; font-size:28px; color:var(--teal);">→</div>';
+              document.querySelector('#portal-content .player-header').insertAdjacentElement('afterend', coachHubCard);
+            } else {
+              coachHubCard.style.display = 'flex';
+            }
+          } else {
+            const coachHubCard = document.getElementById('coach-matchhub-banner');
+            if (coachHubCard) coachHubCard.style.display = 'none';
+          }
           
           document.getElementById('stat-gp').innerText = data.stats.gamesPlayed || 0;
           document.getElementById('stat-mins').innerText = data.stats.minutes || 0;
@@ -3759,6 +3792,56 @@
     // Load leaderboard when Competition Hub tab is opened
     // (handled inside switchTab below)
 
+    // ═══════════════════════════════════════════════
+    // COACH MATCH HUB ACCESS GATE
+    // ═══════════════════════════════════════════════
+    const VALID_COACH_PINS = ["4111", "2627", "1415"];
+
+    function openCoachAuthModal() {
+      let savedPin = '';
+      try { savedPin = localStorage.getItem('ajax_coach_pin') || ''; } catch(e) {}
+      if (VALID_COACH_PINS.includes(savedPin)) {
+        window.location.href = 'match-hub.html';
+        return;
+      }
+      const modal = document.getElementById('coach-auth-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        const err = document.getElementById('site-coach-pin-err');
+        if (err) err.style.display = 'none';
+        const inp = document.getElementById('site-coach-pin');
+        if (inp) {
+          inp.value = '';
+          setTimeout(() => inp.focus(), 100);
+        }
+      }
+    }
+
+    function closeCoachAuthModal() {
+      const modal = document.getElementById('coach-auth-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function verifyCoachPinOnSite() {
+      const inp = document.getElementById('site-coach-pin');
+      const pin = (inp ? inp.value : '').trim();
+      const err = document.getElementById('site-coach-pin-err');
+      if (VALID_COACH_PINS.includes(pin)) {
+        try { localStorage.setItem('ajax_coach_pin', pin); } catch(e) {}
+        if (err) err.style.display = 'none';
+        window.location.href = 'match-hub.html';
+      } else {
+        if (err) {
+          err.style.display = 'block';
+          err.textContent = 'Incorrect Coach PIN. Access denied.';
+        }
+        if (inp) {
+          inp.value = '';
+          inp.focus();
+        }
+      }
+    }
+
     // Init with placeholder
     document.addEventListener('DOMContentLoaded', () => {
       // Only the coach message belongs on load — it renders into the Team Hub,
@@ -3768,5 +3851,28 @@
     });
 
   </script>
+
+  <!-- COACH PIN AUTH MODAL -->
+  <div id="coach-auth-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(13,27,42,0.88); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px;" onclick="if(event.target===this) closeCoachAuthModal()">
+    <div style="background:var(--card); border:1px solid var(--border); border-top:3px solid var(--teal); border-radius:14px; max-width:360px; width:100%; padding:26px 24px; box-shadow:0 20px 40px rgba(0,0,0,0.5); text-align:center; position:relative;">
+      <button type="button" onclick="closeCoachAuthModal()" aria-label="Close" style="position:absolute; top:12px; right:14px; background:transparent; border:none; color:var(--muted); font-size:16px; cursor:pointer;">✕</button>
+      <div style="width:48px; height:48px; margin:0 auto 12px; border-radius:12px; background:rgba(58,191,184,0.15); border:1px solid rgba(58,191,184,0.3); display:flex; align-items:center; justify-content:center; font-size:22px;">🔒</div>
+      <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:4px;">Coach Access Required</div>
+      <div style="font-family:'Bebas Neue',cursive; font-size:26px; color:var(--white); letter-spacing:1px; margin-bottom:6px;">Coach Match Hub</div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.5;">Enter your Coach PIN passcode to unlock match intelligence, report cards &amp; CSV tools.</p>
+      <form onsubmit="event.preventDefault(); verifyCoachPinOnSite();" style="display:flex; flex-direction:column; gap:12px;">
+        <input type="password" id="site-coach-pin" inputmode="numeric" placeholder="Enter Coach PIN" autocomplete="off"
+          style="background:var(--navy); border:1px solid var(--border); border-radius:8px; padding:12px; font-size:18px; text-align:center; color:var(--white); letter-spacing:4px; outline:none; transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        <div id="site-coach-pin-err" style="display:none; color:#f87171; font-size:12px; font-weight:500;">Incorrect Coach PIN. Access denied.</div>
+        <button type="submit" class="btn" style="background:var(--teal); color:var(--navy); font-weight:700; width:100%; padding:12px; font-size:15px; border:none; cursor:pointer; border-radius:8px; font-family:'Bebas Neue',cursive; letter-spacing:1px;">
+          Unlock &amp; Open Match Hub →
+        </button>
+        <button type="button" onclick="closeCoachAuthModal()" style="background:transparent; border:none; color:var(--muted); font-size:12px; cursor:pointer; margin-top:2px;">
+          Cancel
+        </button>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
