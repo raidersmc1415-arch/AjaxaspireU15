@@ -421,7 +421,7 @@
           </table>
         </div>
         <div class="p-2.5 text-[10px] text-slate-400 bg-pitch/40 leading-relaxed text-center">
-          GP = games played (squad) · Min = pitch mins (Bench mins in modal) · TO = turnovers (D3/M3/A3) · Net/80' = Developmental Net Rating per 80 mins ((Glow×1.25 - Grow×1.0 - D3 TO×0.75) / 80')<br>
+          GP = games played (squad) · Min = pitch mins (Bench mins in modal) · TO = turnovers (D3/M3/A3) · Film Index = 0–100 Film Impact Index (80 = Par; 80+ = Net Positive Film Impact)<br>
           <strong class="text-white">Tap any player row</strong> to see their <strong class="accent-text">Positional Breakdown, Turnover Triggers, Glow vs. Grow Habits &amp; Timestamped Film Notes</strong>
         </div>
       </div>
@@ -467,17 +467,17 @@
           </div>
         </div>
 
-        <!-- Player Minutes vs. Turnover Rate & Developmental Net Rating -->
+        <!-- Player Minutes vs. Turnover Rate & Film Impact Index -->
         <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                <span>Player Developmental Net Rating (/80') &amp; Turnover Profile</span>
+                <span>Player Film Impact Index (0–100) &amp; Turnover Profile</span>
               </h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">Formula: <code class="text-brand-400 font-mono">((Glow × 1.25) - (Grow × 1.0) - (D3 TO × 0.75)) / Mins × 80</code>. Rewards progressive actions while accounting for high-touch midfield volume and defending-third risk.</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">Scale: <code class="text-brand-400 font-mono">80 = Par · 80–99 = Positive Net Impact · 70–79 = Solid/Developing · 60–69 = High Build-Out Pressure Focus</code> (Coach raw Net/80' shown in brackets).</p>
             </div>
             <div class="flex flex-wrap items-center gap-1.5 text-[11px]" id="filmMatrixSortBar">
-              <button type="button" onclick="setFilmMatrixSort('netPer80')" id="fms-netPer80" class="px-2.5 py-1 rounded-lg border accent-chip font-semibold">By Net / 80'</button>
+              <button type="button" onclick="setFilmMatrixSort('netPer80')" id="fms-netPer80" class="px-2.5 py-1 rounded-lg border accent-chip font-semibold">By Film Index</button>
               <button type="button" onclick="setFilmMatrixSort('mins')" id="fms-mins" class="px-2.5 py-1 rounded-lg border bg-surface border-border text-slate-300">By Mins</button>
               <button type="button" onclick="setFilmMatrixSort('glowPct')" id="fms-glowPct" class="px-2.5 py-1 rounded-lg border bg-surface border-border text-slate-300">By Glow %</button>
               <button type="button" onclick="setFilmMatrixSort('toPer80')" id="fms-toPer80" class="px-2.5 py-1 rounded-lg border bg-surface border-border text-slate-300">By TO/80'</button>
@@ -490,7 +490,7 @@
                 <tr>
                   <th class="py-2.5 px-3">Player</th>
                   <th class="py-2.5 px-2 text-center">Mins</th>
-                  <th class="py-2.5 px-2 text-center">Net / 80'</th>
+                  <th class="py-2.5 px-2 text-center">Film Index <span class="text-[9px] text-slate-500">(Net/80')</span></th>
                   <th class="py-2.5 px-2 text-center">TOs (D3/M3/A3)</th>
                   <th class="py-2.5 px-2 text-center">TO / 80'</th>
                   <th class="py-2.5 px-2 text-center">Mins / TO</th>
@@ -994,11 +994,21 @@
       // Model 3 Developmental Net Score: (Glow * 1.25) - (Grow * 1.0) - (D3 TO * 0.75)
       p.netPts = Number(((glow * 1.25) - (grow * 1.0) - (toD * 0.75)).toFixed(2));
       p.netPer80 = mins > 0 ? Number((p.netPts * 80 / mins).toFixed(1)) : 0;
+      // Film Impact Index (0-100 scale centered at 80 for parent/player clarity; no negative numbers)
+      p.filmIndex = mins > 0 && (glow + grow) > 0
+        ? Math.max(55, Math.min(99, Math.round(80 + (p.netPer80 * 1.25))))
+        : null;
     }
 
     function fmtNet(val) {
       const n = Number(val) || 0;
       return (n > 0 ? '+' : '') + n.toFixed(1);
+    }
+
+    function fmtFilmIndex(p) {
+      if (!p || !p.mins || !p.filmEventsCount) return '–';
+      const idx = p.filmIndex ?? Math.max(55, Math.min(99, Math.round(80 + ((Number(p.netPer80) || 0) * 1.25))));
+      return `${idx}`;
     }
 
     function sanitizeAndHealData() {
@@ -1259,9 +1269,9 @@
       const bestNet = [...players].filter(p => (p.glow || 0) + (p.grow || 0) >= 8 && p.mins >= 120)
         .sort((a, b) => (b.netPer80 || 0) - (a.netPer80 || 0) || (b.glowPct || 0) - (a.glowPct || 0)).slice(0, 4)
         .map(p => {
-          const n80 = Number(p.netPer80) || 0;
-          const nCls = n80 >= 0 ? 'text-emerald-400' : 'text-amber-300';
-          return `<div onclick="openPlayerModal(${players.indexOf(p)})" class="flex items-center justify-between text-[11px] cursor-pointer hover:text-white"><span class="text-slate-200 truncate"><strong class="text-brand-400">#${p.jersey}</strong> ${esc(shortName(p.name))} <span class="text-slate-500">(${p.mins}')</span></span><span class="font-mono font-semibold ${nCls}">${fmtNet(n80)}/80' <span class="text-slate-400 font-sans text-[10px]">(${p.glow}G/${p.grow}Gr)</span></span></div>`;
+          const fIdx = fmtFilmIndex(p);
+          const nCls = fIdx >= 80 ? 'text-emerald-400' : 'text-amber-300';
+          return `<div onclick="openPlayerModal(${players.indexOf(p)})" class="flex items-center justify-between text-[11px] cursor-pointer hover:text-white"><span class="text-slate-200 truncate"><strong class="text-brand-400">#${p.jersey}</strong> ${esc(shortName(p.name))} <span class="text-slate-500">(${p.mins}')</span></span><span class="font-mono font-semibold ${nCls}">${fIdx}/100 <span class="text-slate-400 font-sans text-[10px]">(${p.glow}G/${p.grow}Gr)</span></span></div>`;
         }).join('');
 
       const lowToRate = [...players].filter(p => p.mins >= 120 && !p.roles.includes('GK'))
@@ -1278,8 +1288,8 @@
         </div>
         <div class="bg-surface p-3 rounded-xl border border-border/80 space-y-1.5">
           <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-between">
-            <span>Top Developmental Net / 80' (120'+)</span>
-            <span class="mono">Net / 80'</span>
+            <span>Top Film Impact Index (120'+)</span>
+            <span class="mono">0–100 Scale</span>
           </div>
           ${bestNet}
         </div>
@@ -1312,7 +1322,8 @@
           const posTop = (p.posBreakdown || []).slice(0, 2).map(r => `${r.pos} (${r.mins}')`).join(', ') || p.roles.slice(0, 2).join(', ');
           const detail = [posTop, season ? `${p.gp} GP · ${p.mins}'` : `${p.mins}'`].filter(Boolean);
           const ga = p.goals && p.assists ? `${p.goals}G + ${p.assists}A` : p.goals ? plural(p.goals, 'Goal') : plural(p.assists, 'Assist');
-          const per80 = p.glow ? `Net ${fmtNet(p.netPer80)}/80' · ${p.glow} Glow / ${p.grow} Grow` : (p.mins >= 30 ? `${((p.goals + p.assists) / p.mins * 80).toFixed(2)} G+A/80'` : `${p.sot}/${p.shots} SOT`);
+          const fIdx = fmtFilmIndex(p);
+          const per80 = p.glow ? `Film Index ${fIdx}/100 · ${p.glow} Glow / ${p.grow} Grow` : (p.mins >= 30 ? `${((p.goals + p.assists) / p.mins * 80).toFixed(2)} G+A/80'` : `${p.sot}/${p.shots} SOT`);
           return `<button type="button" onclick="openPlayerModal(${players.indexOf(p)})" class="w-full text-left flex items-center justify-between p-2.5 rounded-xl bg-surface hover:bg-pitch transition border border-border/60">
               <div class="flex items-center space-x-3 min-w-0">
                 <div class="w-9 h-9 shrink-0 rounded-lg ${leaderCls[i % leaderCls.length]} flex items-center justify-center font-mono font-bold text-xs border">${esc(badge(p))}</div>
@@ -1417,7 +1428,7 @@
         ['turnovers', 'Turnovers']
       ];
       if (hasTeamFilm()) {
-        base.push(['netPer80', 'Net / 80\''], ['toPer80', 'TO / 80\''], ['glow', 'Glow'], ['grow', 'Grow'], ['glowPct', 'Glow %']);
+        base.push(['netPer80', 'Film Index'], ['toPer80', 'TO / 80\''], ['glow', 'Glow'], ['grow', 'Grow'], ['glowPct', 'Glow %']);
       } else {
         base.push(['benchMins', 'Bench Mins']);
       }
@@ -1445,7 +1456,7 @@
       const cols = ['Player', 'Roles (Mins)'].concat(
         season ? ['GP'] : [],
         ['Min (Sub)', isPer80 ? 'G/80' : 'G', isPer80 ? 'A/80' : 'A', isPer80 ? 'KP/80' : 'KP', isPer80 ? 'Sh/80' : 'Shots (SOT)', 'SOT%', 'Cor/Cr', 'TO (D3/M3/A3)'],
-        filmOn ? ['TO/80\'', 'Net / 80\'', 'Glow / Grow'] : [],
+        filmOn ? ['TO/80\'', 'Film Index', 'Glow / Grow'] : [],
         ['Fouls', '+/-']
       );
       $('rosterHead').innerHTML = '<tr>' + cols.map((c, i) => `<th class="py-3 ${i === 0 ? 'px-3 sticky left-0 bg-pitch z-10' : 'px-2' + (i > 1 ? ' text-center' : '')}">${c}</th>`).join('') + '</tr>';
@@ -1488,7 +1499,8 @@
           ? `<span class="text-emerald-400 font-bold">${p.glow}</span> <span class="text-slate-500">/</span> <span class="text-amber-400 font-bold">${p.grow}</span> <span class="text-[10px] ${p.glowPct >= 50 ? 'text-emerald-300' : 'text-slate-400'}">(${p.glowPct}%)</span>`
           : '<span class="text-slate-500">–</span>';
         const n80 = Number(p.netPer80) || 0;
-        const netCls = p.mins === 0 ? 'text-slate-500' : (n80 > 0 ? 'text-emerald-400 font-bold' : n80 < -3.0 ? 'text-rose-400 font-bold' : 'text-amber-300 font-semibold');
+        const fIdx = p.filmIndex ?? Math.max(55, Math.min(99, Math.round(80 + (n80 * 1.25))));
+        const netCls = p.mins === 0 ? 'text-slate-500' : (fIdx >= 80 ? 'text-emerald-400 font-bold' : fIdx < 70 ? 'text-rose-400 font-bold' : 'text-amber-300 font-semibold');
 
         return `<tr onclick="openPlayerModal(${players.indexOf(p)})" class="hover:bg-surface/80 active:bg-surface cursor-pointer transition ${p.mins === 0 ? 'opacity-55' : ''}">
             <td class="py-2.5 px-3 font-semibold text-white sticky left-0 bg-card z-10 border-r border-border/40">
@@ -1510,7 +1522,7 @@
             <td class="py-2.5 px-2 text-center">${p.corners} / ${p.crosses}</td>
             <td class="py-2.5 px-2 text-center">${isPer80 ? fmtRate(p.turnovers, p.mins) : toDetail}</td>
             ${filmOn ? `<td class="py-2.5 px-2 text-center font-mono ${(p.toPer80 || 0) >= 8.5 ? 'text-rose-400 font-bold' : (p.toPer80 || 0) <= 4.0 && p.mins > 0 ? 'text-emerald-400 font-bold' : 'text-slate-300'}">${p.mins > 0 ? (p.toPer80 || 0).toFixed(1) : '–'}</td>` : ''}
-            ${filmOn ? `<td class="py-2.5 px-2 text-center font-mono ${netCls}">${p.mins > 0 ? fmtNet(n80) : '–'}</td>` : ''}
+            ${filmOn ? `<td class="py-2.5 px-2 text-center font-mono ${netCls}" title="Net / 80': ${fmtNet(n80)}">${p.mins > 0 && p.filmEventsCount ? `${fIdx}` : '–'}</td>` : ''}
             ${filmOn ? `<td class="py-2.5 px-2 text-center">${glowGrowHtml}</td>` : ''}
             <td class="py-2.5 px-2 text-center ${p.fouls >= 3 ? 'text-amber-300 font-semibold' : ''}">${p.fouls}</td>
             <td class="py-2.5 px-2 text-center ${gdCls}">${p.mins > 0 ? gdStr : '–'}</td>
@@ -1661,8 +1673,8 @@
         const gPct = p.glowPct || 0;
         const rateCls = p.mins === 0 ? 'text-slate-500' : (p.toPer80 <= 4.0 ? 'text-emerald-400 font-bold' : p.toPer80 >= 8.5 ? 'text-rose-400 font-bold' : 'text-amber-300');
         const n80 = Number(p.netPer80) || 0;
-        const nPts = Number(p.netPts) || 0;
-        const netCls = p.mins === 0 ? 'text-slate-500' : (n80 > 0 ? 'text-emerald-400 font-bold' : n80 < -3.0 ? 'text-rose-400 font-bold' : 'text-amber-300 font-semibold');
+        const fIdx = fmtFilmIndex(p);
+        const netCls = p.mins === 0 ? 'text-slate-500' : (fIdx >= 80 ? 'text-emerald-400 font-bold' : fIdx >= 70 ? 'text-amber-300 font-semibold' : 'text-rose-400 font-bold');
         return `<tr onclick="openPlayerModal(${players.indexOf(p)})" class="hover:bg-surface/80 cursor-pointer transition">
           <td class="py-2.5 px-3 font-semibold text-white">
             <div class="flex items-center gap-2">
@@ -1673,8 +1685,8 @@
           </td>
           <td class="py-2.5 px-2 text-center font-mono text-slate-200">${p.mins}'</td>
           <td class="py-2.5 px-2 text-center font-mono">
-            <span class="${netCls}">${p.mins > 0 ? fmtNet(n80) : '–'}</span>
-            <span class="text-[10px] text-slate-500 ml-0.5">(${nPts > 0 ? '+' : ''}${nPts.toFixed(1)})</span>
+            <span class="${netCls}">${fIdx !== null ? fIdx + '/100' : '–'}</span>
+            <span class="text-[10px] text-slate-500 ml-0.5">(${p.mins > 0 ? fmtNet(n80) : '–'})</span>
           </td>
           <td class="py-2.5 px-2 text-center">
             <span class="font-bold text-white">${p.turnovers || 0}</span>
@@ -2050,7 +2062,8 @@
       const gd = Number(p.gd) || 0;
       const gdStr = gd > 0 ? `+${gd}` : `${gd}`;
       const n80 = Number(p.netPer80) || 0;
-      const netColor = n80 > 0 ? 'text-emerald-400' : n80 < -3.0 ? 'text-rose-400' : 'text-amber-300';
+      const fIdx = p.filmIndex ?? Math.max(55, Math.min(99, Math.round(80 + (n80 * 1.25))));
+      const netColor = fIdx >= 80 ? 'text-emerald-400' : fIdx < 70 ? 'text-rose-400' : 'text-amber-300';
 
       $('modalGrid').innerHTML =
         cell('Pitch Mins', `${p.mins}' (${pct(p.mins, totals.mins || team.matchLength)}%)`) +
@@ -2059,7 +2072,7 @@
         cell('Shots (SOT)', `${p.shots} (${p.sot})`) +
         (isGK ? cell('Saves / CS', `${p.saves} / ${p.cleanSheets || 0}`, 'text-emerald-400') : cell('Corners / Cr', `${p.corners} / ${p.crosses}`)) +
         cell('Turnovers (D/M/A)', `${p.turnovers || 0} (${p.toD||0}/${p.toM||0}/${p.toA||0})`, (p.toD || 0) > 0 ? 'text-rose-400' : 'text-slate-300') +
-        (p.filmEventsCount ? cell('Net Rating / 80\'', p.mins > 0 ? `${fmtNet(n80)} (${p.toPer80} TO/80')` : '–', netColor) : cell('Passes', p.passes || 0)) +
+        (p.filmEventsCount ? cell('Film Impact Index', p.mins > 0 ? `${fIdx}/100 (Net ${fmtNet(n80)}/80')` : '–', netColor) : cell('Passes', p.passes || 0)) +
         (p.filmEventsCount ? cell('Glow / Grow', `${p.glow || 0} Glow · ${p.grow || 0} Grow (${p.glowPct || 0}%)`, (p.glowPct || 0) >= 50 ? 'text-emerald-400' : 'text-amber-300') : cell('Fouls / Off', `${p.fouls || 0} / ${p.offsides || 0}`)) +
         cell('On-Pitch +/-', `${gdStr} (${p.winPct || 0}% W)`, gd >= 0 ? 'text-emerald-400' : 'text-rose-400');
 
@@ -2069,7 +2082,7 @@
       const pClips = allFilm.filter(e => (p.filmEventIds || []).includes(e.id) || (p.jersey && (e.jerseys || []).includes(p.jersey)));
       $('modalFilmSection').classList.toggle('hidden', !pClips.length);
       if (pClips.length) {
-        $('modalFilmRateBadge').textContent = `${pClips.length} clips · Net ${fmtNet(n80)}/80' · ${p.toPer80 || 0} TO/80'`;
+        $('modalFilmRateBadge').textContent = `${pClips.length} clips · Index ${fIdx}/100 · ${p.toPer80 || 0} TO/80'`;
         const toReasons = Object.entries(p.topToReasons || {}).map(([k, v]) => `<span class="bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded text-[10px]">${esc(k)}: <strong>${v}</strong></span>`).join(' ');
         const glowReasons = Object.entries(p.topGlowReasons || {}).map(([k, v]) => `<span class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px]">${esc(k)}: <strong>${v}</strong></span>`).join(' ');
         const gPct = p.glowPct || 0;
@@ -3110,8 +3123,8 @@
               <div class="text-base font-black text-amber-300 print:text-amber-700">${to80 || '0.0'}</div>
             </div>
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
-              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Net / 80' (Glow%)</div>
-              <div class="text-base font-black text-brand-400 print:text-teal-700">${player.filmEventsCount && mins > 0 ? `${fmtNet(player.netPer80)} (${glowPct}%)` : (glowPct ? glowPct + '%' : '–')}</div>
+              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Film Index (Glow%)</div>
+              <div class="text-base font-black text-brand-400 print:text-teal-700">${player.filmEventsCount && mins > 0 ? `${fmtFilmIndex(player)}/100 <span class="text-xs font-semibold text-slate-400">(${glowPct}%)</span>` : (glowPct ? glowPct + '%' : '–')}</div>
             </div>
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
               <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Shot Acc %</div>
