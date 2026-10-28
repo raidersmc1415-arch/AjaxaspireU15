@@ -126,18 +126,23 @@
       box-shadow: 0 2px 10px rgba(0, 194, 214, 0.32);
     }
 
+    /* Print-only text mirror (hidden on screen, shown in PDF/print so multi-line text never clips) */
+    .print-text-mirror {
+      display: none;
+    }
+
     /* Print Styles for Mid-Season Player Report Cards */
     @media print {
       @page {
         size: letter portrait;
-        margin: 0.3in;
+        margin: 0.35in 0.4in;
       }
       html, body {
         background: #ffffff !important;
         color: #0f172a !important;
         font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-size: 9.5px !important;
-        line-height: 1.3 !important;
+        font-size: 10px !important;
+        line-height: 1.38 !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: visible !important;
@@ -145,8 +150,14 @@
         print-color-adjust: exact !important;
       }
       header, #authGate, #teamSwitch, #scopeBar, #reportControlsBar, #playerModal, #shareModal, #toast,
-      .tab-content:not(#tab-reports), .no-print, button, input[type="file"], select.no-print {
+      #matchBanner, .contrast-block, .tab-content:not(#tab-reports), .no-print, button, input[type="file"], select.no-print {
         display: none !important;
+      }
+      main {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       #tab-reports {
         display: block !important;
@@ -164,10 +175,17 @@
         margin: 0 !important;
         width: 100% !important;
       }
+      #reportCardContent {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
       .print-card {
         background: #f8fafc !important;
         border: 1px solid #cbd5e1 !important;
         color: #0f172a !important;
+        padding: 10px 12px !important;
+        border-radius: 10px !important;
         page-break-inside: avoid;
         break-inside: avoid;
       }
@@ -175,6 +193,8 @@
         background: #f0fdf4 !important;
         border: 1px solid #86efac !important;
         color: #14532d !important;
+        padding: 10px 12px !important;
+        border-radius: 10px !important;
         page-break-inside: avoid;
         break-inside: avoid;
       }
@@ -182,26 +202,40 @@
         background: #fefce8 !important;
         border: 1px solid #fde047 !important;
         color: #713f12 !important;
+        padding: 10px 12px !important;
+        border-radius: 10px !important;
         page-break-inside: avoid;
         break-inside: avoid;
       }
       .print-refl-card {
-        background: #f8fafc !important;
+        background: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         color: #0f172a !important;
+        padding: 8px 10px !important;
+        border-radius: 8px !important;
         page-break-inside: avoid;
         break-inside: avoid;
       }
-      .print-textarea {
+      textarea.print-textarea {
+        display: none !important;
+      }
+      .print-text-mirror {
+        display: block !important;
         border: 1px solid #cbd5e1 !important;
         background: #ffffff !important;
         color: #0f172a !important;
-        resize: none !important;
-        font-size: 9.5px !important;
-        line-height: 1.35 !important;
+        border-radius: 8px !important;
+        padding: 7px 10px !important;
+        font-size: 10px !important;
+        line-height: 1.42 !important;
+        white-space: pre-wrap !important;
+        word-break: break-word !important;
+        overflow: visible !important;
+        height: auto !important;
       }
       .print-header-border {
         border-bottom: 2px solid #0f172a !important;
+        padding-bottom: 8px !important;
       }
       .print-rating-pill {
         display: inline-block !important;
@@ -209,8 +243,9 @@
         border: 1px solid #94a3b8 !important;
         color: #0f172a !important;
         font-weight: 700 !important;
-        padding: 1px 6px !important;
-        border-radius: 4px !important;
+        font-size: 10px !important;
+        padding: 2px 7px !important;
+        border-radius: 5px !important;
       }
       select.report-rating-input {
         display: none !important;
@@ -327,7 +362,7 @@
   <main class="flex-1 max-w-5xl w-full mx-auto p-4 space-y-4 safe-bottom">
 
     <!-- Pitchside Contrast Block Match Banner -->
-    <div class="contrast-block rounded-2xl p-5 sm:p-6">
+    <div id="matchBanner" class="contrast-block no-print rounded-2xl p-5 sm:p-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2" id="bannerBadges"></div>
@@ -587,7 +622,7 @@
         <div class="flex items-center justify-between mb-3">
           <div>
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Player Glow (Positive) vs. Grow (Coaching) Actions &amp; Turnovers</h3>
-            <p class="text-[10px] text-slate-500 mt-0.5">From 489 timestamped film review events across 7 matches</p>
+            <p id="chartGlowGrowSub" class="text-[10px] text-slate-500 mt-0.5">From 569 timestamped film review events across 5 matches</p>
           </div>
           <span class="text-[10px] bg-pitch text-slate-300 border border-border px-2 py-0.5 rounded font-mono">Glow · Grow · TOs</span>
         </div>
@@ -3170,47 +3205,64 @@
             diffText = `Player +${Math.abs(diff)}`;
           }
           playerSelfTag = `
-            <div class="flex items-center gap-1.5 text-[10px] mono mt-1">
+            <div class="flex items-center justify-between gap-1.5 text-[10px] mono pt-1 border-t border-border/50">
               <span class="text-teal-400 font-semibold">Player: ${playerSelfVal}/5</span>
-              <span class="px-1.5 py-0.2 rounded border text-[9px] ${diffClass}">${diffText}</span>
+              <span class="px-1.5 py-0.5 rounded border text-[9px] font-bold shrink-0 ${diffClass}">${diffText}</span>
+            </div>
+          `;
+        } else {
+          playerSelfTag = `
+            <div class="flex items-center justify-between gap-1.5 text-[10px] mono pt-1 border-t border-border/50">
+              <span class="text-slate-400">Coach Benchmark</span>
+              <span class="px-1.5 py-0.5 rounded border border-border text-[9px] text-slate-400 shrink-0">1–5 Scale</span>
             </div>
           `;
         }
         return `
-          <div class="space-y-1">
+          <div class="space-y-1.5 mt-1">
             <div class="flex items-center justify-between gap-2">
-              <select data-field="${name}" class="report-rating-input bg-pitch border border-border text-white text-xs font-bold rounded-lg px-2.5 py-1.5 focus:border-brand-500 outline-none w-full sm:w-auto">
-                <option value="1" ${currentVal == 1 ? 'selected' : ''}>1 - Focus Area</option>
-                <option value="2" ${currentVal == 2 ? 'selected' : ''}>2 - Developing</option>
-                <option value="3" ${currentVal == 3 ? 'selected' : ''}>3 - Proficient (Standard)</option>
-                <option value="4" ${currentVal == 4 ? 'selected' : ''}>4 - Advanced / High Impact</option>
-                <option value="5" ${currentVal == 5 ? 'selected' : ''}>5 - Elite Leader</option>
+              <select data-field="${name}" class="report-rating-input bg-pitch border border-border text-white text-xs font-bold rounded-lg px-2.5 py-1.5 focus:border-brand-500 outline-none w-full">
+                <option value="1" ${currentVal == 1 ? 'selected' : ''}>1 - Introductory / New</option>
+                <option value="2" ${currentVal == 2 ? 'selected' : ''}>2 - Emerging / Focus Area</option>
+                <option value="3" ${currentVal == 3 ? 'selected' : ''}>3 - Developing / On Track</option>
+                <option value="4" ${currentVal == 4 ? 'selected' : ''}>4 - Strong / Consistent</option>
+                <option value="5" ${currentVal == 5 ? 'selected' : ''}>5 - Benchmark / Elite</option>
               </select>
-              <span class="print-rating-pill hidden print:inline-block">${currentVal}/5 ★</span>
+              <span class="print-rating-pill hidden print:inline-block">Coach: ${currentVal}/5 ★</span>
             </div>
             ${playerSelfTag}
           </div>
         `;
       };
 
-      // Format recent reflections for the Player Voice section
+      const noteBox = (field, value, rows, extraCls = '') => `
+        <textarea data-field="${field}" rows="${rows}" oninput="syncReportTextareaMirror(this)" class="print-textarea w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white print:text-black focus:outline-none focus:border-brand-500 leading-relaxed ${extraCls}">${esc(value)}</textarea>
+        <div class="print-text-mirror" data-mirror-for="${field}">${esc(value)}</div>
+      `;
+
+      // Format recent reflections for the Player Voice section (3-column horizontal grid)
       let reflectionsHtml = '';
       if (parsedRefl.general.length > 0) {
-        reflectionsHtml = parsedRefl.general.slice(0, 3).map(r => `
-          <div class="p-2.5 rounded-xl bg-pitch/60 print-refl-card border border-border/70 space-y-1.5">
-            <div class="flex items-center justify-between gap-2">
-              <span class="mono text-[10px] text-teal-400 font-bold">${esc(r.date || 'Recent')}</span>
-              <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-surface border border-border text-slate-400">Post-Match</span>
-            </div>
-            <p class="text-xs italic text-slate-200 print:text-black">"${esc(r.reflection)}"</p>
-            ${r.coachReply ? `
-              <div class="mt-1 pt-1.5 border-t border-border/50 text-[11px] text-amber-300 print:text-amber-900 flex items-start gap-1">
-                <span class="font-bold shrink-0">${esc(coachShort)}:</span>
-                <span>"${esc(r.coachReply)}"</span>
+        reflectionsHtml = `
+          <div class="grid grid-cols-1 md:grid-cols-3 print:grid-cols-3 gap-2.5">
+            ${parsedRefl.general.slice(0, 3).map(r => `
+              <div class="p-2.5 rounded-xl bg-pitch/60 print-refl-card border border-border/70 flex flex-col justify-between space-y-1.5">
+                <div class="space-y-1">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="mono text-[10px] text-teal-400 font-bold">${esc(r.date || 'Recent')}</span>
+                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-surface border border-border text-slate-400">Post-Match</span>
+                  </div>
+                  <p class="text-[11px] italic text-slate-200 print:text-black leading-snug">"${esc(r.reflection)}"</p>
+                </div>
+                ${r.coachReply ? `
+                  <div class="pt-1.5 border-t border-border/50 text-[10px] text-amber-300 print:text-amber-900 leading-snug">
+                    <span class="font-bold">${esc(coachShort)}:</span> "${esc(r.coachReply)}"
+                  </div>
+                ` : ''}
               </div>
-            ` : ''}
+            `).join('')}
           </div>
-        `).join('');
+        `;
       } else {
         reflectionsHtml = `
           <div class="p-3 rounded-xl bg-pitch/40 border border-border/60 text-xs text-slate-400 italic text-center">
@@ -3223,7 +3275,7 @@
         <!-- HEADER BLOCK -->
         <div class="border-b-2 border-brand-500 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 print-header-border">
           <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-xl bg-card text-brand-400 border border-border flex items-center justify-center display text-xl font-bold shrink-0">AX</div>
+            <div class="w-11 h-11 rounded-xl bg-card text-brand-400 border border-border flex items-center justify-center display text-xl font-bold shrink-0">AX</div>
             <div>
               <div class="mono text-[10px] uppercase tracking-widest text-brand-400 font-bold flex items-center gap-2">
                 <span>${esc(teamHeader)} · ${esc(leagueSubtitle)}</span>
@@ -3256,9 +3308,9 @@
                 <span class="font-bold text-amber-300 print:text-amber-800">${esc(values.overall_tier)}</span>
               </p>
             </div>
-            <div class="text-right">
-              <label class="no-print block text-[10px] uppercase font-bold text-slate-400 mb-1">Tier Assignment</label>
-              <select data-field="overall_tier" class="no-print bg-pitch border border-border text-xs text-amber-300 font-bold rounded-lg px-2.5 py-1.5 outline-none">
+            <div class="text-right no-print">
+              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Tier Assignment</label>
+              <select data-field="overall_tier" class="bg-pitch border border-border text-xs text-amber-300 font-bold rounded-lg px-2.5 py-1.5 outline-none">
                 <option value="Key Starter / High Impact" ${values.overall_tier.includes('Key Starter') ? 'selected' : ''}>Key Starter / High Impact</option>
                 <option value="Core Impact Contributor" ${values.overall_tier.includes('Core Impact') ? 'selected' : ''}>Core Impact Contributor</option>
                 <option value="Emerging Tactical Contributor" ${values.overall_tier.includes('Emerging') ? 'selected' : ''}>Emerging Tactical Contributor</option>
@@ -3268,7 +3320,7 @@
           </div>
 
           <!-- Quick Stats Grid -->
-          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2.5 text-center">
+          <div class="grid grid-cols-3 sm:grid-cols-6 print:grid-cols-6 gap-2 mt-2.5 text-center">
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
               <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Appearances</div>
               <div class="text-base font-black text-white print:text-black">${gp} <span class="text-xs font-normal text-slate-400">(${mins}')</span></div>
@@ -3296,195 +3348,168 @@
           </div>
         </div>
 
-        <!-- MAIN DUAL-COLUMN EVALUATION & SYNTHESIS -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 print:grid-cols-12">
+        <!-- FULL-WIDTH HORIZONTAL PILLARS 1, 2 & 3 -->
+        <div class="space-y-3.5">
 
-          <!-- LEFT COLUMN: COACH 4-PILLAR EVALUATION MATRIX (7 COLS) -->
-          <div class="col-span-12 lg:col-span-7 print:col-span-7 space-y-3.5">
-
-            <!-- PILLAR 1: TECHNICAL & TACTICAL -->
-            <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
-              <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
-                <h3 class="display text-lg text-teal-400 print:text-teal-700 flex items-center gap-1.5">
-                  <span>PILLAR 1: TECHNICAL &amp; TACTICAL</span>
-                </h3>
-                <span class="text-[10px] mono text-slate-400 uppercase">Scale 1-5</span>
+          <!-- PILLAR 1: TECHNICAL & TACTICAL (FULL WIDTH) -->
+          <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
+            <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
+              <h3 class="display text-lg text-teal-400 print:text-teal-700 flex items-center gap-1.5">
+                <span>PILLAR 1: TECHNICAL &amp; TACTICAL</span>
+              </h3>
+              <span class="text-[10px] mono text-slate-400 uppercase">Scale 1–5 (Coach vs. Player Self-Rating)</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 print:grid-cols-3 gap-2.5">
+              <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
+                <div>
+                  <div class="font-bold text-xs text-white print:text-black">Ball Mastery &amp; First Touch</div>
+                  <div class="text-[10px] text-slate-400 print:text-slate-600">First-touch composure &amp; escaping pressure</div>
+                </div>
+                ${starOpts('tech_ball', values.tech_ball, selfTechBall)}
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
-                  <div>
-                    <div class="font-bold text-xs text-white print:text-black">Ball Mastery</div>
-                    <div class="text-[10px] text-slate-400 print:text-slate-600">First touch composure &amp; escaping pressure</div>
-                  </div>
-                  ${starOpts('tech_ball', values.tech_ball, selfTechBall)}
+              <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
+                <div>
+                  <div class="font-bold text-xs text-white print:text-black">Decision Making &amp; Tempo</div>
+                  <div class="text-[10px] text-slate-400 print:text-slate-600">Speed of play &amp; build vs. counter reads</div>
                 </div>
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
-                  <div>
-                    <div class="font-bold text-xs text-white print:text-black">Decision Making</div>
-                    <div class="text-[10px] text-slate-400 print:text-slate-600">Speed of play &amp; build vs. counter</div>
-                  </div>
-                  ${starOpts('tech_decision', values.tech_decision, selfTechDec)}
-                </div>
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
-                  <div>
-                    <div class="font-bold text-xs text-white print:text-black">Scanning &amp; Vision</div>
-                    <div class="text-[10px] text-slate-400 print:text-slate-600">Pre-orientation &amp; shoulder checks</div>
-                  </div>
-                  ${starOpts('tech_scanning', values.tech_scanning, selfTechScan)}
-                </div>
+                ${starOpts('tech_decision', values.tech_decision, selfTechDec)}
               </div>
-              <div>
-                <label class="block text-[10px] font-semibold text-slate-300 print:text-black mb-1">Coach Technical / Tactical Observations:</label>
-                <textarea data-field="tech_notes" rows="2" class="print-textarea w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white print:text-black focus:outline-none focus:border-brand-500">${esc(values.tech_notes)}</textarea>
+              <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
+                <div>
+                  <div class="font-bold text-xs text-white print:text-black">Scanning &amp; Field Vision</div>
+                  <div class="text-[10px] text-slate-400 print:text-slate-600">Pre-orientation &amp; shoulder checks</div>
+                </div>
+                ${starOpts('tech_scanning', values.tech_scanning, selfTechScan)}
               </div>
             </div>
-
-            <!-- PILLAR 2: PHYSICAL & WORKLOAD -->
-            <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
-              <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
-                <h3 class="display text-lg text-amber-400 print:text-amber-700 flex items-center gap-1.5">
-                  <span>PILLAR 2: PHYSICAL &amp; WORKLOAD</span>
-                </h3>
-                <span class="text-[10px] mono text-slate-400 uppercase">Scale 1-5</span>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
-                  <div>
-                    <div class="font-bold text-xs text-white print:text-black">Work Rate</div>
-                    <div class="text-[10px] text-slate-400 print:text-slate-600">Box-to-box continuous stamina</div>
-                  </div>
-                  ${starOpts('phys_workrate', values.phys_workrate, selfPhysWork)}
-                </div>
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
-                  <div>
-                    <div class="font-bold text-xs text-white print:text-black">Sprint Recovery</div>
-                    <div class="text-[10px] text-slate-400 print:text-slate-600">Counter-press &amp; tracking back</div>
-                  </div>
-                  ${starOpts('phys_recovery', values.phys_recovery, selfPhysRec)}
-                </div>
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
-                  <div>
-                    <div class="font-bold text-xs text-white print:text-black">Engagement &amp; Duels</div>
-                    <div class="text-[10px] text-slate-400 print:text-slate-600">Shielding &amp; winning 50/50s</div>
-                  </div>
-                  ${starOpts('phys_duels', values.phys_duels, selfPhysDuels)}
-                </div>
-              </div>
-              <div>
-                <label class="block text-[10px] font-semibold text-slate-300 print:text-black mb-1">Coach Physical / Athletic Observations:</label>
-                <textarea data-field="phys_notes" rows="2" class="print-textarea w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white print:text-black focus:outline-none focus:border-brand-500">${esc(values.phys_notes)}</textarea>
-              </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-300 print:text-black mb-1">Coach Technical / Tactical Observations:</label>
+              ${noteBox('tech_notes', values.tech_notes, 2)}
             </div>
-
-            <!-- PILLAR 3: PSYCHOLOGICAL & COMPETITIVE MINDSET -->
-            <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
-              <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
-                <h3 class="display text-lg text-sky-400 print:text-sky-700 flex items-center gap-1.5">
-                  <span>PILLAR 3: MINDSET &amp; COMMUNICATION</span>
-                </h3>
-                <span class="text-[10px] mono text-slate-400 uppercase">Scale 1-5</span>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
-                  <div>
-                    <div class="font-bold text-xs text-white print:text-black">Coachability</div>
-                    <div class="text-[10px] text-slate-400 print:text-slate-600">Applying advice &amp; growth mindset</div>
-                  </div>
-                  ${starOpts('psych_coach', values.psych_coach, null)}
-                </div>
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
-                  <div>
-                    <div class="font-bold text-xs text-white print:text-black">Match Composure</div>
-                    <div class="text-[10px] text-slate-400 print:text-slate-600">Resilience after mistakes</div>
-                  </div>
-                  ${starOpts('psych_resilience', values.psych_resilience, null)}
-                </div>
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
-                  <div>
-                    <div class="font-bold text-xs text-white print:text-black">Communication</div>
-                    <div class="text-[10px] text-slate-400 print:text-slate-600">Vocal direction &amp; posture</div>
-                  </div>
-                  ${starOpts('psych_comm', values.psych_comm, null)}
-                </div>
-              </div>
-              <div>
-                <label class="block text-[10px] font-semibold text-slate-300 print:text-black mb-1">Coach Mindset / Leadership Observations:</label>
-                <textarea data-field="psych_notes" rows="2" class="print-textarea w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white print:text-black focus:outline-none focus:border-brand-500">${esc(values.psych_notes)}</textarea>
-              </div>
-            </div>
-
           </div>
 
-          <!-- RIGHT COLUMN: PLAYER VOICE & REFLECTIONS LOG (5 COLS) -->
-          <div class="col-span-12 lg:col-span-5 print:col-span-5 space-y-3.5">
-
-            <!-- PLAYER STATED GOALS CARD -->
-            <div class="bg-card print-card rounded-2xl p-3.5 border border-teal-500/40 space-y-2.5">
-              <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
-                <div class="flex items-center gap-1.5">
-                  <h3 class="display text-base text-teal-400 print:text-teal-800">PLAYER STATED GOALS &amp; VISION</h3>
+          <!-- PILLAR 2: PHYSICAL & WORKLOAD (FULL WIDTH) -->
+          <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
+            <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
+              <h3 class="display text-lg text-amber-400 print:text-amber-700 flex items-center gap-1.5">
+                <span>PILLAR 2: PHYSICAL &amp; WORKLOAD</span>
+              </h3>
+              <span class="text-[10px] mono text-slate-400 uppercase">Scale 1–5 (Coach vs. Player Self-Rating)</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 print:grid-cols-3 gap-2.5">
+              <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
+                <div>
+                  <div class="font-bold text-xs text-white print:text-black">Work Rate &amp; Engine</div>
+                  <div class="text-[10px] text-slate-400 print:text-slate-600">Box-to-box continuous stamina</div>
                 </div>
-                <span class="text-[9px] mono px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">Player_IDP</span>
+                ${starOpts('phys_workrate', values.phys_workrate, selfPhysWork)}
               </div>
-              <div class="space-y-2 text-xs">
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
-                  <div class="text-[10px] mono uppercase text-teal-400 print:text-teal-700 font-bold">In the next 30 days I will:</div>
-                  <div class="text-slate-200 print:text-black mt-0.5 font-medium">
-                    ${esc(parsedRefl.goals.short || 'Sharpen first-touch composure under pressure and scan before receiving.')}
-                  </div>
+              <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
+                <div>
+                  <div class="font-bold text-xs text-white print:text-black">Sprint Recovery</div>
+                  <div class="text-[10px] text-slate-400 print:text-slate-600">Counter-press &amp; transition tracking</div>
                 </div>
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
-                  <div class="text-[10px] mono uppercase text-teal-400 print:text-teal-700 font-bold">In 2 years I see myself:</div>
-                  <div class="text-slate-200 print:text-black mt-0.5 font-medium">
-                    ${esc(parsedRefl.goals.long || 'Leading AJAX in Girls Academy playoffs and preparing for collegiate recruiting.')}
-                  </div>
+                ${starOpts('phys_recovery', values.phys_recovery, selfPhysRec)}
+              </div>
+              <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
+                <div>
+                  <div class="font-bold text-xs text-white print:text-black">Engagement &amp; 1v1 Duels</div>
+                  <div class="text-[10px] text-slate-400 print:text-slate-600">Shielding &amp; winning 50/50 contests</div>
                 </div>
-                <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
-                  <div class="text-[10px] mono uppercase text-amber-300 print:text-amber-800 font-bold">The One Thing ${esc(coachShort)} can help with:</div>
-                  <div class="text-slate-200 print:text-black mt-0.5 font-medium italic">
-                    "${esc(parsedRefl.goals.oneThing || 'Break down game film with me on my body shape when receiving on the half-turn.')}"
-                  </div>
-                </div>
+                ${starOpts('phys_duels', values.phys_duels, selfPhysDuels)}
               </div>
             </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-300 print:text-black mb-1">Coach Physical / Athletic Observations:</label>
+              ${noteBox('phys_notes', values.phys_notes, 2)}
+            </div>
+          </div>
 
-            <!-- RECENT REFLECTIONS LOG & FEEDBACK LOOP CARD -->
-            <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
-              <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
-                <div class="flex items-center gap-1.5">
-                  <h3 class="display text-base text-amber-400 print:text-amber-800">REFLECTIONS &amp; COACH FEEDBACK</h3>
+          <!-- PILLAR 3: MINDSET & COMMUNICATION (FULL WIDTH) -->
+          <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
+            <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
+              <h3 class="display text-lg text-sky-400 print:text-sky-700 flex items-center gap-1.5">
+                <span>PILLAR 3: MINDSET &amp; COMMUNICATION</span>
+              </h3>
+              <span class="text-[10px] mono text-slate-400 uppercase">Scale 1–5</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 print:grid-cols-3 gap-2.5">
+              <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
+                <div>
+                  <div class="font-bold text-xs text-white print:text-black">Coachability</div>
+                  <div class="text-[10px] text-slate-400 print:text-slate-600">Applying advice &amp; growth mindset</div>
                 </div>
-                <span class="text-[9px] mono px-2 py-0.5 rounded bg-surface border border-border text-slate-400">Reflections_Log</span>
+                ${starOpts('psych_coach', values.psych_coach, null)}
               </div>
-              <div class="space-y-2">
-                ${reflectionsHtml}
+              <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
+                <div>
+                  <div class="font-bold text-xs text-white print:text-black">Match Composure</div>
+                  <div class="text-[10px] text-slate-400 print:text-slate-600">Resilience after mistakes</div>
+                </div>
+                ${starOpts('psych_resilience', values.psych_resilience, null)}
+              </div>
+              <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60 flex flex-col justify-between gap-1.5">
+                <div>
+                  <div class="font-bold text-xs text-white print:text-black">Communication</div>
+                  <div class="text-[10px] text-slate-400 print:text-slate-600">Vocal direction &amp; body language</div>
+                </div>
+                ${starOpts('psych_comm', values.psych_comm, null)}
               </div>
             </div>
-
-            <!-- BENCHMARK ALIGNMENT SUMMARY -->
-            <div class="bg-card print-card rounded-2xl p-3 border border-border space-y-1.5 text-xs">
-              <div class="font-bold text-[11px] uppercase tracking-wider text-slate-300 print:text-black flex items-center justify-between">
-                <span>Mid-Season Review Notes</span>
-                <span class="text-brand-400 mono text-[10px]">Player Conference</span>
-              </div>
-              <p class="text-[11px] text-slate-400 print:text-slate-600 leading-relaxed">
-                This review combines match stats, Veo film clips, and player self-ratings. Any gaps between player and coach scores give us a clear starting point for second-half training goals.
-              </p>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-300 print:text-black mb-1">Coach Mindset / Leadership Observations:</label>
+              ${noteBox('psych_notes', values.psych_notes, 2)}
             </div>
-
           </div>
 
         </div>
 
-        <!-- PILLAR 4: GLOW & GROW (ACTION PLAN) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <!-- PLAYER STATED GOALS & VISION (FULL WIDTH 3-COLUMN ROW) -->
+        <div class="bg-card print-card rounded-2xl p-3.5 border border-teal-500/40 space-y-2.5">
+          <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
+            <h3 class="display text-lg text-teal-400 print:text-teal-800">PLAYER STATED GOALS &amp; VISION</h3>
+            <span class="text-[9px] mono px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">Player_IDP</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 print:grid-cols-3 gap-2.5 text-xs">
+            <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
+              <div class="text-[10px] mono uppercase text-teal-400 print:text-teal-700 font-bold">In the next 30 days I will:</div>
+              <div class="text-slate-200 print:text-black mt-1 font-medium leading-snug">
+                ${esc(parsedRefl.goals.short || 'Sharpen first-touch composure under pressure and scan before receiving.')}
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
+              <div class="text-[10px] mono uppercase text-teal-400 print:text-teal-700 font-bold">In 2 years I see myself:</div>
+              <div class="text-slate-200 print:text-black mt-1 font-medium leading-snug">
+                ${esc(parsedRefl.goals.long || 'Leading AJAX in Girls Academy playoffs and preparing for collegiate recruiting.')}
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
+              <div class="text-[10px] mono uppercase text-amber-300 print:text-amber-800 font-bold">The One Thing ${esc(coachShort)} can help with:</div>
+              <div class="text-slate-200 print:text-black mt-1 font-medium italic leading-snug">
+                "${esc(parsedRefl.goals.oneThing || 'Break down game film with me on my body shape when receiving on the half-turn.')}"
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECENT REFLECTIONS LOG & FEEDBACK LOOP (FULL WIDTH HORIZONTAL CARDS) -->
+        <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
+          <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
+            <h3 class="display text-lg text-amber-400 print:text-amber-800">REFLECTIONS &amp; COACH FEEDBACK</h3>
+            <span class="text-[9px] mono px-2 py-0.5 rounded bg-surface border border-border text-slate-400">Reflections_Log</span>
+          </div>
+          ${reflectionsHtml}
+        </div>
+
+        <!-- PILLAR 4: GLOW & GROW (2-COLUMN SIDE-BY-SIDE ACTION PLAN) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-3.5">
           <!-- GLOW (KEY STRENGTHS) -->
           <div class="bg-card print-glow-card rounded-2xl p-3.5 border border-emerald-500/40 space-y-1.5">
             <div class="flex items-center gap-1.5 text-emerald-400 print:text-emerald-800 font-bold text-xs uppercase tracking-wider">
               <span>KEY STRENGTHS (GLOW)</span>
             </div>
             <p class="text-[10px] text-slate-400 print:text-slate-600">Standout technical habits, tactical reads, and competitive strengths:</p>
-            <textarea data-field="glow" rows="3" class="print-textarea w-full bg-pitch/80 text-xs p-2.5 rounded-xl border border-emerald-500/30 text-white print:text-black focus:outline-none focus:border-emerald-500">${esc(values.glow)}</textarea>
+            ${noteBox('glow', values.glow, 3, 'border-emerald-500/30 focus:border-emerald-500')}
           </div>
 
           <!-- GROW (DEVELOPMENT FOCUS) -->
@@ -3492,8 +3517,8 @@
             <div class="flex items-center gap-1.5 text-amber-300 print:text-amber-800 font-bold text-xs uppercase tracking-wider">
               <span>PRIORITY DEVELOPMENT FOCUS (GROW)</span>
             </div>
-            <p class="text-[10px] text-slate-400 print:text-slate-600">The 2-3 specific development objectives for training reps &amp; second-half matches:</p>
-            <textarea data-field="grow" rows="3" class="print-textarea w-full bg-pitch/80 text-xs p-2.5 rounded-xl border border-amber-500/30 text-white print:text-black focus:outline-none focus:border-amber-500">${esc(values.grow)}</textarea>
+            <p class="text-[10px] text-slate-400 print:text-slate-600">The 2–3 specific development objectives for training reps &amp; second-half matches:</p>
+            ${noteBox('grow', values.grow, 3, 'border-amber-500/30 focus:border-amber-500')}
           </div>
         </div>
 
@@ -3501,11 +3526,11 @@
         <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-3">
           <div>
             <label class="block text-xs font-bold text-white print:text-black mb-1">Second-Half Season Action Goals (Agreed in Conference):</label>
-            <textarea data-field="goals_2nd_half" rows="2" class="print-textarea w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white print:text-black focus:outline-none focus:border-brand-500">${esc(values.goals_2nd_half)}</textarea>
+            ${noteBox('goals_2nd_half', values.goals_2nd_half, 3)}
           </div>
 
           <!-- Signatures -->
-          <div class="pt-2.5 border-t border-border/80 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div class="pt-2.5 border-t border-border/80 grid grid-cols-3 gap-4 text-xs">
             <div>
               <div class="text-[10px] mono text-slate-400 print:text-slate-600 uppercase font-semibold">Head Coach Signature</div>
               <div class="mt-3 pt-1 border-b border-slate-500 font-serif italic text-sm text-teal-400 print:text-black">${esc(coachSignature)}</div>
@@ -3524,6 +3549,25 @@
           </div>
         </div>
       `;
+
+      syncAllReportTextareas();
+    }
+
+    function syncReportTextareaMirror(textareaEl) {
+      if (!textareaEl) return;
+      textareaEl.style.height = 'auto';
+      textareaEl.style.height = Math.max(54, textareaEl.scrollHeight + 4) + 'px';
+      const field = textareaEl.getAttribute('data-field');
+      if (field) {
+        const mirror = document.querySelector(`#printableReportCard [data-mirror-for="${field}"]`);
+        if (mirror) mirror.textContent = textareaEl.value;
+      }
+    }
+
+    function syncAllReportTextareas() {
+      document.querySelectorAll('#printableReportCard textarea.print-textarea').forEach(el => {
+        syncReportTextareaMirror(el);
+      });
     }
 
     function saveReportDraft() {
@@ -3555,9 +3599,13 @@
     }
 
     function printReportCard() {
+      syncAllReportTextareas();
       saveReportDraft();
+      syncAllReportTextareas();
       window.print();
     }
+
+    window.addEventListener('beforeprint', syncAllReportTextareas);
 
     function renderAll() {
       renderTeamSwitch();
