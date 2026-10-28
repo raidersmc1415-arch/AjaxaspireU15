@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>AJAX U15 Match Hub · Coach Intelligence</title>
+  <title>AJAX U15 Match Hub · Coaching Staff</title>
   <meta name="description" content="Private coaching analytics for AJAX GA U15 and AJAX Aspire U15: match & season stats, positional breakdowns, swing player workload, and tactical takeaways.">
   <meta name="robots" content="noindex, nofollow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,8 +14,8 @@
   <script>
     tailwind.config = {
       theme: { extend: { colors: {
-        brand: { 400: '#3ABFB8', 500: '#3ABFB8', 600: '#2A7A4B', 700: '#1E5C38', 800: '#1E5C38', 900: '#123A24', 950: '#0B2416' },
-        pitch: '#0D1B2A', surface: '#122030', card: '#172535', border: '#1E3348'
+        brand: { 400: '#008496', 500: '#008496', 600: '#1A2330', 700: '#121821', 800: '#0D1219', 900: '#090D12', 950: '#05070A' },
+        pitch: '#F4F6F9', surface: '#E9EEF4', card: '#FFFFFF', border: '#DCE3EC', forest: '#1A2330', gold: '#00C2D6'
       } } }
     };
   </script>
@@ -24,20 +24,93 @@
       overscroll-behavior-y: none;
       -webkit-tap-highlight-color: transparent;
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #F4F6F9;
+      color: #141B24;
     }
     .display { font-family: 'Bebas Neue', 'DM Sans', sans-serif; letter-spacing: .5px; font-weight: 400 !important; }
     .mono { font-family: 'DM Mono', ui-monospace, monospace; letter-spacing: .12em; }
     ::-webkit-scrollbar { height: 4px; width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #2A4560; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb { background: #B8C4D4; border-radius: 9999px; }
     .safe-top { padding-top: max(env(safe-area-inset-top), 0.75rem); }
     .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
-    /* Per-team accent */
-    body { --accent: #C8A951; --accent-bg: rgba(200,169,81,.16); --accent-bd: rgba(200,169,81,.38); }
-    body[data-team="aspire"] { --accent: #3ABFB8; --accent-bg: rgba(58,191,184,.15); --accent-bd: rgba(58,191,184,.38); }
+    /* Per-team accent (Girls Academy Aspire + AJAX Palette) */
+    body { --accent: #15803D; --accent-bg: rgba(21,128,61,.09); --accent-bd: rgba(21,128,61,.26); }
+    body[data-team="aspire"] { --accent: #008496; --accent-bg: rgba(0,132,150,.10); --accent-bd: rgba(0,132,150,.28); }
     .accent-text { color: var(--accent); }
     .accent-chip { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-bd); }
-    .team-btn[aria-pressed="true"] { background: var(--accent-bg); border-color: var(--accent-bd); color: #fff; }
+    .team-btn { background: #FFFFFF; color: #5A687A; border-color: #DCE3EC; }
+    .team-btn[aria-pressed="true"] { background: linear-gradient(135deg, #212B3A 0%, #141B24 100%) !important; border-color: #00C2D6 !important; color: #FFFFFF !important; box-shadow: 0 6px 18px rgba(20,27,36,0.16); }
+    .team-btn[aria-pressed="true"] .text-white { color: #FFFFFF !important; }
+    .team-btn[aria-pressed="true"] .text-slate-400 { color: rgba(255,255,255,0.75) !important; }
+    .team-btn[aria-pressed="true"] .accent-chip { background: rgba(0,194,214,0.18) !important; color: #00C2D6 !important; border-color: rgba(0,194,214,0.45) !important; }
     .team-btn[aria-pressed="true"] .team-dot { opacity: 1; }
+
+    /* Daylight Editorial Utility Remapping (outside dark contrast blocks) */
+    .text-white { color: #141B24; }
+    .text-slate-100, .text-slate-200 { color: #1E2836; }
+    .text-slate-300 { color: #263140; }
+    .text-slate-400, .text-slate-500 { color: #5A687A; }
+    .text-emerald-400, .text-emerald-300 { color: #15803D; }
+    .text-amber-300, .text-amber-400 { color: #008496; }
+    .text-rose-400, .text-rose-300 { color: #B91C1C; }
+    .text-sky-400, .text-sky-300, .text-blue-400 { color: #0284C7; }
+    .text-purple-400, .text-purple-300 { color: #6D28D9; }
+    .bg-brand-600 { background-color: #1A2330 !important; color: #FFFFFF !important; }
+    .bg-brand-600:hover { background-color: #008496 !important; }
+    .hover\:bg-slate-800:hover { background-color: #E9EEF4 !important; }
+    .hover\:text-white:hover { color: #008496 !important; }
+
+    /* Pitchside Contrast Block (Girls Academy Aspire Slate-Navy + Electric Cyan) */
+    .contrast-block {
+      background: linear-gradient(135deg, #212B3A 0%, #141B24 100%) !important;
+      color: #FFFFFF !important;
+      border: 1px solid #141B24 !important;
+      border-left: 4px solid #00C2D6 !important;
+      box-shadow: 0 14px 34px rgba(20, 27, 36, 0.14);
+    }
+    .contrast-block .text-white { color: #FFFFFF !important; }
+    .contrast-block .text-slate-200, .contrast-block .text-slate-300 { color: rgba(255, 255, 255, 0.88) !important; }
+    .contrast-block .text-slate-400 { color: rgba(255, 255, 255, 0.72) !important; }
+    .contrast-block .accent-text { color: #00C2D6 !important; }
+    .contrast-block .accent-chip {
+      background: rgba(0, 194, 214, 0.16) !important;
+      color: #00C2D6 !important;
+      border-color: rgba(0, 194, 214, 0.42) !important;
+    }
+    .contrast-block .bg-pitch, .contrast-block .bg-pitch\/60 {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(255, 255, 255, 0.16) !important;
+      color: #FFFFFF !important;
+    }
+    .contrast-block .text-emerald-400 { color: #4ADE80 !important; }
+    .contrast-block .text-amber-300 { color: #38BDF8 !important; }
+    .contrast-block .text-rose-400 { color: #FDA4AF !important; }
+    .contrast-block .text-sky-300 { color: #7DD3FC !important; }
+    .contrast-block .text-brand-400 { color: #00C2D6 !important; }
+
+    /* Floating Aspire Slate-Navy Pill Navigation Bar */
+    .nav-pill-bar {
+      background: linear-gradient(135deg, #212B3A 0%, #141B24 100%);
+      padding: 5px;
+      border-radius: 9999px;
+      box-shadow: 0 10px 26px rgba(20, 27, 36, 0.16);
+    }
+    .nav-pill-bar .tab-btn {
+      border-radius: 9999px;
+      color: rgba(255, 255, 255, 0.76) !important;
+      font-weight: 600;
+      transition: all 0.18s ease;
+    }
+    .nav-pill-bar .tab-btn:hover {
+      color: #FFFFFF !important;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .nav-pill-bar .tab-btn.active-pill {
+      background: linear-gradient(135deg, #00C2D6 0%, #008FA3 100%) !important;
+      color: #FFFFFF !important;
+      font-weight: 700;
+      box-shadow: 0 2px 10px rgba(0, 194, 214, 0.32);
+    }
 
     /* Print Styles for Mid-Season Player Report Cards */
     @media print {
@@ -138,17 +211,17 @@
 <body data-team="ga" class="bg-pitch text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
 
   <!-- COACH ACCESS GATE OVERLAY -->
-  <div id="authGate" class="fixed inset-0 z-50 bg-pitch/98 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-surface border border-border rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
-      <div class="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center text-2xl shadow-lg" style="background:linear-gradient(135deg,#1E5C38,#3ABFB8)">🔒</div>
+  <div id="authGate" class="fixed inset-0 z-50 bg-pitch/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-card border border-border rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+      <div class="w-12 h-12 mx-auto rounded-xl bg-forest flex items-center justify-center mono text-xs font-bold text-gold tracking-widest">PIN</div>
       <div>
-        <div class="mono text-[10px] uppercase text-brand-400">Restricted Access · Coaches Only</div>
+        <div class="mono text-[10px] uppercase text-brand-400 font-semibold">Restricted Access · Coaching Staff</div>
         <h2 class="display text-3xl text-white mt-1">AJAX U15 Match Hub</h2>
-        <p class="text-xs text-slate-400 mt-1">Enter your Coach PIN to view live CSV analytics, turnovers, positional splits, player report cards &amp; coaching notes.</p>
+        <p class="text-xs text-slate-400 mt-1">Enter your Coach PIN to view match stats, film logs, positional splits, player report cards, and coaching notes.</p>
       </div>
       <form onsubmit="event.preventDefault(); submitCoachPin();" class="space-y-3">
         <input type="password" id="coachPinInput" inputmode="numeric" placeholder="Enter Coach PIN"
-          class="w-full bg-pitch text-center tracking-[0.35em] font-bold text-lg px-4 py-3 rounded-xl border border-border text-white placeholder-slate-600 focus:outline-none focus:border-brand-500">
+          class="w-full bg-pitch text-center tracking-[0.35em] font-bold text-lg px-4 py-3 rounded-xl border border-border text-white placeholder-slate-400 focus:outline-none focus:border-brand-500">
         <p id="coachPinErr" class="hidden text-xs text-rose-400 font-medium">Incorrect Coach PIN. Try again.</p>
         <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl text-xs uppercase tracking-wider transition active:scale-95">
           Unlock Match Hub →
@@ -161,37 +234,53 @@
     </div>
   </div>
 
-  <header class="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-border safe-top px-4 pb-3 shadow-md">
+  <header class="sticky top-0 z-40 bg-pitch/95 backdrop-blur-md border-b border-border safe-top px-4 pb-3">
     <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
       <div class="flex items-center space-x-3 min-w-0">
-        <div class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center text-lg shadow-lg" style="background:linear-gradient(135deg,#1E5C38,#3ABFB8)">⚽</div>
+        <svg viewBox="0 0 44 52" class="w-9 h-11 shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="mhAspireCyan" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00C4D8"/>
+              <stop offset="100%" stop-color="#007485"/>
+            </linearGradient>
+            <linearGradient id="mhAspireSlate" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#283240"/>
+              <stop offset="100%" stop-color="#121821"/>
+            </linearGradient>
+          </defs>
+          <path d="M22 6 L4 10 L4 29 C4 40 12 46 22 50 Z" fill="url(#mhAspireCyan)"/>
+          <path d="M22 2 L40 6 L40 26 C40 37 32 44 22 48 Z" fill="url(#mhAspireSlate)"/>
+          <circle cx="22" cy="14" r="3.2" fill="#FFFFFF"/>
+          <path d="M16 23 C19 19 25 19 28 24 L25 34 L28 43 L24.5 43 L22 34 L19.5 43 L16.5 43 L19 33 Z" fill="#FFFFFF"/>
+          <circle cx="15.5" cy="42.5" r="2.6" fill="#FFFFFF"/>
+        </svg>
         <div class="min-w-0">
           <div class="flex items-center space-x-2">
-            <h1 class="display text-2xl md:text-3xl text-white leading-none truncate"><span style="color:#2A7A4B">AJAX</span> <span style="color:#3ABFB8">U15</span> Match Hub</h1>
-            <span id="syncBadge" class="hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold">● Standalone</span>
+            <h1 class="display text-2xl md:text-3xl text-white leading-none truncate"><span style="color:#15803D">AJAX</span> <span style="color:#1A2330">ASPIRE</span> <span style="color:#008496">U15</span> Match Hub</h1>
+            <span id="syncBadge" class="hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-card text-slate-300 border border-border mono">Standalone</span>
           </div>
           <p id="hdrSub" class="mono text-[10px] uppercase text-slate-400 truncate mt-1">26/27 Season · Coach View</p>
         </div>
       </div>
       <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
         <a id="hubLink" href="index.html" class="bg-card hover:bg-slate-800 text-slate-200 border border-border px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Back to Team Hub">
-          <span>🏠</span><span class="hidden sm:inline">Team Hub</span>
+          <span>←</span><span class="hidden sm:inline">Team Hub</span>
         </a>
-        <label id="importLabel" for="excelInput" class="cursor-pointer bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/50 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm" title="Upload Statistics.csv or Aspire Film Log (.csv / .xlsx)">
-          <span>📁</span><span>Upload CSV</span>
+        <label id="importLabel" for="excelInput" class="cursor-pointer bg-card hover:bg-slate-800 text-brand-400 border border-border px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Upload Statistics.csv or Aspire Film Log (.csv / .xlsx)">
+          <span>Upload CSV</span>
         </label>
         <input type="file" id="excelInput" accept=".xlsx, .csv" class="hidden">
-        <button id="resetDataBtn" onclick="resetToDefaultData()" class="bg-card hover:bg-slate-800 text-amber-300 border border-amber-500/30 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Reset cached browser data and reload embedded 1W-4L Aspire &amp; 3W-0L GA stats">
-          <span>🔄</span><span class="hidden lg:inline">Reset</span>
+        <button id="resetDataBtn" onclick="resetToDefaultData()" class="bg-card hover:bg-slate-800 text-slate-300 border border-border px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Reset cached browser data and reload embedded 1W-4L Aspire &amp; 3W-1D-0L GA stats">
+          <span>Reset</span>
         </button>
-        <button id="exportHtmlBtn" onclick="exportUpdatedHtml()" class="bg-card hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Download self-contained match-hub.html with latest imported CSVs, takeaways &amp; notes">
-          <span>💾</span><span class="hidden md:inline">Save HTML</span>
+        <button id="exportHtmlBtn" onclick="exportUpdatedHtml()" class="bg-card hover:bg-slate-800 text-slate-200 border border-border px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Download self-contained match-hub.html with latest imported CSVs, takeaways &amp; notes">
+          <span class="hidden md:inline">Save HTML</span><span class="md:hidden">Save</span>
         </button>
         <button onclick="openShareModal()" class="bg-brand-600 hover:bg-brand-700 text-white px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 transition active:scale-95" title="Share summary or link">
-          <span>📤</span><span class="hidden sm:inline">Share</span>
+          <span>Share</span>
         </button>
-        <button onclick="lockHub()" class="bg-card hover:bg-rose-950/60 text-slate-400 hover:text-rose-300 border border-border px-2.5 py-2 rounded-xl text-xs font-semibold transition" title="Lock Match Hub">
-          🔒
+        <button onclick="lockHub()" class="bg-card hover:bg-rose-50 text-slate-400 hover:text-rose-400 border border-border px-2.5 py-2 rounded-xl text-xs font-semibold transition" title="Lock Match Hub">
+          Lock
         </button>
       </div>
     </div>
@@ -200,44 +289,44 @@
     <div class="max-w-5xl mx-auto mt-3 grid grid-cols-2 gap-2" id="teamSwitch"></div>
 
     <!-- Aspire Competition Scope Bar (shown when viewing Aspire) -->
-    <div id="scopeBar" class="hidden max-w-5xl mx-auto mt-2 flex items-center justify-between bg-pitch/60 px-3 py-1.5 rounded-xl border border-border text-[11px]">
-      <span class="text-slate-400 font-medium">📊 Competition Filter:</span>
+    <div id="scopeBar" class="hidden max-w-5xl mx-auto mt-2 flex items-center justify-between bg-card px-3 py-1.5 rounded-xl border border-border text-[11px]">
+      <span class="text-slate-400 font-medium">Competition Filter:</span>
       <div class="flex items-center gap-1">
         <button type="button" onclick="setAspireScope('all')" id="scope-all" class="px-2.5 py-1 rounded-lg font-semibold transition">All Matches</button>
         <button type="button" onclick="setAspireScope('league')" id="scope-league" class="px-2.5 py-1 rounded-lg font-semibold transition">GA &amp; Aspire League</button>
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="max-w-5xl mx-auto mt-2">
-      <div class="flex bg-pitch/80 p-1 rounded-xl border border-border text-xs font-medium overflow-x-auto">
-        <button onclick="switchTab('tab-overview')" id="btn-tab-overview" class="tab-btn flex-1 py-2 px-2 rounded-lg font-semibold transition whitespace-nowrap">Overview</button>
-        <button onclick="switchTab('tab-roster')" id="btn-tab-roster" class="tab-btn flex-1 py-2 px-2 rounded-lg font-semibold transition whitespace-nowrap">Roster &amp; Splits</button>
-        <button onclick="switchTab('tab-film')" id="btn-tab-film" class="tab-btn flex-1 py-2 px-2 rounded-lg font-semibold transition whitespace-nowrap">🎥 Film &amp; Glow/Grow</button>
-        <button onclick="switchTab('tab-charts')" id="btn-tab-charts" class="tab-btn flex-1 py-2 px-2 rounded-lg font-semibold transition whitespace-nowrap">Charts</button>
-        <button onclick="switchTab('tab-tactics')" id="btn-tab-tactics" class="tab-btn flex-1 py-2 px-2 rounded-lg font-semibold transition whitespace-nowrap">Insights &amp; Notes</button>
-        <button onclick="switchTab('tab-reports')" id="btn-tab-reports" class="tab-btn flex-1 py-2 px-2 rounded-lg font-semibold transition whitespace-nowrap text-amber-300">📋 Report Cards</button>
+    <!-- Floating Forest Green Pill Tabs -->
+    <div class="max-w-5xl mx-auto mt-2.5">
+      <div class="nav-pill-bar flex text-xs font-medium overflow-x-auto gap-1">
+        <button onclick="switchTab('tab-overview')" id="btn-tab-overview" class="tab-btn flex-1 py-2 px-3 rounded-full font-semibold transition whitespace-nowrap">Overview</button>
+        <button onclick="switchTab('tab-roster')" id="btn-tab-roster" class="tab-btn flex-1 py-2 px-3 rounded-full font-semibold transition whitespace-nowrap">Roster &amp; Splits</button>
+        <button onclick="switchTab('tab-film')" id="btn-tab-film" class="tab-btn flex-1 py-2 px-3 rounded-full font-semibold transition whitespace-nowrap">Film &amp; Glow/Grow</button>
+        <button onclick="switchTab('tab-charts')" id="btn-tab-charts" class="tab-btn flex-1 py-2 px-3 rounded-full font-semibold transition whitespace-nowrap">Charts</button>
+        <button onclick="switchTab('tab-tactics')" id="btn-tab-tactics" class="tab-btn flex-1 py-2 px-3 rounded-full font-semibold transition whitespace-nowrap">Takeaways &amp; Notes</button>
+        <button onclick="switchTab('tab-reports')" id="btn-tab-reports" class="tab-btn flex-1 py-2 px-3 rounded-full font-semibold transition whitespace-nowrap">Report Cards</button>
       </div>
     </div>
   </header>
 
   <main class="flex-1 max-w-5xl w-full mx-auto p-4 space-y-4 safe-bottom">
 
-    <!-- Banner -->
-    <div class="bg-gradient-to-br from-card to-surface rounded-2xl p-5 border border-border shadow-lg" style="border-top: 3px solid var(--accent)">
+    <!-- Pitchside Contrast Block Match Banner -->
+    <div class="contrast-block rounded-2xl p-5 sm:p-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2" id="bannerBadges"></div>
           <div class="mt-3 flex flex-wrap items-center gap-3">
             <div id="teamName" class="display text-3xl md:text-4xl text-white"></div>
-            <div id="scoreLine" class="display text-4xl md:text-5xl accent-text bg-black/40 px-3 py-1 rounded-xl border border-white/10 shadow-inner"></div>
+            <div id="scoreLine" class="display text-4xl md:text-5xl accent-text bg-pitch px-3.5 py-1 rounded-xl border border-border"></div>
             <div id="scoreRight" class="text-base md:text-xl font-bold text-slate-300"></div>
           </div>
           <p id="matchMeta" class="text-xs text-slate-400 mt-2"></p>
           <p id="bannerSummary" class="text-xs text-slate-400 mt-1"></p>
           <div id="filmLinks" class="mt-3 flex flex-wrap gap-2"></div>
         </div>
-        <div class="grid grid-cols-3 gap-2 border-t md:border-t-0 border-border pt-3 md:pt-0 shrink-0" id="pills"></div>
+        <div class="grid grid-cols-3 gap-2 border-t md:border-t-0 border-white/15 pt-3 md:pt-0 shrink-0" id="pills"></div>
       </div>
     </div>
 
@@ -245,12 +334,12 @@
     <div id="tab-overview" class="tab-content space-y-4">
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="kpis"></div>
 
-      <!-- Aspire Film Review Intelligence Snapshot (shown when team has film log data) -->
+      <!-- Aspire Film Review Breakdown (shown when team has film log data) -->
       <div id="overviewFilmCard" class="hidden bg-card rounded-2xl p-4 border border-border space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-              <span>🎥 Detailed Film Review Intelligence (Glow vs. Grow &amp; Turnovers by Third)</span>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5">
+              <span>Match Film Breakdown · Developmental Net Rating &amp; Turnovers by Third</span>
             </h3>
             <p id="overviewFilmSub" class="text-[11px] text-slate-400 mt-0.5"></p>
           </div>
@@ -284,9 +373,9 @@
       <div class="bg-card rounded-2xl p-4 border border-border">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <span>🔄 Club Swing Players (GA + Aspire Combined Workload)</span>
+            <span>Club Swing Players (GA + Aspire Combined Minutes)</span>
           </h3>
-          <span class="text-[11px] text-amber-300 font-medium">Cross-team fatigue monitor</span>
+          <span class="text-[11px] text-amber-300 font-medium">Cross-team workload</span>
         </div>
         <div id="swingList" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
       </div>
@@ -318,18 +407,18 @@
           </table>
         </div>
         <div class="p-2.5 text-[10px] text-slate-400 bg-pitch/40 leading-relaxed text-center">
-          GP = games played (squad) · Min = pitch mins (Bench mins in modal) · TO = turnovers (Att/Mid/Def) · TO/80' = turnover rate per 80 mins · Glow/Grow = positive vs. coaching actions from Film Review<br>
-          💡 <strong class="text-white">Tap any player row</strong> to see their <strong class="accent-text">Positional Breakdown, Turnover Causes, Glow vs. Grow Habits &amp; Timestamped Film Notes</strong>
+          GP = games played (squad) · Min = pitch mins (Bench mins in modal) · TO = turnovers (D3/M3/A3) · Net/80' = Developmental Net Rating per 80 mins ((Glow×1.25 - Grow×1.0 - D3 TO×0.75) / 80')<br>
+          <strong class="text-white">Tap any player row</strong> to see their <strong class="accent-text">Positional Breakdown, Turnover Triggers, Glow vs. Grow Habits &amp; Timestamped Film Notes</strong>
         </div>
       </div>
     </div>
 
-    <!-- Film Review & Glow/Grow Intelligence Tab -->
+    <!-- Film Review & Glow/Grow Tab -->
     <div id="tab-film" class="tab-content hidden space-y-4">
       <div id="filmEmptyState" class="hidden bg-card p-8 rounded-2xl border border-border text-center space-y-3">
-        <div class="text-4xl">🎥</div>
-        <h3 class="display text-2xl text-white">No Detailed Film Log Loaded for This Squad</h3>
-        <p class="text-xs text-slate-400 max-w-md mx-auto">Detailed timestamped film review intelligence (Turnovers by zone, Glow vs. Grow player actions, and coaching clip notes) is currently active for <strong class="text-brand-400">AJAX Aspire U15</strong>. Switch to Aspire U15 above or import a Film Log CSV.</p>
+        <div class="mono text-xs uppercase text-slate-500">Film Log</div>
+        <h3 class="display text-2xl text-white">No Film Log Loaded for This Squad</h3>
+        <p class="text-xs text-slate-400 max-w-md mx-auto">Timestamped film breakdown (Turnovers by zone, Glow vs. Grow player actions, Developmental Net / 80', and coaching clip notes) is active for <strong class="text-brand-400">AJAX Aspire U15</strong>. Switch to Aspire U15 above or upload a Film Log CSV.</p>
         <button type="button" onclick="selectTeam('aspire')" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-xs font-semibold transition">Switch to AJAX Aspire U15 →</button>
       </div>
 
@@ -341,7 +430,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">📍 Pitch Zone Activity (D3 · M3 · A3)</h3>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Pitch Zone Activity (D3 · M3 · A3)</h3>
               <span class="text-[10px] text-slate-400">Click zone to filter</span>
             </div>
             <div id="filmZoneCards" class="space-y-2"></div>
@@ -349,32 +438,33 @@
 
           <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-rose-400">⚠️ Top Turnover Triggers</h3>
-              <span id="filmToCountBadge" class="text-[10px] bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full font-semibold"></span>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-rose-400">Top Turnover Triggers</h3>
+              <span id="filmToCountBadge" class="text-[10px] bg-pitch text-rose-300 border border-border px-2 py-0.5 rounded font-mono font-semibold"></span>
             </div>
             <div id="filmToReasonsList" class="space-y-2"></div>
           </div>
 
           <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">✨ Top Glow Positive Habits</h3>
-              <span id="filmGlowCountBadge" class="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold"></span>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Top Glow Positive Habits</h3>
+              <span id="filmGlowCountBadge" class="text-[10px] bg-pitch text-emerald-300 border border-border px-2 py-0.5 rounded font-mono font-semibold"></span>
             </div>
             <div id="filmGlowReasonsList" class="space-y-2"></div>
           </div>
         </div>
 
-        <!-- Player Minutes vs. Turnover Rate & Glow/Grow Matrix -->
+        <!-- Player Minutes vs. Turnover Rate & Developmental Net Rating -->
         <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                <span>⚖️ Player Minutes vs. Turnover Rate &amp; Glow / Grow Balance</span>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <span>Player Developmental Net Rating (/80') &amp; Turnover Profile</span>
               </h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">Tying official minutes played from <code class="text-slate-300">Statistics.csv</code> to film-reviewed turnovers, field zones, and Glow (positive) vs. Grow (coaching) actions. Tap any player for full film log.</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">Formula: <code class="text-brand-400 font-mono">((Glow × 1.25) - (Grow × 1.0) - (D3 TO × 0.75)) / Mins × 80</code>. Rewards progressive actions while accounting for high-touch midfield volume and defending-third risk.</p>
             </div>
-            <div class="flex items-center gap-1.5 text-[11px]" id="filmMatrixSortBar">
-              <button type="button" onclick="setFilmMatrixSort('mins')" id="fms-mins" class="px-2.5 py-1 rounded-lg border accent-chip font-semibold">By Mins</button>
+            <div class="flex flex-wrap items-center gap-1.5 text-[11px]" id="filmMatrixSortBar">
+              <button type="button" onclick="setFilmMatrixSort('netPer80')" id="fms-netPer80" class="px-2.5 py-1 rounded-lg border accent-chip font-semibold">By Net / 80'</button>
+              <button type="button" onclick="setFilmMatrixSort('mins')" id="fms-mins" class="px-2.5 py-1 rounded-lg border bg-surface border-border text-slate-300">By Mins</button>
               <button type="button" onclick="setFilmMatrixSort('glowPct')" id="fms-glowPct" class="px-2.5 py-1 rounded-lg border bg-surface border-border text-slate-300">By Glow %</button>
               <button type="button" onclick="setFilmMatrixSort('toPer80')" id="fms-toPer80" class="px-2.5 py-1 rounded-lg border bg-surface border-border text-slate-300">By TO/80'</button>
               <button type="button" onclick="setFilmMatrixSort('turnovers')" id="fms-turnovers" class="px-2.5 py-1 rounded-lg border bg-surface border-border text-slate-300">By Total TOs</button>
@@ -386,12 +476,13 @@
                 <tr>
                   <th class="py-2.5 px-3">Player</th>
                   <th class="py-2.5 px-2 text-center">Mins</th>
+                  <th class="py-2.5 px-2 text-center">Net / 80'</th>
                   <th class="py-2.5 px-2 text-center">TOs (D3/M3/A3)</th>
                   <th class="py-2.5 px-2 text-center">TO / 80'</th>
                   <th class="py-2.5 px-2 text-center">Mins / TO</th>
-                  <th class="py-2.5 px-2 text-center">🟢 Glow</th>
-                  <th class="py-2.5 px-2 text-center">🟠 Grow</th>
-                  <th class="py-2.5 px-3">Glow vs. Grow Ratio</th>
+                  <th class="py-2.5 px-2 text-center">Glow</th>
+                  <th class="py-2.5 px-2 text-center">Grow</th>
+                  <th class="py-2.5 px-3">Glow / Grow Split</th>
                   <th class="py-2.5 px-2">Primary Turnover Trigger</th>
                 </tr>
               </thead>
@@ -403,8 +494,8 @@
         <!-- Match-by-Match Film Breakdown -->
         <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
           <div class="flex items-center justify-between">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">📅 Film Review Breakdown by Match (Click to Filter Log)</h3>
-            <span class="text-[10px] text-slate-400">7 Reviewed Matches · 489 Tagged Moments</span>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Film Breakdown by Match (Click to Filter Log)</h3>
+            <span class="text-[10px] text-slate-400 mono">7 Reviewed Matches · 489 Tagged Moments</span>
           </div>
           <div id="filmMatchCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
         </div>
@@ -413,8 +504,8 @@
         <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-              <span>🎬 Timestamped Coach Film Log Explorer</span>
-              <span id="filmLogCountLabel" class="text-[10px] bg-pitch px-2.5 py-0.5 rounded-full text-brand-400 border border-border"></span>
+              <span>Match Film Log</span>
+              <span id="filmLogCountLabel" class="text-[10px] bg-pitch px-2.5 py-0.5 rounded text-brand-400 border border-border mono"></span>
             </h3>
             <button type="button" onclick="resetFilmFilters()" class="text-[11px] text-slate-400 hover:text-white underline">Reset Filters</button>
           </div>
@@ -433,11 +524,11 @@
             </select>
             <select id="filmOutcomeFilter" onchange="renderFilmLogList()" class="bg-pitch text-xs px-3 py-2 rounded-xl border border-border text-slate-200">
               <option value="ALL">All Outcomes (Glow &amp; Grow)</option>
-              <option value="Glow">🟢 Glow (Positive / Goal)</option>
-              <option value="Grow">🟠 Grow (Negative / Conceded)</option>
-              <option value="Glow & Grow">⚖️ Glow &amp; Grow (Mixed)</option>
-              <option value="Turnover">⚠️ Turnovers Only</option>
-              <option value="FilmReview">🚩 Flagged "Film Review"</option>
+              <option value="Glow">Glow (Positive / Goal)</option>
+              <option value="Grow">Grow (Coaching / Conceded)</option>
+              <option value="Glow & Grow">Glow &amp; Grow (Mixed)</option>
+              <option value="Turnover">Turnovers Only</option>
+              <option value="FilmReview">Flagged "Film Review"</option>
             </select>
             <select id="filmPlayerFilter" onchange="renderFilmLogList()" class="bg-pitch text-xs px-3 py-2 rounded-xl border border-border text-slate-200">
               <option value="ALL">All Players</option>
@@ -484,7 +575,7 @@
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Player Glow (Positive) vs. Grow (Coaching) Actions &amp; Turnovers</h3>
             <p class="text-[10px] text-slate-500 mt-0.5">From 489 timestamped film review events across 7 matches</p>
           </div>
-          <span class="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">🟢 Glow · 🟠 Grow</span>
+          <span class="text-[10px] bg-pitch text-slate-300 border border-border px-2 py-0.5 rounded font-mono">Glow · Grow · TOs</span>
         </div>
         <div class="relative h-64 w-full"><canvas id="chartGlowGrow"></canvas></div>
       </div>
@@ -506,10 +597,10 @@
       <!-- Live Auto-Generated CSV Insights -->
       <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="font-bold text-sm text-emerald-400 flex items-center gap-2">
-            <span>⚡</span> <span>Automated CSV &amp; Film Intelligence</span>
+          <h3 class="font-bold text-sm text-brand-400 flex items-center gap-2">
+            <span>Match &amp; Season Breakdown</span>
           </h3>
-          <span class="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">Live from Stats + Film</span>
+          <span class="text-[10px] bg-pitch text-slate-300 border border-border px-2 py-0.5 rounded font-mono">Stats + Film</span>
         </div>
         <div id="autoInsights" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-300"></div>
       </div>
@@ -518,28 +609,28 @@
       <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <h3 class="font-bold text-sm accent-text flex items-center gap-2">
-            <span>🧠</span> <span id="takeawayTitle">Coach Takeaways</span>
+            <span id="takeawayTitle">Coach Takeaways</span>
           </h3>
           <button id="editTakeawaysBtn" type="button" onclick="toggleEditTakeaways()" class="text-xs bg-surface hover:bg-slate-800 text-slate-200 border border-border px-3 py-1.5 rounded-xl font-semibold transition">
-            ✏️ Edit / Add Takeaway
+            Edit / Add Takeaway
           </button>
         </div>
         <div id="takeaways" class="space-y-3 text-xs leading-relaxed text-slate-300"></div>
 
         <!-- Editor Panel -->
         <div id="takeawayEditor" class="hidden pt-3 border-t border-border space-y-3">
-          <div class="text-xs text-slate-400">Edit existing takeaways or add a new one below (saves locally and embeds when you click <strong class="text-emerald-400">💾 Save HTML</strong>):</div>
+          <div class="text-xs text-slate-400">Edit existing takeaways or add a new one below (saves locally and embeds when you click <strong class="text-brand-400">Save HTML</strong>):</div>
           <div id="takeawayEditorList" class="space-y-2"></div>
           <div class="flex items-center gap-2 flex-wrap">
             <button type="button" onclick="addTakeawayRow()" class="bg-surface hover:bg-slate-800 text-slate-200 border border-border px-3 py-2 rounded-xl text-xs font-semibold">+ Add Point</button>
-            <button type="button" onclick="saveTakeaways()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">💾 Save Takeaways</button>
+            <button type="button" onclick="saveTakeaways()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">Save Takeaways</button>
             <button type="button" onclick="toggleEditTakeaways()" class="text-xs text-slate-400 hover:text-white px-2">Cancel</button>
           </div>
         </div>
       </div>
 
       <a id="glossaryLink" href="index.html#glossary" class="block bg-card p-3 rounded-2xl border border-border text-xs text-slate-300 hover:border-brand-500/50 transition">
-        📖 Open the <span class="accent-text font-semibold">Glossary</span> and <span class="accent-text font-semibold">Game Model</span> on the Team Hub →
+        Open the <span class="accent-text font-semibold">Glossary</span> and <span class="accent-text font-semibold">Game Model</span> on the Team Hub →
       </a>
     </div>
 
@@ -550,28 +641,28 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap mb-1">
             <span class="mono text-[10px] uppercase text-brand-400 font-bold">Player Development · Season 26/27</span>
-            <div id="reportSyncStatus" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-pitch border border-border text-[10px] mono text-slate-300">
+            <div id="reportSyncStatus" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-pitch border border-border text-[10px] mono text-slate-300">
               <span class="inline-block w-2 h-2 rounded-full bg-teal-400"></span> Master Data Hub Connected
             </div>
           </div>
           <h2 class="display text-2xl md:text-3xl text-white">Player Report Cards (Mid-Season Review)</h2>
-          <p class="text-xs text-slate-400">Auto-populates live benchmark ratings from <code class="text-teal-300 font-mono text-[11px]">Player_IDP</code>, reflections &amp; goals from <code class="text-teal-300 font-mono text-[11px]">Reflections_Log</code>, and match film stats.</p>
+          <p class="text-xs text-slate-400">Pulls live ratings from <code class="text-teal-300 font-mono text-[11px]">Player_IDP</code>, reflections and goals from <code class="text-teal-300 font-mono text-[11px]">Reflections_Log</code>, and match film stats.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <select id="reportPlayerSelect" onchange="onSelectReportPlayer(this.value)" class="bg-pitch border border-border text-white text-xs font-semibold px-3 py-2.5 rounded-xl outline-none focus:border-brand-500 cursor-pointer min-w-[210px]" title="Select a player">
             <!-- populated by JS -->
           </select>
-          <button type="button" onclick="refreshReportFromHub()" class="bg-surface hover:bg-slate-800 text-teal-400 border border-teal-500/30 px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm" title="Fetch latest IDP ratings & reflection logs from Google Sheets">
-            <span>⚡</span><span>Sync Live Hub</span>
+          <button type="button" onclick="refreshReportFromHub()" class="bg-surface hover:bg-slate-800 text-teal-400 border border-border px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Fetch latest IDP ratings & reflection logs from Google Sheets">
+            <span>Sync Live Hub</span>
           </button>
-          <button type="button" onclick="printReportCard()" class="bg-brand-600 hover:bg-brand-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-md shadow-brand-500/20" title="Download or print PDF formatted for standard letter size">
-            <span>🖨️</span><span>Download / Print PDF</span>
+          <button type="button" onclick="printReportCard()" class="bg-brand-600 hover:bg-brand-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95" title="Download or print PDF formatted for standard letter size">
+            <span>Download / Print PDF</span>
           </button>
           <button type="button" onclick="saveReportDraft()" class="bg-surface hover:bg-slate-800 text-slate-200 border border-border px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Save draft evaluation to browser">
-            <span>💾</span><span>Save Notes</span>
+            <span>Save Notes</span>
           </button>
           <button type="button" onclick="resetReportDraft()" class="bg-surface hover:bg-slate-800 text-rose-300 border border-border px-2.5 py-2.5 rounded-xl text-xs font-semibold transition" title="Reset evaluation notes for this player to Sheet default">
-            <span>🔄</span>
+            <span>Reset</span>
           </button>
         </div>
       </div>
@@ -585,15 +676,15 @@
 
   <!-- Player modal -->
   <div id="playerModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-end sm:items-center justify-center p-4" onclick="if(event.target===this) closePlayerModal()">
-    <div class="bg-surface border border-border rounded-3xl max-w-lg w-full p-5 shadow-2xl relative max-h-[92vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modalName">
+    <div class="bg-surface border border-border rounded-2xl max-w-lg w-full p-5 shadow-2xl relative max-h-[92vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modalName">
       <button onclick="closePlayerModal()" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-pitch flex items-center justify-center text-slate-400 hover:text-white font-bold text-sm">✕</button>
       <div class="flex items-center space-x-3 pb-3 border-b border-border">
-        <div id="modalAvatar" class="w-12 h-12 rounded-2xl accent-chip flex items-center justify-center font-black text-base border shrink-0"></div>
+        <div id="modalAvatar" class="w-12 h-12 rounded-xl accent-chip flex items-center justify-center font-black text-base border shrink-0"></div>
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <h3 id="modalName" class="font-extrabold text-base text-white"></h3>
-            <span id="modalJerseyBadge" class="hidden text-[10px] bg-pitch text-brand-400 border border-brand-500/40 px-2 py-0.5 rounded-full font-mono font-bold"></span>
-            <span id="modalSwingBadge" class="hidden text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">🔄 Swing</span>
+            <span id="modalJerseyBadge" class="hidden text-[10px] bg-pitch text-brand-400 border border-brand-500/40 px-2 py-0.5 rounded font-mono font-bold"></span>
+            <span id="modalSwingBadge" class="hidden text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded font-mono font-semibold">SWING</span>
           </div>
           <p id="modalPositions" class="text-xs accent-text font-medium mt-0.5"></p>
         </div>
@@ -604,7 +695,7 @@
       <!-- Film Review Profile (Glow vs Grow + Turnover Triggers + Timestamped Clips) -->
       <div id="modalFilmSection" class="hidden my-3 bg-pitch/80 rounded-2xl p-3.5 border border-border space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">🎥 Film Review Analysis (Glow vs. Grow &amp; Turnovers)</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1">Film Breakdown (Developmental Net / 80' &amp; Turnovers)</span>
           <span id="modalFilmRateBadge" class="text-[10px] font-mono text-slate-300"></span>
         </div>
         <div id="modalFilmSummary" class="space-y-2 text-xs"></div>
@@ -629,51 +720,51 @@
       <div id="modalNotesWrap" class="space-y-2 mt-3">
         <label for="modalNotes" class="text-xs font-semibold text-slate-300 flex items-center justify-between">
           <span>Coach Notes (Private to Coaches)</span>
-          <span id="noteSyncStatus" class="text-[10px] text-emerald-400">💾 Saved Locally &amp; in HTML Export</span>
+          <span id="noteSyncStatus" class="text-[10px] text-slate-400 mono">Saved Locally &amp; in HTML Export</span>
         </label>
         <textarea id="modalNotes" rows="3" placeholder="Tactical triggers, positional feedback, or training goals for this player..."
           class="w-full bg-pitch text-sm p-3 rounded-xl border border-border text-white placeholder-slate-600 focus:outline-none focus:border-brand-500"></textarea>
-        <button onclick="saveCurrentNote()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-xl text-xs transition">💾 Save Coach Note</button>
+        <button onclick="saveCurrentNote()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-xl text-xs transition">Save Coach Note</button>
       </div>
     </div>
   </div>
 
   <!-- Share Modal -->
   <div id="shareModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-end sm:items-center justify-center p-4" onclick="if(event.target===this) closeShareModal()">
-    <div class="bg-surface border border-border rounded-3xl max-w-sm w-full p-5 shadow-2xl relative space-y-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative space-y-4">
       <button onclick="closeShareModal()" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-pitch flex items-center justify-center text-slate-400 hover:text-white font-bold text-sm">✕</button>
       <div>
         <div class="mono text-[10px] uppercase text-brand-400">Share &amp; Export Options</div>
         <h3 class="display text-2xl text-white mt-0.5">Share Match Hub</h3>
       </div>
       <div class="space-y-2.5">
-        <button onclick="copyCoachLink()" class="w-full text-left p-3 rounded-2xl bg-card hover:bg-slate-800 border border-border transition flex items-center justify-between">
+        <button onclick="copyCoachLink()" class="w-full text-left p-3 rounded-xl bg-card hover:bg-slate-800 border border-border transition flex items-center justify-between">
           <div>
-            <div class="text-xs font-bold text-white">🔑 Copy Coach Link (Requires PIN)</div>
+            <div class="text-xs font-bold text-white">Copy Coach Link (Requires PIN)</div>
             <div class="text-[11px] text-slate-400 mt-0.5">Best for sending to your co-coach</div>
           </div>
-          <span class="text-brand-400 font-bold">Copy</span>
+          <span class="text-brand-400 font-bold text-xs">Copy</span>
         </button>
-        <button onclick="copyGuestLink()" class="w-full text-left p-3 rounded-2xl bg-card hover:bg-slate-800 border border-border transition flex items-center justify-between">
+        <button onclick="copyGuestLink()" class="w-full text-left p-3 rounded-xl bg-card hover:bg-slate-800 border border-border transition flex items-center justify-between">
           <div>
-            <div class="text-xs font-bold text-amber-300">🔗 Copy Read-Only Guest Link</div>
-            <div class="text-[11px] text-slate-400 mt-0.5">Bypasses PIN gate &amp; hides private coach notes</div>
+            <div class="text-xs font-bold text-amber-300">Copy Read-Only Guest Link</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Bypasses PIN gate and hides private coach notes</div>
           </div>
-          <span class="text-amber-300 font-bold">Copy</span>
+          <span class="text-amber-300 font-bold text-xs">Copy</span>
         </button>
-        <button onclick="shareTextReport()" class="w-full text-left p-3 rounded-2xl bg-card hover:bg-slate-800 border border-border transition flex items-center justify-between">
+        <button onclick="shareTextReport()" class="w-full text-left p-3 rounded-xl bg-card hover:bg-slate-800 border border-border transition flex items-center justify-between">
           <div>
-            <div class="text-xs font-bold text-emerald-400">📋 Copy Text Summary</div>
-            <div class="text-[11px] text-slate-400 mt-0.5">Formatted scoreline, shots &amp; goalscorers for text/chat</div>
+            <div class="text-xs font-bold text-emerald-400">Copy Text Summary</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Formatted scoreline, shots, and goalscorers for text/chat</div>
           </div>
-          <span class="text-emerald-400 font-bold">Copy</span>
+          <span class="text-emerald-400 font-bold text-xs">Copy</span>
         </button>
-        <button id="shareExportHtmlBtn" onclick="exportUpdatedHtml(); closeShareModal();" class="w-full text-left p-3 rounded-2xl bg-card hover:bg-slate-800 border border-emerald-500/30 transition flex items-center justify-between">
+        <button id="shareExportHtmlBtn" onclick="exportUpdatedHtml(); closeShareModal();" class="w-full text-left p-3 rounded-xl bg-card hover:bg-slate-800 border border-border transition flex items-center justify-between">
           <div>
-            <div class="text-xs font-bold text-emerald-300">💾 Download Updated match-hub.html</div>
-            <div class="text-[11px] text-slate-400 mt-0.5">Bakes imported CSVs, takeaways &amp; notes into the HTML file</div>
+            <div class="text-xs font-bold text-slate-200">Download Updated match-hub.html</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Bakes imported CSVs, takeaways, and notes into the HTML file</div>
           </div>
-          <span class="text-emerald-300 font-bold">Save</span>
+          <span class="text-brand-400 font-bold text-xs">Save</span>
         </button>
       </div>
     </div>
@@ -695,7 +786,7 @@
       veo: "https://app.veo.co/clubs/ajax-50ad2f70/teams/ajax-2012g/recordings/"
     };
 
-    const DATA_VERSION = "2026-10-25-v5"; // Forces fresh reload of 4-game GA U15 (3W-1D-0L) & 5-game Aspire U15 (1W-0D-4L) + Film Log
+    const DATA_VERSION = "2026-10-27-v6"; // Forces fresh reload of 4-game GA U15 (3W-1D-0L) & 5-game Aspire U15 (1W-0D-4L) + Film Log + Net Rating / 80'
 
     const TEAMS = [
       {
@@ -717,9 +808,9 @@
         note: "3W-1D-0L · 14 GF : 1 GA (+13)",
         takeaways: [
           ["Unbeaten 4-Game Start & Defensive Dominance", "Unbeaten <strong>3W-1D-0L record (14 GF : 1 GA, +13 GD)</strong> across 4 games (321 minutes) with <strong>3 clean sheets</strong> and only 15 shots conceded total (3.75/gm). Center back <strong>Addison Lee</strong> and goalkeeper <strong>Evelynn Strong</strong> have played every single minute (321'), flanked by <strong>Joselyn Nguyen</strong> (279'), <strong>Anahí Albor</strong> (263'), <strong>Ariana Mallari</strong> (250'), <strong>Madisyn Craig</strong> (224' at CB, +10 on-pitch), and <strong>Adiana Newell</strong> (219')."],
-          ["Attacking Firepower & Positional Versatility", "<strong>Kora Busam</strong> leads the attack with <strong>6G + 2A</strong> (11 SOT on 13 shots) across LW (3G in 60'), LM (2G in 56'), CF (1G/1A in 26'), and RM (1A in 38'). <strong>Addison Leigh</strong> has delivered <strong>2G + 3A in 182'</strong> (100% SOT on 7 shots—2G/1A at LM in 61', 2A at CF in 15', plus 82' at CB in a clean-sheet draw)."],
+          ["Attacking Firepower & Positional Versatility", "<strong>Kora Busam</strong> leads the attack with <strong>6G + 2A</strong> (11 SOT on 13 shots) across LW (3G in 60'), LM (2G in 56'), CF (1G/1A in 26'), and RM (1A in 38'). <strong>Addison Leigh</strong> has delivered <strong>2G + 3A in 182'</strong> (100% SOT on 7 shots: 2G/1A at LM in 61', 2A at CF in 15', plus 82' at CB in a clean-sheet draw)."],
           ["Wing, Midfield & Swing Production", "<strong>Emery Dobson</strong> has 2G + 2A in 226' across RW (159') and LW (54'), <strong>Kaylani Brasil</strong> has 2G + 1A in 160' (CF/RW/LM), <strong>Aliyah Moreno</strong> added 1G + 1A in 150', and <strong>Joselyn Nguyen</strong> anchors the midfield (279' played, 1G at CM). Swing contributors <strong>Kendall Blair</strong> (123' across 3 GP) and <strong>Sophia Culver</strong> (32' at LW/CF) add key depth across both squads."],
-          ["Set Piece Volume & Shot Quality", "Generated <strong>25 corner kicks and 15 crosses</strong> across 4 games—led by <strong>Kora Busam</strong> (13 corners, 4 crosses), <strong>Addison Leigh</strong> (5 corners, 2 crosses), and <strong>Addison Lee</strong> (5 corners). 68% of all shots have been on target (34 of 50) with a 28% goal conversion rate."]
+          ["Set Piece Volume & Shot Quality", "Generated <strong>25 corner kicks and 15 crosses</strong> across 4 games, led by <strong>Kora Busam</strong> (13 corners, 4 crosses), <strong>Addison Leigh</strong> (5 corners, 2 crosses), and <strong>Addison Lee</strong> (5 corners). 68% of all shots have been on target (34 of 50) with a 28% goal conversion rate."]
         ]
       },
       {
@@ -737,8 +828,8 @@
         opponent: "", date: "", venue: "", homeAway: "", note: "1W-0D-4L · GA & Aspire 26/27",
         takeaways: [
           ["Shot Accuracy vs. Volume (1W-0D-4L)", "Across 5 games (413 mins, 7 GF : 12 GA), the squad has an impressive <strong>73% shot accuracy</strong> (27 of 37 shots on target, 19% conversion), averaging 7.4 shots/gm. Increasing final-third entries to 12+ shots/game will turn close games into wins."],
-          ["Film Review: Turnovers by Third & Primary Triggers", "Across <strong>489 tagged film moments (238 turnovers)</strong>, <strong>100 turnovers occurred in the Middle 3rd (M3)</strong>, <strong>80 in the Defending 3rd (D3)</strong>, and <strong>55 in the Attacking 3rd (A3)</strong>. The #1 trigger is <strong>Forced Pass (95 TOs, 40%)</strong> followed by <strong>Turned into Pressure (44 TOs)</strong> and <strong>Heavy Touch (28 TOs)</strong>. Cleaning up forced vertical passes exiting D3/M3 is our highest-leverage coaching point."],
-          ["Glow vs. Grow Player Balance & Ball Security", "<strong>Camila Deleon (#9)</strong> leads all defenders in ball security (only <strong>4 TOs in 346' — 0.9 TO/80'</strong>, <strong>61% Glow rate</strong>: 19 Glow vs 12 Grow). <strong>Alexa Chipres (#50)</strong> (56% Glow, 4.0 TO/80' in 277'), <strong>Grace Krimmel (#5)</strong> (62% Glow, 3.7 TO/80' in 258'), <strong>Kendall Blair (#14)</strong> (44 Glow / 40 Grow in 325'), and <strong>Giselle Rosales (#2)</strong> (38 Glow / 35 Grow in 287') set the standard for positive actions."],
+          ["Film Review: Turnovers by Third & Primary Triggers", "Across <strong>489 tagged film moments (238 turnovers)</strong>, <strong>100 turnovers occurred in the Middle 3rd (M3)</strong>, <strong>80 in the Defending 3rd (D3)</strong>, and <strong>55 in the Attacking 3rd (A3)</strong>. The #1 trigger is <strong>Forced Pass (95 TOs, 40%)</strong> followed by <strong>Turned into Pressure (44 TOs)</strong> and <strong>Heavy Touch (28 TOs)</strong>. Cleaning up forced vertical passes exiting D3 and M3 is our main focus."],
+          ["Developmental Net Rating (/80') & Ball Security", "Using our Developmental Net Rating (<code>(Glow × 1.25 - Grow × 1.0 - D3 TO × 0.75) / 80'</code>), <strong>Grace Krimmel (#5)</strong> (+3.6/80', 62% Glow), <strong>Camila Deleon (#9)</strong> (+2.4/80', only 0.9 TO/80' in 346'), and <strong>Giselle Rosales (#2)</strong> (+2.9/80' in 287') lead the squad. High-volume midfielders <strong>Kendall Blair (#14)</strong> (44 Glow / 40 Grow in 325') and <strong>Scarlett Freitas (#8)</strong> (37 Glow / 42 Grow in 306') carry heavy central touches."],
           ["Attacking Finishers & Midfield Playmaking", "<strong>Sophia Culver (#23)</strong> leads with <strong>3G + 1A</strong> in 263' (52% Glow rate), <strong>Giselle Rosales (#2)</strong> has <strong>2G + 2 Key Passes + 12 Corners</strong> in 287', and <strong>Scarlett Freitas (#8)</strong> has <strong>2 Assists + 1 KP + 37 Glow actions</strong> in 306'."]
         ]
       }
@@ -784,7 +875,7 @@
     let totals = {};
     let activeSortProp = 'goals';
     let sortAscending = false;
-    let filmMatrixSort = 'mins';
+    let filmMatrixSort = 'netPer80';
     let selectedPlayer = null;
     let activeTab = 'tab-overview';
     let chartContrib = null, chartWorkload = null, chartZones = null, chartGlowGrow = null;
@@ -880,6 +971,22 @@
       $('authGate').classList.remove('hidden');
     }
 
+    function computePlayerNetMetrics(p) {
+      if (!p) return;
+      const glow = Number(p.glow) || 0;
+      const grow = Number(p.grow) || 0;
+      const toD = Number(p.toD) || 0;
+      const mins = Number(p.mins) || 0;
+      // Model 3 Developmental Net Score: (Glow * 1.25) - (Grow * 1.0) - (D3 TO * 0.75)
+      p.netPts = Number(((glow * 1.25) - (grow * 1.0) - (toD * 0.75)).toFixed(2));
+      p.netPer80 = mins > 0 ? Number((p.netPts * 80 / mins).toFixed(1)) : 0;
+    }
+
+    function fmtNet(val) {
+      const n = Number(val) || 0;
+      return (n > 0 ? '+' : '') + n.toFixed(1);
+    }
+
     function sanitizeAndHealData() {
       // Safeguard against the 4W-4L combined club total row ever appearing as AJAX ASPIRE U15
       const asp = DATA['AJAX ASPIRE U15'];
@@ -891,21 +998,28 @@
       if (!ga || !ga.totals || !ga.totals.games) {
         DATA['AJAX GA U15'] = JSON.parse(JSON.stringify(DEFAULT_DATA['AJAX GA U15']));
       }
-      // Heal percentage decimals (e.g. 0.73 -> 73) if SheetJS converted % strings to floats
+      // Ensure filmEvents & filmSummary from DEFAULT_DATA are preserved if custom stats were imported without film
+      if (DATA['AJAX ASPIRE U15'] && !DATA['AJAX ASPIRE U15'].filmEvents && DEFAULT_DATA['AJAX ASPIRE U15']?.filmEvents) {
+        applyFilmEventsToTeam(DATA['AJAX ASPIRE U15'], DEFAULT_DATA['AJAX ASPIRE U15'].filmEvents);
+      }
+      // Heal percentage decimals (e.g. 0.73 -> 73) and compute Developmental Net / 80'
       for (const teamObj of Object.values(DATA)) {
         if (!teamObj || !teamObj.totals) continue;
         ['shotAcc', 'conv', 'winPct'].forEach(k => {
           const v = Number(teamObj.totals[k]) || 0;
           if (v > 0 && v <= 1) teamObj.totals[k] = Math.round(v * 100);
         });
+        const tGlow = Number(teamObj.totals.glow) || 0;
+        const tGrow = Number(teamObj.totals.grow) || 0;
+        const tToD = Number(teamObj.totals.toD) || 0;
+        const tMins = Number(teamObj.totals.mins) || 0;
+        teamObj.totals.netPts = Number(((tGlow * 1.25) - (tGrow * 1.0) - (tToD * 0.75)).toFixed(2));
+        teamObj.totals.netPer80 = tMins > 0 ? Number((teamObj.totals.netPts * 80 / tMins).toFixed(1)) : 0;
         (teamObj.players || []).forEach(p => {
           const wv = Number(p.winPct) || 0;
           if (wv > 0 && wv <= 1) p.winPct = Math.round(wv * 100);
+          computePlayerNetMetrics(p);
         });
-      }
-      // Ensure filmEvents & filmSummary from DEFAULT_DATA are preserved if custom stats were imported without film
-      if (DATA['AJAX ASPIRE U15'] && !DATA['AJAX ASPIRE U15'].filmEvents && DEFAULT_DATA['AJAX ASPIRE U15']?.filmEvents) {
-        applyFilmEventsToTeam(DATA['AJAX ASPIRE U15'], DEFAULT_DATA['AJAX ASPIRE U15'].filmEvents);
       }
     }
 
@@ -973,7 +1087,7 @@
         const key = t.id === 'aspire' ? activeExportKey(t) : t.exportName;
         const d = DATA[key]?.totals || {};
         const rec = d.games ? `${d.won}W-${d.tied}D-${d.lost}L (${d.gf}:${d.ga})` : 'No games yet';
-        const filmTag = DATA[key]?.filmEvents?.length ? ` · 🎥 ${DATA[key].filmEvents.length} clips` : '';
+        const filmTag = DATA[key]?.filmEvents?.length ? ` · ${DATA[key].filmEvents.length} film clips` : '';
         const dot = t.id === 'aspire' ? '#3ABFB8' : '#C8A951';
         return `<button type="button" onclick="selectTeam('${t.id}')" aria-pressed="${t.id === team.id}"
           class="team-btn text-left px-3 py-2 rounded-xl border border-border bg-pitch/60 text-slate-300 transition">
@@ -1056,12 +1170,12 @@
       $('glossaryLink').href = LINKS.teamHub + '#glossary';
 
       const badges = [];
-      if (!totals.games) badges.push(`<span class="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">No games logged</span>`);
-      else if (season) badges.push(`<span class="accent-chip border text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Season to Date · ${plural(totals.games, 'game')} (${totals.mins}' total)</span>`);
-      else badges.push(`<span class="accent-chip border text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Full Time · ${team.matchLength} Mins</span>`);
-      if (totals.cleanSheets) badges.push(`<span class="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">🧤 ${season ? plural(totals.cleanSheets, 'Clean Sheet') : 'Clean Sheet'}</span>`);
-      if (hasFilm) badges.push(`<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">🎥 ${totals.filmEventsCount} Film Moments (${totals.glow} Glow · ${totals.grow} Grow)</span>`);
-      badges.push(`<span class="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-bold px-2 py-0.5 rounded-full">${esc(team.league)}</span>`);
+      if (!totals.games) badges.push(`<span class="bg-pitch text-slate-300 border border-border text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">No games logged</span>`);
+      else if (season) badges.push(`<span class="accent-chip border text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Season to Date · ${plural(totals.games, 'game')} (${totals.mins}' total)</span>`);
+      else badges.push(`<span class="accent-chip border text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Full Time · ${team.matchLength} Mins</span>`);
+      if (totals.cleanSheets) badges.push(`<span class="bg-pitch text-sky-300 border border-border text-[10px] font-bold px-2 py-0.5 rounded mono">${season ? plural(totals.cleanSheets, 'Clean Sheet') : 'Clean Sheet'}</span>`);
+      if (hasFilm) badges.push(`<span class="bg-pitch text-emerald-400 border border-border text-[10px] font-bold px-2 py-0.5 rounded mono">${totals.filmEventsCount} Film Moments (${totals.glow} Glow · ${totals.grow} Grow)</span>`);
+      badges.push(`<span class="bg-pitch text-slate-300 border border-border text-[10px] font-bold px-2 py-0.5 rounded">${esc(team.league)}</span>`);
       $('bannerBadges').innerHTML = badges.join('');
 
       $('teamName').textContent = team.short;
@@ -1075,15 +1189,15 @@
         $('scoreLine').textContent = `${goals} - ${ga}`;
         $('scoreRight').textContent = team.opponent || 'Opponent';
         const meta = [formatDate(team.date), team.homeAway, team.venue].filter(Boolean);
-        $('matchMeta').textContent = meta.length ? '📅 ' + meta.join(' · ') : '';
+        $('matchMeta').textContent = meta.length ? meta.join(' · ') : '';
         $('bannerSummary').textContent = [team.note, `${shots} shots taken`, `${plural(totals.shotsAgainst || 0, 'shot')} conceded`].filter(Boolean).join(' · ');
       }
       $('matchMeta').classList.toggle('hidden', !$('matchMeta').textContent);
 
       const links = [];
-      if (LINKS.veo) links.push(`<a href="${esc(LINKS.veo)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch/70 hover:bg-pitch border border-border px-2.5 py-1.5 rounded-lg text-slate-200">🎥 Watch on Veo</a>`);
-      if (LINKS.film) links.push(`<a href="${esc(LINKS.film)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch/70 hover:bg-pitch border border-border px-2.5 py-1.5 rounded-lg text-slate-200">▶ Film Room</a>`);
-      if (hasFilm) links.push(`<button type="button" onclick="switchTab('tab-film')" class="text-[11px] font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 px-2.5 py-1.5 rounded-lg text-emerald-300">🎬 Explore 489 Film Clips →</button>`);
+      if (LINKS.veo) links.push(`<a href="${esc(LINKS.veo)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-border px-2.5 py-1.5 rounded-lg text-slate-200">Watch on Veo →</a>`);
+      if (LINKS.film) links.push(`<a href="${esc(LINKS.film)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-border px-2.5 py-1.5 rounded-lg text-slate-200">Film Room →</a>`);
+      if (hasFilm) links.push(`<button type="button" onclick="switchTab('tab-film')" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-brand-500/40 px-2.5 py-1.5 rounded-lg text-brand-400">Open Film Log (${totals.filmEventsCount}) →</button>`);
       $('filmLinks').innerHTML = links.join('');
 
       const toDef = totals.toD || 0;
@@ -1110,7 +1224,7 @@
     }
 
     /* ---------- Leaders & Creation & Swing Players ---------- */
-    const leaderCls = ['accent-chip', 'bg-blue-500/20 text-blue-400 border-blue-500/40', 'bg-purple-500/20 text-purple-400 border-purple-500/40', 'bg-teal-500/20 text-teal-400 border-teal-500/40', 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'];
+    const leaderCls = ['accent-chip', 'bg-pitch text-slate-200 border-border', 'bg-pitch text-slate-300 border-border', 'bg-pitch text-slate-300 border-border', 'bg-pitch text-slate-300 border-border'];
 
     function renderOverviewFilmSnapshot() {
       const d = DATA[activeExportKey(team)];
@@ -1128,9 +1242,13 @@
         `<div class="flex items-center justify-between text-[11px]"><span class="text-slate-300 truncate">${esc(k)}</span><span class="font-mono font-bold text-rose-400">${v} (${pct(v, fs.turnovers)}%)</span></div>`
       ).join('');
 
-      const bestGlow = [...players].filter(p => (p.glow || 0) + (p.grow || 0) >= 8 && p.mins >= 120)
-        .sort((a, b) => (b.glowPct || 0) - (a.glowPct || 0) || (b.glow || 0) - (a.glow || 0)).slice(0, 4)
-        .map(p => `<div onclick="openPlayerModal(${players.indexOf(p)})" class="flex items-center justify-between text-[11px] cursor-pointer hover:text-white"><span class="text-slate-200 truncate"><strong class="text-brand-400">#${p.jersey}</strong> ${esc(shortName(p.name))} <span class="text-slate-500">(${p.mins}')</span></span><span class="font-semibold text-emerald-400">${p.glowPct}% (${p.glow}🟢/${p.grow}🟠)</span></div>`).join('');
+      const bestNet = [...players].filter(p => (p.glow || 0) + (p.grow || 0) >= 8 && p.mins >= 120)
+        .sort((a, b) => (b.netPer80 || 0) - (a.netPer80 || 0) || (b.glowPct || 0) - (a.glowPct || 0)).slice(0, 4)
+        .map(p => {
+          const n80 = Number(p.netPer80) || 0;
+          const nCls = n80 >= 0 ? 'text-emerald-400' : 'text-amber-300';
+          return `<div onclick="openPlayerModal(${players.indexOf(p)})" class="flex items-center justify-between text-[11px] cursor-pointer hover:text-white"><span class="text-slate-200 truncate"><strong class="text-brand-400">#${p.jersey}</strong> ${esc(shortName(p.name))} <span class="text-slate-500">(${p.mins}')</span></span><span class="font-mono font-semibold ${nCls}">${fmtNet(n80)}/80' <span class="text-slate-400 font-sans text-[10px]">(${p.glow}G/${p.grow}Gr)</span></span></div>`;
+        }).join('');
 
       const lowToRate = [...players].filter(p => p.mins >= 120 && !p.roles.includes('GK'))
         .sort((a, b) => (a.toPer80 || 0) - (b.toPer80 || 0)).slice(0, 4)
@@ -1139,22 +1257,22 @@
       $('overviewFilmGrid').innerHTML = `
         <div class="bg-surface p-3 rounded-xl border border-border/80 space-y-1.5">
           <div class="text-[10px] font-bold uppercase tracking-wider text-rose-400 flex items-center justify-between">
-            <span>⚠️ Top Turnover Causes</span>
-            <span>${fs.turnovers} Total</span>
+            <span>Top Turnover Triggers</span>
+            <span class="mono">${fs.turnovers} Total</span>
           </div>
           ${topReasons}
         </div>
         <div class="bg-surface p-3 rounded-xl border border-border/80 space-y-1.5">
           <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-between">
-            <span>🟢 Highest Glow Ratio (120'+)</span>
-            <span>Glow / Grow</span>
+            <span>Top Developmental Net / 80' (120'+)</span>
+            <span class="mono">Net / 80'</span>
           </div>
-          ${bestGlow}
+          ${bestNet}
         </div>
         <div class="bg-surface p-3 rounded-xl border border-border/80 space-y-1.5">
           <div class="text-[10px] font-bold uppercase tracking-wider text-sky-400 flex items-center justify-between">
-            <span>🛡️ Lowest Turnover Rate (Field)</span>
-            <span>Per 80 Mins</span>
+            <span>Lowest Turnover Rate (Field)</span>
+            <span class="mono">Per 80 Mins</span>
           </div>
           ${lowToRate}
         </div>
@@ -1180,10 +1298,10 @@
           const posTop = (p.posBreakdown || []).slice(0, 2).map(r => `${r.pos} (${r.mins}')`).join(', ') || p.roles.slice(0, 2).join(', ');
           const detail = [posTop, season ? `${p.gp} GP · ${p.mins}'` : `${p.mins}'`].filter(Boolean);
           const ga = p.goals && p.assists ? `${p.goals}G + ${p.assists}A` : p.goals ? plural(p.goals, 'Goal') : plural(p.assists, 'Assist');
-          const per80 = p.glow ? `🟢 ${p.glow} Glow · 🟠 ${p.grow} Grow` : (p.mins >= 30 ? `${((p.goals + p.assists) / p.mins * 80).toFixed(2)} G+A/80'` : `${p.sot}/${p.shots} SOT`);
-          return `<button type="button" onclick="openPlayerModal(${players.indexOf(p)})" class="w-full text-left flex items-center justify-between p-2.5 rounded-xl bg-surface hover:bg-[#1a2c33] active:bg-[#1f353e] transition border border-border/60">
+          const per80 = p.glow ? `Net ${fmtNet(p.netPer80)}/80' · ${p.glow} Glow / ${p.grow} Grow` : (p.mins >= 30 ? `${((p.goals + p.assists) / p.mins * 80).toFixed(2)} G+A/80'` : `${p.sot}/${p.shots} SOT`);
+          return `<button type="button" onclick="openPlayerModal(${players.indexOf(p)})" class="w-full text-left flex items-center justify-between p-2.5 rounded-xl bg-surface hover:bg-pitch transition border border-border/60">
               <div class="flex items-center space-x-3 min-w-0">
-                <div class="w-9 h-9 shrink-0 rounded-full ${leaderCls[i % leaderCls.length]} flex items-center justify-center font-bold text-xs border">${esc(badge(p))}</div>
+                <div class="w-9 h-9 shrink-0 rounded-lg ${leaderCls[i % leaderCls.length]} flex items-center justify-center font-mono font-bold text-xs border">${esc(badge(p))}</div>
                 <div class="min-w-0">
                   <div class="font-bold text-sm text-white flex items-center gap-1.5 flex-wrap">${esc(p.name)} ${tag}</div>
                   <div class="text-[11px] text-slate-400 truncate">${esc(detail.join(' · '))}</div>
@@ -1208,10 +1326,10 @@
         if (p.assists) parts.push(`${plural(p.assists, 'Assist')}`);
         if (p.corners) parts.push(`${plural(p.corners, 'Corner')}`);
         if (p.crosses) parts.push(`${plural(p.crosses, 'Cross')}`);
-        const subRight = p.glow ? `🟢${p.glow}/🟠${p.grow} · ${p.toPer80 || 0} TO/80'` : `${p.turnovers || 0} TOs`;
-        return `<button type="button" onclick="openPlayerModal(${players.indexOf(p)})" class="w-full text-left flex items-center justify-between p-2.5 rounded-xl bg-surface hover:bg-[#1a2c33] transition border border-border/60">
+        const subRight = p.glow ? `Net ${fmtNet(p.netPer80)}/80' · ${p.toPer80 || 0} TO/80'` : `${p.turnovers || 0} TOs`;
+        return `<button type="button" onclick="openPlayerModal(${players.indexOf(p)})" class="w-full text-left flex items-center justify-between p-2.5 rounded-xl bg-surface hover:bg-pitch transition border border-border/60">
           <div class="flex items-center space-x-3 min-w-0">
-            <div class="w-8 h-8 shrink-0 rounded-lg bg-pitch text-brand-400 border border-border flex items-center justify-center font-bold text-xs">${esc(badge(p))}</div>
+            <div class="w-8 h-8 shrink-0 rounded-lg bg-pitch text-brand-400 border border-border flex items-center justify-center font-mono font-bold text-xs">${esc(badge(p))}</div>
             <div class="min-w-0">
               <div class="font-bold text-xs text-white truncate">${esc(p.name)}</div>
               <div class="text-[11px] text-slate-400 truncate">${esc(parts.join(' · '))}</div>
@@ -1232,19 +1350,19 @@
       const swings = allNames.map(n => ({ name: n, info: getSwingInfo(n) })).filter(x => x.info.isSwing);
       $('swingList').innerHTML = swings.length ? swings.map(({ name, info }) => {
         const idx = players.findIndex(p => normKey(p.name) === normKey(name));
-        return `<div onclick="${idx !== -1 ? `openPlayerModal(${idx})` : ''}" class="bg-surface p-3 rounded-xl border border-amber-500/30 flex items-center justify-between ${idx !== -1 ? 'cursor-pointer hover:border-amber-400' : ''} transition">
+        return `<div onclick="${idx !== -1 ? `openPlayerModal(${idx})` : ''}" class="bg-surface p-3 rounded-xl border border-border flex items-center justify-between ${idx !== -1 ? 'cursor-pointer hover:border-brand-400' : ''} transition">
           <div>
             <div class="font-bold text-sm text-white flex items-center gap-1.5">
               <span>${esc(name)}</span>
-              <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-semibold">${info.totalGp} Total GP</span>
+              <span class="text-[10px] accent-chip border px-1.5 py-0.5 rounded font-semibold">${info.totalGp} Total GP</span>
             </div>
             <div class="text-[11px] text-slate-400 mt-1">
-              <span class="text-[#C8A951] font-semibold">GA U15:</span> ${info.gaMins}' (${info.gaGp} GP) &nbsp;·&nbsp;
-              <span class="text-[#3ABFB8] font-semibold">Aspire U15:</span> ${info.aspMins}' (${info.aspGp} GP)
+              <span class="text-[#15803D] font-semibold">GA U15:</span> ${info.gaMins}' (${info.gaGp} GP) &nbsp;·&nbsp;
+              <span class="text-[#008496] font-semibold">Aspire U15:</span> ${info.aspMins}' (${info.aspGp} GP)
             </div>
           </div>
           <div class="text-right pl-2">
-            <div class="display text-2xl text-amber-300 leading-none">${info.totalMins}'</div>
+            <div class="display text-2xl text-brand-400 leading-none">${info.totalMins}'</div>
             <div class="text-[10px] text-slate-400 mt-0.5">Club Mins</div>
           </div>
         </div>`;
@@ -1259,8 +1377,7 @@
       $(tabId).classList.remove('hidden');
       document.querySelectorAll('.tab-btn').forEach(btn => {
         const on = btn.id === `btn-${tabId}`;
-        btn.classList.toggle('bg-brand-600', on); btn.classList.toggle('text-white', on); btn.classList.toggle('shadow', on);
-        btn.classList.toggle('text-slate-400', !on);
+        btn.classList.toggle('active-pill', on);
       });
       if (tabId === 'tab-charts') setTimeout(renderCharts, 50);
       if (tabId === 'tab-film') renderFilmTab();
@@ -1286,7 +1403,7 @@
         ['turnovers', 'Turnovers']
       ];
       if (hasTeamFilm()) {
-        base.push(['toPer80', 'TO / 80\''], ['glow', '🟢 Glow'], ['grow', '🟠 Grow'], ['glowPct', 'Glow %']);
+        base.push(['netPer80', 'Net / 80\''], ['toPer80', 'TO / 80\''], ['glow', 'Glow'], ['grow', 'Grow'], ['glowPct', 'Glow %']);
       } else {
         base.push(['benchMins', 'Bench Mins']);
       }
@@ -1307,14 +1424,14 @@
       if (!sortOptions().some(o => o[0] === activeSortProp)) activeSortProp = 'goals';
       $('sortBar').innerHTML = '<span class="text-slate-500 shrink-0">Sort:</span>' + sortOptions().map(([k, l]) => {
         const on = k === activeSortProp;
-        return `<button onclick="changeSort('${k}')" class="px-2.5 py-1 rounded-lg border whitespace-nowrap ${on ? 'accent-chip' : 'bg-surface border-border text-slate-300'}">${l}${on ? (sortAscending ? ' ⬆' : ' ⬇') : ''}</button>`;
+        return `<button onclick="changeSort('${k}')" class="px-2.5 py-1 rounded-lg border whitespace-nowrap ${on ? 'accent-chip' : 'bg-surface border-border text-slate-300'}">${l}${on ? (sortAscending ? ' ↑' : ' ↓') : ''}</button>`;
       }).join('');
 
       const isPer80 = rateMode === 'per80';
       const cols = ['Player', 'Roles (Mins)'].concat(
         season ? ['GP'] : [],
         ['Min (Sub)', isPer80 ? 'G/80' : 'G', isPer80 ? 'A/80' : 'A', isPer80 ? 'KP/80' : 'KP', isPer80 ? 'Sh/80' : 'Shots (SOT)', 'SOT%', 'Cor/Cr', 'TO (D3/M3/A3)'],
-        filmOn ? ['TO/80\'', 'Glow / Grow'] : [],
+        filmOn ? ['TO/80\'', 'Net / 80\'', 'Glow / Grow'] : [],
         ['Fouls', '+/-']
       );
       $('rosterHead').innerHTML = '<tr>' + cols.map((c, i) => `<th class="py-3 ${i === 0 ? 'px-3 sticky left-0 bg-pitch z-10' : 'px-2' + (i > 1 ? ' text-center' : '')}">${c}</th>`).join('') + '</tr>';
@@ -1329,6 +1446,7 @@
       };
 
       const valOf = p => {
+        if (activeSortProp === 'netPer80' && p.mins === 0) return sortAscending ? 999 : -999;
         const raw = Number(p[activeSortProp]) || 0;
         if (isPer80 && ['goals', 'assists', 'keyPasses', 'shots', 'turnovers', 'glow', 'grow'].includes(activeSortProp)) {
           return p.mins > 0 ? (raw / p.mins * 80) : -1;
@@ -1353,16 +1471,18 @@
         const toDetail = p.turnovers ? `<span class="font-bold text-amber-300">${p.turnovers}</span> <span class="text-[10px] text-slate-400">(${p.toD||0}/${p.toM||0}/${p.toA||0})</span>` : '<span class="text-slate-500">0</span>';
         const hasNote = !isGuestMode && !!(NOTES[noteKey(p)] || localStorage.getItem(noteKey(p)));
         const glowGrowHtml = ((p.glow || 0) + (p.grow || 0)) > 0
-          ? `<span class="text-emerald-400 font-bold">${p.glow}🟢</span> <span class="text-slate-500">/</span> <span class="text-amber-400 font-bold">${p.grow}🟠</span> <span class="text-[10px] ${p.glowPct >= 50 ? 'text-emerald-300' : 'text-slate-400'}">(${p.glowPct}%)</span>`
+          ? `<span class="text-emerald-400 font-bold">${p.glow}</span> <span class="text-slate-500">/</span> <span class="text-amber-400 font-bold">${p.grow}</span> <span class="text-[10px] ${p.glowPct >= 50 ? 'text-emerald-300' : 'text-slate-400'}">(${p.glowPct}%)</span>`
           : '<span class="text-slate-500">–</span>';
+        const n80 = Number(p.netPer80) || 0;
+        const netCls = p.mins === 0 ? 'text-slate-500' : (n80 > 0 ? 'text-emerald-400 font-bold' : n80 < -3.0 ? 'text-rose-400 font-bold' : 'text-amber-300 font-semibold');
 
         return `<tr onclick="openPlayerModal(${players.indexOf(p)})" class="hover:bg-surface/80 active:bg-surface cursor-pointer transition ${p.mins === 0 ? 'opacity-55' : ''}">
             <td class="py-2.5 px-3 font-semibold text-white sticky left-0 bg-card z-10 border-r border-border/40">
               <div class="flex items-center gap-2">
                 <span class="min-w-[1.85rem] h-6 px-1 rounded-lg bg-pitch flex items-center justify-center text-[10px] font-mono font-bold accent-text border border-border">${esc(badge(p))}</span>
                 <span>${esc(p.name)}</span>
-                ${swing.isSwing ? `<span class="text-[9px] bg-amber-500/20 text-amber-300 px-1 rounded" title="Swing Player: ${swing.totalMins}' across GA + Aspire">🔄</span>` : ''}
-                ${hasNote ? `<span class="text-[10px]" title="Has Coach Note">📝</span>` : ''}
+                ${swing.isSwing ? `<span class="text-[9px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-1 rounded font-mono" title="Swing Player: ${swing.totalMins}' across GA + Aspire">SW</span>` : ''}
+                ${hasNote ? `<span class="text-[9px] bg-pitch text-brand-400 border border-border px-1 rounded font-mono" title="Has Coach Note">NOTE</span>` : ''}
               </div>
             </td>
             <td class="py-2.5 px-2">${posPills}</td>
@@ -1376,6 +1496,7 @@
             <td class="py-2.5 px-2 text-center">${p.corners} / ${p.crosses}</td>
             <td class="py-2.5 px-2 text-center">${isPer80 ? fmtRate(p.turnovers, p.mins) : toDetail}</td>
             ${filmOn ? `<td class="py-2.5 px-2 text-center font-mono ${(p.toPer80 || 0) >= 8.5 ? 'text-rose-400 font-bold' : (p.toPer80 || 0) <= 4.0 && p.mins > 0 ? 'text-emerald-400 font-bold' : 'text-slate-300'}">${p.mins > 0 ? (p.toPer80 || 0).toFixed(1) : '–'}</td>` : ''}
+            ${filmOn ? `<td class="py-2.5 px-2 text-center font-mono ${netCls}">${p.mins > 0 ? fmtNet(n80) : '–'}</td>` : ''}
             ${filmOn ? `<td class="py-2.5 px-2 text-center">${glowGrowHtml}</td>` : ''}
             <td class="py-2.5 px-2 text-center ${p.fouls >= 3 ? 'text-amber-300 font-semibold' : ''}">${p.fouls}</td>
             <td class="py-2.5 px-2 text-center ${gdCls}">${p.mins > 0 ? gdStr : '–'}</td>
@@ -1386,7 +1507,7 @@
     /* ---------- Film Review & Glow/Grow Tab ---------- */
     function setFilmMatrixSort(prop) {
       filmMatrixSort = prop;
-      ['mins', 'glowPct', 'toPer80', 'turnovers'].forEach(k => {
+      ['netPer80', 'mins', 'glowPct', 'toPer80', 'turnovers'].forEach(k => {
         const el = $(`fms-${k}`);
         if (el) el.className = `px-2.5 py-1 rounded-lg border ${k === prop ? 'accent-chip font-semibold' : 'bg-surface border-border text-slate-300'}`;
       });
@@ -1406,24 +1527,24 @@
       $('filmContentWrap').classList.remove('hidden');
 
       const glowPct = pct(fs.glow, fs.glow + fs.grow);
-      const teamToPer80 = totals.mins > 0 ? (fs.turnovers * 80 / totals.mins).toFixed(1) : '—';
+      const teamToPer80 = totals.mins > 0 ? (fs.turnovers * 80 / totals.mins).toFixed(1) : '0.0';
 
       $('filmTopKpis').innerHTML =
         kpi('Film Moments Logged', fs.totalEvents, `${fs.matches.length} reviewed matches · ${events.filter(e => e.filmReview).length} flagged for team film`, 'accent-text') +
         kpi('Film Turnovers', fs.turnovers, `D3: ${fs.toD} · M3: ${fs.toM} · A3: ${fs.toA} (${teamToPer80}/80')`, 'text-rose-400') +
-        kpi('🟢 Glow Actions', fs.glow, `${fs.glowOnly} pure Glow + ${fs.glowAndGrow} Glow & Grow (${glowPct}%)`, 'text-emerald-400') +
-        kpi('🟠 Grow Actions', fs.grow, `${fs.growOnly} pure Grow + ${fs.glowAndGrow} Glow & Grow (${100 - glowPct}%)`, 'text-amber-300');
+        kpi('Glow Actions (1.25x)', fs.glow, `${fs.glowOnly} pure Glow + ${fs.glowAndGrow} Glow & Grow (${glowPct}%)`, 'text-emerald-400') +
+        kpi('Grow Actions (-1.0x)', fs.grow, `${fs.growOnly} pure Grow + ${fs.glowAndGrow} Glow & Grow (${100 - glowPct}%)`, 'text-amber-300');
 
       // Zone Cards (D3, M3, A3)
       const zoneMeta = {
-        D3: { name: 'Defending 3rd (D3)', color: 'text-rose-400', bar: '#ef4444', desc: 'Build-out, clearances & box defense' },
+        D3: { name: 'Defending 3rd (D3)', color: 'text-rose-400', bar: '#ef4444', desc: 'Build-out, clearances & box defense (-0.75 TO weight)' },
         M3: { name: 'Middle 3rd (M3)', color: 'text-sky-400', bar: '#3b82f6', desc: 'Progression, midfield duels & press' },
         A3: { name: 'Attacking 3rd (A3)', color: 'text-amber-300', bar: '#f59e0b', desc: 'Final pass, combination play & finishing' }
       };
       $('filmZoneCards').innerHTML = (fs.zones || []).map(z => {
         const zm = zoneMeta[z.zone] || { name: z.zone, color: 'text-white', bar: '#3ABFB8', desc: '' };
         const toShare = pct(z.turnovers, fs.turnovers);
-        return `<div onclick="$('filmZoneFilter').value='${z.zone}'; renderFilmLogList();" class="bg-surface hover:bg-slate-800/80 cursor-pointer p-3 rounded-xl border border-border/80 transition space-y-1.5">
+        return `<div onclick="$('filmZoneFilter').value='${z.zone}'; renderFilmLogList();" class="bg-surface hover:bg-pitch cursor-pointer p-3 rounded-xl border border-border/80 transition space-y-1.5">
           <div class="flex items-center justify-between">
             <span class="font-bold text-xs ${zm.color}">${zm.name}</span>
             <span class="text-[11px] font-mono text-white">${z.turnovers} TOs (${toShare}%)</span>
@@ -1433,7 +1554,7 @@
           </div>
           <div class="flex items-center justify-between text-[10px] text-slate-400">
             <span>${z.events} total events</span>
-            <span>🟢 ${z.glow} Glow · 🟠 ${z.grow} Grow (${z.glowPct}% Glow)</span>
+            <span>${z.glow} Glow · ${z.grow} Grow (${z.glowPct}% Glow)</span>
           </div>
         </div>`;
       }).join('');
@@ -1477,10 +1598,10 @@
             <span class="font-bold text-xs text-white truncate">${esc(m.match)}</span>
             <span class="text-[10px] font-mono bg-pitch px-1.5 py-0.5 rounded text-slate-300">${m.events} clips</span>
           </div>
-          <div class="text-[11px] text-amber-300 font-medium">⚠️ ${m.turnovers} TOs <span class="text-slate-500 text-[10px]">(D3:${m.toD} · M3:${m.toM} · A3:${m.toA})</span></div>
+          <div class="text-[11px] text-amber-300 font-medium">${m.turnovers} TOs <span class="text-slate-500 text-[10px]">(D3:${m.toD} · M3:${m.toM} · A3:${m.toA})</span></div>
           <div class="flex items-center justify-between text-[10px]">
-            <span class="text-emerald-400 font-semibold">🟢 ${m.glow} Glow</span>
-            <span class="text-rose-400 font-semibold">🟠 ${m.grow} Grow</span>
+            <span class="text-emerald-400 font-semibold">${m.glow} Glow</span>
+            <span class="text-rose-400 font-semibold">${m.grow} Grow</span>
             <span class="text-slate-400">${m.glowPct}% Glow</span>
           </div>
         </div>
@@ -1504,6 +1625,11 @@
     function renderFilmMatrix() {
       const activePlayers = [...players].filter(p => p.mins > 0 || (p.filmEventsCount || 0) > 0);
       activePlayers.sort((a, b) => {
+        if (filmMatrixSort === 'netPer80') {
+          if (a.mins === 0) return 1;
+          if (b.mins === 0) return -1;
+          return (b.netPer80 || 0) - (a.netPer80 || 0) || b.mins - a.mins;
+        }
         if (filmMatrixSort === 'glowPct') return (b.glowPct || 0) - (a.glowPct || 0) || (b.glow || 0) - (a.glow || 0);
         if (filmMatrixSort === 'toPer80') {
           if (a.mins === 0) return 1;
@@ -1520,6 +1646,9 @@
         const totGG = (p.glow || 0) + (p.grow || 0);
         const gPct = p.glowPct || 0;
         const rateCls = p.mins === 0 ? 'text-slate-500' : (p.toPer80 <= 4.0 ? 'text-emerald-400 font-bold' : p.toPer80 >= 8.5 ? 'text-rose-400 font-bold' : 'text-amber-300');
+        const n80 = Number(p.netPer80) || 0;
+        const nPts = Number(p.netPts) || 0;
+        const netCls = p.mins === 0 ? 'text-slate-500' : (n80 > 0 ? 'text-emerald-400 font-bold' : n80 < -3.0 ? 'text-rose-400 font-bold' : 'text-amber-300 font-semibold');
         return `<tr onclick="openPlayerModal(${players.indexOf(p)})" class="hover:bg-surface/80 cursor-pointer transition">
           <td class="py-2.5 px-3 font-semibold text-white">
             <div class="flex items-center gap-2">
@@ -1529,6 +1658,10 @@
             </div>
           </td>
           <td class="py-2.5 px-2 text-center font-mono text-slate-200">${p.mins}'</td>
+          <td class="py-2.5 px-2 text-center font-mono">
+            <span class="${netCls}">${p.mins > 0 ? fmtNet(n80) : '–'}</span>
+            <span class="text-[10px] text-slate-500 ml-0.5">(${nPts > 0 ? '+' : ''}${nPts.toFixed(1)})</span>
+          </td>
           <td class="py-2.5 px-2 text-center">
             <span class="font-bold text-white">${p.turnovers || 0}</span>
             <span class="text-[10px] text-slate-400 ml-1">(${p.toD||0}/${p.toM||0}/${p.toA||0})</span>
@@ -1563,12 +1696,12 @@
 
     function formatFilmClipCard(e, compact = false) {
       const outBadge = e.outcome === 'Glow'
-        ? '<span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">🟢 Glow</span>'
+        ? '<span class="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded font-mono font-bold uppercase">Glow</span>'
         : e.outcome === 'Grow'
-        ? `<span class="text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full font-bold">🟠 ${e.qualityRaw === 'Goal Conceded' ? 'Goal Conceded' : 'Grow'}</span>`
+        ? `<span class="text-[10px] bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded font-mono font-bold uppercase">${e.qualityRaw === 'Goal Conceded' ? 'Goal Conceded' : 'Grow'}</span>`
         : e.outcome === 'Glow & Grow'
-        ? '<span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">⚖️ Glow &amp; Grow</span>'
-        : '<span class="text-[10px] bg-slate-500/20 text-slate-300 border border-slate-500/30 px-2 py-0.5 rounded-full font-semibold">⚪ Neutral</span>';
+        ? '<span class="text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded font-mono font-bold uppercase">Glow &amp; Grow</span>'
+        : '<span class="text-[10px] bg-slate-500/15 text-slate-300 border border-slate-500/30 px-2 py-0.5 rounded font-mono font-semibold uppercase">Neutral</span>';
 
       const zoneBadge = e.zone
         ? `<span class="text-[10px] font-mono px-1.5 py-0.5 rounded border ${e.zone === 'D3' ? 'bg-rose-500/15 text-rose-300 border-rose-500/30' : e.zone === 'M3' ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30'}">${esc(e.zoneDetail || e.zone)}</span>`
@@ -1579,7 +1712,7 @@
         : '';
 
       const flagBadge = e.filmReview
-        ? '<span class="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/40 px-1.5 py-0.5 rounded font-bold">🚩 Film Review</span>'
+        ? '<span class="text-[10px] bg-purple-500/15 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded font-mono font-bold uppercase">Film Review</span>'
         : '';
 
       const playerPills = (e.players && e.players.length)
@@ -1589,7 +1722,7 @@
       return `<div class="bg-surface p-3 rounded-xl border border-border/80 space-y-1.5">
         <div class="flex flex-wrap items-center justify-between gap-1.5">
           <div class="flex flex-wrap items-center gap-1.5">
-            <span class="font-mono text-[11px] font-bold text-white bg-pitch px-2 py-0.5 rounded border border-border">⏱️ ${esc(e.time || '—')} ${esc(e.half || '')}</span>
+            <span class="font-mono text-[11px] font-bold text-white bg-pitch px-2 py-0.5 rounded border border-border">${esc(e.time || '00:00')} ${esc(e.half || '')}</span>
             <span class="text-xs font-bold text-slate-200">${esc(e.match)}</span>
             ${zoneBadge}
             ${catBadge}
@@ -1636,7 +1769,7 @@
     /* ---------- Charts ---------- */
     function renderCharts() {
       if (typeof Chart === 'undefined') return;
-      const tick = { color: '#94a3b8' };
+      const tick = { color: '#5A687A' };
       const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim();
 
       const producers = players.filter(p => p.goals > 0 || p.assists > 0 || (p.keyPasses || 0) > 0)
@@ -1651,16 +1784,16 @@
             labels: producers.map(p => shortName(p.name)),
             datasets: [
               { label: 'Goals', data: producers.map(p => p.goals), backgroundColor: accent, borderRadius: 4 },
-              { label: 'Assists', data: producers.map(p => p.assists), backgroundColor: '#38bdf8', borderRadius: 4 },
-              { label: 'Key Passes', data: producers.map(p => p.keyPasses || 0), backgroundColor: '#a78bfa', borderRadius: 4 }
+              { label: 'Assists', data: producers.map(p => p.assists), backgroundColor: '#008496', borderRadius: 4 },
+              { label: 'Key Passes', data: producers.map(p => p.keyPasses || 0), backgroundColor: '#1E2836', borderRadius: 4 }
             ]
           },
           options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+            plugins: { legend: { labels: { color: '#5A687A', font: { size: 11 } } } },
             scales: {
               x: { stacked: true, ticks: tick, grid: { display: false } },
-              y: { stacked: true, ticks: { ...tick, stepSize: 1 }, grid: { color: '#243741' } }
+              y: { stacked: true, ticks: { ...tick, stepSize: 1 }, grid: { color: '#DCE3EC' } }
             }
           }
         });
@@ -1677,17 +1810,17 @@
           data: {
             labels: filmPlayers.map(p => `#${p.jersey || ''} ${shortName(p.name)}`),
             datasets: [
-              { label: '🟢 Glow (Positive)', data: filmPlayers.map(p => p.glow || 0), backgroundColor: '#10b981', borderRadius: 4 },
-              { label: '🟠 Grow (Coaching)', data: filmPlayers.map(p => p.grow || 0), backgroundColor: '#f59e0b', borderRadius: 4 },
-              { label: '⚠️ Turnovers', data: filmPlayers.map(p => p.turnovers || 0), backgroundColor: '#ef4444', borderRadius: 4 }
+              { label: 'Glow (Positive)', data: filmPlayers.map(p => p.glow || 0), backgroundColor: '#15803D', borderRadius: 4 },
+              { label: 'Grow (Coaching)', data: filmPlayers.map(p => p.grow || 0), backgroundColor: '#008496', borderRadius: 4 },
+              { label: 'Turnovers', data: filmPlayers.map(p => p.turnovers || 0), backgroundColor: '#B91C1C', borderRadius: 4 }
             ]
           },
           options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+            plugins: { legend: { labels: { color: '#5A687A', font: { size: 11 } } } },
             scales: {
               x: { ticks: { ...tick, font: { size: 10 } }, grid: { display: false } },
-              y: { ticks: tick, grid: { color: '#243741' } }
+              y: { ticks: tick, grid: { color: '#DCE3EC' } }
             }
           }
         });
@@ -1712,16 +1845,16 @@
             {
               label: 'Sub (Bench) Minutes',
               data: squadPlayers.map(p => p.benchMins || 0),
-              backgroundColor: 'rgba(148, 163, 184, 0.22)',
+              backgroundColor: 'rgba(90, 104, 122, 0.20)',
               borderRadius: 4
             }
           ]
         },
         options: {
           responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-          plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+          plugins: { legend: { labels: { color: '#5A687A', font: { size: 11 } } } },
           scales: {
-            x: { stacked: true, min: 0, max: maxMins, ticks: tick, grid: { color: '#243741' } },
+            x: { stacked: true, min: 0, max: maxMins, ticks: tick, grid: { color: '#DCE3EC' } },
             y: { stacked: true, ticks: { ...tick, font: { size: 10 }, autoSkip: false }, grid: { display: false } }
           }
         }
@@ -1741,26 +1874,26 @@
           type: 'doughnut',
           data: {
             labels: ['Attacking 3rd (A3)', 'Middle 3rd (M3)', 'Defending 3rd (D3)'],
-            datasets: [{ data: zoneData, backgroundColor: ['#f59e0b', '#3b82f6', '#ef4444'], borderWidth: 0 }]
+            datasets: [{ data: zoneData, backgroundColor: ['#008496', '#1E2836', '#B91C1C'], borderWidth: 0 }]
           },
           options: {
             responsive: true, maintainAspectRatio: false, cutout: '70%',
-            plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12, font: { size: 11 } } } }
+            plugins: { legend: { position: 'bottom', labels: { color: '#5A687A', boxWidth: 12, font: { size: 11 } } } }
           }
         });
       }
     }
 
-    /* ---------- Automated CSV Intelligence & Coach Takeaways ---------- */
+    /* ---------- Automated CSV & Film Breakdown + Coach Takeaways ---------- */
     function renderAutoInsights() {
       const cards = [];
       const maxMins = totals.mins || team.matchLength || 80;
 
-      // 1. Ironwomen / High Workload (>72% of team minutes)
+      // 1. High Workload (>72% of team minutes)
       const iron = players.filter(p => p.mins >= maxMins * 0.72).sort((a, b) => b.mins - a.mins);
       if (iron.length) {
         cards.push({
-          title: '⏱️ High Workload Anchors',
+          title: 'High Minute Load',
           body: `${iron.map(p => `<strong>${esc(p.name)}</strong> (${p.mins}' / ${pct(p.mins, maxMins)}%)`).join(', ')} carried the heaviest minute load across ${plural(totals.games || 1, 'game')}.`
         });
       }
@@ -1772,11 +1905,11 @@
         const unlucky = highShots.filter(p => pct(p.goals, p.shots) < 20);
         let txt = '';
         if (clinical.length) txt += `<strong>Clinical:</strong> ${clinical.map(p => `${esc(p.name)} (${p.goals}G on ${p.shots} shots, ${pct(p.goals, p.shots)}%)`).join(', ')}. `;
-        if (unlucky.length) txt += `<strong>Volume w/o reward yet:</strong> ${unlucky.map(p => `${esc(p.name)} (${p.shots} shots, ${p.sot} SOT → ${p.goals}G)`).join(', ')}.`;
-        if (txt) cards.push({ title: '🎯 Finishing & Shot Conversion', body: txt });
+        if (unlucky.length) txt += `<strong>Volume without reward yet:</strong> ${unlucky.map(p => `${esc(p.name)} (${p.shots} shots, ${p.sot} SOT → ${p.goals}G)`).join(', ')}.`;
+        if (txt) cards.push({ title: 'Finishing & Shot Conversion', body: txt });
       }
 
-      // 3. Positional Sweet Spots
+      // 3. Positional Output
       const multiPosScorers = players.filter(p => (p.posBreakdown || []).filter(r => r.goals + r.assists > 0).length > 0)
         .sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists)).slice(0, 3);
       if (multiPosScorers.length) {
@@ -1785,30 +1918,30 @@
             .map(r => `${r.pos}: ${r.goals}G/${r.assists}A in ${r.mins}'`).join(', ');
           return `<strong>${esc(shortName(p.name))}</strong> (${splits})`;
         });
-        cards.push({ title: '📍 Output by Position Played', body: lines.join(' · ') });
+        cards.push({ title: 'Output by Position Played', body: lines.join(' · ') });
       }
 
-      // 4. Turnovers & Film Review Glow/Grow Intelligence
+      // 4. Turnovers & Developmental Net Rating
       const toD = totals.toD || sum('toD');
       const toPlayers = players.filter(p => (p.toD || 0) > 0).sort((a, b) => (b.toD || 0) - (a.toD || 0));
       if (toD > 0) {
         cards.push({
-          title: '🛡️ Build-Out Alert (Defending 3rd TOs)',
+          title: 'Build-Out Risk (Defending 3rd TOs)',
           body: `<strong>${toD} turnovers in the defending 3rd</strong> (${totals.turnovers || sum('turnovers')} total; ${totals.toM || 0} Mid 3rd, ${totals.toA || 0} Att 3rd). Highest D3 exposure: ${toPlayers.slice(0, 4).map(p => `${esc(shortName(p.name))} (${p.toD} D3 / ${p.turnovers} tot)`).join(', ')}.`
         });
       } else {
         cards.push({
-          title: '🛡️ Clean Rest Defense & Build-Out',
+          title: 'Clean Rest Defense & Build-Out',
           body: `<strong>0 turnovers in the defending 3rd</strong> across ${totals.mins || team.matchLength} minutes (${totals.turnovers || sum('turnovers')} total turnovers). Composed progression out of the backline.`
         });
       }
 
       if (hasTeamFilm()) {
-        const glowLeaders = [...players].filter(p => (p.glow || 0) >= 15).sort((a, b) => (b.glowPct || 0) - (a.glowPct || 0));
+        const netLeaders = [...players].filter(p => p.mins >= 120).sort((a, b) => (b.netPer80 || 0) - (a.netPer80 || 0));
         const highToRate = [...players].filter(p => p.mins >= 120).sort((a, b) => (b.toPer80 || 0) - (a.toPer80 || 0));
         cards.push({
-          title: '🟢 Glow vs. 🟠 Grow Film Standouts',
-          body: `<strong>Top Glow % (15+ actions):</strong> ${glowLeaders.slice(0, 4).map(p => `${esc(shortName(p.name))} (${p.glowPct}% — ${p.glow}🟢/${p.grow}🟠)`).join(', ')}.<br><strong>Highest TO/80' exposure (120'+):</strong> ${highToRate.slice(0, 3).map(p => `${esc(shortName(p.name))} (${p.toPer80}/80')`).join(', ')}.`
+          title: 'Developmental Net Rating (/80\') Leaders',
+          body: `<strong>Top Net / 80' (120'+):</strong> ${netLeaders.slice(0, 4).map(p => `${esc(shortName(p.name))} (${fmtNet(p.netPer80)}/80' · ${p.glow} Glow / ${p.grow} Grow)`).join(', ')}.<br><strong>Highest TO/80' exposure (120'+):</strong> ${highToRate.slice(0, 3).map(p => `${esc(shortName(p.name))} (${p.toPer80}/80')`).join(', ')}.`
         });
       }
 
@@ -1889,7 +2022,7 @@
 
       $('modalSwingBadge').classList.toggle('hidden', !swing.isSwing);
       if (swing.isSwing) {
-        $('modalSwingBadge').textContent = `🔄 Swing (${swing.totalMins}' Club Mins)`;
+        $('modalSwingBadge').textContent = `SWING (${swing.totalMins}' Club Mins)`;
       }
 
       let role = p.roles.join(', ') || p.pos || 'Unused Sub';
@@ -1902,6 +2035,8 @@
       const isGK = p.roles.includes('GK');
       const gd = Number(p.gd) || 0;
       const gdStr = gd > 0 ? `+${gd}` : `${gd}`;
+      const n80 = Number(p.netPer80) || 0;
+      const netColor = n80 > 0 ? 'text-emerald-400' : n80 < -3.0 ? 'text-rose-400' : 'text-amber-300';
 
       $('modalGrid').innerHTML =
         cell('Pitch Mins', `${p.mins}' (${pct(p.mins, totals.mins || team.matchLength)}%)`) +
@@ -1910,8 +2045,8 @@
         cell('Shots (SOT)', `${p.shots} (${p.sot})`) +
         (isGK ? cell('Saves / CS', `${p.saves} / ${p.cleanSheets || 0}`, 'text-emerald-400') : cell('Corners / Cr', `${p.corners} / ${p.crosses}`)) +
         cell('Turnovers (D/M/A)', `${p.turnovers || 0} (${p.toD||0}/${p.toM||0}/${p.toA||0})`, (p.toD || 0) > 0 ? 'text-rose-400' : 'text-slate-300') +
-        (p.filmEventsCount ? cell('TO Rate / 80\'', p.mins > 0 ? `${p.toPer80} (${p.minsPerTo || 0}'/TO)` : '–', (p.toPer80 || 0) <= 4.5 ? 'text-emerald-400' : 'text-amber-300') : cell('Passes', p.passes || 0)) +
-        (p.filmEventsCount ? cell('Glow / Grow', `🟢${p.glow || 0} · 🟠${p.grow || 0} (${p.glowPct || 0}%)`, (p.glowPct || 0) >= 50 ? 'text-emerald-400' : 'text-amber-300') : cell('Fouls / Off', `${p.fouls || 0} / ${p.offsides || 0}`)) +
+        (p.filmEventsCount ? cell('Net Rating / 80\'', p.mins > 0 ? `${fmtNet(n80)} (${p.toPer80} TO/80')` : '–', netColor) : cell('Passes', p.passes || 0)) +
+        (p.filmEventsCount ? cell('Glow / Grow', `${p.glow || 0} Glow · ${p.grow || 0} Grow (${p.glowPct || 0}%)`, (p.glowPct || 0) >= 50 ? 'text-emerald-400' : 'text-amber-300') : cell('Fouls / Off', `${p.fouls || 0} / ${p.offsides || 0}`)) +
         cell('On-Pitch +/-', `${gdStr} (${p.winPct || 0}% W)`, gd >= 0 ? 'text-emerald-400' : 'text-rose-400');
 
       // Film Review Section inside Player Modal
@@ -1920,15 +2055,16 @@
       const pClips = allFilm.filter(e => (p.filmEventIds || []).includes(e.id) || (p.jersey && (e.jerseys || []).includes(p.jersey)));
       $('modalFilmSection').classList.toggle('hidden', !pClips.length);
       if (pClips.length) {
-        $('modalFilmRateBadge').textContent = `${pClips.length} film clips · ${p.toPer80 || 0} TO/80'`;
-        const toReasons = Object.entries(p.topToReasons || {}).map(([k, v]) => `<span class="bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-lg text-[10px]">${esc(k)}: <strong>${v}</strong></span>`).join(' ');
-        const glowReasons = Object.entries(p.topGlowReasons || {}).map(([k, v]) => `<span class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-lg text-[10px]">${esc(k)}: <strong>${v}</strong></span>`).join(' ');
+        $('modalFilmRateBadge').textContent = `${pClips.length} clips · Net ${fmtNet(n80)}/80' · ${p.toPer80 || 0} TO/80'`;
+        const toReasons = Object.entries(p.topToReasons || {}).map(([k, v]) => `<span class="bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded text-[10px]">${esc(k)}: <strong>${v}</strong></span>`).join(' ');
+        const glowReasons = Object.entries(p.topGlowReasons || {}).map(([k, v]) => `<span class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px]">${esc(k)}: <strong>${v}</strong></span>`).join(' ');
         const gPct = p.glowPct || 0;
         $('modalFilmSummary').innerHTML = `
           <div class="space-y-1">
             <div class="flex items-center justify-between text-[11px]">
-              <span class="text-emerald-400 font-bold">🟢 ${p.glow || 0} Glow Actions (${gPct}%)</span>
-              <span class="text-amber-400 font-bold">🟠 ${p.grow || 0} Grow Actions (${100 - gPct}%)</span>
+              <span class="text-emerald-400 font-bold">${p.glow || 0} Glow Actions (${gPct}%)</span>
+              <span class="font-mono text-slate-300">Net: <strong class="${netColor}">${fmtNet(n80)} / 80'</strong> (${(Number(p.netPts)||0) > 0 ? '+' : ''}${(Number(p.netPts)||0).toFixed(1)} pts)</span>
+              <span class="text-amber-400 font-bold">${p.grow || 0} Grow Actions (${100 - gPct}%)</span>
             </div>
             <div class="w-full h-2 bg-rose-500/30 rounded-full overflow-hidden flex">
               <div class="h-full bg-emerald-400" style="width:${gPct}%"></div>
@@ -2236,7 +2372,14 @@
         p.topGlowReasons = sortObj(pGlR);
         p.topGrowReasons = sortObj(pGrR);
         p.filmEventIds = pEvs.map(e => e.id);
+        computePlayerNetMetrics(p);
       });
+      const tGlow = Number(teamObj.totals.glow) || 0;
+      const tGrow = Number(teamObj.totals.grow) || 0;
+      const tToD = Number(teamObj.totals.toD) || 0;
+      const tMins = Number(teamObj.totals.mins) || 0;
+      teamObj.totals.netPts = Number(((tGlow * 1.25) - (tGrow * 1.0) - (tToD * 0.75)).toFixed(2));
+      teamObj.totals.netPer80 = tMins > 0 ? Number((teamObj.totals.netPts * 80 / tMins).toFixed(1)) : 0;
     }
 
     /* ---------- CSV / XLSX Import + Standalone HTML Export ---------- */
@@ -2890,7 +3033,7 @@
         <!-- HEADER BLOCK -->
         <div class="border-b-2 border-brand-500 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 print-header-border">
           <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-2xl bg-brand-600/20 text-brand-400 border border-brand-500/40 flex items-center justify-center text-2xl font-bold shrink-0">⚽</div>
+            <div class="w-12 h-12 rounded-xl bg-card text-brand-400 border border-border flex items-center justify-center display text-xl font-bold shrink-0">AX</div>
             <div>
               <div class="mono text-[10px] uppercase tracking-widest text-brand-400 font-bold flex items-center gap-2">
                 <span>${esc(teamHeader)} · ${esc(leagueSubtitle)}</span>
@@ -2913,9 +3056,9 @@
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="display text-3xl text-white print:text-black">${esc(player.name)}</span>
-                <span class="mono text-xs px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/40 font-bold">Jersey #${esc(player.jersey)}</span>
-                <span class="text-xs px-2.5 py-0.5 rounded-full bg-surface text-slate-300 border border-border font-semibold">${esc(player.squad)}</span>
-                ${ratingsData?.found ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30 mono">⚡ IDP Synced</span>' : ''}
+                <span class="mono text-xs px-2.5 py-0.5 rounded bg-pitch text-brand-400 border border-border font-bold">Jersey #${esc(player.jersey)}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded bg-surface text-slate-300 border border-border font-semibold">${esc(player.squad)}</span>
+                ${ratingsData?.found ? '<span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/15 text-teal-300 border border-teal-500/30 mono">IDP Synced</span>' : ''}
               </div>
               <p class="text-xs text-slate-400 print:text-slate-600 mt-1">
                 <strong>Primary Roles:</strong> ${esc(roles)} &nbsp;|&nbsp; 
@@ -2950,15 +3093,15 @@
             </div>
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
               <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Turnovers/80</div>
-              <div class="text-base font-black text-amber-300 print:text-amber-700">${to80 || '—'}</div>
+              <div class="text-base font-black text-amber-300 print:text-amber-700">${to80 || '0.0'}</div>
             </div>
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
-              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Film Glow %</div>
-              <div class="text-base font-black text-brand-400 print:text-teal-700">${glowPct ? glowPct + '%' : '—'}</div>
+              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Net / 80' (Glow%)</div>
+              <div class="text-base font-black text-brand-400 print:text-teal-700">${player.filmEventsCount && mins > 0 ? `${fmtNet(player.netPer80)} (${glowPct}%)` : (glowPct ? glowPct + '%' : '–')}</div>
             </div>
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
               <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Shot Acc %</div>
-              <div class="text-base font-black text-sky-400 print:text-sky-700">${shotAcc ? shotAcc + '%' : '—'}</div>
+              <div class="text-base font-black text-sky-400 print:text-sky-700">${shotAcc ? shotAcc + '%' : '–'}</div>
             </div>
           </div>
         </div>
@@ -2973,7 +3116,7 @@
             <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
               <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
                 <h3 class="display text-lg text-teal-400 print:text-teal-700 flex items-center gap-1.5">
-                  <span>⚡ PILLAR 1: TECHNICAL &amp; TACTICAL MASTERY</span>
+                  <span>PILLAR 1: TECHNICAL &amp; TACTICAL</span>
                 </h3>
                 <span class="text-[10px] mono text-slate-400 uppercase">Scale 1-5</span>
               </div>
@@ -3010,7 +3153,7 @@
             <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
               <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
                 <h3 class="display text-lg text-amber-400 print:text-amber-700 flex items-center gap-1.5">
-                  <span>🏃 PILLAR 2: PHYSICAL &amp; WORKLOAD PROFILE</span>
+                  <span>PILLAR 2: PHYSICAL &amp; WORKLOAD</span>
                 </h3>
                 <span class="text-[10px] mono text-slate-400 uppercase">Scale 1-5</span>
               </div>
@@ -3047,7 +3190,7 @@
             <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
               <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
                 <h3 class="display text-lg text-sky-400 print:text-sky-700 flex items-center gap-1.5">
-                  <span>🧠 PILLAR 3: PSYCHOLOGICAL &amp; COMPETITIVE MINDSET</span>
+                  <span>PILLAR 3: MINDSET &amp; COMMUNICATION</span>
                 </h3>
                 <span class="text-[10px] mono text-slate-400 uppercase">Scale 1-5</span>
               </div>
@@ -3089,7 +3232,6 @@
             <div class="bg-card print-card rounded-2xl p-3.5 border border-teal-500/40 space-y-2.5">
               <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
                 <div class="flex items-center gap-1.5">
-                  <span class="text-teal-400 text-sm">🎯</span>
                   <h3 class="display text-base text-teal-400 print:text-teal-800">PLAYER STATED GOALS &amp; VISION</h3>
                 </div>
                 <span class="text-[9px] mono px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">Player_IDP</span>
@@ -3120,7 +3262,6 @@
             <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-2.5">
               <div class="flex items-center justify-between border-b border-border/80 pb-1.5">
                 <div class="flex items-center gap-1.5">
-                  <span class="text-amber-400 text-sm">💬</span>
                   <h3 class="display text-base text-amber-400 print:text-amber-800">REFLECTIONS &amp; COACH FEEDBACK</h3>
                 </div>
                 <span class="text-[9px] mono px-2 py-0.5 rounded bg-surface border border-border text-slate-400">Reflections_Log</span>
@@ -3133,11 +3274,11 @@
             <!-- BENCHMARK ALIGNMENT SUMMARY -->
             <div class="bg-card print-card rounded-2xl p-3 border border-border space-y-1.5 text-xs">
               <div class="font-bold text-[11px] uppercase tracking-wider text-slate-300 print:text-black flex items-center justify-between">
-                <span>Core Pillar Review Protocol</span>
-                <span class="text-brand-400 mono text-[10px]">Conference Standard</span>
+                <span>Mid-Season Review Notes</span>
+                <span class="text-brand-400 mono text-[10px]">Player Conference</span>
               </div>
               <p class="text-[11px] text-slate-400 print:text-slate-600 leading-relaxed">
-                Evaluations synthesize match data, tagged Veo video moments, and athlete self-ratings. Discrepancies between player and coach scores represent high-leverage learning opportunities for our second-half growth plan.
+                This review combines match stats, Veo film clips, and player self-ratings. Any gaps between player and coach scores give us a clear starting point for second-half training goals.
               </p>
             </div>
 
@@ -3150,16 +3291,16 @@
           <!-- GLOW (KEY STRENGTHS) -->
           <div class="bg-card print-glow-card rounded-2xl p-3.5 border border-emerald-500/40 space-y-1.5">
             <div class="flex items-center gap-1.5 text-emerald-400 print:text-emerald-800 font-bold text-xs uppercase tracking-wider">
-              <span>🌟 KEY STRENGTHS (GLOW)</span>
+              <span>KEY STRENGTHS (GLOW)</span>
             </div>
-            <p class="text-[10px] text-slate-400 print:text-slate-600">Standout technical mastery, tactical habits, and competitive strengths:</p>
+            <p class="text-[10px] text-slate-400 print:text-slate-600">Standout technical habits, tactical reads, and competitive strengths:</p>
             <textarea data-field="glow" rows="3" class="print-textarea w-full bg-pitch/80 text-xs p-2.5 rounded-xl border border-emerald-500/30 text-white print:text-black focus:outline-none focus:border-emerald-500">${esc(values.glow)}</textarea>
           </div>
 
           <!-- GROW (DEVELOPMENT FOCUS) -->
           <div class="bg-card print-grow-card rounded-2xl p-3.5 border border-amber-500/40 space-y-1.5">
             <div class="flex items-center gap-1.5 text-amber-300 print:text-amber-800 font-bold text-xs uppercase tracking-wider">
-              <span>🌱 PRIORITY DEVELOPMENT FOCUS (GROW)</span>
+              <span>PRIORITY DEVELOPMENT FOCUS (GROW)</span>
             </div>
             <p class="text-[10px] text-slate-400 print:text-slate-600">The 2-3 specific development objectives for training reps &amp; second-half matches:</p>
             <textarea data-field="grow" rows="3" class="print-textarea w-full bg-pitch/80 text-xs p-2.5 rounded-xl border border-amber-500/30 text-white print:text-black focus:outline-none focus:border-amber-500">${esc(values.grow)}</textarea>
@@ -3169,7 +3310,7 @@
         <!-- SECOND HALF OBJECTIVES & CONFERENCE SIGN-OFF -->
         <div class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-3">
           <div>
-            <label class="block text-xs font-bold text-white print:text-black mb-1">🎯 Second-Half Season Action Goals (Agreed in Conference):</label>
+            <label class="block text-xs font-bold text-white print:text-black mb-1">Second-Half Season Action Goals (Agreed in Conference):</label>
             <textarea data-field="goals_2nd_half" rows="2" class="print-textarea w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white print:text-black focus:outline-none focus:border-brand-500">${esc(values.goals_2nd_half)}</textarea>
           </div>
 
