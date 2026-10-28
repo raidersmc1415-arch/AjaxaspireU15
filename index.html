@@ -20,8 +20,8 @@
  :root {
  --forest: #1A2330; --green: #15803D; --green-lt: #16A34A; --teal: #008496;
  --navy: #F4F6F9; --navy-mid: #E9EEF4; --card: #FFFFFF;
- --border: #DCE3EC; --white: #141B24; --text: #263140;
- --muted: #5A687A; --gold: #008496; --gold-bright: #00C2D6;
+ --border: #CBD5E1; --white: #0B111A; --text: #182230;
+ --muted: #2D3748; --gold: #007485; --gold-bright: #00C2D6;
  }
 
  * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -790,14 +790,126 @@
     <div id="pos" class="section">
       <div class="section-header">
         <div class="section-label">Tactical Setup</div>
-        <div class="section-title">Positions & Roles</div>
-        <div class="section-desc">Select a position on the field to view specific expectations.</div>
+        <div class="section-title">Positions &amp; Roles</div>
+        <div class="section-desc">Our Systems of Play: 4-2-3-1, 4-4-2 &amp; 4-3-3. Select a formation and tap any position on the field to view specific expectations.</div>
       </div>
 
       <!-- FORMATION TOGGLE -->
-      <div style="display:flex; gap:10px; margin-bottom:16px;">
-        <button class="pos-formation-btn active" id="pf-442" onclick="showFormation('442')">4-4-2</button>
+      <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+        <button class="pos-formation-btn active" id="pf-4231" onclick="showFormation('4231')">4-2-3-1</button>
+        <button class="pos-formation-btn" id="pf-442" onclick="showFormation('442')">4-4-2</button>
         <button class="pos-formation-btn" id="pf-433" onclick="showFormation('433')">4-3-3</button>
+      </div>
+
+      <!-- 4-2-3-1 FORMATION WRAPPER -->
+      <div id="pos-4231-wrap">
+      <div style="position:relative; margin-bottom:18px;">
+        <svg viewBox="0 0 320 480" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:360px; display:block; margin:0 auto; border-radius:8px;">
+          <rect width="320" height="480" fill="#0c3d1c" rx="8"/>
+          <rect x="20" y="20" width="280" height="440" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1.5"/>
+          <line x1="20" y1="240" x2="300" y2="240" stroke="rgba(255,255,255,0.14)" stroke-width="1.5"/>
+          <circle cx="160" cy="240" r="45" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1.5"/>
+          <circle cx="160" cy="240" r="2.5" fill="rgba(255,255,255,0.3)"/>
+          <rect x="100" y="20" width="120" height="70" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <rect x="130" y="20" width="60" height="30" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <rect x="100" y="390" width="120" height="70" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <rect x="130" y="430" width="60" height="30" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+
+          <!-- Double Pivot & #10 Window connection lines -->
+          <line x1="125" y1="290" x2="195" y2="290" stroke="rgba(0,194,214,0.22)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="125" y1="290" x2="160" y2="195" stroke="rgba(0,194,214,0.22)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="195" y1="290" x2="160" y2="195" stroke="rgba(0,194,214,0.22)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="160" y1="195" x2="160" y2="108" stroke="rgba(0,194,214,0.22)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="160" y1="195" x2="45" y2="185" stroke="rgba(0,194,214,0.18)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="160" y1="195" x2="275" y2="185" stroke="rgba(0,194,214,0.18)" stroke-width="1" stroke-dasharray="4,4"/>
+
+          <!-- Lone Striker #9 -->
+          <g onclick="showPos('pos4231-9', null)" style="cursor:pointer">
+            <circle cx="160" cy="108" r="17" fill="rgba(0,194,214,0.20)" stroke="#00C2D6" stroke-width="1.8"/>
+            <text x="160" y="113" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">9</text>
+            <text x="160" y="138" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.75)">ST</text>
+          </g>
+
+          <!-- Attacking 3: 11 (LW), 10 (CAM), 7 (RW) -->
+          <g onclick="showPos('pos4231-wide', null)" style="cursor:pointer">
+            <circle cx="45" cy="185" r="17" fill="rgba(0,194,214,0.20)" stroke="#00C2D6" stroke-width="1.8"/>
+            <text x="45" y="190" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">11</text>
+            <text x="45" y="213" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.75)">LW</text>
+          </g>
+          <g onclick="showPos('pos4231-10', null)" style="cursor:pointer">
+            <circle cx="160" cy="195" r="18" fill="rgba(0,194,214,0.32)" stroke="#00C2D6" stroke-width="2.2"/>
+            <text x="160" y="200" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">10</text>
+            <text x="160" y="222" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.85)">CAM</text>
+          </g>
+          <g onclick="showPos('pos4231-wide', null)" style="cursor:pointer">
+            <circle cx="275" cy="185" r="17" fill="rgba(0,194,214,0.20)" stroke="#00C2D6" stroke-width="1.8"/>
+            <text x="275" y="190" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">7</text>
+            <text x="275" y="213" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.75)">RW</text>
+          </g>
+
+          <!-- Double Pivot Holding Mids: 6 & 8 -->
+          <g onclick="showPos('pos4231-pivot', null)" style="cursor:pointer">
+            <circle cx="125" cy="290" r="17" fill="rgba(21,128,61,0.35)" stroke="#00C2D6" stroke-width="2"/>
+            <text x="125" y="295" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">6</text>
+            <text x="125" y="317" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.8)">CDM</text>
+          </g>
+          <g onclick="showPos('pos4231-pivot', null)" style="cursor:pointer">
+            <circle cx="195" cy="290" r="17" fill="rgba(21,128,61,0.35)" stroke="#00C2D6" stroke-width="2"/>
+            <text x="195" y="295" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">8</text>
+            <text x="195" y="317" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.8)">CDM</text>
+          </g>
+
+          <!-- Back Four: 3, 5, 4, 2 -->
+          <g onclick="showPos('pos442-fb', null)" style="cursor:pointer">
+            <circle cx="45" cy="370" r="17" fill="rgba(0,194,214,0.18)" stroke="#00C2D6" stroke-width="1.5"/>
+            <text x="45" y="375" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">3</text>
+            <text x="45" y="398" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.75)">LB</text>
+          </g>
+          <g onclick="showPos('pos442-cb', null)" style="cursor:pointer">
+            <circle cx="125" cy="385" r="17" fill="rgba(0,194,214,0.18)" stroke="#00C2D6" stroke-width="1.5"/>
+            <text x="125" y="390" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">5</text>
+            <text x="125" y="410" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.75)">CB</text>
+          </g>
+          <g onclick="showPos('pos442-cb', null)" style="cursor:pointer">
+            <circle cx="195" cy="385" r="17" fill="rgba(0,194,214,0.18)" stroke="#00C2D6" stroke-width="1.5"/>
+            <text x="195" y="390" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">4</text>
+            <text x="195" y="410" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.75)">CB</text>
+          </g>
+          <g onclick="showPos('pos442-fb', null)" style="cursor:pointer">
+            <circle cx="275" cy="370" r="17" fill="rgba(0,194,214,0.18)" stroke="#00C2D6" stroke-width="1.5"/>
+            <text x="275" y="375" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">2</text>
+            <text x="275" y="398" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.75)">RB</text>
+          </g>
+
+          <!-- GK -->
+          <g onclick="showPos('pos442-gk', null)" style="cursor:pointer">
+            <circle cx="160" cy="440" r="17" fill="rgba(0,194,214,0.18)" stroke="#00C2D6" stroke-width="1.5"/>
+            <text x="160" y="445" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="15" fill="#fff">1</text>
+            <text x="160" y="465" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="rgba(255,255,255,0.75)">GK</text>
+          </g>
+
+          <text x="160" y="14" text-anchor="middle" font-family="Bebas Neue, cursive" font-size="11" fill="rgba(255,255,255,0.6)" letter-spacing="2">4 — 2 — 3 — 1</text>
+        </svg>
+        <p style="text-align:center; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:1px; margin-top:8px;">TAP A POSITION TO VIEW ROLE &amp; RESPONSIBILITIES</p>
+      </div>
+      </div><!-- /pos-4231-wrap -->
+
+      <!-- 4-2-3-1 DETAIL PANELS -->
+      <div id="pos4231-pivot" class="pos-detail">
+        <div class="tag tag-gold" style="margin-bottom:14px">Double Pivot Holding Midfielders · #6 &amp; #8 · 4-2-3-1</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">The Engine Room of the 4-2-3-1:</strong> Just like our 4-4-2, we play with two holding midfielders (#6 and #8) in front of the back four, which means our build-out patterns (Plan A, Plan B, Plan C) stay identical across both systems.<br><br><strong style="color:var(--white);">In Possession (Ball-Side Pivot &amp; Equilibrium):</strong> When the ball is on your side of the field, check in to receive on the half-turn (or act as the decoy to free the fullback in Plan A). When one pivot steps forward to link with the #10 or crash the box (#8), the other MUST hold behind the ball (#6) as the central anchor.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Form a connected two-player shield directly in front of the center backs (#4 and #5). Protect the half-spaces, deny passes into the opponent's #10 or strikers, and win every second ball.</p>
+      </div>
+      <div id="pos4231-10" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Attacking Midfielder (The Window) · #10 · 4-2-3-1</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession (Find the Window):</strong> You are the central connector between our double pivot (#6 and #8) and our striker (#9). Operate in the "window" (pocket) behind the opponent's midfield line. In Build Out Plan A, B, and C, you drop into the window just like in the 4-4-2—receiving on the half-turn to slip #9, #7, or #11 in behind, or bouncing the ball to an advancing pivot.<br><br><strong style="color:var(--white);">Combination &amp; Box Arrival:</strong> Never stand still on the same line as #9. Float into half-spaces to create 3v2 overloads with the wide players, and arrive in the box on every cross.<br><br><strong style="color:var(--white);">Out of Possession:</strong> You have a critical defensive reference: screen or lock onto the opponent's #6 (holding mid) so they cannot build through the center, and step up alongside #9 when we trigger the press or form our mid-block.</p>
+      </div>
+      <div id="pos4231-wide" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Wide Attacking Midfielders · #7 &amp; #11 · 4-2-3-1</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">Higher Starting Position:</strong> In the 4-2-3-1, you start higher than in a flat 4-4-2—forming the line of three with the #10 behind the #9.<br><br><strong style="color:var(--white);">In Possession:</strong> Stretch the opponent's back line horizontally. When you receive wide, attack your fullback 1v1 or drive inside into the half-space to combine with the #10 (which triggers your fullback #2 or #3 to overlap around you). When the ball is on the opposite flank, tuck inside to attack the back post and penalty spot.<br><br><strong style="color:var(--white);">Out of Possession:</strong> Drop in level with the double pivot (#6 and #8) to form a compact midfield bank of four (4-4-1-1 / 4-4-2 defensive block). Track their fullback all the way and help lock the touchline trap.</p>
+      </div>
+      <div id="pos4231-9" class="pos-detail">
+        <div class="tag tag-teal" style="margin-bottom:14px">Center Forward · #9 · 4-2-3-1</div>
+        <p style="color:var(--muted); font-size:14px; line-height:1.7;"><strong style="color:var(--white);">In Possession (Pin &amp; Penetrate):</strong> As the lone striker at the top of the 4-2-3-1, your first job is to occupy and pin both opponent center backs. By holding the line high, you create the central window underneath you for the #10 to receive. Threaten the channels and space in behind on every forward look, and when you check to feet, hold the ball up cleanly to bring #10, #7, and #11 into the attack.<br><br><strong style="color:var(--white);">Out of Possession:</strong> You set the angle of our press. Curve your pressing run between the center backs to split the field in half, while the #10 locks onto their holding mid behind you.</p>
       </div>
 
       <!-- 4-3-3 FORMATION WRAPPER -->
@@ -933,7 +1045,7 @@
       </div><!-- /pos-433-wrap -->
 
       <!-- 4-4-2 FORMATION WRAPPER -->
-      <div id="pos-442-wrap">
+      <div id="pos-442-wrap" style="display:none;">
       <div style="position:relative; margin-bottom:18px;">
         <svg viewBox="0 0 320 480" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:360px; display:block; margin:0 auto; border-radius:8px;">
           <rect width="320" height="480" fill="#0c3d1c" rx="8"/>
@@ -1233,9 +1345,9 @@
     <!-- ═══════════════════════════════════════════════════ -->
     <div id="tactics" class="section">
       <div class="section-header">
-        <div class="section-label">Systems of Play</div>
+        <div class="section-label">Our Systems of Play · 4-2-3-1, 4-4-2 &amp; 4-3-3</div>
         <div class="section-title">Tactics Board</div>
-        <div class="section-desc">Select a formation or pattern to see player positions, movement, and when to use each system.</div>
+        <div class="section-desc">Explore our three systems of play (4-2-3-1, 4-4-2 &amp; 4-3-3) — each with its own attacking shape, player movements, and build-out patterns.</div>
       </div>
 
       <!-- WEEKLY SCENARIO (fix #11 — scenario-based thinking) -->
@@ -1248,9 +1360,19 @@
 
       <!-- SCENARIO BUTTONS -->
       <div style="margin-bottom:20px;">
-        <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">4-4-2 · Our System</div>
+        <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:8px;">4-2-3-1 · Current Match System (Double Pivot &amp; #10 Window)</div>
         <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-bottom:18px;">
-          <button class="tac-btn active" onclick="setTactic('442shape',this)">Attacking Shape</button>
+          <button class="tac-btn active" onclick="setTactic('4231shape',this)">Attacking Shape</button>
+          <button class="tac-btn" onclick="setTactic('4231movements',this)">Movements · Pivot &amp; #10</button>
+          <button class="tac-btn" onclick="setTactic('4231planA',this)">Build Out · Plan A</button>
+          <button class="tac-btn" onclick="setTactic('4231planB',this)">Build Out · Plan B</button>
+          <button class="tac-btn" onclick="setTactic('4231planC',this)">Build Out · Plan C</button>
+          <button class="tac-btn" onclick="setTactic('4231block',this)">Mid Block</button>
+        </div>
+
+        <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--green); margin-bottom:8px;">4-4-2 · Two Banks &amp; Strike Pair</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-bottom:18px;">
+          <button class="tac-btn" onclick="setTactic('442shape',this)">Attacking Shape</button>
           <button class="tac-btn" onclick="setTactic('442movements',this)">Movements · Strike Pair</button>
           <button class="tac-btn" onclick="setTactic('442planA',this)">Build Out · Plan A</button>
           <button class="tac-btn" onclick="setTactic('442planB',this)">Build Out · Plan B</button>
@@ -1258,7 +1380,7 @@
           <button class="tac-btn" onclick="setTactic('442block',this)">Mid Block</button>
         </div>
 
-        <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:8px;">4-3-3 · Our Growth Model (Where We're Headed)</div>
+        <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:8px;">4-3-3 · Positional Play &amp; High Press</div>
         <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px;">
           <button class="tac-btn" onclick="setTactic('433',this)">Attacking Shape</button>
           <button class="tac-btn" onclick="setTactic('overlap',this)">Movements · Overlap</button>
@@ -2607,11 +2729,17 @@
 
     // POSITIONS LOGIC
     function showFormation(f) {
+      const is4231 = f === '4231';
+      const is442 = f === '442';
       const is433 = f === '433';
+      const w4231 = document.getElementById('pos-4231-wrap');
+      if (w4231) w4231.style.display = is4231 ? 'block' : 'none';
+      document.getElementById('pos-442-wrap').style.display = is442 ? 'block' : 'none';
       document.getElementById('pos-433-wrap').style.display = is433 ? 'block' : 'none';
-      document.getElementById('pos-442-wrap').style.display = is433 ? 'none' : 'block';
+      const b4231 = document.getElementById('pf-4231');
+      if (b4231) b4231.classList.toggle('active', is4231);
+      document.getElementById('pf-442').classList.toggle('active', is442);
       document.getElementById('pf-433').classList.toggle('active', is433);
-      document.getElementById('pf-442').classList.toggle('active', !is433);
       // Close any open detail panel when switching formations
       document.querySelectorAll('.pos-detail').forEach(d => d.classList.remove('active'));
     }
@@ -2993,6 +3121,150 @@
     // Pitch is 400 wide x 560 tall in SVG units
     // We're attacking upward (toward y=0)
     const TACTICS = {
+      // ══════════════════════════════════════════════════════════════════
+      // 4-2-3-1 SYSTEM — Double Pivot (6 & 8) + #10 in the Window
+      // ══════════════════════════════════════════════════════════════════
+
+      // ── 4-2-3-1 ATTACKING SHAPE ───────────────────────────────────────
+      '4231shape': {
+        title: '4-2-3-1 Attacking Shape',
+        situation: 'Our primary match system over the last two games. A back four (2, 4, 5, 3), a double pivot of two holding midfielders (6 & 8), an attacking line of three (7 wide right, 10 in the central window, 11 wide left), and the 9 pinning the back line.',
+        notes: '<strong style="color:var(--teal)">6 &amp; 8 (The Double Pivot):</strong> Two holding midfielders sit in front of the center backs to give us a two-player shield and two central build-out outlets. Never both forward at the same time: when one steps to connect or arrive in the box, the other anchors behind the ball.<br><br><strong style="color:var(--teal)">#10 (Lives in the Window):</strong> Operates in the central pocket between the opponent\'s midfield and back line. Because #9 pins the center backs deep, the #10 has a clear window to receive on the half-turn, combine with #7 and #11, or slip #9 in behind.<br><br><strong style="color:var(--teal)">7 &amp; 11 (Attacking Width &amp; Half-Spaces):</strong> Start higher than in the 4-4-2, level with the #10. Stretch the opponent\'s back four horizontally; when you cut inside to combine with the #10, it opens the wide lane for #2 or #3 to overlap.<br><br><strong style="color:var(--teal)">#9 (Pins Both Center Backs):</strong> Occupies the opponent\'s CBs high up the pitch so they cannot step into the #10\'s window. Threatens the channels in behind and holds the ball up to bring the attacking three into play.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:355,y:435}, p3:{x:45,y:435},    // fullbacks
+          p4:{x:255,y:470}, p5:{x:145,y:470},   // center backs
+          p6:{x:155,y:345}, p8:{x:245,y:335},   // double pivot holding mids (6 & 8)
+          p7:{x:375,y:215}, p11:{x:25,y:215},   // wide attacking mids (7 & 11)
+          p10:{x:200,y:215},                     // #10 central attacking mid in the window
+          p9:{x:200,y:110}                       // lone striker pinning the back line
+        },
+        arrows: []
+      },
+
+      // ── 4-2-3-1 MOVEMENTS — DOUBLE PIVOT, #10 WINDOW & OVERLAPS ───────
+      '4231movements': {
+        title: '4-2-3-1 Movements · Double Pivot, #10 Window & Wide Overlaps',
+        situation: 'How our 4-2-3-1 creates overloads in possession: the #10 drops into the window to link while #9 threatens in behind, #7 cuts inside to combine so #2 can overlap, and #8 steps up to support while #6 anchors.',
+        notes: '<strong style="color:var(--teal)">#10 drops into the window / #9 attacks in behind:</strong> As the #10 checks into the central window to receive from the pivot, #9 makes the blind-side run in behind the center backs. If the CB steps with the #10, the through-ball to #9 is on immediately; if the CB holds, the #10 turns and drives at the back line.<br><br><strong style="color:var(--teal)">Wide triangle (7 cuts in, 2 overlaps):</strong> When #7 drives inside into the right half-space to combine with #10 and #8, right back #2 overlaps at speed down the touchline to deliver service.<br><br><strong style="color:var(--teal)">Double Pivot balance (8 steps, 6 anchors):</strong> As the play advances, #8 steps forward to connect the attack and hunt second balls at the top of the box, while #6 slides centrally to lock down rest defense in front of #4 and #5.<br><br><strong style="color:var(--teal)">Weak-side winger (#11) attacks the box:</strong> When the ball is on the right, #11 tucks off the touchline to attack the back post and penalty spot.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:375,y:220}, p3:{x:50,y:435},    // 2 overlapping high, 3 tucked
+          p4:{x:255,y:465}, p5:{x:145,y:465},
+          p6:{x:195,y:360},                      // 6 anchors centrally
+          p8:{x:255,y:285},                      // 8 steps up to support
+          p10:{x:185,y:235},                     // 10 drops into the window
+          p7:{x:285,y:190},                      // 7 cuts inside into half-space
+          p11:{x:55,y:175},                      // 11 tucks in toward back post
+          p9:{x:190,y:105}                       // 9 runs in behind
+        },
+        arrows: [
+          {from:{x:200,y:205}, to:{x:185,y:238}, color:'#00C2D6', dash:false, label:'10 drops into window'},
+          {from:{x:200,y:150}, to:{x:190,y:100}, color:'#008496', dash:false, label:'9 runs in behind'},
+          {from:{x:365,y:220}, to:{x:290,y:192}, color:'#00C2D6', dash:false, label:'7 cuts inside'},
+          {from:{x:365,y:410}, to:{x:375,y:228}, color:'#16A34A', dash:false, label:'2 overlaps wide'},
+          {from:{x:245,y:335}, to:{x:255,y:290}, color:'#16A34A', dash:true,  label:'8 steps up (6 anchors)'}
+        ]
+      },
+
+      // ── 4-2-3-1 BUILD OUT PLAN A — FREE FULLBACK ──────────────────────
+      '4231planA': {
+        title: '4-2-3-1 Build Out · Plan A (Free Fullback)',
+        situation: 'Our build-out patterns do not change from the 4-4-2 to the 4-2-3-1 because both systems use two holding midfielders (6 & 8) and the 10 drops into the window in both. Here, the 8 checks in as a decoy so the ball can hit the unmarked fullback (2).',
+        notes: '<strong style="color:var(--teal)">Same build-out structure as our 4-4-2:</strong> Because both 4-2-3-1 and 4-4-2 have two holding mids (#6 &amp; #8) and the #10 dropping into the window, our back four and double pivot execute the exact same Plan A.<br><br><strong style="color:var(--teal)">8 checks in as a DECOY:</strong> Ball-side holding mid (#8) checks toward the ball to pull their marker inside, opening the outside lane.<br><br><strong style="color:var(--teal)">CB (#4) → Free Fullback (#2):</strong> With #8 occupying the marker, #4 plays wide to the unmarked #2.<br><br><strong style="color:var(--teal)">Three options for #2:</strong> Play up the line to #7, hit the diagonal pass inside to the <strong style="color:var(--gold)">#10 dropping into the window</strong>, or bounce a square pass inside to #8 to trigger a quick switch through #6.<br><br><strong style="color:var(--gold)">Board shows the right side. If built through #5 on the left, #6 checks in as the decoy and #3 is the free fullback.</strong>',
+        players: {
+          p1:{x:200,y:520},
+          p3:{x:40,y:455},
+          p4:{x:262,y:490}, p5:{x:150,y:490},
+          p6:{x:185,y:340},                      // 6 holding pivot, central support
+          p8:{x:250,y:410},                      // 8 checks in (decoy)
+          p2:{x:378,y:360},                      // 2 free fullback
+          p7:{x:378,y:215},                      // 7 wide right attacking mid
+          p11:{x:28,y:225},                      // 11 wide left attacking mid
+          p10:{x:165,y:235},                     // 10 drops into the window
+          p9:{x:210,y:135}                       // 9 pins CBs high
+        },
+        arrows: [
+          {from:{x:262,y:490}, to:{x:378,y:372}, color:'#00C2D6', dash:false, label:'CB → free 2 (bypass 8)'},
+          {from:{x:275,y:435}, to:{x:252,y:415}, color:'rgba(148,163,184,0.8)', dash:true, label:'8 checks in (decoy)'},
+          {from:{x:378,y:360}, to:{x:378,y:230}, color:'#008496', dash:false, label:'2 → 7 up the line'},
+          {from:{x:378,y:360}, to:{x:180,y:240}, color:'#00C2D6', dash:true,  label:'2 → 10 in the window'},
+          {from:{x:378,y:360}, to:{x:262,y:410}, color:'#16A34A', dash:false, label:'2 → 8 square (switch)'}
+        ],
+        opponents: [
+          {x:238, y:390, label:'M'}
+        ]
+      },
+
+      // ── 4-2-3-1 BUILD OUT PLAN B — BALL-SIDE PIVOT ────────────────────
+      '4231planB': {
+        title: '4-2-3-1 Build Out · Plan B (Ball-Side Pivot)',
+        situation: 'Identical to our 4-4-2 Plan B. Ball goes to #4 (right CB) → ball-side holding mid (#8) checks in and receives on the half-turn, with #6 supporting centrally, #10 dropping into the window, and #7/#11 wide.',
+        notes: '<strong style="color:var(--teal)">Ball-side holding mid (#8) checks in and receives:</strong> When #4 has the ball, #8 checks in at an angle and opens their body on the half-turn so they face infield and forward.<br><br><strong style="color:var(--teal)">Second holding mid (#6) provides the support angle:</strong> #6 sits slightly deeper and central—ready to receive a one-touch lay-off and switch play if #8 is pressed.<br><br><strong style="color:var(--teal)">#10 drops into the window:</strong> As #8 turns forward, #10 checks into the central window behind their midfield line to link play.<br><br><strong style="color:var(--teal)">Forward routes from #8:</strong> Connect to <span style="color:var(--gold)">#6</span> (central support/switch), hit <span style="color:var(--gold)">#10 in the window</span>, switch to <span style="color:var(--gold)">#11</span> on the weak side, or play <span style="color:var(--gold)">#7</span> down the right channel.<br><br><strong style="color:var(--gold)">If built on the left side through #5, the roles mirror: #6 checks in to receive and #8 provides the central support angle.</strong>',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:360,y:445}, p3:{x:40,y:445},
+          p4:{x:262,y:485}, p5:{x:138,y:485},
+          p8:{x:258,y:398},                      // 8 checks in to receive
+          p6:{x:180,y:360},                      // 6 central support angle
+          p10:{x:235,y:285},                     // 10 dropping into the window
+          p7:{x:378,y:225},                      // 7 wide right
+          p11:{x:25,y:225},                      // 11 wide left (switch)
+          p9:{x:200,y:150}                       // 9 pinning CBs
+        },
+        arrows: [
+          {from:{x:262,y:485}, to:{x:258,y:412}, color:'#00C2D6', dash:false, label:'4 → 8 checks in'},
+          {from:{x:258,y:398}, to:{x:192,y:364}, color:'#008496', dash:false, label:'8 → 6 support'},
+          {from:{x:258,y:398}, to:{x:238,y:298}, color:'#00C2D6', dash:true,  label:'8 → 10 in window'},
+          {from:{x:258,y:398}, to:{x:45,y:232},  color:'#008496', dash:false, label:'8 → 11 (switch)'},
+          {from:{x:258,y:398}, to:{x:365,y:238}, color:'#16A34A', dash:false, label:'8 → 7 wide'}
+        ]
+      },
+
+      // ── 4-2-3-1 BUILD OUT PLAN C — DOUBLE DECOY, OVER THE TOP TO #10 ──
+      '4231planC': {
+        title: '4-2-3-1 Build Out · Plan C (Over the Top into the Window)',
+        situation: 'Identical to our 4-4-2 Plan C. Both holding mids (6 & 8) check in to drag their markers short and empty the central window. GK or #5 clips the ball OVER the first line of pressure directly to the #10 dropping into the window.',
+        notes: '<strong style="color:var(--teal)">6 AND 8 both check in (Double Decoy):</strong> Both holding midfielders drop toward the ball to pull the opponent\'s central midfielders short. Their job is not to receive—it is to vacate the central window behind them.<br><br><strong style="color:var(--teal)">#10 drops into the vacated window:</strong> With the opponent\'s midfield pulled toward our box and #9 pinning their center backs deep, the #10 drops into the wide-open central window.<br><br><strong style="color:var(--teal)">GK or #5 clips OVER the press:</strong> Reading the space, #5 (or #1) plays a controlled clip over the first wave of pressure into the #10 in the window.<br><br><strong style="color:var(--teal)">#9, #7, and #11 threaten in behind:</strong> As the ball travels to the #10, our front three (#9, #7, #11) stay high to pin the back line and attack the space behind on the lay-off or turn.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:360,y:445}, p3:{x:40,y:445},
+          p4:{x:262,y:480}, p5:{x:150,y:480},
+          p6:{x:175,y:400},                      // 6 checks in (decoy)
+          p8:{x:250,y:400},                      // 8 checks in (decoy)
+          p10:{x:205,y:255},                     // 10 drops into the vacated window
+          p7:{x:375,y:205}, p11:{x:25,y:205},    // 7 & 11 high and wide
+          p9:{x:220,y:135}                       // 9 pins the back line
+        },
+        arrows: [
+          {from:{x:178,y:400}, to:{x:185,y:448}, color:'rgba(148,163,184,0.8)', dash:true, label:'6 checks in (decoy)'},
+          {from:{x:252,y:410}, to:{x:262,y:455}, color:'rgba(148,163,184,0.8)', dash:true, label:'8 checks in (decoy)'},
+          {from:{x:150,y:480}, to:{x:205,y:270}, color:'#00C2D6', dash:false, label:'5 clips OVER → 10 in window'},
+          {from:{x:205,y:210}, to:{x:205,y:255}, color:'#16A34A', dash:true,  label:'10 drops into window'}
+        ],
+        opponents: [
+          {x:168, y:388, label:'M'},
+          {x:262, y:388, label:'M'}
+        ]
+      },
+
+      // ── 4-2-3-1 MID BLOCK ─────────────────────────────────────────────
+      '4231block': {
+        title: '4-2-3-1 Mid Block · Defending Shape (4-4-1-1 / 4-4-2)',
+        situation: 'Out of possession, our 4-2-3-1 seamlessly locks into the same compact two-bank mid block as our 4-4-2: #7 and #11 tuck in level with #6 and #8, while #10 screens the opponent\'s #6 right behind #9.',
+        notes: '<strong style="color:var(--teal)">7 &amp; 11 drop level with 6 &amp; 8:</strong> Out of possession, our wide attacking mids (#7 and #11) drop into line with the double pivot (#6 and #8) to form a compact midfield bank of four.<br><br><strong style="color:var(--teal)">#10 locks onto their #6 (Pivot):</strong> Our #10 steps up just off #9\'s shoulder to screen and deny the opponent\'s holding midfielder (#6), forcing their center backs to play predictable passes wide.<br><br><strong style="color:var(--teal)">Compactness (25–30 yards vertically):</strong> Keep the back four and midfield four connected so no line-breaking passes can enter the window in front of our center backs.<br><br><strong style="color:var(--teal)">Touchline trigger:</strong> When the opponent\'s CB plays out to their fullback, our wide mid (#7 or #11) and fullback (#2 or #3) trap on the touchline while the ball-side pivot slides across to cut the inside pass.',
+        players: {
+          p1:{x:200,y:520},
+          p2:{x:348,y:450}, p3:{x:52,y:450},
+          p4:{x:258,y:458}, p5:{x:142,y:458},
+          p7:{x:358,y:348}, p6:{x:245,y:360},
+          p8:{x:155,y:360}, p11:{x:42,y:348},
+          p10:{x:215,y:270},                     // 10 screens opponent pivot behind 9
+          p9:{x:175,y:235}                       // 9 leads the block
+        },
+        arrows: []
+      },
+
       // ── 4-3-3 ATTACKING ──────────────────────────────────────────────
       '433': {
         title: '4-3-3 Attacking Shape',
@@ -3386,10 +3658,10 @@
         const isGK = id === 'p1';
         pg.innerHTML += `
           <g class="player-group" style="cursor:default;">
-            <circle cx="${pos.x}" cy="${pos.y}" r="16" fill="${isGK ? '#1E5C38' : '#C8A951'}" stroke="${isGK ? '#3ABFB8' : '#0D1B2A'}" stroke-width="2"/>
+            <circle cx="${pos.x}" cy="${pos.y}" r="16" fill="${isGK ? '#15803D' : '#00C2D6'}" stroke="${isGK ? '#FFFFFF' : '#141B24'}" stroke-width="2"/>
             <text x="${pos.x}" y="${pos.y+1}" text-anchor="middle" dominant-baseline="middle"
               font-family="'DM Sans',sans-serif" font-size="${num.length > 1 ? '11' : '13'}"
-              font-weight="bold" fill="${isGK ? '#fff' : '#0D1B2A'}">${num}</text>
+              font-weight="bold" fill="${isGK ? '#FFFFFF' : '#141B24'}">${num}</text>
           </g>
         `;
       });
@@ -3400,7 +3672,7 @@
     let tacticsInit = false;
     function ensureTacticsInit() {
       if (tacticsInit) return;
-      setTactic('442shape', document.querySelector('.tac-btn.active'));
+      setTactic('4231shape', document.querySelector('.tac-btn.active'));
     }
 
     // ═══════════════════════════════════════════════

@@ -38,26 +38,39 @@
     body[data-team="aspire"] { --accent: #008496; --accent-bg: rgba(0,132,150,.10); --accent-bd: rgba(0,132,150,.28); }
     .accent-text { color: var(--accent); }
     .accent-chip { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-bd); }
-    .team-btn { background: #FFFFFF; color: #5A687A; border-color: #DCE3EC; }
+    .team-btn { background: #FFFFFF; color: #334155; border-color: #CBD5E1; }
     .team-btn[aria-pressed="true"] { background: linear-gradient(135deg, #212B3A 0%, #141B24 100%) !important; border-color: #00C2D6 !important; color: #FFFFFF !important; box-shadow: 0 6px 18px rgba(20,27,36,0.16); }
     .team-btn[aria-pressed="true"] .text-white { color: #FFFFFF !important; }
-    .team-btn[aria-pressed="true"] .text-slate-400 { color: rgba(255,255,255,0.75) !important; }
+    .team-btn[aria-pressed="true"] .text-slate-400 { color: rgba(255,255,255,0.82) !important; }
     .team-btn[aria-pressed="true"] .accent-chip { background: rgba(0,194,214,0.18) !important; color: #00C2D6 !important; border-color: rgba(0,194,214,0.45) !important; }
     .team-btn[aria-pressed="true"] .team-dot { opacity: 1; }
 
-    /* Daylight Editorial Utility Remapping (outside dark contrast blocks) */
-    .text-white { color: #141B24; }
-    .text-slate-100, .text-slate-200 { color: #1E2836; }
-    .text-slate-300 { color: #263140; }
-    .text-slate-400, .text-slate-500 { color: #5A687A; }
-    .text-emerald-400, .text-emerald-300 { color: #15803D; }
-    .text-amber-300, .text-amber-400 { color: #008496; }
-    .text-rose-400, .text-rose-300 { color: #B91C1C; }
-    .text-sky-400, .text-sky-300, .text-blue-400 { color: #0284C7; }
-    .text-purple-400, .text-purple-300 { color: #6D28D9; }
-    .bg-brand-600 { background-color: #1A2330 !important; color: #FFFFFF !important; }
-    .bg-brand-600:hover { background-color: #008496 !important; }
-    .hover\:bg-slate-800:hover { background-color: #E9EEF4 !important; }
+    /* Daylight Editorial Utility Remapping (Overrides Tailwind runtime classes outside dark contrast blocks) */
+    .text-white { color: #0F172A !important; }
+    .text-slate-100, .text-slate-200 { color: #1E293B !important; }
+    .text-slate-300 { color: #1E293B !important; }
+    .text-slate-400 { color: #334155 !important; }
+    .text-slate-500, .text-slate-600 { color: #475569 !important; }
+    .text-emerald-400, .text-emerald-300 { color: #15803D !important; }
+    .text-teal-400, .text-teal-300 { color: #0F766E !important; }
+    .text-amber-300, .text-amber-400 { color: #B45309 !important; }
+    .text-rose-400, .text-rose-300 { color: #B91C1C !important; }
+    .text-sky-400, .text-sky-300, .text-blue-400 { color: #0369A1 !important; }
+    .text-purple-400, .text-purple-300 { color: #6D28D9 !important; }
+    .placeholder-slate-400::placeholder, .placeholder-slate-500::placeholder, .placeholder-slate-600::placeholder { color: #64748B !important; }
+    select, textarea, input[type="text"], input[type="password"] {
+      color: #0F172A !important;
+      background-color: #FFFFFF !important;
+      border-color: #CBD5E1 !important;
+    }
+    select option {
+      color: #0F172A !important;
+      background-color: #FFFFFF !important;
+    }
+    .bg-brand-600, .bg-brand-600.text-white, .bg-brand-600 span { background-color: #1A2330 !important; color: #FFFFFF !important; }
+    .bg-brand-600:hover, .bg-brand-600:hover span { background-color: #008496 !important; color: #FFFFFF !important; }
+    #toast, #toast.text-white { background-color: #1A2330 !important; color: #FFFFFF !important; }
+    .hover\:bg-slate-800:hover { background-color: #E2E8F0 !important; }
     .hover\:text-white:hover { color: #008496 !important; }
 
     /* Pitchside Contrast Block (Girls Academy Aspire Slate-Navy + Electric Cyan) */
@@ -69,8 +82,8 @@
       box-shadow: 0 14px 34px rgba(20, 27, 36, 0.14);
     }
     .contrast-block .text-white { color: #FFFFFF !important; }
-    .contrast-block .text-slate-200, .contrast-block .text-slate-300 { color: rgba(255, 255, 255, 0.88) !important; }
-    .contrast-block .text-slate-400 { color: rgba(255, 255, 255, 0.72) !important; }
+    .contrast-block .text-slate-100, .contrast-block .text-slate-200, .contrast-block .text-slate-300 { color: rgba(255, 255, 255, 0.92) !important; }
+    .contrast-block .text-slate-400, .contrast-block .text-slate-500 { color: rgba(255, 255, 255, 0.78) !important; }
     .contrast-block .accent-text { color: #00C2D6 !important; }
     .contrast-block .accent-chip {
       background: rgba(0, 194, 214, 0.16) !important;
@@ -82,10 +95,11 @@
       border-color: rgba(255, 255, 255, 0.16) !important;
       color: #FFFFFF !important;
     }
-    .contrast-block .text-emerald-400 { color: #4ADE80 !important; }
-    .contrast-block .text-amber-300 { color: #38BDF8 !important; }
-    .contrast-block .text-rose-400 { color: #FDA4AF !important; }
-    .contrast-block .text-sky-300 { color: #7DD3FC !important; }
+    .contrast-block .text-emerald-400, .contrast-block .text-emerald-300 { color: #4ADE80 !important; }
+    .contrast-block .text-teal-400, .contrast-block .text-teal-300 { color: #2DD4BF !important; }
+    .contrast-block .text-amber-300, .contrast-block .text-amber-400 { color: #38BDF8 !important; }
+    .contrast-block .text-rose-400, .contrast-block .text-rose-300 { color: #FDA4AF !important; }
+    .contrast-block .text-sky-300, .contrast-block .text-sky-400 { color: #7DD3FC !important; }
     .contrast-block .text-brand-400 { color: #00C2D6 !important; }
 
     /* Floating Aspire Slate-Navy Pill Navigation Bar */
