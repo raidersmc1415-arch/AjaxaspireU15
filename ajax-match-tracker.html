@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Ajax Aspire · Sideline Match Tracker &amp; Live Position Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              400: '#3ABFB8',
+              500: '#2BA8A1',
+              600: '#1E857F',
+              700: '#156B66'
+            },
+            pitch: '#0A121D',
+            card: '#14273D',
+            surface: '#182C44',
+            border: '#223D5B',
+            grass: '#11442B',
+            grassLt: '#155737'
+          },
+          fontFamily: {
+            sans: ['"DM Sans"', 'sans-serif'],
+            mono: ['"DM Mono"', 'monospace'],
+            display: ['"Bebas Neue"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #0D1B2A; color: #E2E8F0; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    .mono { font-family: 'DM Mono', monospace; }
+    .display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em; }
+    
+    /* Pitch Visual Styling */
+    .soccer-pitch {
+      background: radial-gradient(circle at center, #175438 0%, #103F29 100%);
+      position: relative;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-radius: 18px;
+      overflow: hidden;
+      aspect-ratio: 16 / 10;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+    }
+    .pitch-stripe {
+      background: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 80px, transparent 80px, transparent 160px);
+    }
+    .pitch-line {
+      position: absolute;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      pointer-events: none;
+    }
+    .player-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      user-select: none;
+    }
+    .player-node:active {
+      transform: translate(-50%, -50%) scale(0.92);
+    }
+    .selected-node {
+      animation: pulse-ring 1.5s infinite;
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(58, 191, 184, 0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(58, 191, 184, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(58, 191, 184, 0); }
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0A121D; }
+    ::-webkit-scrollbar-thumb { background: #223D5B; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen p-2 sm:p-4 flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+  <!-- TOP STATUS BAR & SCOREBOARD (IPAD OPTIMIZED) -->
+  <header class="bg-card rounded-2xl border border-border p-3 sm:p-4 shadow-2xl mb-3 space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <!-- Team / Squad Brand -->
+      <div class="flex items-center space-x-2.5">
+        <div class="w-10 h-10 rounded-xl bg-pitch border border-teal-500/40 text-teal-300 flex items-center justify-center font-black display text-xl shrink-0">
+          AX
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <select id="teamSelector" onchange="onSelectSquad(this.value)" class="bg-pitch text-white text-xs font-bold rounded-lg px-2 py-1 border border-border outline-none">
+              <option value="aspire">AJAX ASPIRE U15</option>
+              <option value="ga">AJAX GA U15</option>
+            </select>
+            <span class="mono text-[10px] text-teal-400 px-1.5 py-0.2 rounded bg-pitch border border-border" id="compLabel">GA &amp; ASPIRE 26_27</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-0.5">Sideline Match &amp; Position Manager · iPad Touch Optimized</p>
+        </div>
+      </div>
+
+      <!-- Live Digital Match Clock -->
+      <div class="flex items-center bg-pitch px-3 py-1.5 rounded-xl border border-teal-500/40 shadow-inner space-x-3">
+        <div class="text-center">
+          <div class="text-[8px] mono uppercase text-teal-400 font-bold" id="periodDisplay">1ST HALF</div>
+          <div class="text-2xl sm:text-3xl font-black font-mono tracking-wider text-white" id="clockDisplay">00:00</div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button id="timerToggleBtn" onclick="toggleTimer()" class="w-9 h-9 rounded-lg bg-teal-500 hover:bg-teal-600 text-pitch font-black flex items-center justify-center text-sm transition active:scale-95 shadow">
+            ▶
+          </button>
+          <button onclick="advancePeriod()" title="Next Half / Finish" class="w-9 h-9 rounded-lg bg-surface hover:bg-slate-700 text-slate-200 border border-border flex items-center justify-center text-xs font-bold transition">
+            ⏭
+          </button>
+          <div class="flex flex-col gap-0.5">
+            <button onclick="adjustClock(60)" class="px-1.5 py-0.5 rounded bg-surface border border-border text-[9px] font-mono hover:bg-slate-700 text-slate-300">+1m</button>
+            <button onclick="adjustClock(-60)" class="px-1.5 py-0.5 rounded bg-surface border border-border text-[9px] font-mono hover:bg-slate-700 text-slate-300">-1m</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action & Export Buttons -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button onclick="openNewGameModal()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 px-2.5 py-1.5 rounded-xl transition flex items-center gap-1">
+          <span>⚙️ Match Setup</span>
+        </button>
+        <button onclick="exportStatisticsCsv()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center gap-1.5">
+          <span>💾 Export Statistics.csv</span>
+        </button>
+        <button onclick="openHistoryModal()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 px-2.5 py-1.5 rounded-xl transition">
+          <span>📁 Games</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Scoreboard & Opponent Quick Action Bar -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-border/70">
+      <!-- Scoreboard Display -->
+      <div class="flex items-center justify-between bg-pitch/80 p-2.5 rounded-xl border border-border/80">
+        <div class="flex items-center gap-2">
+          <span class="display text-xl text-teal-300 font-bold truncate max-w-[120px]" id="homeSquadName">AJAX ASPIRE</span>
+          <span class="text-3xl font-black font-mono text-white" id="scoreAjax">0</span>
+        </div>
+        <span class="text-slate-500 font-bold text-sm">VS</span>
+        <div class="flex items-center gap-2">
+          <span class="text-3xl font-black font-mono text-rose-400" id="scoreOpponent">0</span>
+          <span class="display text-xl text-slate-200 font-bold truncate max-w-[120px]" id="oppSquadName">OPPONENT</span>
+        </div>
+      </div>
+
+      <!-- Quick Opponent Events Bar -->
+      <div class="flex items-center justify-between bg-pitch/80 p-2 rounded-xl border border-border/80 text-xs">
+        <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Opponent Actions:</span>
+        <div class="flex items-center gap-1.5 flex-wrap justify-end">
+          <button onclick="logOpponentGoal()" class="px-2 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold hover:bg-rose-500/30 active:scale-95">
+            + Opp Goal
+          </button>
+          <button onclick="logOpponentShot()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
+            + Opp Shot (<span id="oppShotsCount">0</span>)
+          </button>
+          <button onclick="logOpponentCorner()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
+            + Corner (<span id="oppCornersCount">0</span>)
+          </button>
+          <button onclick="logOpponentFoul()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
+            + Foul (<span id="oppFoulsCount">0</span>)
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN TWO-COLUMN WORKSPACE: TACTICAL PITCH BOARD & LIVE BENCH -->
+  <main class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 mb-3 flex-1">
+    
+    <!-- LEFT COLUMN: TACTICAL PITCH VISUALIZER (COVERS 8 OF 12 COLS ON DESKTOP/IPAD) -->
+    <div class="lg:col-span-8 space-y-3">
+      <!-- Pitch Header / Formation Selector -->
+      <div class="flex items-center justify-between bg-card p-2.5 rounded-xl border border-border text-xs">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-white flex items-center gap-1.5">
+            <span>⚽ Pitch Lineup &amp; Subs</span>
+          </span>
+          <span class="text-[10px] text-teal-400 mono" id="activeSubPrompt">Tap player to sub or log stats</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-[10px] mono text-slate-400 uppercase">Formation:</label>
+          <select id="formationSelect" onchange="changeFormation(this.value)" class="bg-pitch text-teal-300 text-xs font-bold px-2 py-1 rounded-lg border border-border outline-none">
+            <option value="4-3-3">4-3-3 (Ajax Standard)</option>
+            <option value="4-2-3-1">4-2-3-1 (Double Pivot)</option>
+            <option value="3-5-2">3-5-2 (Wingbacks)</option>
+            <option value="4-4-2">4-4-2 (Flat Mid)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- The Tactical Soccer Pitch Graphic -->
+      <div class="soccer-pitch" id="soccerPitch">
+        <div class="pitch-stripe absolute inset-0 pointer-events-none"></div>
+
+        <!-- Field Third Guidelines -->
+        <div class="absolute inset-y-0 left-0 w-1/3 border-r border-dashed border-white/20 pointer-events-none flex items-start justify-center pt-2">
+          <span class="mono text-[9px] font-bold text-white/30 uppercase tracking-widest">D3 · DEFENDING</span>
+        </div>
+        <div class="absolute inset-y-0 left-1/3 w-1/3 border-r border-dashed border-white/20 pointer-events-none flex items-start justify-center pt-2">
+          <span class="mono text-[9px] font-bold text-white/30 uppercase tracking-widest">M3 · MIDDLE</span>
+        </div>
+        <div class="absolute inset-y-0 right-0 w-1/3 pointer-events-none flex items-start justify-center pt-2">
+          <span class="mono text-[9px] font-bold text-white/30 uppercase tracking-widest">A3 · ATTACKING</span>
+        </div>
+
+        <!-- Pitch Lines -->
+        <div class="pitch-line inset-2.5 rounded-xl"></div>
+        <div class="pitch-line top-2.5 bottom-2.5 left-1/2 -translate-x-1/2"></div>
+        <div class="pitch-line top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full"></div>
+        <!-- Penalty Box Left (Our Goal) -->
+        <div class="pitch-line top-1/2 left-2.5 -translate-y-1/2 w-20 h-44 border-l-0"></div>
+        <div class="pitch-line top-1/2 left-2.5 -translate-y-1/2 w-8 h-24 border-l-0"></div>
+        <!-- Penalty Box Right (Opponent Goal) -->
+        <div class="pitch-line top-1/2 right-2.5 -translate-y-1/2 w-20 h-44 border-r-0"></div>
+        <div class="pitch-line top-1/2 right-2.5 -translate-y-1/2 w-8 h-24 border-r-0"></div>
+
+        <!-- 11 Dynamic Player Nodes Injected via JS -->
+        <div id="pitchPlayersLayer"></div>
+      </div>
+
+      <!-- Bench Tray & Substitutes Panel -->
+      <div class="bg-card p-3 rounded-2xl border border-border space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-bold uppercase tracking-wider text-slate-300">Available Substitutes (<span id="benchCount">0</span>)</span>
+            <span class="text-[10px] text-slate-400">Tap bench player to complete sub</span>
+          </div>
+          <button onclick="showQuickSquadMinutes()" class="text-[10px] text-teal-400 hover:underline mono font-semibold">Equal Time Monitor ⏱️</button>
+        </div>
+        <div id="benchRosterGrid" class="flex flex-wrap gap-2 overflow-x-auto pb-1"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: QUICK ACTION STAT LOGGER & LIVE FEED (4 OF 12 COLS) -->
+    <div class="lg:col-span-4 space-y-3">
+      
+      <!-- Selected Player Action Panel (Shows when a player is tapped) -->
+      <div id="playerActionCard" class="bg-card p-4 rounded-2xl border border-teal-500/50 space-y-3 shadow-xl">
+        <div class="flex items-center justify-between border-b border-border/80 pb-2.5">
+          <div class="flex items-center space-x-2.5">
+            <span id="actJersey" class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/40 font-mono font-black flex items-center justify-center text-sm">#23</span>
+            <div>
+              <h3 id="actName" class="font-bold text-white text-sm leading-tight">Sophia Culver</h3>
+              <div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                <span id="actRole" class="mono text-teal-300 font-bold">ST (CF)</span>
+                <span>·</span>
+                <span id="actMins" class="mono text-amber-300">0' played</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="deselectPlayer()" class="text-slate-400 hover:text-white text-sm font-bold w-6 h-6 rounded-full bg-pitch flex items-center justify-center">✕</button>
+        </div>
+
+        <!-- 1-Tap Stat Event Buttons -->
+        <div class="grid grid-cols-3 gap-1.5 text-xs font-semibold">
+          <button onclick="logSelectedEvent('goal')" class="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+            <span class="text-base">⚽</span>
+            <span>Goal (+3)</span>
+          </button>
+          <button onclick="logSelectedEvent('assist')" class="p-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+            <span class="text-base">🅰️</span>
+            <span>Assist (+2)</span>
+          </button>
+          <button onclick="logSelectedEvent('keyPass')" class="p-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+            <span class="text-base">🔑</span>
+            <span>Key Pass</span>
+          </button>
+          <button onclick="logSelectedEvent('sot')" class="p-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+            <span class="text-base">🎯</span>
+            <span>Shot On</span>
+          </button>
+          <button onclick="logSelectedEvent('soff')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
+            <span class="text-base">🥅</span>
+            <span>Shot Off</span>
+          </button>
+          <button onclick="logSelectedEvent('corner')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
+            <span class="text-base">🚩</span>
+            <span>Corner</span>
+          </button>
+          <button onclick="logSelectedEvent('cross')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
+            <span class="text-base">👟</span>
+            <span>Cross</span>
+          </button>
+          <button onclick="logSelectedEvent('save')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1 transition active:scale-95">
+            <span class="text-base">🧤</span>
+            <span>Save</span>
+          </button>
+          <button onclick="promptTurnoverZone()" class="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+            <span class="text-base">⚠️</span>
+            <span>Turnover</span>
+          </button>
+        </div>
+
+        <!-- Quick Sub Out or Reposition Buttons -->
+        <div class="pt-2 border-t border-border/70 flex items-center justify-between text-xs">
+          <button onclick="subSelectedPlayerOff()" class="text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1">
+            <span>⬇️ Sub Out to Bench</span>
+          </button>
+          <button onclick="promptMovePosition()" class="text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1">
+            <span>🔄 Change Position</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Match Event Log Feed -->
+      <div class="bg-card p-3.5 rounded-2xl border border-border space-y-2.5">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+            <span>📜 Live Match Events</span>
+            <span class="text-[10px] bg-pitch text-teal-400 px-1.5 py-0.2 rounded mono" id="eventCountLabel">0</span>
+          </span>
+          <button onclick="undoLastEvent()" class="text-[10px] text-amber-300 hover:text-amber-200 underline font-mono">⎌ Undo Last</button>
+        </div>
+        <div id="eventsFeedList" class="space-y-1.5 max-h-64 overflow-y-auto pr-1 text-xs"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM LIVE EQUAL PLAYING TIME MONITOR (ACCESSIBLE DURING PLAY) -->
+  <footer class="bg-card rounded-2xl border border-border p-3 shadow-xl space-y-2">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="font-bold text-white uppercase text-[11px] tracking-wider">Playing Time Equality Monitor</span>
+        <span class="text-[10px] text-slate-400 mono">Target: ~40–55' per player for balanced development</span>
+      </div>
+      <div class="flex items-center gap-3 text-[10px] mono">
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> 35–55' Ideal</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span> &lt;35' Needs Run</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> &gt;55' Heavy Load</span>
+      </div>
+    </div>
+    <!-- Horizontal Player Minutes Pill Stream -->
+    <div id="liveMinutesStream" class="flex items-center gap-2 overflow-x-auto pb-1 text-xs whitespace-nowrap"></div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: MATCH SETUP & NEW GAME WIZARD -->
+  <!-- ======================================================== -->
+  <div id="setupModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-md w-full p-5 shadow-2xl relative space-y-4">
+      <button onclick="closeModal('setupModal')" class="absolute top-4 right-4 w-7 h-7 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+      <div>
+        <div class="mono text-[10px] uppercase text-teal-400 font-bold">Pre-Game Configuration</div>
+        <h3 class="display text-2xl text-white">Match Setup</h3>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Opponent Name</label>
+          <input type="text" id="setupOpponent" value="La Morinda" placeholder="e.g. Woodland, Rocklin, Crossfire"
+            class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Competition</label>
+            <input type="text" id="setupComp" value="GA &amp; ASPIRE 26_27"
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Half Length (Mins)</label>
+            <input type="number" id="setupHalfLength" value="40"
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-pitch/60 border border-border/70 text-[11px] text-slate-300">
+          <strong>Tip:</strong> Starting timer will begin counting live on-pitch minutes. Subs and position rotations will be tracked automatically.
+        </div>
+        <button onclick="applyMatchSetup()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition">
+          Save &amp; Start Match
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: TURNOVER PITCH THIRD SELECTION -->
+  <!-- ======================================================== -->
+  <div id="turnoverModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative space-y-3 text-center">
+      <h3 class="display text-xl text-white">Log Turnover Zone</h3>
+      <p class="text-xs text-slate-400">Which pitch third did the giveaway occur in?</p>
+      <div class="grid grid-cols-3 gap-2 text-xs font-bold pt-2">
+        <button onclick="commitTurnover('D3')" class="py-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1">
+          <span class="text-lg">🛡️</span>
+          <span>D3 (Def)</span>
+          <span class="text-[9px] text-rose-400 font-normal">Build-Out</span>
+        </button>
+        <button onclick="commitTurnover('M3')" class="py-3 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-1">
+          <span class="text-lg">⚙️</span>
+          <span>M3 (Mid)</span>
+          <span class="text-[9px] text-sky-400 font-normal">Midfield</span>
+        </button>
+        <button onclick="commitTurnover('A3')" class="py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-1">
+          <span class="text-lg">🎯</span>
+          <span>A3 (Att)</span>
+          <span class="text-[9px] text-amber-400 font-normal">1v1 / Final</span>
+        </button>
+      </div>
+      <button onclick="closeModal('turnoverModal')" class="mt-2 text-xs text-slate-400 hover:text-white">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none duration-300 z-50"></div>
+
+  <!-- APP STATE & SCRIPT LOGIC -->
+  <script>
+    /* =========================================================
+       ROSTERS & FORMATION PRESETS
+       ========================================================= */
+    const SQUADS = {
+      aspire: {
+        id: 'aspire',
+        name: 'AJAX ASPIRE U15',
+        label: 'Ajax Aspire U15',
+        exportName: 'AJAX ASPIRE U15',
+        competition: 'GA & ASPIRE 26_27',
+        roster: [
+          { jersey: 1, name: "Sola Alberto", defaultPos: "LM", roles: ["LM", "CF", "CAM"] },
+          { jersey: 2, name: "Giselle Rosales", defaultPos: "RW", roles: ["RW", "RM", "CAM"] },
+          { jersey: 4, name: "Arianna Zamora", defaultPos: "RB", roles: ["RB", "LB"] },
+          { jersey: 5, name: "Grace Krimmel", defaultPos: "CF", roles: ["CF", "CB"] },
+          { jersey: 7, name: "MacKenzie Castro", defaultPos: "LB", roles: ["LB", "RB", "LW"] },
+          { jersey: 8, name: "Scarlett Freitas", defaultPos: "DM", roles: ["DM", "CM"] },
+          { jersey: 9, name: "Camila Deleon", defaultPos: "CB", roles: ["CB", "LB"] },
+          { jersey: 14, name: "Kendall Blair", defaultPos: "CM", roles: ["CM", "RB", "RW"] },
+          { jersey: 15, name: "Alessandra Fernandez", defaultPos: "LW", roles: ["LW", "CF", "DM"] },
+          { jersey: 19, name: "Amy Godínez Vargas", defaultPos: "RB", roles: ["RB", "LB"] },
+          { jersey: 23, name: "Sophia Culver", defaultPos: "CF", roles: ["CF", "LW", "RW"] },
+          { jersey: 24, name: "Evelyn Lopez", defaultPos: "CM", roles: ["CM", "RM"] },
+          { jersey: 25, name: "Ella Simmons", defaultPos: "AM", roles: ["AM", "CM"] },
+          { jersey: 34, name: "Nairobi Mcgadney", defaultPos: "LW", roles: ["LW", "CF"] },
+          { jersey: 36, name: "Alex Marigorda", defaultPos: "CB", roles: ["CB", "LB"] },
+          { jersey: 37, name: "Brooklyn Brewer", defaultPos: "RM", roles: ["RM", "RW"] },
+          { jersey: 50, name: "Alexa Chipres", defaultPos: "CB", roles: ["CB", "DM", "CM"] },
+          { jersey: 88, name: "Sonia Vera", defaultPos: "GK", roles: ["GK"] },
+          { jersey: 89, name: "Carlee Gowan", defaultPos: "CB", roles: ["CB", "CF"] }
+        ],
+        defaultStarters: [88, 9, 50, 89, 19, 8, 14, 24, 1, 23, 2] // 11 jerseys
+      },
+      ga: {
+        id: 'ga',
+        name: 'AJAX GA U15',
+        label: 'Ajax GA U15',
+        exportName: 'AJAX GA U15',
+        competition: 'GA & ASPIRE 26_27',
+        roster: [
+          { jersey: 1, name: "Evelynn Strong", defaultPos: "GK", roles: ["GK"] },
+          { jersey: 3, name: "Addison Lee", defaultPos: "CB", roles: ["CB"] },
+          { jersey: 6, name: "Madisyn Craig", defaultPos: "CB", roles: ["CB", "RB"] },
+          { jersey: 10, name: "Joselyn Nguyen", defaultPos: "CM", roles: ["CM", "DM"] },
+          { jersey: 11, name: "Kora Busam", defaultPos: "LW", roles: ["LW", "CF"] },
+          { jersey: 12, name: "Addison Leigh", defaultPos: "LM", roles: ["LM", "CF", "CB"] },
+          { jersey: 13, name: "Emery Dobson", defaultPos: "RW", roles: ["RW", "LW"] },
+          { jersey: 16, name: "Kaylani Brasil", defaultPos: "CF", roles: ["CF", "RW"] },
+          { jersey: 17, name: "Aliyah Moreno", defaultPos: "LW", roles: ["LW", "RW"] },
+          { jersey: 18, name: "Anahí Albor", defaultPos: "CM", roles: ["CM", "LM", "CF"] },
+          { jersey: 20, name: "Ariana Mallari", defaultPos: "LB", roles: ["LB", "RB"] },
+          { jersey: 21, name: "Adiana Newell", defaultPos: "RB", roles: ["RB", "LB"] },
+          { jersey: 14, name: "Kendall Blair", defaultPos: "CM", roles: ["CM"] },
+          { jersey: 23, name: "Sophia Culver", defaultPos: "CF", roles: ["CF"] }
+        ],
+        defaultStarters: [1, 20, 3, 6, 21, 10, 18, 12, 11, 16, 13]
+      }
+    };
+
+    // FORMATION COORDINATES (X% from left, Y% from top on pitch)
+    const FORMATIONS = {
+      '4-3-3': {
+        GK:  { x: 7,  y: 50 },
+        LB:  { x: 24, y: 18 },
+        LCB: { x: 21, y: 39 },
+        RCB: { x: 21, y: 61 },
+        RB:  { x: 24, y: 82 },
+        DM:  { x: 42, y: 50 },
+        LCM: { x: 55, y: 32 },
+        RCM: { x: 55, y: 68 },
+        LW:  { x: 78, y: 20 },
+        ST:  { x: 86, y: 50 },
+        RW:  { x: 78, y: 80 }
+      },
+      '4-2-3-1': {
+        GK:  { x: 7,  y: 50 },
+        LB:  { x: 24, y: 18 },
+        LCB: { x: 21, y: 39 },
+        RCB: { x: 21, y: 61 },
+        RB:  { x: 24, y: 82 },
+        LDM: { x: 42, y: 36 },
+        RDM: { x: 42, y: 64 },
+        CAM: { x: 62, y: 50 },
+        LW:  { x: 76, y: 20 },
+        ST:  { x: 86, y: 50 },
+        RW:  { x: 76, y: 80 }
+      },
+      '3-5-2': {
+        GK:  { x: 7,  y: 50 },
+        LCB: { x: 21, y: 26 },
+        CB:  { x: 19, y: 50 },
+        RCB: { x: 21, y: 74 },
+        LWB: { x: 45, y: 14 },
+        DM:  { x: 42, y: 50 },
+        RWB: { x: 45, y: 86 },
+        LCM: { x: 58, y: 35 },
+        RCM: { x: 58, y: 65 },
+        LST: { x: 82, y: 38 },
+        RST: { x: 82, y: 62 }
+      },
+      '4-4-2': {
+        GK:  { x: 7,  y: 50 },
+        LB:  { x: 24, y: 18 },
+        LCB: { x: 21, y: 39 },
+        RCB: { x: 21, y: 61 },
+        RB:  { x: 24, y: 82 },
+        LM:  { x: 54, y: 18 },
+        LCM: { x: 50, y: 40 },
+        RCM: { x: 50, y: 60 },
+        RM:  { x: 54, y: 82 },
+        LST: { x: 84, y: 38 },
+        RST: { x: 84, y: 62 }
+      }
+    };
+
+    /* =========================================================
+       ACTIVE MATCH STATE
+       ========================================================= */
+    let activeSquadKey = 'aspire';
+    let currentFormation = '4-3-3';
+    let opponentName = 'La Morinda';
+    let competitionName = 'GA & ASPIRE 26_27';
+    let halfLengthMinutes = 40;
+
+    let timerRunning = false;
+    let timerInterval = null;
+    let matchSeconds = 0;
+    let currentPeriod = 1; // 1 = H1, 2 = H2, 3 = Final
+
+    let onPitchPlayers = {}; // slotName -> jersey
+    let playerStats = {};    // jersey -> { mins: 0, goals: 0, assists: 0, shots: 0, sot: 0, soff: 0, corners: 0, crosses: 0, turnovers: 0, toD: 0, toM: 0, toA: 0, fouls: 0, saves: 0, posMins: { CB: 40, DM: 20 }, benchMins: 0, onPitch: false, currentPos: '' }
+    let matchEvents = [];    // list of event objects
+    let selectedPlayerJersey = null;
+    let selectedSlot = null;
+
+    let oppStats = { goals: 0, shots: 0, corners: 0, fouls: 0 };
+
+    /* =========================================================
+       INITIALIZATION
+       ========================================================= */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      renderPitch();
+      renderBench();
+      renderMinutesStream();
+      renderEventsFeed();
+      updateScoreboard();
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2600);
+    }
+
+    function onSelectSquad(squadKey) {
+      if (confirm('Switching squads will reset active on-pitch tracker for this match. Proceed?')) {
+        activeSquadKey = squadKey;
+        initSquadMatch();
+      } else {
+        document.getElementById('teamSelector').value = activeSquadKey;
+      }
+    }
+
+    function initSquadMatch() {
+      const sq = SQUADS[activeSquadKey];
+      document.getElementById('homeSquadName').textContent = sq.name;
+      document.getElementById('compLabel').textContent = sq.competition;
+
+      // Initialize playerStats
+      playerStats = {};
+      sq.roster.forEach(p => {
+        playerStats[p.jersey] = {
+          name: p.name,
+          jersey: p.jersey,
+          mins: 0,
+          goals: 0,
+          assists: 0,
+          shots: 0,
+          sot: 0,
+          soff: 0,
+          corners: 0,
+          crosses: 0,
+          turnovers: 0,
+          toD: 0,
+          toM: 0,
+          toA: 0,
+          fouls: 0,
+          saves: 0,
+          posMins: {},
+          benchMins: 0,
+          onPitch: false,
+          currentPos: ''
+        };
+      });
+
+      // Populate Starting 11 into slots
+      const slots = Object.keys(FORMATIONS[currentFormation]);
+      onPitchPlayers = {};
+      slots.forEach((slot, i) => {
+        const j = sq.defaultStarters[i];
+        if (j && playerStats[j]) {
+          onPitchPlayers[slot] = j;
+          playerStats[j].onPitch = true;
+          playerStats[j].currentPos = slot;
+        }
+      });
+
+      matchEvents = [];
+      oppStats = { goals: 0, shots: 0, corners: 0, fouls: 0 };
+      matchSeconds = 0;
+      currentPeriod = 1;
+      timerRunning = false;
+      clearInterval(timerInterval);
+
+      saveState();
+      renderPitch();
+      renderBench();
+      renderMinutesStream();
+      renderEventsFeed();
+      updateScoreboard();
+      updateClockDisplay();
+      showToast(`Initialized lineup for ${sq.label}`);
+    }
+
+    /* =========================================================
+       TIMER CONTROLLER
+       ========================================================= */
+    function toggleTimer() {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        document.getElementById('timerToggleBtn').textContent = '▶';
+        document.getElementById('timerToggleBtn').classList.replace('bg-amber-400', 'bg-teal-500');
+        showToast('Paused match clock.');
+      } else {
+        timerRunning = true;
+        document.getElementById('timerToggleBtn').textContent = '⏸';
+        document.getElementById('timerToggleBtn').classList.replace('bg-teal-500', 'bg-amber-400');
+        timerInterval = setInterval(tickSecond, 1000);
+        showToast('Match clock running.');
+      }
+    }
+
+    function tickSecond() {
+      matchSeconds++;
+      updateClockDisplay();
+
+      // Accrue minutes to on-pitch and bench players every 60 seconds
+      if (matchSeconds % 60 === 0) {
+        // Active on pitch players get +1 min to their total and current position
+        Object.entries(onPitchPlayers).forEach(([slot, jersey]) => {
+          if (playerStats[jersey]) {
+            playerStats[jersey].mins++;
+            const pos = simplifyPos(slot);
+            playerStats[jersey].posMins[pos] = (playerStats[jersey].posMins[pos] || 0) + 1;
+          }
+        });
+
+        // Bench players get +1 min to bench time
+        const sq = SQUADS[activeSquadKey];
+        const onPitchSet = new Set(Object.values(onPitchPlayers));
+        sq.roster.forEach(p => {
+          if (!onPitchSet.has(p.jersey) && playerStats[p.jersey]) {
+            playerStats[p.jersey].benchMins++;
+          }
+        });
+
+        saveState();
+        renderMinutesStream();
+        renderBench();
+      }
+    }
+
+    function simplifyPos(slot) {
+      if (slot.includes('CB')) return 'CB';
+      if (slot.includes('LB')) return 'LB';
+      if (slot.includes('RB')) return 'RB';
+      if (slot.includes('DM')) return 'DM';
+      if (slot.includes('CM')) return 'CM';
+      if (slot.includes('AM') || slot.includes('CAM')) return 'AM';
+      if (slot.includes('LW') || slot.includes('LM')) return 'LW';
+      if (slot.includes('RW') || slot.includes('RM')) return 'RW';
+      if (slot.includes('ST') || slot.includes('CF')) return 'CF';
+      return slot;
+    }
+
+    function adjustClock(deltaSec) {
+      matchSeconds = Math.max(0, matchSeconds + deltaSec);
+      updateClockDisplay();
+    }
+
+    function updateClockDisplay() {
+      const mins = Math.floor(matchSeconds / 60);
+      const secs = matchSeconds % 60;
+      document.getElementById('clockDisplay').textContent = 
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function advancePeriod() {
+      if (currentPeriod === 1) {
+        if (confirm('End First Half and begin Half-Time?')) {
+          currentPeriod = 2;
+          document.getElementById('periodDisplay').textContent = '2ND HALF';
+          matchSeconds = halfLengthMinutes * 60;
+          if (timerRunning) toggleTimer();
+          updateClockDisplay();
+          logMatchSystemEvent('Half Time Reached');
+          showToast('1st Half completed. 2nd Half ready.');
+        }
+      } else if (currentPeriod === 2) {
+        if (confirm('Full-Time whistle! Complete match?')) {
+          currentPeriod = 3;
+          document.getElementById('periodDisplay').textContent = 'FULL TIME';
+          if (timerRunning) toggleTimer();
+          logMatchSystemEvent('Full Time Whistle');
+          showToast('Match Completed! Ready to export.');
+        }
+      }
+    }
+
+    /* =========================================================
+       PITCH VISUALIZER & LINEUP LOGIC
+       ========================================================= */
+    function renderPitch() {
+      const container = document.getElementById('pitchPlayersLayer');
+      if (!container) return;
+      const coords = FORMATIONS[currentFormation];
+
+      container.innerHTML = Object.entries(coords).map(([slot, pos]) => {
+        const jersey = onPitchPlayers[slot];
+        const p = jersey ? playerStats[jersey] : null;
+        const isSelected = selectedSlot === slot;
+        const shortName = p ? p.name.split(' ')[0] : 'Open';
+        const mins = p ? p.mins : 0;
+
+        return `
+          <div class="player-node ${isSelected ? 'selected-node' : ''}" style="left: ${pos.x}%; top: ${pos.y}%;" onclick="onTapPitchNode('${slot}')">
+            <div class="flex flex-col items-center">
+              <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 ${isSelected ? 'border-brand-400 bg-teal-600 scale-110' : 'border-white/80 bg-pitch/90'} text-white flex items-center justify-center font-mono font-black text-xs sm:text-sm shadow-xl relative">
+                ${jersey ? '#' + jersey : '?'}
+                ${p && p.goals > 0 ? `<span class="absolute -top-1 -right-1 bg-emerald-500 text-white rounded-full text-[8px] w-4 h-4 flex items-center justify-center font-bold">⚽${p.goals > 1 ? p.goals : ''}</span>` : ''}
+              </div>
+              <div class="mt-0.5 px-1.5 py-0.2 rounded bg-pitch/90 border border-white/20 text-center leading-none">
+                <span class="text-[9px] font-bold text-teal-300 block">${slot}</span>
+                <span class="text-[10px] font-semibold text-white block truncate max-w-[65px]">${shortName}</span>
+                <span class="text-[8px] font-mono text-amber-300">${mins}'</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function onTapPitchNode(slot) {
+      // Case 1: If another slot was already selected, this means SWAP positions on pitch!
+      if (selectedSlot && selectedSlot !== slot) {
+        const j1 = onPitchPlayers[selectedSlot];
+        const j2 = onPitchPlayers[slot];
+        onPitchPlayers[selectedSlot] = j2;
+        onPitchPlayers[slot] = j1;
+        if (playerStats[j1]) playerStats[j1].currentPos = slot;
+        if (playerStats[j2]) playerStats[j2].currentPos = selectedSlot;
+
+        logMatchSystemEvent(`Position Swap: #${j1} to ${slot}, #${j2} to ${selectedSlot}`);
+        showToast(`Swapped #${j1} and #${j2}`);
+        selectedSlot = null;
+        selectedPlayerJersey = null;
+        renderPitch();
+        return;
+      }
+
+      // Case 2: Select this slot
+      selectedSlot = slot;
+      const jersey = onPitchPlayers[slot];
+      if (jersey && playerStats[jersey]) {
+        selectPlayer(jersey);
+      } else {
+        document.getElementById('activeSubPrompt').textContent = `Slot ${slot} selected. Tap a bench player to put in!`;
+      }
+      renderPitch();
+    }
+
+    function selectPlayer(jersey) {
+      selectedPlayerJersey = jersey;
+      const p = playerStats[jersey];
+      if (!p) return;
+
+      document.getElementById('actJersey').textContent = `#${p.jersey}`;
+      document.getElementById('actName').textContent = p.name;
+      document.getElementById('actRole').textContent = `${p.currentPos || 'Field'} (${simplifyPos(p.currentPos)})`;
+      document.getElementById('actMins').textContent = `${p.mins}' played (${p.goals}G · ${p.assists}A · ${p.turnovers}TO)`;
+      document.getElementById('activeSubPrompt').textContent = `Active: #${p.jersey} ${p.name}. Log event or tap bench player to sub!`;
+    }
+
+    function deselectPlayer() {
+      selectedSlot = null;
+      selectedPlayerJersey = null;
+      document.getElementById('activeSubPrompt').textContent = 'Tap player to sub or log stats';
+      renderPitch();
+    }
+
+    /* =========================================================
+       BENCH TRAY & SUBSTITUTION ENGINE
+       ========================================================= */
+    function renderBench() {
+      const container = document.getElementById('benchRosterGrid');
+      if (!container) return;
+      const sq = SQUADS[activeSquadKey];
+      const onPitchSet = new Set(Object.values(onPitchPlayers));
+
+      const benchPlayers = sq.roster.filter(p => !onPitchSet.has(p.jersey));
+      document.getElementById('benchCount').textContent = benchPlayers.length;
+
+      container.innerHTML = benchPlayers.map(p => {
+        const stat = playerStats[p.jersey] || { mins: 0, benchMins: 0 };
+        return `
+          <button type="button" onclick="onTapBenchPlayer(${p.jersey})"
+            class="p-2 rounded-xl bg-pitch/80 hover:bg-slate-800 border border-border/80 text-left transition flex items-center space-x-2 shrink-0 active:scale-95">
+            <span class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center font-mono font-bold text-xs text-teal-300 border border-border/80">#${p.jersey}</span>
+            <div class="min-w-0 pr-1">
+              <span class="text-xs font-bold text-white block truncate max-w-[85px]">${p.name.split(' ')[0]}</span>
+              <span class="text-[9px] font-mono text-slate-400 block">${stat.mins}' in / ${stat.benchMins}' bench</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function onTapBenchPlayer(benchJersey) {
+      // If an on-pitch slot was selected -> PERFORM THE SUB!
+      if (selectedSlot) {
+        const outJersey = onPitchPlayers[selectedSlot];
+        const curMins = Math.floor(matchSeconds / 60);
+
+        onPitchPlayers[selectedSlot] = benchJersey;
+        if (playerStats[outJersey]) {
+          playerStats[outJersey].onPitch = false;
+          playerStats[outJersey].currentPos = 'Sub';
+        }
+        if (playerStats[benchJersey]) {
+          playerStats[benchJersey].onPitch = true;
+          playerStats[benchJersey].currentPos = selectedSlot;
+        }
+
+        const outName = playerStats[outJersey]?.name || `#${outJersey}`;
+        const inName = playerStats[benchJersey]?.name || `#${benchJersey}`;
+
+        logMatchEvent({
+          time: curMins,
+          type: 'sub',
+          desc: `SUB (${curMins}'): #${benchJersey} ${inName} ON for #${outJersey} ${outName} at ${selectedSlot}`,
+          jersey: benchJersey,
+          zone: 'M3'
+        });
+
+        showToast(`Subbed #${benchJersey} ON for #${outJersey}`);
+        deselectPlayer();
+        renderPitch();
+        renderBench();
+        renderMinutesStream();
+        saveState();
+        return;
+      }
+
+      // If no slot selected, prompt coach
+      showToast(`Select a position on the pitch first to sub #${benchJersey} in.`);
+    }
+
+    function subSelectedPlayerOff() {
+      if (!selectedSlot || !selectedPlayerJersey) return;
+      const j = selectedPlayerJersey;
+      const curMins = Math.floor(matchSeconds / 60);
+
+      delete onPitchPlayers[selectedSlot];
+      if (playerStats[j]) {
+        playerStats[j].onPitch = false;
+        playerStats[j].currentPos = 'Sub';
+      }
+
+      logMatchEvent({
+        time: curMins,
+        type: 'sub',
+        desc: `SUB OUT (${curMins}'): #${j} to Bench (Slot ${selectedSlot} now vacant)`,
+        jersey: j,
+        zone: 'M3'
+      });
+
+      deselectPlayer();
+      renderPitch();
+      renderBench();
+      renderMinutesStream();
+      saveState();
+    }
+
+    function changeFormation(formKey) {
+      currentFormation = formKey;
+      renderPitch();
+      showToast(`Formation set to ${formKey}`);
+    }
+
+    /* =========================================================
+       ONE-TAP IN-GAME STAT EVENT LOGGING
+       ========================================================= */
+    function logSelectedEvent(eventType) {
+      if (!selectedPlayerJersey || !playerStats[selectedPlayerJersey]) {
+        showToast('Please select a player on the pitch first.');
+        return;
+      }
+
+      const j = selectedPlayerJersey;
+      const p = playerStats[j];
+      const curMins = Math.floor(matchSeconds / 60);
+      const slot = selectedSlot || p.currentPos || 'Field';
+
+      if (eventType === 'goal') {
+        p.goals++;
+        p.shots++;
+        p.sot++;
+        updateScoreboard();
+        logMatchEvent({ time: curMins, type: 'goal', desc: `GOAL! #${j} ${p.name.split(' ')[0]} scores at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`⚽ GOAL logged for #${j} ${p.name}!`);
+      } else if (eventType === 'assist') {
+        p.assists++;
+        logMatchEvent({ time: curMins, type: 'assist', desc: `ASSIST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`🅰️ Assist logged for #${j}`);
+      } else if (eventType === 'sot') {
+        p.shots++;
+        p.sot++;
+        logMatchEvent({ time: curMins, type: 'shot', desc: `SHOT ON TARGET: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`🎯 Shot on target logged for #${j}`);
+      } else if (eventType === 'soff') {
+        p.shots++;
+        p.soff++;
+        logMatchEvent({ time: curMins, type: 'shot', desc: `SHOT OFF TARGET: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`🥅 Shot off logged for #${j}`);
+      } else if (eventType === 'corner') {
+        p.corners++;
+        logMatchEvent({ time: curMins, type: 'corner', desc: `CORNER KICK: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`🚩 Corner kick logged`);
+      } else if (eventType === 'cross') {
+        p.crosses++;
+        logMatchEvent({ time: curMins, type: 'cross', desc: `CROSS: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`👟 Cross logged`);
+      } else if (eventType === 'keyPass') {
+        p.keyPasses = (p.keyPasses || 0) + 1;
+        logMatchEvent({ time: curMins, type: 'keyPass', desc: `KEY PASS: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`🔑 Key Pass logged`);
+      } else if (eventType === 'save') {
+        p.saves++;
+        logMatchEvent({ time: curMins, type: 'save', desc: `SAVE: #${j} ${p.name.split(' ')[0]} (GK) at ${curMins}'`, jersey: j, zone: 'D3' });
+        showToast(`🧤 Save logged for goalkeeper!`);
+      }
+
+      selectPlayer(j);
+      saveState();
+      renderPitch();
+    }
+
+    function promptTurnoverZone() {
+      if (!selectedPlayerJersey) return;
+      document.getElementById('turnoverModal').classList.replace('hidden', 'flex');
+    }
+
+    function commitTurnover(zone) {
+      closeModal('turnoverModal');
+      if (!selectedPlayerJersey || !playerStats[selectedPlayerJersey]) return;
+      const j = selectedPlayerJersey;
+      const p = playerStats[j];
+      const curMins = Math.floor(matchSeconds / 60);
+
+      p.turnovers++;
+      if (zone === 'D3') p.toD++;
+      else if (zone === 'M3') p.toM++;
+      else if (zone === 'A3') p.toA++;
+
+      logMatchEvent({
+        time: curMins,
+        type: 'turnover',
+        desc: `TURNOVER in ${zone}: #${j} ${p.name.split(' ')[0]} at ${curMins}'`,
+        jersey: j,
+        zone
+      });
+
+      selectPlayer(j);
+      saveState();
+      showToast(`⚠️ Turnover logged in ${zone}`);
+    }
+
+    /* Opponent Events */
+    function logOpponentGoal() {
+      oppStats.goals++;
+      oppStats.shots++;
+      updateScoreboard();
+      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppGoal', desc: `OPPONENT GOAL conceded (${Math.floor(matchSeconds / 60)}')`, zone: 'D3' });
+      showToast('Opponent goal logged.');
+    }
+    function logOpponentShot() {
+      oppStats.shots++;
+      document.getElementById('oppShotsCount').textContent = oppStats.shots;
+      showToast('Opponent shot logged.');
+    }
+    function logOpponentCorner() {
+      oppStats.corners++;
+      document.getElementById('oppCornersCount').textContent = oppStats.corners;
+      showToast('Opponent corner logged.');
+    }
+    function logOpponentFoul() {
+      oppStats.fouls++;
+      document.getElementById('oppFoulsCount').textContent = oppStats.fouls;
+      showToast('Opponent foul logged.');
+    }
+
+    function logMatchEvent(ev) {
+      matchEvents.unshift(ev);
+      renderEventsFeed();
+    }
+
+    function logMatchSystemEvent(desc) {
+      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'sys', desc, zone: '' });
+    }
+
+    function undoLastEvent() {
+      if (!matchEvents.length) return;
+      const ev = matchEvents.shift();
+      if (ev.type === 'goal' && playerStats[ev.jersey]) {
+        playerStats[ev.jersey].goals--;
+        playerStats[ev.jersey].shots--;
+        playerStats[ev.jersey].sot--;
+      } else if (ev.type === 'oppGoal') {
+        oppStats.goals = Math.max(0, oppStats.goals - 1);
+        oppStats.shots = Math.max(0, oppStats.shots - 1);
+      }
+      updateScoreboard();
+      renderEventsFeed();
+      saveState();
+      showToast(`Undid: ${ev.desc}`);
+    }
+
+    function renderEventsFeed() {
+      const container = document.getElementById('eventsFeedList');
+      if (!container) return;
+      document.getElementById('eventCountLabel').textContent = matchEvents.length;
+
+      if (!matchEvents.length) {
+        container.innerHTML = `<div class="p-4 text-center text-slate-500 italic">No match events logged yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = matchEvents.map(e => `
+        <div class="p-2 rounded-xl bg-pitch/60 border border-border/60 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-teal-400 font-bold">${e.time}'</span>
+            <span class="text-slate-200">${e.desc}</span>
+          </div>
+          ${e.zone ? `<span class="mono text-[9px] px-1 py-0.2 rounded border ${e.zone==='D3'?'bg-rose-500/20 text-rose-300 border-rose-500/30':e.zone==='M3'?'bg-sky-500/20 text-sky-300 border-sky-500/30':'bg-amber-500/20 text-amber-300 border-amber-500/30'}">${e.zone}</span>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function updateScoreboard() {
+      let ajaxGoals = 0;
+      Object.values(playerStats).forEach(p => ajaxGoals += (p.goals || 0));
+      document.getElementById('scoreAjax').textContent = ajaxGoals;
+      document.getElementById('scoreOpponent').textContent = oppStats.goals;
+      document.getElementById('oppSquadName').textContent = opponentName.toUpperCase();
+    }
+
+    /* =========================================================
+       LIVE PLAYING TIME EQUALITY STREAM
+       ========================================================= */
+    function renderMinutesStream() {
+      const stream = document.getElementById('liveMinutesStream');
+      if (!stream) return;
+      const sq = SQUADS[activeSquadKey];
+
+      const sorted = [...sq.roster].sort((a,b) => {
+        const ma = playerStats[a.jersey]?.mins || 0;
+        const mb = playerStats[b.jersey]?.mins || 0;
+        return mb - ma;
+      });
+
+      stream.innerHTML = sorted.map(p => {
+        const stat = playerStats[p.jersey] || { mins: 0, currentPos: 'Sub', onPitch: false };
+        const m = stat.mins;
+        const colorCls = m >= 55 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+          : m >= 35 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+          : 'bg-sky-500/20 text-sky-300 border-sky-500/40';
+
+        return `
+          <div class="p-1.5 px-2.5 rounded-xl border flex items-center space-x-2 shrink-0 ${colorCls}">
+            <span class="font-mono font-bold">#${p.jersey}</span>
+            <span class="font-semibold">${p.name.split(' ')[0]}</span>
+            <span class="font-mono font-black">${m}'</span>
+            <span class="text-[9px] uppercase px-1 py-0.2 rounded bg-pitch/80">${stat.onPitch ? stat.currentPos : 'Bench'}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* =========================================================
+       1-CLICK EXACT 57-COLUMN STATISTICS.CSV EXPORTER
+       ========================================================= */
+    function exportStatisticsCsv() {
+      const sq = SQUADS[activeSquadKey];
+      const teamName = sq.exportName;
+      const comp = competitionName;
+
+      // 1. Calculate squad totals
+      let totalMins = matchSeconds > 0 ? Math.round(matchSeconds / 60) : 80;
+      let gf = 0, ga = oppStats.goals, shots = 0, sot = 0, soff = 0, saves = 0;
+      let corners = 0, crosses = 0, to = 0, toA = 0, toM = 0, toD = 0, fouls = 0, kp = 0;
+
+      Object.values(playerStats).forEach(p => {
+        gf += p.goals;
+        shots += p.shots;
+        sot += p.sot;
+        soff += p.soff;
+        saves += p.saves;
+        corners += p.corners;
+        crosses += p.crosses;
+        to += p.turnovers;
+        toA += p.toA;
+        toM += p.toM;
+        toD += p.toD;
+        fouls += p.fouls;
+        kp += (p.keyPasses || 0);
+      });
+
+      const gd = gf - ga;
+      const winPct = gf > ga ? '100%' : gf === ga ? '0%' : '0%';
+      const shotAcc = shots > 0 ? `${Math.round(sot * 100 / shots)}%` : '0%';
+      const conv = shots > 0 ? `${Math.round(gf * 100 / shots)}%` : '0%';
+
+      // Exact 57 column headers required by Match Hub / Soccer Teammate
+      const headers = [
+        "Team","Player","Position","Competition","Games Played","Player of the Game Awards","Minutes Played",
+        "Goals","Assists","Shots On Target","Shots Off Target","Shots","Saves","Crosses","Corner Kicks","Turnovers",
+        "Turnover Attacking 3rd","Turnover Middle 3rd","Turnover Defending 3rd","Fouls","Offsides",
+        "Substitutions On","Substitutions Off","Penalty Goals","Penalties On Target","Penalties Off Target","Penalty Kicks",
+        "Yellow Cards","Red Cards","Own Goals","Clean Sheets","Duels","Games Won","Games Tied","Games Lost",
+        "Minutes Per Game","Minutes Per Goal","Shots Per Game","Shots Against","Shots Against Per Game","Yellow Cards (Sin Bin)",
+        "Shot Accuracy","Goal Conversion","Free Kicks","Free Kick Goals","Free Kick Shots","Free Kicks Off Target","Free Kicks On Target",
+        "Goal Difference","Goals Against","Goals Per Game","Goal Kicks","Key Passes","Passes","Goals Against Per Game",
+        "Minutes Per Goal Against","Win Percentage"
+      ];
+
+      const csvRows = [];
+      csvRows.push(headers.map(h => `"${h}"`).join(','));
+
+      // 2. Team Summary Row
+      const teamRow = [
+        `"${teamName}"`, `""`, `""`, `"${comp}"`, `"1"`, `"0"`, `"${totalMins}"`,
+        `"${gf}"`, `"0"`, `"${sot}"`, `"${soff}"`, `"${shots}"`, `"${saves}"`, `"${crosses}"`, `"${corners}"`, `"${to}"`,
+        `"${toA}"`, `"${toM}"`, `"${toD}"`, `"${fouls}"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+        `"0"`, `"0"`, `"0"`, `"${ga === 0 ? 1 : 0}"`, `"0"`, `"${gf > ga ? 1 : 0}"`, `"${gf === ga ? 1 : 0}"`, `"${gf < ga ? 1 : 0}"`,
+        `"${totalMins}"`, `"${gf > 0 ? (totalMins / gf).toFixed(0) : ''}"`, `"${shots}"`, `"${oppStats.shots}"`, `"${oppStats.shots}"`, `"0"`,
+        `"${shotAcc}"`, `"${conv}"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+        `"${gd}"`, `"${ga}"`, `"${gf.toFixed(2)}"`, `"0"`, `"${kp}"`, `"${to + kp}"`, `"${ga.toFixed(2)}"`,
+        `"${ga > 0 ? (totalMins / ga).toFixed(0) : ''}"`, `"${winPct}"`
+      ];
+      csvRows.push(teamRow.join(','));
+
+      // 3. Player Rows (Aggregate Total + Positional Rows + Bench Row)
+      sq.roster.forEach(r => {
+        const p = playerStats[r.jersey];
+        if (!p) return;
+        const pMins = p.mins;
+        const pBench = p.benchMins;
+        const pShots = p.shots;
+        const pSot = p.sot;
+        const pSoff = p.soff;
+        const pG = p.goals;
+        const pA = p.assists;
+
+        // Player Total Row (Position empty)
+        const pTotRow = [
+          `"${teamName}"`, `"${p.name}"`, `""`, `"${comp}"`, `"${pMins > 0 ? 1 : 0}"`, `"0"`, `"${pMins}"`,
+          `"${pG}"`, `"${pA}"`, `"${pSot}"`, `"${pSoff}"`, `"${pShots}"`, `"${p.saves}"`, `"${p.crosses}"`, `"${p.corners}"`, `"${p.turnovers}"`,
+          `"${p.toA}"`, `"${p.toM}"`, `"${p.toD}"`, `"${p.fouls}"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+          `"0"`, `"0"`, `"0"`, `"${p.saves > 0 && ga === 0 ? 1 : 0}"`, `"0"`, `"0"`, `"0"`, `"0"`,
+          `"${pMins}"`, `""`, `"${pShots}"`, `"0"`, `"0"`, `"0"`,
+          `"${pShots > 0 ? Math.round(pSot * 100 / pShots) + '%' : ''}"`, `""`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+          `"${gd}"`, `"${ga}"`, `"0"`, `"0"`, `"${p.keyPasses || 0}"`, `"0"`, `"0"`, `""`, `""`
+        ];
+        csvRows.push(pTotRow.join(','));
+
+        // Position Breakdown Rows (e.g. CB, DM, CM)
+        Object.entries(p.posMins).forEach(([pos, minsAtPos]) => {
+          if (minsAtPos > 0) {
+            const pPosRow = [
+              `"${teamName}"`, `"${p.name}"`, `"${pos}"`, `"${comp}"`, `"1"`, `"0"`, `"${minsAtPos}"`,
+              `"${pG}"`, `"${pA}"`, `"${pSot}"`, `"${pSoff}"`, `"${pShots}"`, `"${p.saves}"`, `"${p.crosses}"`, `"${p.corners}"`, `"${p.turnovers}"`,
+              `"${p.toA}"`, `"${p.toM}"`, `"${p.toD}"`, `"${p.fouls}"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+              `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+              `"${minsAtPos}"`, `""`, `"${pShots}"`, `"0"`, `"0"`, `"0"`,
+              `"${pShots > 0 ? Math.round(pSot * 100 / pShots) + '%' : ''}"`, `""`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+              `"${gd}"`, `"${ga}"`, `"0"`, `"0"`, `"${p.keyPasses || 0}"`, `"0"`, `"0"`, `""`, `""`
+            ];
+            csvRows.push(pPosRow.join(','));
+          }
+        });
+
+        // Bench Row (Position = "Sub")
+        if (pBench > 0) {
+          const pSubRow = [
+            `"${teamName}"`, `"${p.name}"`, `"Sub"`, `"${comp}"`, `"1"`, `"0"`, `"${pBench}"`,
+            `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+            `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+            `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+            `"${pBench}"`, `""`, `"0"`, `"0"`, `"0"`, `"0"`, `""`, `""`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`,
+            `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `"0"`, `""`, `""`
+          ];
+          csvRows.push(pSubRow.join(','));
+        }
+      });
+
+      const csvContent = csvRows.join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Statistics_${opponentName.replace(/\s+/g,'_')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Exported Statistics.csv (${csvRows.length} rows)`);
+    }
+
+    /* =========================================================
+       MODALS & GAME WIZARD
+       ========================================================= */
+    function openNewGameModal() {
+      document.getElementById('setupOpponent').value = opponentName;
+      document.getElementById('setupComp').value = competitionName;
+      document.getElementById('setupHalfLength').value = halfLengthMinutes;
+      document.getElementById('setupModal').classList.replace('hidden', 'flex');
+    }
+
+    function applyMatchSetup() {
+      opponentName = document.getElementById('setupOpponent').value.trim() || 'Opponent';
+      competitionName = document.getElementById('setupComp').value.trim() || 'GA & ASPIRE 26_27';
+      halfLengthMinutes = parseInt(document.getElementById('setupHalfLength').value, 10) || 40;
+
+      closeModal('setupModal');
+      updateScoreboard();
+      saveState();
+      showToast(`Match setup saved: vs ${opponentName}`);
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.replace('flex', 'hidden');
+    }
+
+    /* LocalStorage Persistence */
+    function saveState() {
+      const state = {
+        activeSquadKey,
+        currentFormation,
+        opponentName,
+        competitionName,
+        halfLengthMinutes,
+        matchSeconds,
+        currentPeriod,
+        onPitchPlayers,
+        playerStats,
+        matchEvents,
+        oppStats
+      };
+      try {
+        localStorage.setItem('ajax_sideline_tracker_state', JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem('ajax_sideline_tracker_state');
+        if (!raw) {
+          initSquadMatch();
+          return;
+        }
+        const state = JSON.parse(raw);
+        activeSquadKey = state.activeSquadKey || 'aspire';
+        currentFormation = state.currentFormation || '4-3-3';
+        opponentName = state.opponentName || 'La Morinda';
+        competitionName = state.competitionName || 'GA & ASPIRE 26_27';
+        halfLengthMinutes = state.halfLengthMinutes || 40;
+        matchSeconds = state.matchSeconds || 0;
+        currentPeriod = state.currentPeriod || 1;
+        onPitchPlayers = state.onPitchPlayers || {};
+        playerStats = state.playerStats || {};
+        matchEvents = state.matchEvents || [];
+        oppStats = state.oppStats || { goals: 0, shots: 0, corners: 0, fouls: 0 };
+
+        document.getElementById('teamSelector').value = activeSquadKey;
+        document.getElementById('formationSelect').value = currentFormation;
+        updateClockDisplay();
+      } catch (e) {
+        initSquadMatch();
+      }
+    }
+  </script>
+</body>
+</html>
