@@ -741,7 +741,12 @@
               <span>Match Film Log</span>
               <span id="filmLogCountLabel" class="text-[10px] bg-pitch px-2.5 py-0.5 rounded text-brand-400 border border-border mono"></span>
             </h3>
-            <button type="button" onclick="resetFilmFilters()" class="text-[11px] text-slate-400 hover:text-white underline">Reset Filters</button>
+            <div class="flex items-center gap-2">
+              <a href="film-moment-logger.html" target="_blank" class="text-[11px] bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1.5">
+                <span>🎙️ Voice &amp; Fast Logger</span> ↗
+              </a>
+              <button type="button" onclick="resetFilmFilters()" class="text-[11px] text-slate-400 hover:text-white underline">Reset Filters</button>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2">
@@ -1929,6 +1934,7 @@
       if (LINKS.veo) links.push(`<a href="${esc(LINKS.veo)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-border px-2.5 py-1.5 rounded-lg text-slate-200">Watch on Veo →</a>`);
       if (LINKS.film) links.push(`<a href="${esc(LINKS.film)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-border px-2.5 py-1.5 rounded-lg text-slate-200">Film Room →</a>`);
       if (hasFilm) links.push(`<button type="button" onclick="switchTab('tab-film')" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-brand-500/40 px-2.5 py-1.5 rounded-lg text-brand-400">Open Film Log (${totals.filmEventsCount}) →</button>`);
+      links.push(`<a href="film-moment-logger.html" target="_blank" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-teal-500/40 px-2.5 py-1.5 rounded-lg text-teal-300">🎙️ Voice Logger ↗</a>`);
       $('filmLinks').innerHTML = links.join('');
 
       const toDef = totals.toD || 0;

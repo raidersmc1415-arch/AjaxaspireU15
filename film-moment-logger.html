@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ajax Aspire U15 · Smart Film Moment Logger &amp; Voice Converter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              400: '#3ABFB8',
+              500: '#2BA8A1',
+              600: '#1E857F',
+              700: '#156B66'
+            },
+            pitch: '#0A121D',
+            card: '#14273D',
+            surface: '#182C44',
+            border: '#223D5B'
+          },
+          fontFamily: {
+            sans: ['"DM Sans"', 'sans-serif'],
+            mono: ['"DM Mono"', 'monospace'],
+            display: ['"Bebas Neue"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #0D1B2A; color: #E2E8F0; font-family: 'DM Sans', sans-serif; }
+    .mono { font-family: 'DM Mono', monospace; }
+    .display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0A121D; }
+    ::-webkit-scrollbar-thumb { background: #223D5B; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3ABFB8; }
+    .recording-pulse { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.05); } }
+  </style>
+</head>
+<body class="min-h-screen p-3 sm:p-6 flex flex-col justify-between">
+
+  <div class="max-w-6xl mx-auto w-full space-y-5">
+
+    <!-- Top App Header -->
+    <header class="bg-card rounded-2xl border border-border p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl">
+      <div class="flex items-center space-x-3.5">
+        <div class="w-12 h-12 rounded-xl bg-brand-500/15 border border-brand-400/40 text-brand-400 flex items-center justify-center display text-2xl font-bold shrink-0">
+          🎙️
+        </div>
+        <div>
+          <div class="mono text-[10px] uppercase tracking-widest text-brand-400 font-bold flex items-center gap-2">
+            <span>AJAX ASPIRE U15 · FILM STUDY TOOLKIT</span>
+            <span class="px-2 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px]">v3 READY</span>
+          </div>
+          <h1 class="display text-2xl sm:text-3xl text-white leading-tight">Smart Match Film Logger &amp; Voice Converter</h1>
+          <p class="text-xs text-slate-400">Log moments via voice dictation, fast-tap while watching Veo, or parse raw transcripts without Excel date bugs.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <a href="match-hub.html#tab-film" target="_blank" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 hover:text-white px-3 py-2 rounded-xl font-semibold transition flex items-center gap-1.5">
+          <span>Open Match Hub</span> ↗
+        </a>
+        <button onclick="downloadCleanCsv()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white font-semibold px-3.5 py-2 rounded-xl transition shadow-lg flex items-center gap-1.5">
+          <span>💾 Download CSV</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="flex border-b border-border/80 text-xs font-semibold overflow-x-auto gap-2">
+      <button onclick="switchTab('tab-voice')" id="btn-tab-voice" class="tab-btn px-4 py-2.5 rounded-t-xl border-t-2 border-brand-400 bg-card text-brand-400 transition flex items-center gap-2">
+        <span>🎙️ Voice Memo &amp; AI Parser</span>
+      </button>
+      <button onclick="switchTab('tab-rapid')" id="btn-tab-rapid" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-white transition flex items-center gap-2">
+        <span>⚡ Quick-Tap Rapid Logger</span>
+      </button>
+      <button onclick="switchTab('tab-table')" id="btn-tab-table" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-white transition flex items-center gap-2">
+        <span>📋 Logged Moments (<span id="tabCountBadge">0</span>)</span>
+      </button>
+      <button onclick="switchTab('tab-gemini')" id="btn-tab-gemini" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-white transition flex items-center gap-2">
+        <span>🤖 Mobile Phone Prompt Template</span>
+      </button>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 1: VOICE MEMO & NATURAL LANGUAGE PARSER -->
+    <!-- ======================================================== -->
+    <div id="tab-voice" class="tab-pane space-y-4">
+      <div class="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-3">
+          <div>
+            <h2 class="display text-xl text-white flex items-center gap-2">
+              <span>Voice Memo Transcript to Structured Film Log</span>
+            </h2>
+            <p class="text-xs text-slate-400">Speak your game notes while watching Veo, or paste Gemini/Voice Memo transcripts below.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="micBtn" onclick="toggleSpeechRecognition()" class="text-xs bg-pitch hover:bg-slate-800 text-rose-400 border border-rose-500/30 px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-2">
+              <span id="micDot" class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span id="micText">Live Dictate (Web Mic)</span>
+            </button>
+            <button onclick="loadSampleVoiceTranscript()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 px-3 py-1.5 rounded-xl transition">
+              Load Sample Memo
+            </button>
+          </div>
+        </div>
+
+        <!-- Global Match Context -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Match Name</label>
+            <input type="text" id="voiceMatchName" placeholder="e.g. La Morinda, Woodland, Rocklin" value="La Morinda"
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Default Half</label>
+            <select id="voiceDefaultHalf" class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-slate-200 focus:outline-none focus:border-brand-500">
+              <option value="H1">First Half (H1)</option>
+              <option value="H2" selected>Second Half (H2)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Date Stamp</label>
+            <input type="date" id="voiceDate" class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-slate-200 focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <!-- Transcript Input Area -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-300">Paste Spoken Voice Notes (One moment per sentence/paragraph or raw voice flow):</span>
+            <span class="text-[10px] text-teal-400 mono">Auto-resolves: Sophie (#23), Cami (#9), Alexa (#50), D3/M3/A3, Glow/Grow</span>
+          </div>
+          <textarea id="voiceInputText" rows="7" placeholder='Example voice notes:
+"14:22 first half, D3 build out. Camila under heavy press from the 9, stays composed, beats her inside and plays Scarlett. Scarlett one-times out to Amy. Glow. Key pass."
+"32 minutes second half. Giselle free kick outside the 18, hits it with great power but misses wide right. Grow. Needs to put that on frame."
+"54 minutes, D3. Mack forces an entry pass to the 10 into heavy traffic instead of playing the wide channel. Grow, turnover, forced pass."
+"68:33 second half, A3. Sophie receives at top of box, splits both centerbacks, clean left footed finish bottom right corner. Goal scored! Glow."'
+            class="w-full bg-pitch text-xs p-3.5 rounded-xl border border-border text-white placeholder-slate-600 focus:outline-none focus:border-brand-500 font-mono leading-relaxed"></textarea>
+        </div>
+
+        <!-- Parse Button & Options -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+          <div class="text-[11px] text-slate-400 flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">🛡️ Anti-Corruption Active:</span>
+            <span>All jersey lists are sanitized as safe text strings (never auto-converts to dates like 2026-08-07).</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearVoiceInput()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-400 hover:text-white px-3 py-2 rounded-xl transition">
+              Clear
+            </button>
+            <button onclick="parseVoiceNotes()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white font-bold px-5 py-2 rounded-xl transition shadow-lg flex items-center gap-1.5">
+              <span>⚡ Convert to Film Moments →</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 2: QUICK-TAP RAPID LOGGER (WHILE WATCHING VEO) -->
+    <!-- ======================================================== -->
+    <div id="tab-rapid" class="tab-pane hidden space-y-4">
+      <div class="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-3">
+          <div>
+            <h2 class="display text-xl text-white flex items-center gap-2">
+              <span>Quick-Tap Moment Logger</span>
+            </h2>
+            <p class="text-xs text-slate-400">Tag moments with 3 quick taps without pausing or breaking your flow.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400">Match:</span>
+            <input type="text" id="rapidMatch" value="La Morinda" class="bg-pitch text-xs px-2.5 py-1 rounded-lg border border-border text-white w-28">
+            <select id="rapidHalf" class="bg-pitch text-xs px-2 py-1 rounded-lg border border-border text-slate-200">
+              <option value="H1">H1</option>
+              <option value="H2" selected>H2</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Time & Zone Controls -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Time Controls -->
+          <div class="bg-pitch/60 rounded-xl p-3 border border-border/60 space-y-2">
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Match Time (MM:SS)</label>
+            <div class="flex items-center gap-2">
+              <input type="text" id="rapidTime" value="65:00" class="bg-pitch text-sm font-mono font-bold px-3 py-1.5 rounded-lg border border-border text-teal-400 w-24 text-center">
+              <button onclick="adjustRapidTime(-1)" class="px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs font-bold hover:bg-slate-700">-1m</button>
+              <button onclick="adjustRapidTime(1)" class="px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs font-bold hover:bg-slate-700">+1m</button>
+              <button onclick="adjustRapidTime(5)" class="px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs font-bold hover:bg-slate-700">+5m</button>
+            </div>
+          </div>
+
+          <!-- Pitch Zone (D3 / M3 / A3) -->
+          <div class="bg-pitch/60 rounded-xl p-3 border border-border/60 space-y-2">
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Field Zone (1 Charge)</label>
+            <div class="grid grid-cols-3 gap-1.5 text-xs font-bold">
+              <button type="button" onclick="setRapidZone('D3')" id="zoneBtn-D3" class="zone-btn py-1.5 rounded-lg border border-rose-500/40 bg-rose-500/20 text-rose-300">
+                D3 (Defending)
+              </button>
+              <button type="button" onclick="setRapidZone('M3')" id="zoneBtn-M3" class="zone-btn py-1.5 rounded-lg border border-border bg-surface text-slate-300">
+                M3 (Middle)
+              </button>
+              <button type="button" onclick="setRapidZone('A3')" id="zoneBtn-A3" class="zone-btn py-1.5 rounded-lg border border-border bg-surface text-slate-300">
+                A3 (Attacking)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outcome Selector -->
+        <div class="space-y-1.5">
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Action Outcome &amp; Quality</label>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs font-bold">
+            <button type="button" onclick="setRapidOutcome('Glow')" id="outBtn-Glow" class="out-btn py-2 rounded-xl border border-emerald-500/50 bg-emerald-500/20 text-emerald-300">
+              🟢 Glow (Positive)
+            </button>
+            <button type="button" onclick="setRapidOutcome('Grow')" id="outBtn-Grow" class="out-btn py-2 rounded-xl border border-border bg-surface text-slate-300">
+              🔴 Grow (Coaching)
+            </button>
+            <button type="button" onclick="setRapidOutcome('Glow & Grow')" id="outBtn-Mixed" class="out-btn py-2 rounded-xl border border-border bg-surface text-slate-300">
+              🟡 Glow &amp; Grow (Mixed)
+            </button>
+            <button type="button" onclick="setRapidOutcome('Goal Scored')" id="outBtn-Goal" class="out-btn py-2 rounded-xl border border-border bg-surface text-slate-300">
+              ⚽ Goal Scored (+3)
+            </button>
+            <button type="button" onclick="setRapidOutcome('Goal Conceded')" id="outBtn-Conceded" class="out-btn py-2 rounded-xl border border-border bg-surface text-slate-300">
+              🥅 Conceded (-2.5)
+            </button>
+          </div>
+        </div>
+
+        <!-- Player Selection Grid -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Select Players Involved (Click multiple to combine):</label>
+            <button onclick="clearRapidPlayers()" class="text-[10px] text-slate-400 hover:text-white underline">Clear Selection</button>
+          </div>
+          <div id="rosterPickGrid" class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-7 gap-1.5"></div>
+        </div>
+
+        <!-- Primary Action Trigger -->
+        <div class="space-y-1.5">
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Primary Action Trigger / Tag</label>
+          <div class="flex flex-wrap gap-1.5 text-xs" id="quickTagList">
+            <button type="button" onclick="setRapidTag('Forced Pass')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Forced Pass</button>
+            <button type="button" onclick="setRapidTag('Turned into Pressure')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Turned into Pressure</button>
+            <button type="button" onclick="setRapidTag('Heavy Touch')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Heavy Touch</button>
+            <button type="button" onclick="setRapidTag('Key Pass / Line Breaker')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Key Pass / Line Breaker</button>
+            <button type="button" onclick="setRapidTag('Good Press / Duel Won')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Good Press / Duel Won</button>
+            <button type="button" onclick="setRapidTag('Decision on the Ball')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Decision on the Ball</button>
+            <button type="button" onclick="setRapidTag('Decision off the Ball')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Decision off the Ball</button>
+            <button type="button" onclick="setRapidTag('Defensive Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Defensive Shape</button>
+            <button type="button" onclick="setRapidTag('Lost Mark / Bad Recovery')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Lost Mark / Bad Recovery</button>
+            <button type="button" onclick="setRapidTag('Clearance')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Clearance</button>
+            <button type="button" onclick="setRapidTag('Save')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Save</button>
+            <button type="button" onclick="setRapidTag('Quality Shot')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Quality Shot</button>
+          </div>
+        </div>
+
+        <!-- Coaching Comment / Voice Input -->
+        <div class="space-y-1.5">
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Coaching Note / Observation</label>
+          <div class="relative">
+            <textarea id="rapidNotes" rows="2" placeholder="Describe the moment, tactical instruction, or what to review on film..."
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white placeholder-slate-600 focus:outline-none focus:border-brand-500"></textarea>
+          </div>
+        </div>
+
+        <button onclick="commitRapidMoment()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition shadow-xl flex items-center justify-center gap-2">
+          <span>➕ Commit Moment to Log (Enter)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 3: LOGGED MOMENTS TABLE & IMPACT SUMMARY -->
+    <!-- ======================================================== -->
+    <div id="tab-table" class="tab-pane hidden space-y-4">
+      <!-- Live Running Stats Row -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div class="bg-card p-3 rounded-xl border border-border text-center">
+          <div class="text-[9px] mono uppercase text-slate-400">Total Logged</div>
+          <div class="text-xl font-black text-white mt-0.5" id="sumTotal">0</div>
+        </div>
+        <div class="bg-card p-3 rounded-xl border border-border text-center">
+          <div class="text-[9px] mono uppercase text-slate-400">Glow Actions</div>
+          <div class="text-xl font-black text-emerald-400 mt-0.5" id="sumGlow">0</div>
+        </div>
+        <div class="bg-card p-3 rounded-xl border border-border text-center">
+          <div class="text-[9px] mono uppercase text-slate-400">Grow Actions</div>
+          <div class="text-xl font-black text-rose-400 mt-0.5" id="sumGrow">0</div>
+        </div>
+        <div class="bg-card p-3 rounded-xl border border-border text-center">
+          <div class="text-[9px] mono uppercase text-slate-400">Glow %</div>
+          <div class="text-xl font-black text-teal-300 mt-0.5" id="sumGlowPct">0%</div>
+        </div>
+        <div class="bg-card p-3 rounded-xl border border-border text-center col-span-2 sm:col-span-1">
+          <div class="text-[9px] mono uppercase text-slate-400">Turnovers (D/M/A)</div>
+          <div class="text-xl font-black text-amber-300 mt-0.5" id="sumTOs">0 (0/0/0)</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons & Exporter Bar -->
+      <div class="bg-card rounded-2xl border border-border p-4 flex flex-wrap items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-white">Moments Table</span>
+          <span class="text-[10px] bg-pitch text-teal-400 border border-border px-2 py-0.5 rounded mono" id="tableHeaderCount">0 clips</span>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="copyCleanCsvToClipboard()" class="text-xs bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5">
+            <span>📋 Copy CSV to Clipboard</span>
+          </button>
+          <button onclick="downloadCleanCsv()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5">
+            <span>💾 Download Aspire_Film_Log.csv</span>
+          </button>
+          <button onclick="clearAllMoments()" class="text-xs bg-pitch hover:bg-rose-950/40 border border-border text-rose-400 px-3 py-1.5 rounded-xl transition">
+            Clear Table
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="bg-card rounded-2xl border border-border overflow-hidden">
+        <div class="overflow-x-auto max-h-[60vh]">
+          <table class="w-full text-left text-xs whitespace-nowrap">
+            <thead class="bg-pitch text-slate-400 uppercase text-[10px] font-bold border-b border-border sticky top-0 z-10">
+              <tr>
+                <th class="py-2.5 px-3">#</th>
+                <th class="py-2.5 px-2">Match</th>
+                <th class="py-2.5 px-2 text-center">Time</th>
+                <th class="py-2.5 px-2 text-center">Half</th>
+                <th class="py-2.5 px-2 text-center">Zone</th>
+                <th class="py-2.5 px-2">Player(s)</th>
+                <th class="py-2.5 px-2">Category</th>
+                <th class="py-2.5 px-2">Trigger / Tag</th>
+                <th class="py-2.5 px-2 text-center">Quality</th>
+                <th class="py-2.5 px-3">Coach Comment</th>
+                <th class="py-2.5 px-2 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="momentsTbody" class="divide-y divide-border/50">
+              <tr>
+                <td colspan="11" class="py-8 text-center text-slate-500 text-xs">
+                  No moments logged yet. Use Tab 1 to paste voice notes or Tab 2 to quick-tap moments.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 4: GEMINI PROMPT TEMPLATE (FOR PHONE VOICE MEMOS) -->
+    <!-- ======================================================== -->
+    <div id="tab-gemini" class="tab-pane hidden space-y-4">
+      <div class="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-xl">
+        <div class="border-b border-border/80 pb-3">
+          <h2 class="display text-xl text-white flex items-center gap-2">
+            <span>Mobile Voice Memo to Gemini Prompt Template</span>
+          </h2>
+          <p class="text-xs text-slate-400">If you speak moments into your phone and use Gemini on the go, paste this prompt into Gemini to guarantee 100% clean formatting with zero Excel date errors.</p>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-teal-400">Copy-Paste Gemini Instructions:</span>
+            <button onclick="copyGeminiPrompt()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white font-bold px-3 py-1 rounded-xl transition">
+              Copy System Prompt 📋
+            </button>
+          </div>
+          <pre id="geminiPromptBox" class="bg-pitch p-4 rounded-xl border border-border font-mono text-[11px] text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed select-all">You are the official match film breakdown assistant for the AJAX Aspire U15 soccer team.
+I will paste my raw spoken voice memos from watching game film. Break each moment into a clean CSV row matching this exact column schema:
+
+Date,Timestamp (MM:SS),Half,Field Zone,Player(s) Involved,Event Category,Quality / Outcome,Coaching Notes,Match,Short Form Tag
+
+STRICT RULES:
+1. Anti-Date Formatting: When multiple players are involved, ALWAYS format them as a quoted string with hashtags like "#8, #7" or "#4, #24". NEVER output bare numbers like "8, 7" which Google Sheets or Excel will misinterpret as dates.
+2. Player Name to Jersey Mapping:
+   - #23 Sophia Culver (Sophie / Culver)
+   - #2 Giselle Rosales (G / Giselle)
+   - #5 Grace Krimmel (Grace / Ellie / Krimmel)
+   - #8 Scarlett Freitas (Scarlett)
+   - #9 Camila Deleon (Cami / Camila)
+   - #50 Alexa Chipres (Alexa)
+   - #19 Amy Godinez Vargas (Amy)
+   - #14 Kendall Blair (Kendall)
+   - #1 Sola Alberto (Sola)
+   - #7 MacKenzie Castro (Mack / MacKenzie)
+   - #4 Arianna Zamora (Ari / Arianna)
+   - #89 Carlee Gowan (Carlee / Carly)
+   - #88 Sonia Vera (Sonia / GK / Keeper)
+   - #37 Brooklyn Brewer (Brooklyn)
+   - #25 Ella Simmons (Ella)
+   - #24 Evelyn Lopez (Evelyn / Ev)
+   - #36 Alex Marigorda (Alex)
+   - #15 Alessandra Fernandez (Ally / Allie)
+   - #34 Nairobi Mcgadney (Nairobi)
+3. Quality / Outcome must strictly be one of: "Good / Positive" (for Glow), "Poor / Negative" (for Grow), "Glow and Grow (Good actions and Not so Good action)", "Goal Scored", "Goal Conceded", or "Neutral / Complete".
+4. Field Zone must strictly be "D3", "M3", or "A3" (or "D3 - Central", "M3 - Wide Left", etc.).
+5. Event Category: "Turnover", "Defensive Moment", "Offensive Moment", "Key Pass", "Pass String (5+)", "Press Goal Kick", "Set Pieces".
+6. Short Form Tag: "Forced Pass", "Turned into Pressure", "Heavy Touch", "Key Pass / Line Breaker", "Good Press / Duel Won", "Clearance", "Save", "Decision on the Ball", "Decision off the Ball", "Defensive Shape", "Lost Mark / Bad Recovery", "Didn't Scan or Didn't have a Plan".
+
+Output ONLY the raw CSV text so I can copy and paste directly into my Master Sheet.</pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none duration-300 z-50"></div>
+
+  <script>
+    /* =========================================================
+       AJAX ASPIRE U15 ROSTER & SYNONYM MAP
+       ========================================================= */
+    const ASPIRE_ROSTER = [
+      { jersey: 1, name: "Sola Alberto", nicknames: ["sola", "alberto"] },
+      { jersey: 2, name: "Giselle Rosales", nicknames: ["giselle", "rosales", " g "] },
+      { jersey: 4, name: "Arianna Zamora", nicknames: ["arianna", "ari", "zamora"] },
+      { jersey: 5, name: "Grace Krimmel", nicknames: ["grace", "ellie", "krimmel"] },
+      { jersey: 7, name: "MacKenzie Castro", nicknames: ["mackenzie", "mack", "castro"] },
+      { jersey: 8, name: "Scarlett Freitas", nicknames: ["scarlett", "freitas"] },
+      { jersey: 9, name: "Camila Deleon", nicknames: ["camila", "cami", "deleon"] },
+      { jersey: 14, name: "Kendall Blair", nicknames: ["kendall", "blair"] },
+      { jersey: 15, name: "Alessandra Fernandez", nicknames: ["alessandra", "ally", "allie", "fernandez"] },
+      { jersey: 19, name: "Amy Godínez Vargas", nicknames: ["amy", "godinez", "vargas"] },
+      { jersey: 23, name: "Sophia Culver", nicknames: ["sophia", "sophie", "culver"] },
+      { jersey: 24, name: "Evelyn Lopez", nicknames: ["evelyn", "ev", "lopez"] },
+      { jersey: 25, name: "Ella Simmons", nicknames: ["ella", "simmons"] },
+      { jersey: 34, name: "Nairobi Mcgadney", nicknames: ["nairobi", "mcgadney"] },
+      { jersey: 36, name: "Alex Marigorda", nicknames: ["alex", "marigorda"] },
+      { jersey: 37, name: "Brooklyn Brewer", nicknames: ["brooklyn", "brewer"] },
+      { jersey: 50, name: "Alexa Chipres", nicknames: ["alexa", "chipres"] },
+      { jersey: 88, name: "Sonia Vera", nicknames: ["sonia", "vera", "keeper", "goalie"] },
+      { jersey: 89, name: "Carlee Gowan", nicknames: ["carlee", "carly", "gowan"] }
+    ];
+
+    // Corrupted date back-recovery table (heals historical date-converted rows)
+    const SERIAL_JERSEY_LOOKUP = {
+      "37507": [2, 9, 8], "39449": [8, 1, 2], "41839": [14, 7, 19],
+      "41853": [14, 8, 2], "43562": [19, 4, 7], "46060": [2, 7],
+      "46114": [4, 2], "46136": [4, 24], "46228": [7, 25],
+      "46241": [8, 7], "46248": [8, 14], "39117": [7, 2, 4],
+      "2026-08-07": [8, 7], "2026-07-25": [7, 25], "2026-04-24": [4, 24],
+      "2014-07-19": [14, 7, 19], "2002-09-08": [2, 9, 8], "2008-01-02": [8, 1, 2],
+      "2014-08-02": [14, 8, 2], "2019-04-07": [19, 4, 7], "2026-02-07": [2, 7],
+      "2026-04-02": [4, 2]
+    };
+
+    let LOGGED_MOMENTS = [];
+    let selectedRapidPlayers = new Set();
+    let currentRapidZone = 'D3';
+    let currentRapidOutcome = 'Glow';
+    let currentRapidTag = 'Forced Pass';
+    let isRecording = false;
+    let recognition = null;
+
+    /* Initialize today date */
+    document.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().split('T')[0];
+      if (document.getElementById('voiceDate')) document.getElementById('voiceDate').value = today;
+      buildRosterPickGrid();
+      loadFromLocalStorage();
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2800);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const on = btn.id === `btn-${tabId}`;
+        btn.classList.toggle('border-t-2', on);
+        btn.classList.toggle('border-brand-400', on);
+        btn.classList.toggle('bg-card', on);
+        btn.classList.toggle('text-brand-400', on);
+        btn.classList.toggle('text-slate-400', !on);
+      });
+      if (tabId === 'tab-table') renderMomentsTable();
+    }
+
+    /* =========================================================
+       ROSTER QUICK PICK GRID
+       ========================================================= */
+    function buildRosterPickGrid() {
+      const grid = document.getElementById('rosterPickGrid');
+      if (!grid) return;
+      grid.innerHTML = ASPIRE_ROSTER.map(p => `
+        <button type="button" onclick="toggleRapidPlayer(${p.jersey})" id="pBtn-${p.jersey}"
+          class="p-1.5 rounded-xl border border-border bg-surface hover:border-brand-500/50 text-left transition flex items-center gap-1.5">
+          <span class="w-6 h-6 rounded-lg bg-pitch flex items-center justify-center font-mono font-bold text-[10px] text-teal-400 border border-border/80 shrink-0">#${p.jersey}</span>
+          <span class="text-[11px] font-semibold text-slate-200 truncate">${p.name.split(' ')[0]}</span>
+        </button>
+      `).join('');
+    }
+
+    function toggleRapidPlayer(jersey) {
+      if (selectedRapidPlayers.has(jersey)) selectedRapidPlayers.delete(jersey);
+      else selectedRapidPlayers.add(jersey);
+      updateRosterPickUi();
+    }
+
+    function clearRapidPlayers() {
+      selectedRapidPlayers.clear();
+      updateRosterPickUi();
+    }
+
+    function updateRosterPickUi() {
+      ASPIRE_ROSTER.forEach(p => {
+        const btn = document.getElementById(`pBtn-${p.jersey}`);
+        if (!btn) return;
+        const active = selectedRapidPlayers.has(p.jersey);
+        btn.classList.toggle('bg-teal-500/20', active);
+        btn.classList.toggle('border-teal-500/60', active);
+        btn.classList.toggle('text-teal-300', active);
+        btn.classList.toggle('bg-surface', !active);
+        btn.classList.toggle('border-border', !active);
+      });
+    }
+
+    function setRapidZone(zone) {
+      currentRapidZone = zone;
+      ['D3', 'M3', 'A3'].forEach(z => {
+        const btn = document.getElementById(`zoneBtn-${z}`);
+        if (!btn) return;
+        const active = z === zone;
+        btn.className = active
+          ? (z === 'D3' ? 'zone-btn py-1.5 rounded-lg border border-rose-500/50 bg-rose-500/25 text-rose-300 font-bold'
+            : z === 'M3' ? 'zone-btn py-1.5 rounded-lg border border-sky-500/50 bg-sky-500/25 text-sky-300 font-bold'
+            : 'zone-btn py-1.5 rounded-lg border border-amber-500/50 bg-amber-500/25 text-amber-300 font-bold')
+          : 'zone-btn py-1.5 rounded-lg border border-border bg-surface text-slate-300';
+      });
+    }
+
+    function setRapidOutcome(out) {
+      currentRapidOutcome = out;
+      const map = {
+        'Glow': 'outBtn-Glow',
+        'Grow': 'outBtn-Grow',
+        'Glow & Grow': 'outBtn-Mixed',
+        'Goal Scored': 'outBtn-Goal',
+        'Goal Conceded': 'outBtn-Conceded'
+      };
+      Object.entries(map).forEach(([key, id]) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        const active = key === out;
+        btn.className = active
+          ? (key === 'Glow' ? 'out-btn py-2 rounded-xl border border-emerald-500/50 bg-emerald-500/25 text-emerald-300 font-bold'
+            : key === 'Grow' ? 'out-btn py-2 rounded-xl border border-rose-500/50 bg-rose-500/25 text-rose-300 font-bold'
+            : key === 'Goal Scored' ? 'out-btn py-2 rounded-xl border border-emerald-400 bg-emerald-500/30 text-emerald-200 font-black'
+            : key === 'Goal Conceded' ? 'out-btn py-2 rounded-xl border border-rose-500 bg-rose-600/30 text-rose-200 font-black'
+            : 'out-btn py-2 rounded-xl border border-amber-500/50 bg-amber-500/25 text-amber-300 font-bold')
+          : 'out-btn py-2 rounded-xl border border-border bg-surface text-slate-300 font-bold';
+      });
+    }
+
+    function setRapidTag(tag) {
+      currentRapidTag = tag;
+      document.querySelectorAll('#quickTagList .tag-btn').forEach(btn => {
+        const active = btn.textContent.trim() === tag;
+        btn.classList.toggle('bg-teal-500/20', active);
+        btn.classList.toggle('border-teal-500/50', active);
+        btn.classList.toggle('text-teal-300', active);
+        btn.classList.toggle('bg-surface', !active);
+        btn.classList.toggle('border-border', !active);
+      });
+    }
+
+    function adjustRapidTime(deltaMinutes) {
+      const input = document.getElementById('rapidTime');
+      const parts = input.value.split(':');
+      let mins = parseInt(parts[0], 10) || 0;
+      let secs = parseInt(parts[1], 10) || 0;
+      mins = Math.max(0, mins + deltaMinutes);
+      input.value = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function commitRapidMoment() {
+      const match = document.getElementById('rapidMatch').value.trim() || 'League Match';
+      const half = document.getElementById('rapidHalf').value;
+      const time = document.getElementById('rapidTime').value.trim() || '00:00';
+      const notes = document.getElementById('rapidNotes').value.trim();
+      const jerseys = Array.from(selectedRapidPlayers).sort((a,b) => a - b);
+
+      if (!jerseys.length) {
+        showToast('Please select at least 1 player involved.');
+        return;
+      }
+
+      // Safe players formatted string to protect against Excel date corruption:
+      const playersFormatted = jerseys.map(j => `#${j}`).join(', ');
+
+      // Outcome and Category mapping
+      let qualityRaw = currentRapidOutcome === 'Glow' ? 'Good / Positive'
+        : currentRapidOutcome === 'Grow' ? 'Poor / Negative'
+        : currentRapidOutcome === 'Glow & Grow' ? 'Glow and Grow (Good actions and Not so Good action)'
+        : currentRapidOutcome;
+
+      let category = currentRapidOutcome.includes('Goal') ? 'Offensive Moment'
+        : currentRapidTag.includes('Pass') || currentRapidTag.includes('Touch') || currentRapidTag.includes('Turned') ? 'Turnover'
+        : currentRapidTag.includes('Duel') || currentRapidTag.includes('Clearance') || currentRapidTag.includes('Shape') ? 'Defensive Moment'
+        : 'Offensive Moment';
+
+      const momentObj = {
+        date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+        match,
+        time,
+        half,
+        zone: currentRapidZone,
+        playersRaw: playersFormatted,
+        jerseys,
+        category,
+        tag: currentRapidTag,
+        quality: qualityRaw,
+        notes
+      };
+
+      LOGGED_MOMENTS.push(momentObj);
+      saveToLocalStorage();
+      document.getElementById('rapidNotes').value = '';
+      adjustRapidTime(1); // Advance time by 1 min
+      clearRapidPlayers();
+      showToast(`Logged moment #${LOGGED_MOMENTS.length} at ${time}!`);
+      updateCountBadges();
+    }
+
+    /* =========================================================
+       VOICE MEMO NATURAL LANGUAGE PARSER
+       ========================================================= */
+    function loadSampleVoiceTranscript() {
+      document.getElementById('voiceInputText').value = 
+`"14:22 first half, D3 build out. Camila under heavy press from the 9, stays composed, beats her inside and plays Scarlett. Scarlett one-times out to Amy. Glow. Key pass."
+
+"32 minutes second half. Giselle free kick outside the 18, hits it with great power but misses wide right. Grow. Needs to put that on frame."
+
+"54 minutes, D3. Mack forces an entry pass to the 10 into heavy traffic instead of playing the wide channel. Grow, turnover, forced pass."
+
+"68:33 second half, A3. Sophie receives at top of box, splits both centerbacks, clean left footed finish bottom right corner. Goal scored! Glow."
+
+"83:20, D3. Kendall sets back to Cami but doesn't move into supporting angle, Cami forces into defender. Mixed. Turned into pressure."`;
+      showToast('Loaded sample transcript!');
+    }
+
+    function clearVoiceInput() {
+      document.getElementById('voiceInputText').value = '';
+    }
+
+    function parseVoiceNotes() {
+      const rawText = document.getElementById('voiceInputText').value.trim();
+      if (!rawText) {
+        showToast('Please paste or dictate some voice notes first.');
+        return;
+      }
+
+      const matchName = document.getElementById('voiceMatchName').value.trim() || 'Match';
+      const defaultHalf = document.getElementById('voiceDefaultHalf').value || 'H2';
+      const dateVal = document.getElementById('voiceDate').value || new Date().toISOString().split('T')[0];
+
+      // Split by lines or quotes
+      const lines = rawText.split(/\n+/).map(l => l.trim().replace(/^["']|["']$/g, '')).filter(l => l.length > 5);
+
+      let parsedCount = 0;
+      lines.forEach(line => {
+        const parsed = parseSingleVoiceSnippet(line, matchName, defaultHalf, dateVal);
+        if (parsed) {
+          LOGGED_MOMENTS.push(parsed);
+          parsedCount++;
+        }
+      });
+
+      if (parsedCount > 0) {
+        saveToLocalStorage();
+        updateCountBadges();
+        showToast(`Parsed & added ${parsedCount} film moments!`);
+        switchTab('tab-table');
+      } else {
+        showToast('Could not extract any film moments. Check formatting.');
+      }
+    }
+
+    function parseSingleVoiceSnippet(text, defaultMatch, defaultHalf, defaultDate) {
+      const lower = text.toLowerCase();
+
+      // 1. Time extraction (e.g. 14:22, 14:22:00, 32 minutes, 68', 68:33)
+      let time = '00:00';
+      const timeMatch = text.match(/\b(\d{1,2}:\d{2}(?::\d{2})?)\b/) || text.match(/\b(\d{1,2})\s*(?:mins?|minutes?|')\b/);
+      if (timeMatch) {
+        if (timeMatch[1].includes(':')) {
+          const parts = timeMatch[1].split(':');
+          time = `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+        } else {
+          time = `${timeMatch[1].padStart(2, '0')}:00`;
+        }
+      }
+
+      // 2. Half extraction
+      let half = defaultHalf;
+      if (lower.includes('first half') || lower.includes('1st half') || /\bh1\b/.test(lower)) half = 'H1';
+      else if (lower.includes('second half') || lower.includes('2nd half') || /\bh2\b/.test(lower)) half = 'H2';
+
+      // 3. Zone extraction
+      let zone = 'M3';
+      if (/\bd3\b|defending third|defensive third|own box|back line/i.test(text)) zone = 'D3';
+      else if (/\ba3\b|attacking third|final third|opponent box|opponent 18/i.test(text)) zone = 'A3';
+      else if (/\bm3\b|middle third|midfield/i.test(text)) zone = 'M3';
+
+      // 4. Player resolution
+      const foundJerseys = new Set();
+      ASPIRE_ROSTER.forEach(p => {
+        // Check jersey number with word boundary or #
+        const numRegex = new RegExp(`(?:#|\\b)${p.jersey}\\b`, 'i');
+        if (numRegex.test(text)) foundJerseys.add(p.jersey);
+        // Check nicknames
+        p.nicknames.forEach(nick => {
+          if (lower.includes(nick.toLowerCase().trim())) foundJerseys.add(p.jersey);
+        });
+      });
+
+      // If no players resolved, mark as Team
+      const jerseys = Array.from(foundJerseys).sort((a,b) => a - b);
+      const playersRaw = jerseys.length ? jerseys.map(j => `#${j}`).join(', ') : 'Team';
+
+      // 5. Outcome & Quality
+      let quality = 'Good / Positive';
+      if (/goal scored|finish clean|scores|found the net/i.test(text)) quality = 'Goal Scored';
+      else if (/goal conceded|conceding|fumbles.*goal|pk awarded/i.test(text)) quality = 'Goal Conceded';
+      else if (/glow and grow|mixed/i.test(text)) quality = 'Glow and Grow (Good actions and Not so Good action)';
+      else if (/grow|turnover|poor|negative|mistake|forced|heavy touch|lost mark/i.test(text)) quality = 'Poor / Negative';
+      else if (/glow|positive|good|nice|quality|line breaker|great/i.test(text)) quality = 'Good / Positive';
+      else if (/neutral|complete/i.test(text)) quality = 'Neutral / Complete';
+
+      // 6. Action Tag & Category
+      let tag = 'Decision on the Ball';
+      if (/forced pass/i.test(text)) tag = 'Forced Pass';
+      else if (/turned into pressure/i.test(text)) tag = 'Turned into Pressure';
+      else if (/heavy touch/i.test(text)) tag = 'Heavy Touch';
+      else if (/line breaker|key pass|through ball/i.test(text)) tag = 'Key Pass / Line Breaker';
+      else if (/press|duel won|tackle/i.test(text)) tag = 'Good Press / Duel Won';
+      else if (/clearance|clears/i.test(text)) tag = 'Clearance';
+      else if (/save|stops/i.test(text)) tag = 'Save';
+      else if (/defensive shape/i.test(text)) tag = 'Defensive Shape';
+      else if (/lost mark|bad recovery/i.test(text)) tag = 'Lost Mark / Bad Recovery';
+      else if (/didn't scan|didn't have a plan/i.test(text)) tag = "Didn't Scan or Didn't have a Plan";
+      else if (/shot/i.test(text)) tag = 'Quality Shot';
+
+      let category = quality.includes('Goal') ? 'Offensive Moment'
+        : tag.includes('Pass') || tag.includes('Touch') || tag.includes('Pressure') ? 'Turnover'
+        : tag.includes('Duel') || tag.includes('Clearance') || tag.includes('Save') ? 'Defensive Moment'
+        : 'Offensive Moment';
+
+      return {
+        date: `${defaultDate} 00:00:00`,
+        match: defaultMatch,
+        time,
+        half,
+        zone,
+        playersRaw,
+        jerseys,
+        category,
+        tag,
+        quality,
+        notes: text
+      };
+    }
+
+    /* =========================================================
+       LIVE SPEECH RECOGNITION (WEB SPEECH API)
+       ========================================================= */
+    function toggleSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast('Speech Recognition not supported in this browser. Please paste text.');
+        return;
+      }
+
+      const micBtn = document.getElementById('micBtn');
+      const micDot = document.getElementById('micDot');
+      const micText = document.getElementById('micText');
+      const input = document.getElementById('voiceInputText');
+
+      if (isRecording) {
+        if (recognition) recognition.stop();
+        isRecording = false;
+        micDot.classList.remove('recording-pulse');
+        micText.textContent = 'Live Dictate (Web Mic)';
+        showToast('Stopped recording.');
+        return;
+      }
+
+      try {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+          isRecording = true;
+          micDot.classList.add('recording-pulse');
+          micText.textContent = 'Listening... Speak now';
+          showToast('Mic active! Dictate your moment observations.');
+        };
+
+        recognition.onresult = (e) => {
+          let transcript = '';
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            transcript += e.results[i][0].transcript + ' ';
+          }
+          if (transcript) {
+            input.value += (input.value ? '\n\n' : '') + `"${transcript.trim()}"`;
+          }
+        };
+
+        recognition.onerror = (err) => {
+          showToast(`Mic error: ${err.error || 'Check microphone permissions'}`);
+          isRecording = false;
+          micDot.classList.remove('recording-pulse');
+          micText.textContent = 'Live Dictate (Web Mic)';
+        };
+
+        recognition.onend = () => {
+          isRecording = false;
+          micDot.classList.remove('recording-pulse');
+          micText.textContent = 'Live Dictate (Web Mic)';
+        };
+
+        recognition.start();
+      } catch (err) {
+        showToast('Could not initialize microphone.');
+      }
+    }
+
+    /* =========================================================
+       MOMENTS TABLE & RUNNING TOTALS
+       ========================================================= */
+    function renderMomentsTable() {
+      const tbody = document.getElementById('momentsTbody');
+      if (!tbody) return;
+
+      if (!LOGGED_MOMENTS.length) {
+        tbody.innerHTML = `<tr><td colspan="11" class="py-8 text-center text-slate-500 text-xs">No moments logged yet. Use Tab 1 or Tab 2 to add moments.</td></tr>`;
+        updateRunningSummary();
+        return;
+      }
+
+      tbody.innerHTML = LOGGED_MOMENTS.map((m, idx) => {
+        const isGlow = m.quality.includes('Positive') || m.quality.includes('Goal Scored');
+        const isGrow = m.quality.includes('Negative') || m.quality.includes('Goal Conceded');
+        const qBadge = isGlow ? '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">GLOW</span>'
+          : isGrow ? '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold">GROW</span>'
+          : '<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">MIXED</span>';
+
+        const zBadge = `<span class="font-mono text-[10px] px-1.5 py-0.5 rounded border ${m.zone === 'D3' ? 'bg-rose-500/15 text-rose-300 border-rose-500/30' : m.zone === 'M3' ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30'}">${m.zone}</span>`;
+
+        return `
+          <tr class="hover:bg-surface/80 transition">
+            <td class="py-2.5 px-3 font-mono text-slate-400 text-[11px]">${idx + 1}</td>
+            <td class="py-2.5 px-2 font-semibold text-white truncate max-w-[100px]">${esc(m.match)}</td>
+            <td class="py-2.5 px-2 text-center font-mono text-teal-400 font-bold">${m.time}</td>
+            <td class="py-2.5 px-2 text-center font-mono text-slate-300">${m.half}</td>
+            <td class="py-2.5 px-2 text-center">${zBadge}</td>
+            <td class="py-2.5 px-2 font-mono font-bold text-white text-[11px]">${esc(m.playersRaw)}</td>
+            <td class="py-2.5 px-2 text-slate-300 text-[11px]">${esc(m.category)}</td>
+            <td class="py-2.5 px-2 text-amber-300 text-[11px] font-semibold">${esc(m.tag)}</td>
+            <td class="py-2.5 px-2 text-center">${qBadge}</td>
+            <td class="py-2.5 px-3 text-slate-300 text-[11px] max-w-xs truncate" title="${esc(m.notes)}">${esc(m.notes)}</td>
+            <td class="py-2.5 px-2 text-center">
+              <button onclick="deleteMoment(${idx})" class="text-rose-400 hover:text-white text-xs font-bold px-2 py-0.5 rounded hover:bg-rose-600/30 transition">✕</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      updateRunningSummary();
+    }
+
+    function deleteMoment(idx) {
+      LOGGED_MOMENTS.splice(idx, 1);
+      saveToLocalStorage();
+      renderMomentsTable();
+      updateCountBadges();
+      showToast('Deleted moment.');
+    }
+
+    function clearAllMoments() {
+      if (!confirm('Are you sure you want to clear all logged moments in this session?')) return;
+      LOGGED_MOMENTS = [];
+      saveToLocalStorage();
+      renderMomentsTable();
+      updateCountBadges();
+      showToast('Cleared moments table.');
+    }
+
+    function updateCountBadges() {
+      const c = LOGGED_MOMENTS.length;
+      document.getElementById('tabCountBadge').textContent = c;
+      if (document.getElementById('tableHeaderCount')) document.getElementById('tableHeaderCount').textContent = `${c} clips`;
+    }
+
+    function updateRunningSummary() {
+      const tot = LOGGED_MOMENTS.length;
+      let glow = 0, grow = 0, toD = 0, toM = 0, toA = 0;
+
+      LOGGED_MOMENTS.forEach(m => {
+        if (m.quality.includes('Positive') || m.quality.includes('Goal Scored')) glow++;
+        else if (m.quality.includes('Negative') || m.quality.includes('Goal Conceded')) grow++;
+
+        if (m.category === 'Turnover' || m.tag.includes('Pass') || m.tag.includes('Touch') || m.tag.includes('Pressure')) {
+          if (m.zone === 'D3') toD++;
+          else if (m.zone === 'M3') toM++;
+          else if (m.zone === 'A3') toA++;
+        }
+      });
+
+      const totalGG = glow + grow;
+      const gPct = totalGG > 0 ? Math.round((glow / totalGG) * 100) : 0;
+      const totalTOs = toD + toM + toA;
+
+      if (document.getElementById('sumTotal')) document.getElementById('sumTotal').textContent = tot;
+      if (document.getElementById('sumGlow')) document.getElementById('sumGlow').textContent = glow;
+      if (document.getElementById('sumGrow')) document.getElementById('sumGrow').textContent = grow;
+      if (document.getElementById('sumGlowPct')) document.getElementById('sumGlowPct').textContent = `${gPct}%`;
+      if (document.getElementById('sumTOs')) document.getElementById('sumTOs').textContent = `${totalTOs} (${toD}/${toM}/${toA})`;
+    }
+
+    /* =========================================================
+       CSV GENERATION & EXPORT
+       ========================================================= */
+    function generateCleanCsvString() {
+      const headers = ['Date', 'Timestamp (MM:SS)', 'Half', 'Field Zone', 'Player(s) Involved', 'Event Category', 'Quality / Outcome', 'Coaching Notes', 'Match', 'Short Form Tag'];
+      const rows = LOGGED_MOMENTS.map(m => [
+        csvEscape(m.date),
+        csvEscape(m.time),
+        csvEscape(m.half),
+        csvEscape(m.zone),
+        csvEscape(m.playersRaw),
+        csvEscape(m.category),
+        csvEscape(m.quality),
+        csvEscape(m.notes),
+        csvEscape(m.match),
+        csvEscape(m.tag)
+      ]);
+      return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    }
+
+    function csvEscape(val) {
+      let s = String(val == null ? '' : val);
+      if (s.includes('"') || s.includes(',') || s.includes('\n')) {
+        s = '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }
+
+    function copyCleanCsvToClipboard() {
+      if (!LOGGED_MOMENTS.length) {
+        showToast('No moments to copy.');
+        return;
+      }
+      const csv = generateCleanCsvString();
+      navigator.clipboard.writeText(csv).then(() => {
+        showToast('Clean CSV copied to clipboard!');
+      }).catch(() => {
+        showToast('Could not copy to clipboard.');
+      });
+    }
+
+    function downloadCleanCsv() {
+      if (!LOGGED_MOMENTS.length) {
+        showToast('No moments to export yet.');
+        return;
+      }
+      const csv = generateCleanCsvString();
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Aspire_Film_Log_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Downloaded clean Aspire_Film_Log.csv!');
+    }
+
+    function copyGeminiPrompt() {
+      const text = document.getElementById('geminiPromptBox').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Gemini System Prompt copied!');
+      }).catch(() => {
+        showToast('Could not copy prompt.');
+      });
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /* LocalStorage Persistence */
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem('ajax_aspire_active_moments', JSON.stringify(LOGGED_MOMENTS));
+      } catch (e) {}
+    }
+
+    function loadFromLocalStorage() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('ajax_aspire_active_moments') || '[]');
+        if (Array.isArray(saved) && saved.length) {
+          LOGGED_MOMENTS = saved;
+          updateCountBadges();
+          renderMomentsTable();
+        }
+      } catch (e) {}
+    }
+  </script>
+</body>
+</html>
