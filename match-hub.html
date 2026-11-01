@@ -1073,13 +1073,13 @@
             </div>
           </div>
 
-          <!-- Top Controls: Amber Flag Film Button + Commit directly to Match Hub (Zero Upload) -->
+          <!-- Top Controls: Amber Flag Film Button + Prominent Commit to Match Hub -->
           <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="flagTrackerBookmark()" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl border border-amber-500/40 transition shadow flex items-center gap-1.5 active:scale-95">
+            <button onclick="flagTrackerBookmark()" class="bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 font-bold text-xs px-3.5 py-2.5 rounded-xl border-2 border-amber-400/70 transition shadow-md flex items-center gap-1.5 active:scale-95">
               <span>📌 Flag Moment for Film</span>
             </button>
-            <button onclick="commitMatchToHub()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-lg flex items-center gap-1.5 active:scale-95">
-              <span>⚡ Commit Match to Hub</span>
+            <button id="commitHubBtn" onclick="commitMatchToHub()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-emerald-400 shadow-xl flex items-center gap-2 transition active:scale-95">
+              <span>⚡ COMMIT MATCH TO HUB</span>
             </button>
           </div>
         </div>
@@ -1099,13 +1099,16 @@
           </div>
 
           <div class="flex items-center justify-between bg-pitch/80 p-2 rounded-xl border border-border/80 text-xs">
-            <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Opponent Actions:</span>
+            <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Opponent:</span>
             <div class="flex items-center gap-1.5 flex-wrap justify-end">
               <button onclick="logTrackerOpponentGoal()" class="px-2 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold hover:bg-rose-500/30 active:scale-95">
                 + Opp Goal
               </button>
-              <button onclick="logTrackerOpponentShot()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
+              <button onclick="logTrackerOpponentShot()" class="px-2 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold hover:bg-sky-500/30 active:scale-95">
                 + Opp Shot (<span id="trackerOppShots">0</span>)
+              </button>
+              <button onclick="logTrackerOpponentSub()" class="px-2 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold hover:bg-amber-500/30 active:scale-95">
+                + Opp Sub (<span id="trackerOppSubs">0</span>)
               </button>
               <button onclick="logTrackerOpponentCorner()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
                 + Corner (<span id="trackerOppCorners">0</span>)
@@ -3752,6 +3755,7 @@
       subHistory: [],
       oppGoals: 0,
       oppShots: 0,
+      oppSubs: 0,
       oppCorners: 0
     };
 
@@ -3816,6 +3820,7 @@
       trackerState.period = 1;
       trackerState.oppGoals = 0;
       trackerState.oppShots = 0;
+      trackerState.oppSubs = 0;
       trackerState.oppCorners = 0;
       saveTrackerState();
     }
@@ -4286,7 +4291,16 @@
     function logTrackerOpponentShot() {
       trackerState.oppShots++;
       if ($('trackerOppShots')) $('trackerOppShots').textContent = trackerState.oppShots;
-      showToast('Opponent shot logged.');
+      logTrackerEventRecord({ time: Math.floor(trackerState.matchSeconds / 60), type: 'oppShot', desc: `OPPONENT SHOT against (${Math.floor(trackerState.matchSeconds / 60)}')`, zone: 'D3' });
+      showToast(`Opponent shot logged (Total: ${trackerState.oppShots})`);
+      saveTrackerState();
+    }
+    function logTrackerOpponentSub() {
+      trackerState.oppSubs = (trackerState.oppSubs || 0) + 1;
+      if ($('trackerOppSubs')) $('trackerOppSubs').textContent = trackerState.oppSubs;
+      logTrackerEventRecord({ time: Math.floor(trackerState.matchSeconds / 60), type: 'oppSub', desc: `OPPONENT SUB #${trackerState.oppSubs} made (${Math.floor(trackerState.matchSeconds / 60)}')`, zone: 'M3' });
+      showToast(`Opponent sub #${trackerState.oppSubs} logged`);
+      saveTrackerState();
     }
     function logTrackerOpponentCorner() {
       trackerState.oppCorners++;
@@ -4327,8 +4341,11 @@
       let ajaxGoals = 0;
       Object.values(trackerState.playerStats).forEach(p => ajaxGoals += (p.goals || 0));
       if ($('trackerScoreAjax')) $('trackerScoreAjax').textContent = ajaxGoals;
-      if ($('trackerScoreOpp')) $('trackerScoreOpp').textContent = trackerState.oppGoals;
+      if ($('trackerScoreOpp')) $('trackerScoreOpp').textContent = trackerState.oppGoals || 0;
       if ($('trackerOppHeader')) $('trackerOppHeader').textContent = (trackerState.opponent || 'OPPONENT').toUpperCase();
+      if ($('trackerOppShots')) $('trackerOppShots').textContent = trackerState.oppShots || 0;
+      if ($('trackerOppSubs')) $('trackerOppSubs').textContent = trackerState.oppSubs || 0;
+      if ($('trackerOppCorners')) $('trackerOppCorners').textContent = trackerState.oppCorners || 0;
     }
 
     function renderTrackerMinutesStream() {
@@ -4377,6 +4394,7 @@
           if ($('trackerOpponentInput')) $('trackerOpponentInput').value = trackerState.opponent || 'La Morinda';
           if ($('trackerFormationSelect')) $('trackerFormationSelect').value = trackerState.formation || '4-3-3';
           updateTrackerClockDisplay();
+          updateTrackerScoreboard();
         } else {
           initTrackerState();
         }
@@ -4561,6 +4579,58 @@
         localStorage.removeItem('matchhub_takeaways_aspire');
         localStorage.removeItem('matchhub_takeaways_sig_aspire');
       } catch (err) {}
+
+      // 6. Build cumulative season stats map to sync directly with Google Sheet (Player_IDP)
+      const cleanNorm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const statsPayload = {};
+      (teamObj.players || []).forEach(p => {
+        const norm = cleanNorm(p.name);
+        statsPayload[norm] = {
+          name: p.name,
+          gp: p.gp || 0,
+          mins: p.mins || 0,
+          goals: p.goals || 0,
+          assists: p.assists || 0,
+          sot: p.sot || 0,
+          soff: p.soff || 0,
+          fouls: p.fouls || 0,
+          toD: p.toD || 0,
+          keyPasses: p.keyPasses || 0,
+          duelsWon: p.duelsWon || 0
+        };
+      });
+
+      const coachPin = (typeof CURRENT_COACH_PIN !== 'undefined' && CURRENT_COACH_PIN) || localStorage.getItem('ajax_coach_pin') || '4111';
+
+      const matchSummary = {
+        date: new Date().toISOString(),
+        opponent: oppName,
+        ajaxScore: ajaxGoals,
+        oppScore: oppGoals,
+        matchMins: matchMins,
+        oppShots: trackerState.oppShots || 0,
+        oppSubs: trackerState.oppSubs || 0,
+        oppCorners: trackerState.oppCorners || 0,
+        eventCount: trackerState.events.length
+      };
+
+      // Background async sync to Google Sheets Master Data Hub (Player_IDP)
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateSeasonStats',
+          pin: coachPin,
+          playerStats: statsPayload,
+          matchSummary: matchSummary
+        })
+      }).then(r => r.json()).then(res => {
+        if (res && res.success) {
+          showToast(`☁️ Google Sheet (Player_IDP) synced: ${res.updated || 0} players updated!`);
+        }
+      }).catch(err => {
+        console.warn('Background sheet sync notice:', err);
+      });
 
       // Reset tracker for next game
       initTrackerState();

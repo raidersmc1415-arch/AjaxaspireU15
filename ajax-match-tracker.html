@@ -121,16 +121,19 @@
         </div>
       </div>
 
-      <!-- Action & Export Buttons -->
+      <!-- Action & Export Buttons: Prominent Commit to Match Hub Button -->
       <div class="flex items-center gap-1.5 flex-wrap">
-        <button onclick="flagSidelineBookmark()" class="text-xs bg-amber-500/25 hover:bg-amber-500/35 border-2 border-amber-400/70 text-amber-300 font-bold px-3 py-1.5 rounded-xl transition shadow-lg flex items-center gap-1.5 active:scale-95">
-          <span>📌 Flag Moment for Film</span>
+        <button id="commitMatchHubBtn" onclick="commitMatchToHub()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3.5 py-2 rounded-xl transition shadow-xl flex items-center gap-1.5 active:scale-95 border-2 border-emerald-400">
+          <span>⚡ COMMIT MATCH TO HUB</span>
+        </button>
+        <button onclick="flagSidelineBookmark()" class="text-xs bg-amber-500/25 hover:bg-amber-500/35 border-2 border-amber-400/70 text-amber-300 font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center gap-1.5 active:scale-95">
+          <span>📌 Flag Film</span>
         </button>
         <button onclick="openNewGameModal()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 px-2.5 py-1.5 rounded-xl transition flex items-center gap-1">
           <span>⚙️ Match Setup</span>
         </button>
-        <button onclick="exportStatisticsCsv()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center gap-1.5">
-          <span>💾 Export Statistics.csv</span>
+        <button onclick="exportStatisticsCsv()" class="text-xs bg-surface hover:bg-slate-700 text-slate-300 border border-border px-2.5 py-1.5 rounded-xl transition flex items-center gap-1">
+          <span>💾 CSV</span>
         </button>
         <button onclick="openHistoryModal()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 px-2.5 py-1.5 rounded-xl transition">
           <span>📁 Games</span>
@@ -155,13 +158,16 @@
 
       <!-- Quick Opponent Events Bar -->
       <div class="flex items-center justify-between bg-pitch/80 p-2 rounded-xl border border-border/80 text-xs">
-        <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Opponent Actions:</span>
+        <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Opponent:</span>
         <div class="flex items-center gap-1.5 flex-wrap justify-end">
           <button onclick="logOpponentGoal()" class="px-2 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold hover:bg-rose-500/30 active:scale-95">
             + Opp Goal
           </button>
-          <button onclick="logOpponentShot()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
+          <button onclick="logOpponentShot()" class="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold hover:bg-sky-500/30 active:scale-95">
             + Opp Shot (<span id="oppShotsCount">0</span>)
+          </button>
+          <button onclick="logOpponentSub()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold hover:bg-amber-500/30 active:scale-95">
+            + Opp Sub (<span id="oppSubsCount">0</span>)
           </button>
           <button onclick="logOpponentCorner()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
             + Corner (<span id="oppCornersCount">0</span>)
@@ -573,7 +579,8 @@
     let selectedSlot = null;
     let swapMode = false;
 
-    let oppStats = { goals: 0, shots: 0, corners: 0, fouls: 0 };
+    let oppStats = { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 };
+    const API_URL = "https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec";
 
     /* =========================================================
        INITIALIZATION
@@ -651,7 +658,7 @@
       });
 
       matchEvents = [];
-      oppStats = { goals: 0, shots: 0, corners: 0, fouls: 0 };
+      oppStats = { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 };
       matchSeconds = 0;
       currentPeriod = 1;
       timerRunning = false;
@@ -1146,8 +1153,19 @@
     }
     function logOpponentShot() {
       oppStats.shots++;
-      document.getElementById('oppShotsCount').textContent = oppStats.shots;
-      showToast('Opponent shot logged.');
+      const el = document.getElementById('oppShotsCount');
+      if (el) el.textContent = oppStats.shots;
+      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppShot', desc: `OPPONENT SHOT against (${Math.floor(matchSeconds / 60)}')`, zone: 'D3' });
+      showToast(`Opponent shot logged (Total: ${oppStats.shots})`);
+      saveState();
+    }
+    function logOpponentSub() {
+      oppStats.subs = (oppStats.subs || 0) + 1;
+      const el = document.getElementById('oppSubsCount');
+      if (el) el.textContent = oppStats.subs;
+      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppSub', desc: `OPPONENT SUB #${oppStats.subs} made (${Math.floor(matchSeconds / 60)}')`, zone: 'M3' });
+      showToast(`Opponent substitution #${oppStats.subs} logged`);
+      saveState();
     }
     function logOpponentCorner() {
       oppStats.corners++;
@@ -1211,8 +1229,12 @@
       let ajaxGoals = 0;
       Object.values(playerStats).forEach(p => ajaxGoals += (p.goals || 0));
       document.getElementById('scoreAjax').textContent = ajaxGoals;
-      document.getElementById('scoreOpponent').textContent = oppStats.goals;
+      document.getElementById('scoreOpponent').textContent = oppStats.goals || 0;
       document.getElementById('oppSquadName').textContent = opponentName.toUpperCase();
+      if (document.getElementById('oppShotsCount')) document.getElementById('oppShotsCount').textContent = oppStats.shots || 0;
+      if (document.getElementById('oppSubsCount')) document.getElementById('oppSubsCount').textContent = oppStats.subs || 0;
+      if (document.getElementById('oppCornersCount')) document.getElementById('oppCornersCount').textContent = oppStats.corners || 0;
+      if (document.getElementById('oppFoulsCount')) document.getElementById('oppFoulsCount').textContent = oppStats.fouls || 0;
     }
 
     /* =========================================================
@@ -1377,6 +1399,144 @@
     }
 
     /* =========================================================
+       ZERO-UPLOAD COMMITTOR: COMMIT DIRECTLY TO MATCH HUB & GOOGLE SHEET
+       ========================================================= */
+    function commitMatchToHub() {
+      let ajaxGoals = 0;
+      Object.values(playerStats).forEach(p => ajaxGoals += (p.goals || 0));
+      const oppGoals = oppStats.goals;
+      const matchMins = matchSeconds > 0 ? Math.round(matchSeconds / 60) : 80;
+      const targetTeam = activeSquadKey === 'ga' ? 'AJAX GA U15' : 'AJAX ASPIRE U15';
+
+      if (!confirm(`Commit Match vs. ${opponentName} (${ajaxGoals} - ${oppGoals}, ${matchMins}') directly to Match Hub and sync to Team Hub Google Sheet?`)) return;
+
+      // 1. Read existing Match Hub custom data from localStorage if available
+      let customData = null;
+      try {
+        const raw = localStorage.getItem('matchhub_custom_data');
+        if (raw) customData = JSON.parse(raw);
+      } catch (e) {}
+
+      // 2. Prepare cumulative update for the Google Sheet (Player_IDP tab)
+      const statsPayload = {};
+      const cleanNorm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      Object.values(playerStats).forEach(ps => {
+        if (!ps || !ps.name) return;
+        const norm = cleanNorm(ps.name);
+        
+        // Find existing cumulative if present in local Match Hub cache
+        let existingP = null;
+        if (customData && customData[targetTeam] && Array.isArray(customData[targetTeam].players)) {
+          existingP = customData[targetTeam].players.find(p => cleanNorm(p.name) === norm);
+        }
+
+        const prevGp = existingP ? (existingP.gp || 0) : 0;
+        const prevMins = existingP ? (existingP.mins || 0) : 0;
+        const prevGoals = existingP ? (existingP.goals || 0) : 0;
+        const prevAssists = existingP ? (existingP.assists || 0) : 0;
+        const prevShots = existingP ? (existingP.shots || 0) : 0;
+        const prevSot = existingP ? (existingP.sot || 0) : 0;
+        const prevSoff = existingP ? (existingP.soff || 0) : 0;
+        const prevToD = existingP ? (existingP.toD || 0) : 0;
+        const prevKp = existingP ? (existingP.keyPasses || 0) : 0;
+        const prevDuels = existingP ? (existingP.duelsWon || 0) : 0;
+
+        const newGp = prevGp + (ps.mins > 0 ? 1 : 0);
+        const newMins = prevMins + ps.mins;
+        const newGoals = prevGoals + ps.goals;
+        const newAssists = prevAssists + ps.assists;
+        const newSot = prevSot + ps.sot;
+        const newSoff = prevSoff + ps.soff;
+        const newToD = prevToD + ps.toD;
+        const newKp = prevKp + (ps.keyPasses || 0);
+        const newDuels = prevDuels + (ps.duelsWon || 0);
+
+        statsPayload[norm] = {
+          name: ps.name,
+          jersey: ps.jersey,
+          gp: newGp,
+          mins: newMins,
+          goals: newGoals,
+          assists: newAssists,
+          sot: newSot,
+          soff: newSoff,
+          fouls: ps.fouls || 0,
+          toD: newToD,
+          keyPasses: newKp,
+          duelsWon: newDuels
+        };
+
+        if (existingP) {
+          existingP.gp = newGp;
+          existingP.mins = newMins;
+          existingP.goals = newGoals;
+          existingP.assists = newAssists;
+          existingP.shots = prevShots + ps.shots;
+          existingP.sot = newSot;
+          existingP.soff = newSoff;
+          existingP.toD = newToD;
+          existingP.keyPasses = newKp;
+          existingP.duelsWon = newDuels;
+        }
+      });
+
+      if (customData && customData[targetTeam]) {
+        const tot = customData[targetTeam].totals || { games: 0, mins: 0, gf: 0, ga: 0, gd: 0, won: 0, tied: 0, lost: 0 };
+        tot.games += 1;
+        tot.mins += matchMins;
+        tot.gf += ajaxGoals;
+        tot.ga += oppGoals;
+        tot.gd = tot.gf - tot.ga;
+        if (ajaxGoals > oppGoals) tot.won += 1;
+        else if (ajaxGoals === oppGoals) tot.tied += 1;
+        else tot.lost += 1;
+        customData[targetTeam].totals = tot;
+        try {
+          localStorage.setItem('matchhub_custom_data', JSON.stringify(customData));
+        } catch(e) {}
+      }
+
+      const coachPin = localStorage.getItem('ajax_coach_pin') || '4111';
+
+      const matchSummary = {
+        date: new Date().toISOString(),
+        team: targetTeam,
+        opponent: opponentName,
+        ajaxScore: ajaxGoals,
+        oppScore: oppGoals,
+        matchMins: matchMins,
+        oppShots: oppStats.shots || 0,
+        oppSubs: oppStats.subs || 0,
+        oppCorners: oppStats.corners || 0,
+        eventCount: matchEvents.length
+      };
+
+      // Background POST directly into Google Sheets (Player_IDP)
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateSeasonStats',
+          pin: coachPin,
+          playerStats: statsPayload,
+          matchSummary: matchSummary
+        })
+      }).then(r => r.json()).then(res => {
+        if (res && res.success) {
+          showToast(`☁️ Google Sheets (Player_IDP) synced: ${res.updated || 0} players updated!`);
+        }
+      }).catch(err => {
+        console.warn('Google Sheet background sync notice:', err);
+      });
+
+      showToast(`🎉 Match vs ${opponentName} committed! Opening Match Hub...`);
+      setTimeout(() => {
+        window.location.href = `match-hub.html#${activeSquadKey}`;
+      }, 1200);
+    }
+
+    /* =========================================================
        MODALS & GAME WIZARD
        ========================================================= */
     function openNewGameModal() {
@@ -1439,11 +1599,12 @@
         onPitchPlayers = state.onPitchPlayers || {};
         playerStats = state.playerStats || {};
         matchEvents = state.matchEvents || [];
-        oppStats = state.oppStats || { goals: 0, shots: 0, corners: 0, fouls: 0 };
+        oppStats = state.oppStats || { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 };
 
         document.getElementById('teamSelector').value = activeSquadKey;
         document.getElementById('formationSelect').value = currentFormation;
         updateClockDisplay();
+        updateScoreboard();
       } catch (e) {
         initSquadMatch();
       }

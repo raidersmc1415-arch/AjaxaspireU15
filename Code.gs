@@ -189,6 +189,7 @@ function doPost(e) {
     if (payload.action === 'saveMatchHubNote')      return handleSaveMatchHubNote(payload);
     if (payload.action === 'saveMatchHubTakeaways') return handleSaveMatchHubTakeaways(payload);
     if (payload.action === 'saveMatchHubData')      return handleSaveMatchHubData(payload);
+    if (payload.action === 'updateSeasonStats')     return handleUpdateSeasonStats(payload);
 
     // IDP submission — write JSON blob into Player_IDP column M (IDP_Submitted)
     if (payload.reflection && payload.reflection.indexOf('[IDP SUBMISSION]') === 0 && payload.idpData) {
@@ -1106,4 +1107,99 @@ function handleSaveMatchHubData(payload) {
     setMatchHubKV('datasets', datasets);
   }
   return jsonOut({ success: true });
+}
+
+// --- PART 14: AUTOMATED SEASON STATS SYNC TO PLAYER_IDP ---
+// Called by the Sideline Tracker when Coach commits a match. Updates
+// cumulative minutes, goals, assists, shots, duels, key passes directly in
+// the Player_IDP sheet so Team Hub & Player IDP portals reflect real-time stats.
+function handleUpdateSeasonStats(payload) {
+  try {
+    if (!isValidCoachPin(payload.pin)) {
+      return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
+    }
+
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Player_IDP');
+    if (!sheet) {
+      return jsonOut({ success: false, message: 'Player_IDP sheet tab not found' });
+    }
+
+    var data = sheet.getDataRange().getValues();
+    var headers = data[0].map(function(h) { return h.toString().trim(); });
+
+    var iName    = headers.indexOf('Player Name');
+    var iGames   = headers.indexOf('Games Played');
+    var iMins    = headers.indexOf('Minutes Played');
+    var iAvg     = headers.indexOf('Average Minutes');
+    var iGoals   = headers.indexOf('Goals');
+    var iAssists = headers.indexOf('Assists');
+    var iShots   = headers.indexOf('Shots On Target');
+    var iShotsOff= headers.indexOf('Shots Off Target');
+    var iFouls   = headers.indexOf('Fouls');
+    var iCS      = headers.indexOf('Clean Sheets');
+    var iWin     = headers.indexOf('Win %');
+    var iTO      = headers.indexOf('Turnovers Def 3rd');
+    var iKP      = headers.indexOf('Key Passes');
+    var iDuels   = headers.indexOf('Duels');
+
+    var statsMap = payload.playerStats || {}; // normalized name or jersey -> stat object
+    var updateCount = 0;
+
+    for (var i = 1; i < data.length; i++) {
+      var rowName = String(data[i][iName] || '').trim();
+      if (!rowName || normName(rowName) === 'coach shawn') continue;
+      var nKey = normName(rowName);
+
+      var ps = statsMap[nKey];
+      if (!ps) {
+        // Fallback: match by matching player object name
+        for (var k in statsMap) {
+          if (normName(statsMap[k].name || '') === nKey) {
+            ps = statsMap[k];
+            break;
+          }
+        }
+      }
+      if (!ps) continue;
+
+      var setCell = function(colIdx, val) {
+        if (colIdx !== -1 && val !== undefined && val !== null && val !== '') {
+          sheet.getRange(i + 1, colIdx + 1).setValue(val);
+        }
+      };
+
+      if (ps.gp !== undefined) setCell(iGames, ps.gp);
+      if (ps.mins !== undefined) {
+        setCell(iMins, ps.mins);
+        if (iAvg !== -1 && ps.gp > 0) {
+          setCell(iAvg, Math.round(ps.mins / ps.gp));
+        }
+      }
+      if (ps.goals !== undefined) setCell(iGoals, ps.goals);
+      if (ps.assists !== undefined) setCell(iAssists, ps.assists);
+      if (ps.sot !== undefined) setCell(iShots, ps.sot);
+      if (ps.soff !== undefined) setCell(iShotsOff, ps.soff);
+      if (ps.fouls !== undefined) setCell(iFouls, ps.fouls);
+      if (ps.toD !== undefined) setCell(iTO, ps.toD);
+      if (ps.keyPasses !== undefined) setCell(iKP, ps.keyPasses);
+      if (ps.duelsWon !== undefined) setCell(iDuels, ps.duelsWon);
+
+      updateCount++;
+    }
+
+    // Save match summary snapshot into match_hub KV store for full match history audit
+    if (payload.matchSummary) {
+      try {
+        var kv = getMatchHubKVMap();
+        var history = kv['match_history'] || [];
+        history.unshift(payload.matchSummary);
+        setMatchHubKV('match_history', history);
+      } catch(e) {}
+    }
+
+    return jsonOut({ success: true, updated: updateCount });
+  } catch (err) {
+    return jsonOut({ success: false, message: err.toString() });
+  }
 }
