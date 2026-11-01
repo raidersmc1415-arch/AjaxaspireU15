@@ -1073,8 +1073,11 @@
             </div>
           </div>
 
-          <!-- Commit directly to Match Hub Button (Zero Upload) -->
-          <div class="flex items-center gap-2">
+          <!-- Top Controls: Amber Flag Film Button + Commit directly to Match Hub (Zero Upload) -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="flagTrackerBookmark()" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl border border-amber-500/40 transition shadow flex items-center gap-1.5 active:scale-95">
+              <span>📌 Flag Moment for Film</span>
+            </button>
             <button onclick="commitMatchToHub()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-lg flex items-center gap-1.5 active:scale-95">
               <span>⚡ Commit Match to Hub</span>
             </button>
@@ -1181,24 +1184,35 @@
         <!-- Action Logger & Live Feed (4 cols) -->
         <div class="lg:col-span-4 space-y-3">
           
+          <!-- THE 1-TAP FILM BOOKMARK BANNER (PROMINENT AT TOP) -->
+          <div class="bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent p-3 rounded-2xl border-2 border-amber-500/50 shadow-lg space-y-1.5">
+            <button onclick="flagTrackerBookmark()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl font-black text-xs transition flex items-center justify-center gap-2 active:scale-95 shadow-md">
+              <span class="text-base">📌</span>
+              <span>FLAG MOMENT FOR FILM REVIEW (1-TAP)</span>
+            </button>
+            <p class="text-[10px] text-amber-200/90 text-center leading-tight font-medium">
+              Drops a timestamped bookmark to analyze on Veo later without typing notes.
+            </p>
+          </div>
+
           <!-- Selected Player Action Panel -->
-          <div id="trackerActionCard" class="bg-card p-4 rounded-2xl border border-teal-500/50 space-y-3 shadow-xl">
+          <div id="trackerActionCard" class="bg-card p-4 rounded-2xl border border-border space-y-3 shadow-xl transition-all">
             <div class="flex items-center justify-between border-b border-border/80 pb-2">
-              <div class="flex items-center space-x-2.5">
-                <span id="trackerActJersey" class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/40 font-mono font-black flex items-center justify-center text-sm">#23</span>
-                <div>
-                  <h3 id="trackerActName" class="font-bold text-white text-sm leading-tight">Sophia Culver</h3>
-                  <div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-                    <span id="trackerActRole" class="mono text-teal-300 font-bold">ST (CF)</span>
+              <div class="flex items-center space-x-2.5 min-w-0">
+                <span id="trackerActJersey" class="w-8 h-8 rounded-lg bg-surface text-slate-400 border border-border font-mono font-black flex items-center justify-center text-sm shrink-0">–</span>
+                <div class="min-w-0">
+                  <h3 id="trackerActName" class="font-bold text-white text-sm leading-tight truncate">👆 Select a Player on Pitch</h3>
+                  <div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 truncate">
+                    <span id="trackerActRole" class="mono text-teal-400 font-bold">Tap any jersey</span>
                     <span>·</span>
-                    <span id="trackerActMins" class="mono text-amber-300">0' played</span>
+                    <span id="trackerActMins" class="mono text-slate-400">Auto-clears after action</span>
                   </div>
                 </div>
               </div>
-              <button onclick="deselectTrackerPlayer()" class="text-slate-400 hover:text-white text-sm font-bold w-6 h-6 rounded-full bg-pitch flex items-center justify-center">✕</button>
+              <button id="trackerDeselectBtn" onclick="deselectTrackerPlayer()" class="hidden text-slate-400 hover:text-white text-sm font-bold w-6 h-6 rounded-full bg-pitch flex items-center justify-center shrink-0">✕</button>
             </div>
 
-            <!-- 1-Tap Stat Buttons -->
+            <!-- 1-Tap Stat Buttons (12-Action Grid) -->
             <div class="grid grid-cols-3 gap-1.5 text-xs font-semibold">
               <button onclick="logTrackerEvent('goal')" class="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-1 transition active:scale-95">
                 <span class="text-base">⚽</span>
@@ -1212,6 +1226,20 @@
                 <span class="text-base">🔑</span>
                 <span>Key Pass</span>
               </button>
+
+              <button onclick="logTrackerEvent('duelWon')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1 transition active:scale-95">
+                <span class="text-base">💪</span>
+                <span>Duel Won</span>
+              </button>
+              <button onclick="logTrackerEvent('duelLost')" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 flex flex-col items-center gap-1 transition active:scale-95">
+                <span class="text-base">❌</span>
+                <span>Duel Lost</span>
+              </button>
+              <button onclick="promptTrackerTurnoverZone()" class="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+                <span class="text-base">⚠️</span>
+                <span>Turnover</span>
+              </button>
+
               <button onclick="logTrackerEvent('sot')" class="p-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-1 transition active:scale-95">
                 <span class="text-base">🎯</span>
                 <span>Shot On</span>
@@ -1220,42 +1248,34 @@
                 <span class="text-base">🥅</span>
                 <span>Shot Off</span>
               </button>
-              <button onclick="logTrackerEvent('corner')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
-                <span class="text-base">🚩</span>
-                <span>Corner</span>
+              <button onclick="logTrackerEvent('save')" class="p-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+                <span class="text-base">🧤</span>
+                <span>Save (GK)</span>
               </button>
+
               <button onclick="logTrackerEvent('cross')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
                 <span class="text-base">👟</span>
                 <span>Cross</span>
               </button>
-              <button onclick="logTrackerEvent('save')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1 transition active:scale-95">
-                <span class="text-base">🧤</span>
-                <span>Save</span>
+              <button onclick="logTrackerEvent('corner')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
+                <span class="text-base">🚩</span>
+                <span>Corner</span>
               </button>
-              <button onclick="promptTrackerTurnoverZone()" class="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 transition active:scale-95">
-                <span class="text-base">⚠️</span>
-                <span>Turnover</span>
+              <button onclick="flagTrackerBookmark()" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+                <span class="text-base">📌</span>
+                <span>Flag Film</span>
               </button>
             </div>
 
             <!-- Sub Out / Position Adjust -->
             <div class="pt-2 border-t border-border/70 flex items-center justify-between text-xs">
-              <button onclick="subTrackerPlayerOff()" class="text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1">
+              <button onclick="subTrackerPlayerOff()" class="text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1 active:scale-95">
                 <span>⬇️ Sub to Bench</span>
               </button>
-              <span class="text-[10px] text-slate-400">Tap other player to swap</span>
+              <button id="trackerSwapPosBtn" onclick="toggleTrackerSwapMode()" class="px-2 py-1 rounded bg-surface hover:bg-slate-700 text-slate-300 border border-border text-[10px] mono flex items-center gap-1 transition active:scale-95">
+                <span>🔄 Swap Field Position</span>
+              </button>
             </div>
-          </div>
-
-          <!-- THE 1-TAP FILM BOOKMARK BUTTON (COACH FAVORITE) -->
-          <div class="bg-card p-3 rounded-2xl border border-border space-y-2">
-            <button onclick="flagTrackerBookmark()" class="w-full py-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 active:scale-95 shadow-lg">
-              <span class="text-base">📌</span>
-              <span>Flag Moment for Film Review (1-Tap)</span>
-            </button>
-            <p class="text-[10px] text-slate-400 text-center leading-snug">
-              Drops a timestamped bookmark so you can review this moment on Veo later without typing notes on the sideline.
-            </p>
           </div>
 
           <!-- Live Feed List -->
@@ -3738,6 +3758,7 @@
     let trackerTimerInterval = null;
     let trackerSelectedSlot = null;
     let trackerSelectedJersey = null;
+    let trackerSwapMode = false;
 
     function initTrackerState() {
       const aspPlayers = (DATA['AJAX ASPIRE U15']?.players || []).map(p => {
@@ -3768,6 +3789,8 @@
           toA: 0,
           saves: 0,
           keyPasses: 0,
+          duelsWon: 0,
+          duelsLost: 0,
           benchMins: 0,
           posMins: {},
           currentPos: 'Sub'
@@ -3922,7 +3945,8 @@
     }
 
     function onTapTrackerPitchNode(slot) {
-      if (trackerSelectedSlot && trackerSelectedSlot !== slot) {
+      // 1. If currently in explicit Swap Mode and a slot is already selected:
+      if (trackerSwapMode && trackerSelectedSlot && trackerSelectedSlot !== slot) {
         const j1 = trackerState.onPitch[trackerSelectedSlot];
         const j2 = trackerState.onPitch[slot];
         trackerState.onPitch[trackerSelectedSlot] = j2;
@@ -3931,14 +3955,21 @@
         if (trackerState.playerStats[j2]) trackerState.playerStats[j2].currentPos = trackerSelectedSlot;
 
         logTrackerSystemEvent(`Position Swap: #${j1} to ${slot}, #${j2} to ${trackerSelectedSlot}`);
-        showToast(`Swapped #${j1} and #${j2}`);
-        trackerSelectedSlot = null;
-        trackerSelectedJersey = null;
-        renderTrackerPitch();
+        showToast(`Swapped positions: #${j1} and #${j2}`);
+        trackerSwapMode = false;
+        updateTrackerSwapBtnUI();
+        deselectTrackerPlayer();
         saveTrackerState();
         return;
       }
 
+      // 2. If clicking on the currently selected slot, unselect it:
+      if (trackerSelectedSlot === slot) {
+        deselectTrackerPlayer();
+        return;
+      }
+
+      // 3. Otherwise, select the newly clicked player without swapping:
       trackerSelectedSlot = slot;
       const j = trackerState.onPitch[slot];
       if (j && trackerState.playerStats[j]) {
@@ -3949,22 +3980,74 @@
       renderTrackerPitch();
     }
 
+    function toggleTrackerSwapMode() {
+      if (!trackerSelectedSlot) {
+        showToast('Select a player on pitch first to swap.');
+        return;
+      }
+      trackerSwapMode = !trackerSwapMode;
+      updateTrackerSwapBtnUI();
+      if (trackerSwapMode) {
+        showToast('Swap mode ON: Now tap another player on the pitch to swap positions.');
+      }
+    }
+
+    function updateTrackerSwapBtnUI() {
+      const btn = $('trackerSwapPosBtn');
+      if (!btn) return;
+      if (trackerSwapMode) {
+        btn.className = 'px-2 py-1 rounded bg-amber-500 text-slate-950 font-bold border border-amber-400 text-[10px] mono flex items-center gap-1 transition animate-pulse';
+        btn.innerHTML = '<span>🔄 Tap 2nd Player to Swap</span>';
+      } else {
+        btn.className = 'px-2 py-1 rounded bg-surface hover:bg-slate-700 text-slate-300 border border-border text-[10px] mono flex items-center gap-1 transition active:scale-95';
+        btn.innerHTML = '<span>🔄 Swap Field Position</span>';
+      }
+    }
+
     function selectTrackerPlayer(jersey) {
       trackerSelectedJersey = jersey;
       const p = trackerState.playerStats[jersey];
       if (!p) return;
 
       $('trackerActJersey').textContent = `#${p.jersey}`;
+      $('trackerActJersey').className = 'w-8 h-8 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/40 font-mono font-black flex items-center justify-center text-sm shrink-0';
       $('trackerActName').textContent = p.name;
       $('trackerActRole').textContent = `${p.currentPos || 'Field'} (${simplifyTrackerPos(p.currentPos)})`;
       $('trackerActMins').textContent = `${p.mins}' played (${p.goals}G · ${p.assists}A · ${p.turnovers}TO)`;
-      $('trackerSubPrompt').textContent = `Active: #${p.jersey} ${p.name}. Log event or tap bench player to sub!`;
+      $('trackerSubPrompt').textContent = `Active: #${p.jersey} ${p.name}. Tap stat button (auto-clears) or bench player to sub!`;
+      
+      const card = $('trackerActionCard');
+      if (card) {
+        card.classList.add('border-teal-500/50');
+        card.classList.remove('border-border');
+      }
+      const closeBtn = $('trackerDeselectBtn');
+      if (closeBtn) closeBtn.classList.remove('hidden');
     }
 
     function deselectTrackerPlayer() {
       trackerSelectedSlot = null;
       trackerSelectedJersey = null;
-      $('trackerSubPrompt').textContent = 'Tap player to sub or log stats';
+      trackerSwapMode = false;
+      updateTrackerSwapBtnUI();
+
+      if ($('trackerActJersey')) {
+        $('trackerActJersey').textContent = '–';
+        $('trackerActJersey').className = 'w-8 h-8 rounded-lg bg-surface text-slate-400 border border-border font-mono font-black flex items-center justify-center text-sm shrink-0';
+      }
+      if ($('trackerActName')) $('trackerActName').textContent = '👆 Select a Player on Pitch';
+      if ($('trackerActRole')) $('trackerActRole').textContent = 'Tap any jersey';
+      if ($('trackerActMins')) $('trackerActMins').textContent = 'Auto-clears after action';
+      if ($('trackerSubPrompt')) $('trackerSubPrompt').textContent = 'Tap player to sub or log stats';
+
+      const card = $('trackerActionCard');
+      if (card) {
+        card.classList.remove('border-teal-500/50');
+        card.classList.add('border-border');
+      }
+      const closeBtn = $('trackerDeselectBtn');
+      if (closeBtn) closeBtn.classList.add('hidden');
+
       renderTrackerPitch();
     }
 
@@ -4096,6 +4179,18 @@
         p.assists++;
         logTrackerEventRecord({ time: curMins, type: 'assist', desc: `ASSIST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
         showToast(`🅰️ Assist logged for #${j}`);
+      } else if (type === 'keyPass') {
+        p.keyPasses++;
+        logTrackerEventRecord({ time: curMins, type: 'keyPass', desc: `KEY PASS: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`🔑 Key Pass logged for #${j}`);
+      } else if (type === 'duelWon') {
+        p.duelsWon = (p.duelsWon || 0) + 1;
+        logTrackerEventRecord({ time: curMins, type: 'duelWon', desc: `DUEL WON: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        showToast(`💪 Duel Won logged for #${j}`);
+      } else if (type === 'duelLost') {
+        p.duelsLost = (p.duelsLost || 0) + 1;
+        logTrackerEventRecord({ time: curMins, type: 'duelLost', desc: `DUEL LOST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        showToast(`❌ Duel Lost logged for #${j}`);
       } else if (type === 'sot') {
         p.shots++;
         p.sot++;
@@ -4114,23 +4209,23 @@
         p.crosses++;
         logTrackerEventRecord({ time: curMins, type: 'cross', desc: `CROSS: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
         showToast(`👟 Cross logged`);
-      } else if (type === 'keyPass') {
-        p.keyPasses++;
-        logTrackerEventRecord({ time: curMins, type: 'keyPass', desc: `KEY PASS: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
-        showToast(`🔑 Key Pass logged`);
       } else if (type === 'save') {
         p.saves++;
         logTrackerEventRecord({ time: curMins, type: 'save', desc: `SAVE: #${j} ${p.name.split(' ')[0]} (GK) at ${curMins}'`, jersey: j, zone: 'D3' });
         showToast(`🧤 Save logged for goalkeeper!`);
       }
 
-      selectTrackerPlayer(j);
+      // Automatically unselect player after action to complete event and prevent accidental swaps
+      deselectTrackerPlayer();
       renderTrackerPitch();
       saveTrackerState();
     }
 
     function promptTrackerTurnoverZone() {
-      if (!trackerSelectedJersey) return;
+      if (!trackerSelectedJersey) {
+        showToast('Select a player on pitch first to log a turnover.');
+        return;
+      }
       $('turnoverModal').classList.replace('hidden', 'flex');
     }
 
@@ -4154,7 +4249,8 @@
         zone
       });
 
-      selectTrackerPlayer(j);
+      // Auto-clear selection
+      deselectTrackerPlayer();
       saveTrackerState();
       showToast(`⚠️ Turnover logged in ${zone}`);
     }
@@ -4163,16 +4259,20 @@
       const curMins = Math.floor(trackerState.matchSeconds / 60);
       const secs = trackerState.matchSeconds % 60;
       const timeStr = `${String(curMins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      const j = trackerSelectedJersey || '';
+      const p = j && trackerState.playerStats[j] ? trackerState.playerStats[j] : null;
+      const pName = p ? ` (${p.name.split(' ')[0]})` : '';
       
       logTrackerEventRecord({
         time: curMins,
         type: 'bookmark',
-        desc: `📌 Flagged for Film Review (${timeStr})`,
-        jersey: trackerSelectedJersey || '',
+        desc: `📌 Flagged for Film Review (${timeStr})${pName}`,
+        jersey: j,
         zone: 'M3',
         isBookmark: true
       });
       showToast(`📌 Bookmark dropped at ${timeStr} for film review!`);
+      if (trackerSelectedJersey) deselectTrackerPlayer();
       saveTrackerState();
     }
 
@@ -4338,6 +4438,8 @@
           p.toA = (p.toA || 0) + ps.toA;
           p.saves = (p.saves || 0) + ps.saves;
           p.keyPasses = (p.keyPasses || 0) + ps.keyPasses;
+          p.duelsWon = (p.duelsWon || 0) + (ps.duelsWon || 0);
+          p.duelsLost = (p.duelsLost || 0) + (ps.duelsLost || 0);
           p.benchMins = (p.benchMins || 0) + ps.benchMins;
 
           // Merge positional minutes into p.posBreakdown
@@ -4372,9 +4474,61 @@
         const pObj = trackerState.playerStats[ev.jersey];
         const pName = pObj ? pObj.name : 'Team';
         const isGoal = ev.type === 'goal';
+        const isAssist = ev.type === 'assist';
+        const isKeyPass = ev.type === 'keyPass';
+        const isDuelWon = ev.type === 'duelWon';
+        const isDuelLost = ev.type === 'duelLost';
+        const isSave = ev.type === 'save';
         const isOppGoal = ev.type === 'oppGoal';
         const isTO = ev.type === 'turnover';
         const isBm = ev.isBookmark;
+
+        let category = 'Film Review';
+        let tag = 'Flagged on Sideline';
+        let qualityRaw = 'Neutral / Complete';
+        let outcome = 'Neutral';
+
+        if (isGoal) {
+          category = 'Offensive Moment';
+          tag = 'Decision on the Ball';
+          qualityRaw = 'Goal Scored';
+          outcome = 'Glow';
+        } else if (isAssist) {
+          category = 'Offensive Moment';
+          tag = 'Decision on the Ball';
+          qualityRaw = 'Good / Positive';
+          outcome = 'Glow';
+        } else if (isKeyPass) {
+          category = 'Offensive Moment';
+          tag = 'Key Pass / Line Breaker';
+          qualityRaw = 'Good / Positive';
+          outcome = 'Glow';
+        } else if (isDuelWon) {
+          category = 'Defensive Moment';
+          tag = 'Good Press / Duel Won';
+          qualityRaw = 'Good / Positive';
+          outcome = 'Glow';
+        } else if (isDuelLost) {
+          category = 'Defensive Moment';
+          tag = 'Defensive Duel Lost';
+          qualityRaw = 'Poor / Grow';
+          outcome = 'Grow';
+        } else if (isSave) {
+          category = 'Defensive Moment';
+          tag = 'Save';
+          qualityRaw = 'Good / Positive';
+          outcome = 'Glow';
+        } else if (isOppGoal) {
+          category = 'Defensive Moment';
+          tag = 'Defensive Duel Lost';
+          qualityRaw = 'Goal Conceded';
+          outcome = 'Grow';
+        } else if (isTO) {
+          category = 'Turnover';
+          tag = 'Turned into Pressure';
+          qualityRaw = 'Poor / Grow';
+          outcome = 'Grow';
+        }
 
         newFilmMoments.push({
           id: maxId,
@@ -4386,10 +4540,10 @@
           jerseys: ev.jersey ? [ev.jersey] : [],
           players: ev.jersey ? [`#${ev.jersey} ${pName}`] : ['Team'],
           playersRaw: ev.jersey ? String(ev.jersey) : 'Team',
-          category: isGoal ? 'Offensive Moment' : isTO ? 'Turnover' : isOppGoal ? 'Defensive Moment' : 'Film Review',
-          tag: isGoal ? 'Decision on the Ball' : isTO ? 'Turned into Pressure' : isOppGoal ? 'Defensive Duel Lost' : 'Flagged on Sideline',
-          qualityRaw: isGoal ? 'Goal Scored' : isOppGoal ? 'Goal Conceded' : isTO ? 'Grow' : 'Neutral',
-          outcome: isGoal ? 'Glow' : isOppGoal ? 'Grow' : isTO ? 'Grow' : 'Neutral',
+          category,
+          tag,
+          qualityRaw,
+          outcome,
           note: ev.desc || `Sideline logged ${ev.type}`,
           filmReview: isBm || isOppGoal,
           isCritical: isOppGoal

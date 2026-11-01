@@ -123,6 +123,9 @@
 
       <!-- Action & Export Buttons -->
       <div class="flex items-center gap-1.5 flex-wrap">
+        <button onclick="flagSidelineBookmark()" class="text-xs bg-amber-500/25 hover:bg-amber-500/35 border-2 border-amber-400/70 text-amber-300 font-bold px-3 py-1.5 rounded-xl transition shadow-lg flex items-center gap-1.5 active:scale-95">
+          <span>📌 Flag Moment for Film</span>
+        </button>
         <button onclick="openNewGameModal()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 px-2.5 py-1.5 rounded-xl transition flex items-center gap-1">
           <span>⚙️ Match Setup</span>
         </button>
@@ -240,71 +243,94 @@
 
     <!-- RIGHT COLUMN: QUICK ACTION STAT LOGGER & LIVE FEED (4 OF 12 COLS) -->
     <div class="lg:col-span-4 space-y-3">
+
+      <!-- 1-TAP SIDELINE FILM BOOKMARK BANNER (ALWAYS ACCESSIBLE) -->
+      <div class="bg-card p-3 rounded-2xl border-2 border-amber-500/50 space-y-1.5 shadow-lg">
+        <button onclick="flagSidelineBookmark()" class="w-full py-2.5 px-3 bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 border border-amber-400/60 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 active:scale-95 shadow">
+          <span class="text-base">📌</span>
+          <span>Flag Moment for Film Review (1-Tap)</span>
+        </button>
+        <p class="text-[10px] text-slate-400 text-center leading-snug">
+          Drops a timestamped Veo bookmark (tags selected player if active, then auto-clears).
+        </p>
+      </div>
       
-      <!-- Selected Player Action Panel (Shows when a player is tapped) -->
-      <div id="playerActionCard" class="bg-card p-4 rounded-2xl border border-teal-500/50 space-y-3 shadow-xl">
+      <!-- Selected Player Action Panel (Auto-deselects after logging an action) -->
+      <div id="playerActionCard" class="bg-card p-4 rounded-2xl border border-border space-y-3 shadow-xl transition-all">
         <div class="flex items-center justify-between border-b border-border/80 pb-2.5">
           <div class="flex items-center space-x-2.5">
-            <span id="actJersey" class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/40 font-mono font-black flex items-center justify-center text-sm">#23</span>
+            <span id="actJersey" class="w-8 h-8 rounded-lg bg-surface text-slate-400 border border-border font-mono font-black flex items-center justify-center text-sm">👆</span>
             <div>
-              <h3 id="actName" class="font-bold text-white text-sm leading-tight">Sophia Culver</h3>
+              <h3 id="actName" class="font-bold text-slate-300 text-sm leading-tight">Select a Player on Pitch</h3>
               <div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-                <span id="actRole" class="mono text-teal-300 font-bold">ST (CF)</span>
+                <span id="actRole" class="mono text-teal-400 font-bold">Tap any jersey</span>
                 <span>·</span>
-                <span id="actMins" class="mono text-amber-300">0' played</span>
+                <span id="actMins" class="mono text-slate-400">Auto-clears after action</span>
               </div>
             </div>
           </div>
-          <button onclick="deselectPlayer()" class="text-slate-400 hover:text-white text-sm font-bold w-6 h-6 rounded-full bg-pitch flex items-center justify-center">✕</button>
+          <button id="deselectBtn" onclick="deselectPlayer()" class="hidden text-slate-400 hover:text-white text-sm font-bold w-7 h-7 rounded-full bg-pitch items-center justify-center border border-border">✕</button>
         </div>
 
-        <!-- 1-Tap Stat Event Buttons -->
+        <!-- 1-Tap Stat Event Buttons (12 Buttons · Auto-deselects player on tap) -->
         <div class="grid grid-cols-3 gap-1.5 text-xs font-semibold">
-          <button onclick="logSelectedEvent('goal')" class="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+          <button onclick="logSelectedEvent('goal')" class="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">⚽</span>
-            <span>Goal (+3)</span>
+            <span>Goal</span>
           </button>
-          <button onclick="logSelectedEvent('assist')" class="p-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+          <button onclick="logSelectedEvent('assist')" class="p-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">🅰️</span>
-            <span>Assist (+2)</span>
+            <span>Assist</span>
           </button>
-          <button onclick="logSelectedEvent('keyPass')" class="p-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+          <button onclick="logSelectedEvent('keyPass')" class="p-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">🔑</span>
             <span>Key Pass</span>
           </button>
-          <button onclick="logSelectedEvent('sot')" class="p-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-1 transition active:scale-95">
-            <span class="text-base">🎯</span>
-            <span>Shot On</span>
+          <button onclick="logSelectedEvent('duelWon')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">💪</span>
+            <span>Duel Won</span>
           </button>
-          <button onclick="logSelectedEvent('soff')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
-            <span class="text-base">🥅</span>
-            <span>Shot Off</span>
+          <button onclick="logSelectedEvent('duelLost')" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/35 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">❌</span>
+            <span>Duel Lost</span>
           </button>
-          <button onclick="logSelectedEvent('corner')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
-            <span class="text-base">🚩</span>
-            <span>Corner</span>
-          </button>
-          <button onclick="logSelectedEvent('cross')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
-            <span class="text-base">👟</span>
-            <span>Cross</span>
-          </button>
-          <button onclick="logSelectedEvent('save')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1 transition active:scale-95">
-            <span class="text-base">🧤</span>
-            <span>Save</span>
-          </button>
-          <button onclick="promptTurnoverZone()" class="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+          <button onclick="promptTurnoverZone()" class="p-2 rounded-xl bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 border border-rose-500/50 flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">⚠️</span>
             <span>Turnover</span>
           </button>
+          <button onclick="logSelectedEvent('sot')" class="p-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">🎯</span>
+            <span>Shot On</span>
+          </button>
+          <button onclick="logSelectedEvent('soff')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">🥅</span>
+            <span>Shot Off</span>
+          </button>
+          <button onclick="logSelectedEvent('save')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">🧤</span>
+            <span>Save (GK)</span>
+          </button>
+          <button onclick="logSelectedEvent('cross')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">👟</span>
+            <span>Cross</span>
+          </button>
+          <button onclick="logSelectedEvent('corner')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">🚩</span>
+            <span>Corner</span>
+          </button>
+          <button onclick="flagSidelineBookmark()" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">📌</span>
+            <span>Flag Film</span>
+          </button>
         </div>
 
-        <!-- Quick Sub Out or Reposition Buttons -->
+        <!-- Quick Sub Out or Explicit Position Swap Buttons -->
         <div class="pt-2 border-t border-border/70 flex items-center justify-between text-xs">
-          <button onclick="subSelectedPlayerOff()" class="text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1">
-            <span>⬇️ Sub Out to Bench</span>
+          <button onclick="subSelectedPlayerOff()" class="text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-rose-500/10 transition">
+            <span>⬇️ Sub to Bench</span>
           </button>
-          <button onclick="promptMovePosition()" class="text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1">
-            <span>🔄 Change Position</span>
+          <button id="swapPositionBtn" onclick="toggleSwapMode()" class="text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1 px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-500/10 transition">
+            <span>🔄 Swap Field Position</span>
           </button>
         </div>
       </div>
@@ -545,6 +571,7 @@
     let matchEvents = [];    // list of event objects
     let selectedPlayerJersey = null;
     let selectedSlot = null;
+    let swapMode = false;
 
     let oppStats = { goals: 0, shots: 0, corners: 0, fouls: 0 };
 
@@ -601,6 +628,9 @@
           toA: 0,
           fouls: 0,
           saves: 0,
+          keyPasses: 0,
+          duelsWon: 0,
+          duelsLost: 0,
           posMins: {},
           benchMins: 0,
           onPitch: false,
@@ -767,8 +797,8 @@
     }
 
     function onTapPitchNode(slot) {
-      // Case 1: If another slot was already selected, this means SWAP positions on pitch!
-      if (selectedSlot && selectedSlot !== slot) {
+      // Case 1: Explicit Swap Mode is active and coach tapped a second pitch player
+      if (swapMode && selectedSlot && selectedSlot !== slot) {
         const j1 = onPitchPlayers[selectedSlot];
         const j2 = onPitchPlayers[slot];
         onPitchPlayers[selectedSlot] = j2;
@@ -777,14 +807,21 @@
         if (playerStats[j2]) playerStats[j2].currentPos = selectedSlot;
 
         logMatchSystemEvent(`Position Swap: #${j1} to ${slot}, #${j2} to ${selectedSlot}`);
-        showToast(`Swapped #${j1} and #${j2}`);
-        selectedSlot = null;
-        selectedPlayerJersey = null;
-        renderPitch();
+        showToast(`🔄 Swapped #${j1} and #${j2}`);
+        deselectPlayer();
+        saveState();
         return;
       }
 
-      // Case 2: Select this slot
+      // Case 2: Tapping the same already-selected player unselects them
+      if (selectedSlot === slot) {
+        deselectPlayer();
+        return;
+      }
+
+      // Case 3: Select this slot & player (never accidentally swaps positions!)
+      swapMode = false;
+      updateSwapButtonUI();
       selectedSlot = slot;
       const jersey = onPitchPlayers[slot];
       if (jersey && playerStats[jersey]) {
@@ -795,22 +832,86 @@
       renderPitch();
     }
 
+    function toggleSwapMode() {
+      if (!selectedSlot || !selectedPlayerJersey) {
+        showToast('Tap a player on the pitch first, then tap Swap Field Position.');
+        return;
+      }
+      swapMode = !swapMode;
+      updateSwapButtonUI();
+      const p = playerStats[selectedPlayerJersey];
+      if (swapMode) {
+        document.getElementById('activeSubPrompt').textContent = `🔄 SWAP MODE: Tap another field player to swap positions with #${p.jersey} ${p.name.split(' ')[0]}`;
+        showToast(`Tap another player on the pitch to swap positions with #${p.jersey}`);
+      } else {
+        document.getElementById('activeSubPrompt').textContent = `Active: #${p.jersey} ${p.name}. Log action or tap bench player to sub!`;
+      }
+    }
+
+    function updateSwapButtonUI() {
+      const btn = document.getElementById('swapPositionBtn');
+      if (!btn) return;
+      if (swapMode) {
+        btn.className = 'text-amber-300 font-bold flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-amber-400 bg-amber-500/25 transition animate-pulse';
+        btn.innerHTML = '<span>🔄 Tap 2nd Player to Swap...</span>';
+      } else {
+        btn.className = 'text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1 px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-500/10 transition';
+        btn.innerHTML = '<span>🔄 Swap Field Position</span>';
+      }
+    }
+
     function selectPlayer(jersey) {
       selectedPlayerJersey = jersey;
       const p = playerStats[jersey];
       if (!p) return;
 
-      document.getElementById('actJersey').textContent = `#${p.jersey}`;
-      document.getElementById('actName').textContent = p.name;
+      const card = document.getElementById('playerActionCard');
+      if (card) card.className = 'bg-card p-4 rounded-2xl border-2 border-teal-400 ring-2 ring-teal-500/20 space-y-3 shadow-xl transition-all';
+
+      const badge = document.getElementById('actJersey');
+      if (badge) {
+        badge.textContent = `#${p.jersey}`;
+        badge.className = 'w-8 h-8 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/40 font-mono font-black flex items-center justify-center text-sm';
+      }
+      const nameEl = document.getElementById('actName');
+      if (nameEl) {
+        nameEl.textContent = p.name;
+        nameEl.className = 'font-bold text-white text-sm leading-tight';
+      }
       document.getElementById('actRole').textContent = `${p.currentPos || 'Field'} (${simplifyPos(p.currentPos)})`;
-      document.getElementById('actMins').textContent = `${p.mins}' played (${p.goals}G · ${p.assists}A · ${p.turnovers}TO)`;
-      document.getElementById('activeSubPrompt').textContent = `Active: #${p.jersey} ${p.name}. Log event or tap bench player to sub!`;
+      document.getElementById('actMins').textContent = `${p.mins}' played (${p.goals}G · ${p.assists}A · ${p.keyPasses || 0}KP · ${p.turnovers}TO)`;
+      document.getElementById('activeSubPrompt').textContent = `Active: #${p.jersey} ${p.name}. Log action (auto-completes) or tap bench player to sub!`;
+
+      const closeBtn = document.getElementById('deselectBtn');
+      if (closeBtn) closeBtn.classList.replace('hidden', 'flex');
     }
 
     function deselectPlayer() {
       selectedSlot = null;
       selectedPlayerJersey = null;
+      swapMode = false;
+      updateSwapButtonUI();
+
+      const card = document.getElementById('playerActionCard');
+      if (card) card.className = 'bg-card p-4 rounded-2xl border border-border space-y-3 shadow-xl transition-all';
+
+      const badge = document.getElementById('actJersey');
+      if (badge) {
+        badge.textContent = '👆';
+        badge.className = 'w-8 h-8 rounded-lg bg-surface text-slate-400 border border-border font-mono font-black flex items-center justify-center text-sm';
+      }
+      const nameEl = document.getElementById('actName');
+      if (nameEl) {
+        nameEl.textContent = 'Select a Player on Pitch';
+        nameEl.className = 'font-bold text-slate-300 text-sm leading-tight';
+      }
+      document.getElementById('actRole').textContent = 'Tap any jersey';
+      document.getElementById('actMins').textContent = 'Auto-clears after action';
       document.getElementById('activeSubPrompt').textContent = 'Tap player to sub or log stats';
+
+      const closeBtn = document.getElementById('deselectBtn');
+      if (closeBtn) closeBtn.classList.replace('flex', 'hidden');
+
       renderPitch();
     }
 
@@ -958,21 +1059,32 @@
         showToast(`👟 Cross logged`);
       } else if (eventType === 'keyPass') {
         p.keyPasses = (p.keyPasses || 0) + 1;
-        logMatchEvent({ time: curMins, type: 'keyPass', desc: `KEY PASS: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
-        showToast(`🔑 Key Pass logged`);
+        logMatchEvent({ time: curMins, type: 'keyPass', desc: `🔑 KEY PASS (Glow): #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`🔑 Key Pass logged for #${j} ${p.name.split(' ')[0]}`);
+      } else if (eventType === 'duelWon') {
+        p.duelsWon = (p.duelsWon || 0) + 1;
+        logMatchEvent({ time: curMins, type: 'duelWon', desc: `💪 DUEL WON (Glow): #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        showToast(`💪 Duel Won logged for #${j} ${p.name.split(' ')[0]}`);
+      } else if (eventType === 'duelLost') {
+        p.duelsLost = (p.duelsLost || 0) + 1;
+        logMatchEvent({ time: curMins, type: 'duelLost', desc: `❌ DUEL LOST (Grow): #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'D3' });
+        showToast(`❌ Duel Lost logged for #${j} ${p.name.split(' ')[0]}`);
       } else if (eventType === 'save') {
         p.saves++;
         logMatchEvent({ time: curMins, type: 'save', desc: `SAVE: #${j} ${p.name.split(' ')[0]} (GK) at ${curMins}'`, jersey: j, zone: 'D3' });
         showToast(`🧤 Save logged for goalkeeper!`);
       }
 
-      selectPlayer(j);
+      // Auto-deselect player immediately after completing the action
+      deselectPlayer();
       saveState();
-      renderPitch();
     }
 
     function promptTurnoverZone() {
-      if (!selectedPlayerJersey) return;
+      if (!selectedPlayerJersey) {
+        showToast('Please select a player on the pitch first.');
+        return;
+      }
       document.getElementById('turnoverModal').classList.replace('hidden', 'flex');
     }
 
@@ -996,9 +1108,32 @@
         zone
       });
 
-      selectPlayer(j);
+      // Auto-deselect player immediately after completing the turnover
+      deselectPlayer();
       saveState();
-      showToast(`⚠️ Turnover logged in ${zone}`);
+      showToast(`⚠️ Turnover logged in ${zone} for #${j}`);
+    }
+
+    function flagSidelineBookmark() {
+      const curMins = Math.floor(matchSeconds / 60);
+      const secs = matchSeconds % 60;
+      const timeStr = `${String(curMins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      const j = selectedPlayerJersey;
+      const p = j ? playerStats[j] : null;
+      const who = p ? ` · #${j} ${p.name.split(' ')[0]}` : '';
+
+      logMatchEvent({
+        time: curMins,
+        type: 'bookmark',
+        desc: `📌 FILM BOOKMARK (${timeStr})${who}`,
+        jersey: j || '',
+        zone: 'M3',
+        isBookmark: true
+      });
+
+      deselectPlayer();
+      saveState();
+      showToast(`📌 Film Bookmark saved at ${timeStr}${who}!`);
     }
 
     /* Opponent Events */
