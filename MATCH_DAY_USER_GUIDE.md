@@ -73,7 +73,11 @@ If you ever need to fix a typo, correct minutes, or adjust a score manually:
 ### Before Kickoff
 1. Open [ajax-match-tracker.html](file:///Users/shawncraig/Desktop/Anti%20Gravity%20SC/ajax-match-tracker.html) (or tap the **Match Tracker** tab inside `match-hub.html`).
 2. Tap **`⚙️ Match Setup`**: enter opponent name (e.g. *Rocklin*, *La Morinda*).
-3. Review Starting XI on the visual pitch. If you want to change who starts:
+3. **Guest Players & Roster Adjustments:**
+   - **Madisyn Craig #33** is already pre-loaded into your active roster and Starting XI for Rocklin!
+   - **Sola Alberto #1** is automatically set to the substitutes bench (0 mins) so she will not accrue minutes while recovering.
+   - **Need to add any new guest player on the fly?** Tap the **`➕ Add Guest Player`** button on the Substitutes Tray. Type their jersey number (e.g. `33`) and name, and they will immediately appear on the bench ready to sub on!
+4. Review Starting XI on the visual pitch. If you want to change who starts:
    - Tap a pitch position (e.g. `CF`)
    - Tap a player on the available substitutes tray below to sub them into that spot.
 
