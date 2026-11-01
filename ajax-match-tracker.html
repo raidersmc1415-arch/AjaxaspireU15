@@ -138,6 +138,9 @@
         <button onclick="openHistoryModal()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 px-2.5 py-1.5 rounded-xl transition">
           <span>📁 Games</span>
         </button>
+        <button onclick="resetCurrentMatch()" class="text-xs bg-surface hover:bg-slate-700 text-slate-300 border border-border px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 active:scale-95" title="Clear test match and reset board">
+          <span>🔄 Reset Match</span>
+        </button>
       </div>
     </div>
 
@@ -1534,6 +1537,13 @@
       setTimeout(() => {
         window.location.href = `match-hub.html#${activeSquadKey}`;
       }, 1200);
+    }
+
+    function resetCurrentMatch() {
+      if (!confirm('Clear tracker board and start a fresh match? (Clears test clocks, scores, and events)')) return;
+      if (timerRunning) toggleTimer();
+      initSquadMatch();
+      showToast('Match tracker reset to 0-0.');
     }
 
     /* =========================================================

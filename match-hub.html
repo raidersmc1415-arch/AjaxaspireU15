@@ -1073,13 +1073,16 @@
             </div>
           </div>
 
-          <!-- Top Controls: Amber Flag Film Button + Prominent Commit to Match Hub -->
+          <!-- Top Controls: Amber Flag Film Button + Prominent Commit to Match Hub + Reset Match -->
           <div class="flex items-center gap-2 flex-wrap">
             <button onclick="flagTrackerBookmark()" class="bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 font-bold text-xs px-3.5 py-2.5 rounded-xl border-2 border-amber-400/70 transition shadow-md flex items-center gap-1.5 active:scale-95">
               <span>📌 Flag Moment for Film</span>
             </button>
             <button id="commitHubBtn" onclick="commitMatchToHub()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-emerald-400 shadow-xl flex items-center gap-2 transition active:scale-95">
               <span>⚡ COMMIT MATCH TO HUB</span>
+            </button>
+            <button onclick="resetTrackerMatch()" class="bg-surface hover:bg-slate-700 text-slate-300 border border-border px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Clear test match and reset tracker board">
+              <span>🔄 Reset Match</span>
             </button>
           </div>
         </div>
@@ -4638,6 +4641,19 @@
       renderAll();
       showToast(`🎉 Match vs ${oppName} committed directly to Match Hub! Standing, roster splits, film log & report cards updated.`);
       switchTab('tab-overview');
+    }
+
+    function resetTrackerMatch() {
+      if (!confirm('Clear tracker board and start a fresh match? (Clears test clocks, scores, and events)')) return;
+      if (trackerState.running) toggleTrackerTimer();
+      initTrackerState();
+      deselectTrackerPlayer();
+      renderTrackerPitch();
+      renderTrackerBench();
+      renderTrackerMinutesStream();
+      renderTrackerEventsFeed();
+      updateTrackerScoreboard();
+      showToast('Match tracker reset to 0-0.');
     }
 
     /* =========================================================
