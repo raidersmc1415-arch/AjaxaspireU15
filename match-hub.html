@@ -1177,11 +1177,16 @@
 
           <!-- Substitutes Tray (Below Pitch) -->
           <div class="bg-card p-3 rounded-2xl border border-border space-y-2">
-            <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center justify-between text-xs flex-wrap gap-2">
               <span class="font-bold uppercase tracking-wider text-slate-300">Available Substitutes (<span id="trackerBenchCount">0</span>)</span>
-              <button onclick="undoTrackerLastSub()" class="text-xs text-amber-300 hover:text-white underline mono flex items-center gap-1">
-                <span>⎌ Undo Last Sub</span>
-              </button>
+              <div class="flex items-center gap-3">
+                <button onclick="openTrackerAddGuestModal()" class="text-xs text-amber-300 hover:text-white underline mono font-bold flex items-center gap-1 active:scale-95">
+                  <span>➕ Add Guest Player</span>
+                </button>
+                <button onclick="undoTrackerLastSub()" class="text-xs text-teal-300 hover:text-white underline mono flex items-center gap-1">
+                  <span>⎌ Undo Sub</span>
+                </button>
+              </div>
             </div>
             <div id="trackerBenchGrid" class="flex flex-wrap gap-2 overflow-x-auto pb-1"></div>
           </div>
@@ -1427,6 +1432,48 @@
         </button>
       </div>
       <button onclick="closeModal('turnoverModal')" class="w-full py-2 rounded-xl bg-pitch text-slate-400 hover:text-white text-xs font-semibold">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Modal: Add Guest / Call-Up Player to Tracker -->
+  <div id="trackerAddGuestModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4" onclick="if(event.target===this) closeModal('trackerAddGuestModal')">
+    <div class="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative space-y-3">
+      <div class="flex items-center justify-between border-b border-border pb-2">
+        <h3 class="display text-xl text-white">➕ Add Guest / Call-Up Player</h3>
+        <button onclick="closeModal('trackerAddGuestModal')" aria-label="Close" class="w-6 h-6 rounded-full bg-pitch flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs">✕</button>
+      </div>
+      <p class="text-xs text-slate-400">Add a guest player to today's active match roster.</p>
+      
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="mono text-[10px] text-slate-400 block mb-1">Jersey Number</label>
+          <input type="number" id="trackerGuestJerseyInput" placeholder="e.g. 33" class="w-full bg-pitch border border-border rounded-lg px-2.5 py-1.5 text-white font-mono font-bold outline-none focus:border-teal-400">
+        </div>
+        <div>
+          <label class="mono text-[10px] text-slate-400 block mb-1">Player Full Name</label>
+          <input type="text" id="trackerGuestNameInput" placeholder="e.g. Madisyn Craig" class="w-full bg-pitch border border-border rounded-lg px-2.5 py-1.5 text-white font-bold outline-none focus:border-teal-400">
+        </div>
+        <div>
+          <label class="mono text-[10px] text-slate-400 block mb-1">Primary Role / Position</label>
+          <select id="trackerGuestRoleInput" class="w-full bg-pitch border border-border rounded-lg px-2 py-1.5 text-teal-300 font-bold outline-none">
+            <option value="CM">CM · Central Midfielder</option>
+            <option value="CF">CF / ST · Striker</option>
+            <option value="RW">RW / RM · Right Wing</option>
+            <option value="LW">LW / LM · Left Wing</option>
+            <option value="CAM">CAM / 10 · Attacking Mid</option>
+            <option value="DM">DM / 6 · Defensive Mid</option>
+            <option value="CB">CB · Center Back</option>
+            <option value="RB">RB · Right Fullback</option>
+            <option value="LB">LB · Left Fullback</option>
+            <option value="GK">GK · Goalkeeper</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end gap-2">
+        <button onclick="closeModal('trackerAddGuestModal')" class="px-3 py-1.5 rounded-xl bg-pitch border border-border text-xs text-slate-400 hover:text-white">Cancel</button>
+        <button onclick="saveTrackerGuestPlayer()" class="px-4 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs active:scale-95 shadow">Add to Roster</button>
+      </div>
     </div>
   </div>
 
@@ -1746,6 +1793,7 @@
       23: { name: "Sophia Culver", pos: "ST/W" },
       24: { name: "Evelyn Lopez", pos: "CM/W" },
       25: { name: "Ella Simmons", pos: "CM" },
+      33: { name: "Madisyn Craig", pos: "CM/W" },
       34: { name: "Nairobi Mcgadney", pos: "W/ST" },
       36: { name: "Alex Marigorda", pos: "CB" },
       37: { name: "Brooklyn Brewer", pos: "W/ST" },
@@ -3777,6 +3825,14 @@
         return { name: p.name, jersey: parseInt(j, 10) || 0 };
       }).filter(p => p.jersey > 0);
 
+      // Ensure all rostered players from ASPIRE_JERSEY_MAP (including guest players) are available
+      Object.entries(ASPIRE_JERSEY_MAP).forEach(([jNum, info]) => {
+        const jInt = parseInt(jNum, 10);
+        if (!aspPlayers.some(p => p.jersey === jInt)) {
+          aspPlayers.push({ name: info.name, jersey: jInt });
+        }
+      });
+
       trackerState.playerStats = {};
       aspPlayers.forEach(p => {
         trackerState.playerStats[p.jersey] = {
@@ -3804,8 +3860,8 @@
         };
       });
 
-      // Default Starting 11 (4-3-3): 88, 9, 50, 89, 19, 8, 14, 24, 1, 23, 2
-      const defaults = [88, 9, 50, 89, 19, 8, 14, 24, 1, 23, 2];
+      // Default Starting 11 (4-3-3): 88, 9, 50, 89, 19, 8, 14, 24, 33 (Madisyn Craig starts, Sola #1 injured), 23, 2
+      const defaults = [88, 9, 50, 89, 19, 8, 14, 24, 33, 23, 2];
       const slots = Object.keys(TRACKER_FORMATIONS[trackerState.formation]);
       trackerState.onPitch = {};
       slots.forEach((s, idx) => {
@@ -4440,8 +4496,40 @@
       (teamObj.players || []).forEach(p => { byName[p.name.toLowerCase()] = p; });
 
       Object.values(trackerState.playerStats).forEach(ps => {
-        const p = byName[ps.name.toLowerCase()];
-        if (!p) return;
+        let p = byName[ps.name.toLowerCase()];
+        if (!p) {
+          // If guest player (e.g. Madisyn Craig), create entry in team players array
+          p = {
+            name: ps.name,
+            jersey: ps.jersey,
+            roles: [ps.currentPos ? simplifyTrackerPos(ps.currentPos) : 'CM'],
+            posBreakdown: [],
+            benchMins: 0,
+            squadGames: 0,
+            gp: 0,
+            mins: 0,
+            goals: 0,
+            assists: 0,
+            shots: 0,
+            sot: 0,
+            soff: 0,
+            corners: 0,
+            crosses: 0,
+            turnovers: 0,
+            toD: 0,
+            toM: 0,
+            toA: 0,
+            saves: 0,
+            keyPasses: 0,
+            duelsWon: 0,
+            duelsLost: 0,
+            fouls: 0,
+            cleanSheets: 0,
+            winPct: 0
+          };
+          teamObj.players.push(p);
+          byName[ps.name.toLowerCase()] = p;
+        }
 
         if (ps.mins > 0) {
           p.gp = (p.gp || 0) + 1;
@@ -4654,6 +4742,64 @@
       renderTrackerEventsFeed();
       updateTrackerScoreboard();
       showToast('Match tracker reset to 0-0.');
+    }
+
+    function openTrackerAddGuestModal() {
+      if ($('trackerGuestJerseyInput')) $('trackerGuestJerseyInput').value = '';
+      if ($('trackerGuestNameInput')) $('trackerGuestNameInput').value = '';
+      $('trackerAddGuestModal').classList.replace('hidden', 'flex');
+    }
+
+    function saveTrackerGuestPlayer() {
+      const jersey = parseInt($('trackerGuestJerseyInput').value, 10);
+      const name = $('trackerGuestNameInput').value.trim();
+      const role = $('trackerGuestRoleInput').value;
+
+      if (!jersey || jersey <= 0) {
+        showToast('Please enter a valid jersey number.');
+        return;
+      }
+      if (!name) {
+        showToast('Please enter the player full name.');
+        return;
+      }
+
+      if (trackerState.playerStats[jersey]) {
+        showToast(`Jersey #${jersey} already exists on roster (${trackerState.playerStats[jersey].name}).`);
+        return;
+      }
+
+      ASPIRE_JERSEY_MAP[jersey] = { name, pos: role };
+
+      trackerState.playerStats[jersey] = {
+        name,
+        jersey,
+        mins: 0,
+        goals: 0,
+        assists: 0,
+        shots: 0,
+        sot: 0,
+        soff: 0,
+        corners: 0,
+        crosses: 0,
+        turnovers: 0,
+        toD: 0,
+        toM: 0,
+        toA: 0,
+        saves: 0,
+        keyPasses: 0,
+        duelsWon: 0,
+        duelsLost: 0,
+        benchMins: 0,
+        posMins: {},
+        currentPos: 'Sub'
+      };
+
+      closeModal('trackerAddGuestModal');
+      renderTrackerBench();
+      renderTrackerMinutesStream();
+      saveTrackerState();
+      showToast(`⭐ Added #${jersey} ${name} to bench! Tap to put on pitch.`);
     }
 
     /* =========================================================

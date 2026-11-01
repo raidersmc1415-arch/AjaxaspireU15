@@ -1188,6 +1188,32 @@ function handleUpdateSeasonStats(payload) {
       updateCount++;
     }
 
+    // Auto-create row in Player_IDP for guest players who logged minutes and are not yet on the sheet
+    var existingNames = {};
+    for (var j = 1; j < data.length; j++) {
+      existingNames[normName(data[j][iName])] = true;
+    }
+    for (var k in statsMap) {
+      var gpObj = statsMap[k];
+      if (gpObj && gpObj.name && gpObj.mins > 0 && !existingNames[normName(gpObj.name)]) {
+        var newRow = new Array(headers.length).fill('');
+        if (iName !== -1) newRow[iName] = gpObj.name;
+        if (iGames !== -1) newRow[iGames] = gpObj.gp || 1;
+        if (iMins !== -1) newRow[iMins] = gpObj.mins || 0;
+        if (iAvg !== -1) newRow[iAvg] = gpObj.mins || 0;
+        if (iGoals !== -1) newRow[iGoals] = gpObj.goals || 0;
+        if (iAssists !== -1) newRow[iAssists] = gpObj.assists || 0;
+        if (iShots !== -1) newRow[iShots] = gpObj.sot || 0;
+        if (iShotsOff !== -1) newRow[iShotsOff] = gpObj.soff || 0;
+        if (iTO !== -1) newRow[iTO] = gpObj.toD || 0;
+        if (iKP !== -1) newRow[iKP] = gpObj.keyPasses || 0;
+        if (iDuels !== -1) newRow[iDuels] = gpObj.duelsWon || 0;
+        sheet.appendRow(newRow);
+        existingNames[normName(gpObj.name)] = true;
+        updateCount++;
+      }
+    }
+
     // Save match summary snapshot into match_hub KV store for full match history audit
     if (payload.matchSummary) {
       try {
