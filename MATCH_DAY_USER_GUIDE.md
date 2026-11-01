@@ -107,7 +107,27 @@ If you ever need to fix a typo, correct minutes, or adjust a score manually:
 
 ---
 
-## 5. Post-Match Veo Film Review Workflow
+## 5. How to Remove Test Data or Revert a Test Match
+
+If you are testing the sideline tracker and commit a test match, here is exactly how to remove the test data across each layer:
+
+### A. Resetting the Match Hub (1 Click)
+- In the top header bar of **Match Hub** ([`match-hub.html`](file:///Users/shawncraig/Desktop/Anti%20Gravity%20SC/match-hub.html)), tap the **`Reset`** button (located next to *Upload CSV* and *Save HTML*).
+- This immediately wipes `matchhub_custom_data` from your browser’s cache and restores your pristine 5-match baseline (569 real film moments, 1W-4L Aspire record).
+
+### B. Resetting the In-Game Sideline Tracker Board
+- If you tapped around to test buttons on the pitch and want to wipe the board clean before kickoff:
+- Tap the **`🔄 Reset Match`** button right next to *Commit Match to Hub*.
+- This resets the clock to `00:00`, clears the score to `0-0`, clears test opponent events, and resets the Starting XI.
+
+### C. Reverting Google Sheets (`Player_IDP`)
+If a test commit was sent to your Google Sheet:
+- **Option 1 (Instant Macro Re-Sync):** Open your Google Sheet and click **`Ajax Hub > Sync Match Stats`** from the custom menu. This re-reads your master `Raw_Match_Stats` tab and restores the legitimate cumulative stats for every player.
+- **Option 2 (Version History):** Click **`File > Version History > See Version History`** in Google Sheets, pick the timestamp from before your test, and click **Restore this version**.
+
+---
+
+## 6. Post-Match Veo Film Review Workflow
 
 When you sit down with your laptop or iPad to watch the Veo match replay:
 1. Open **Match Hub** (`match-hub.html#film`).
