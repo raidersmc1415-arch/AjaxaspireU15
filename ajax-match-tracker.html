@@ -383,12 +383,12 @@
   <!-- ======================================================== -->
   <!-- MODAL: MATCH SETUP & NEW GAME WIZARD -->
   <!-- ======================================================== -->
-  <div id="setupModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-surface border border-border rounded-2xl max-w-md w-full p-5 shadow-2xl relative space-y-4">
-      <button onclick="closeModal('setupModal')" class="absolute top-4 right-4 w-7 h-7 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+  <div id="setupModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-3xl w-full p-4 sm:p-5 shadow-2xl relative space-y-4 max-h-[94vh] overflow-y-auto">
+      <button onclick="closeModal('setupModal')" class="absolute top-4 right-4 w-11 h-11 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
       <div>
         <div class="mono text-[10px] uppercase text-teal-400 font-bold">Pre-Game Configuration</div>
-        <h3 class="display text-2xl text-white">Match Setup</h3>
+        <h3 class="display text-2xl text-white">Match Setup &amp; Lineup</h3>
       </div>
       <div class="space-y-3 text-xs">
         <div>
@@ -396,7 +396,7 @@
           <input type="text" id="setupOpponent" value="La Morinda" placeholder="e.g. Woodland, Rocklin, Crossfire"
             class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
         </div>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Competition</label>
             <input type="text" id="setupComp" value="GA &amp; ASPIRE 26_27"
@@ -407,12 +407,56 @@
             <input type="number" id="setupHalfLength" value="40"
               class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
           </div>
+          <div>
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Formation</label>
+            <select id="setupFormation" onchange="onSetupFormationChange(this.value)"
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-teal-300 font-bold focus:outline-none focus:border-brand-500">
+              <option value="4-3-3">4-3-3</option>
+              <option value="4-2-3-1">4-2-3-1</option>
+              <option value="3-5-2">3-5-2</option>
+              <option value="4-4-2">4-4-2</option>
+            </select>
+          </div>
         </div>
-        <div class="p-2.5 rounded-xl bg-pitch/60 border border-border/70 text-[11px] text-slate-300">
-          <strong>Tip:</strong> Starting timer will begin counting live on-pitch minutes. Subs and position rotations will be tracked automatically.
+
+        <!-- STEP 1: AVAILABILITY -->
+        <div class="p-3 rounded-xl bg-pitch/60 border border-border/70 space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <div class="text-[11px] font-bold text-white">1 · Who's Out Today?</div>
+              <div class="text-[10px] text-slate-400">Tap to mark injured / absent. Out players won't appear on the bench or collect bench minutes.</div>
+            </div>
+            <span class="mono text-[10px] text-amber-300" id="setupAvailCount"></span>
+          </div>
+          <div id="setupAvailGrid" class="flex flex-wrap gap-1.5"></div>
         </div>
-        <button onclick="applyMatchSetup()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition">
-          Save &amp; Start Match
+
+        <!-- STEP 2: STARTING XI -->
+        <div class="p-3 rounded-xl bg-pitch/60 border border-border/70 space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <div class="text-[11px] font-bold text-white">2 · Starting XI</div>
+              <div class="text-[10px] text-slate-400">Tap a position, then tap a player. Picking a player already starting swaps them.</div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="setupAutoFill()" class="min-h-[36px] px-2.5 rounded-lg bg-surface border border-border text-[10px] text-teal-300 font-bold active:scale-95">⚡ Auto-Fill</button>
+              <button type="button" onclick="setupClearLineup()" class="min-h-[36px] px-2.5 rounded-lg bg-surface border border-border text-[10px] text-slate-300 font-bold active:scale-95">Clear</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div id="setupSlotList" class="grid grid-cols-1 gap-1.5"></div>
+            <div class="space-y-1.5">
+              <div class="mono text-[10px] uppercase text-slate-400 font-bold" id="setupPickerLabel">Tap a position on the left</div>
+              <div id="setupPlayerPicker" class="grid grid-cols-2 gap-1.5"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="setupLockNote" class="hidden p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/40 text-[11px] text-amber-200">
+          ⚠️ This match is already in progress. Saving a new lineup moves players without logging subs — use the bench tray for in-game substitutions.
+        </div>
+        <button onclick="applyMatchSetup()" class="w-full min-h-[48px] py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition">
+          Save Lineup &amp; Go to Pitch
         </button>
       </div>
     </div>
@@ -631,6 +675,13 @@
     let selectedPlayerJersey = null;
     let selectedSlot = null;
     let swapMode = false;
+    let absentPlayers = new Set();
+
+    // Pre-Game Lineup Builder State
+    let setupLineup = {};
+    let setupOut = new Set();
+    let setupSelectedSlot = null;
+    let setupFormationKey = '4-3-3';
 
     let oppStats = { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 };
     const API_URL = "https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec";
@@ -761,11 +812,11 @@
           }
         });
 
-        // Bench players get +1 min to bench time
+        // Bench players get +1 min to bench time (excluding absent/injured players)
         const sq = SQUADS[activeSquadKey];
         const onPitchSet = new Set(Object.values(onPitchPlayers));
         sq.roster.forEach(p => {
-          if (!onPitchSet.has(p.jersey) && playerStats[p.jersey]) {
+          if (!onPitchSet.has(p.jersey) && playerStats[p.jersey] && !absentPlayers.has(p.jersey)) {
             playerStats[p.jersey].benchMins++;
           }
         });
@@ -984,8 +1035,9 @@
       const sq = SQUADS[activeSquadKey];
       const onPitchSet = new Set(Object.values(onPitchPlayers));
 
-      const benchPlayers = sq.roster.filter(p => !onPitchSet.has(p.jersey));
-      document.getElementById('benchCount').textContent = benchPlayers.length;
+      const benchPlayers = sq.roster.filter(p => !onPitchSet.has(p.jersey) && !absentPlayers.has(p.jersey));
+      const outPlayers = sq.roster.filter(p => absentPlayers.has(p.jersey));
+      document.getElementById('benchCount').textContent = benchPlayers.length + (outPlayers.length ? ` · ${outPlayers.length} Out` : '');
 
       container.innerHTML = benchPlayers.map(p => {
         const stat = playerStats[p.jersey] || { mins: 0, benchMins: 0 };
@@ -1597,13 +1649,294 @@
     }
 
     /* =========================================================
-       MODALS & GAME WIZARD
+       PRE-GAME LINEUP BUILDER & MATCH SETUP WIZARD
        ========================================================= */
     function openNewGameModal() {
       document.getElementById('setupOpponent').value = opponentName;
       document.getElementById('setupComp').value = competitionName;
       document.getElementById('setupHalfLength').value = halfLengthMinutes;
+      document.getElementById('setupFormation').value = currentFormation;
+
+      setupFormationKey = currentFormation;
+      setupOut = new Set(absentPlayers);
+
+      // Clone existing pitch assignments
+      setupLineup = { ...onPitchPlayers };
+
+      // If empty lineup, auto fill with defaults
+      const slots = Object.keys(FORMATIONS[setupFormationKey] || {});
+      if (Object.keys(setupLineup).length === 0) {
+        setupAutoFill(false);
+      } else {
+        // Remove any players who are in setupOut from setupLineup
+        Object.entries(setupLineup).forEach(([slot, j]) => {
+          if (setupOut.has(j)) delete setupLineup[slot];
+        });
+      }
+
+      // Default selected slot to first open slot, or first slot
+      setupSelectedSlot = slots.find(s => !setupLineup[s]) || slots[0] || null;
+
+      // In-game warning
+      const lockNote = document.getElementById('setupLockNote');
+      if (lockNote) {
+        if (timerRunning || matchSeconds > 0) {
+          lockNote.classList.remove('hidden');
+        } else {
+          lockNote.classList.add('hidden');
+        }
+      }
+
+      renderSetupAvailGrid();
+      renderSetupSlots();
+      renderSetupPlayerPicker();
+
       document.getElementById('setupModal').classList.replace('hidden', 'flex');
+    }
+
+    function renderSetupAvailGrid() {
+      const container = document.getElementById('setupAvailGrid');
+      const countEl = document.getElementById('setupAvailCount');
+      if (!container) return;
+      const sq = SQUADS[activeSquadKey];
+      const sorted = [...sq.roster].sort((a,b) => a.jersey - b.jersey);
+
+      if (countEl) {
+        countEl.textContent = setupOut.size > 0 
+          ? `${setupOut.size} player${setupOut.size === 1 ? '' : 's'} out / absent`
+          : 'All players available';
+      }
+
+      container.innerHTML = sorted.map(p => {
+        const isOut = setupOut.has(p.jersey);
+        const isStarting = Object.values(setupLineup).includes(p.jersey);
+        const cls = isOut 
+          ? 'bg-rose-500/20 text-rose-300 border-rose-500/60 font-bold'
+          : isStarting
+            ? 'bg-teal-500/15 text-teal-300 border-teal-500/40 font-medium'
+            : 'bg-pitch/90 text-slate-300 border-border hover:border-slate-500';
+
+        return `
+          <button type="button" onclick="toggleSetupPlayerAvail(${p.jersey})"
+            class="min-h-[38px] px-2.5 py-1 rounded-lg border text-xs flex items-center gap-1.5 transition active:scale-95 ${cls}"
+            title="${isOut ? 'Mark available' : 'Mark injured / absent'}">
+            <span class="font-mono font-bold">#${p.jersey}</span>
+            <span class="truncate max-w-[70px]">${p.name.split(' ')[0]}</span>
+            ${isOut ? '<span class="text-[9px] uppercase px-1 rounded bg-rose-500/30 text-rose-200 font-bold">OUT</span>' : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function toggleSetupPlayerAvail(jersey) {
+      if (setupOut.has(jersey)) {
+        setupOut.delete(jersey);
+      } else {
+        setupOut.add(jersey);
+        // If they were starting, remove them from setupLineup
+        Object.entries(setupLineup).forEach(([slot, j]) => {
+          if (j === jersey) delete setupLineup[slot];
+        });
+      }
+      renderSetupAvailGrid();
+      renderSetupSlots();
+      renderSetupPlayerPicker();
+    }
+
+    function onSetupFormationChange(formKey) {
+      setupFormationKey = formKey;
+      const validSlots = Object.keys(FORMATIONS[formKey] || {});
+      const newLineup = {};
+      validSlots.forEach(slot => {
+        if (setupLineup[slot]) newLineup[slot] = setupLineup[slot];
+      });
+      setupLineup = newLineup;
+
+      if (!validSlots.includes(setupSelectedSlot)) {
+        setupSelectedSlot = validSlots.find(s => !setupLineup[s]) || validSlots[0] || null;
+      }
+
+      renderSetupSlots();
+      renderSetupPlayerPicker();
+    }
+
+    function renderSetupSlots() {
+      const container = document.getElementById('setupSlotList');
+      if (!container) return;
+      const slots = Object.keys(FORMATIONS[setupFormationKey] || {});
+      const sq = SQUADS[activeSquadKey];
+
+      container.innerHTML = slots.map(slot => {
+        const j = setupLineup[slot];
+        const player = j ? sq.roster.find(p => p.jersey === j) : null;
+        const isSelected = setupSelectedSlot === slot;
+
+        const borderCls = isSelected 
+          ? 'border-teal-400 bg-teal-500/20 shadow-md ring-2 ring-teal-400/30'
+          : j 
+            ? 'border-border bg-pitch/80 hover:border-slate-500'
+            : 'border-dashed border-border/80 bg-pitch/30 hover:border-teal-500/50';
+
+        return `
+          <div onclick="selectSetupSlot('${slot}')"
+            class="min-h-[44px] p-2 rounded-xl border flex items-center justify-between cursor-pointer transition active:scale-[0.99] ${borderCls}">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-10 h-8 rounded-lg bg-surface border border-border flex items-center justify-center font-mono font-bold text-xs text-teal-300 shrink-0">
+                ${slot}
+              </span>
+              ${player ? `
+                <div class="truncate">
+                  <span class="font-bold text-white text-xs">#${player.jersey} ${player.name}</span>
+                </div>
+              ` : `
+                <span class="text-xs text-slate-500 italic">-- Open / Tap to assign --</span>
+              `}
+            </div>
+            ${j ? `
+              <button type="button" onclick="clearSetupSlot('${slot}', event)"
+                class="w-8 h-8 rounded-lg bg-surface hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 flex items-center justify-center text-xs font-bold transition shrink-0 ml-1"
+                title="Remove from slot">✕</button>
+            ` : `
+              <span class="text-[10px] mono text-teal-400 px-1.5 py-0.5 rounded bg-surface border border-border shrink-0">ASSIGN</span>
+            `}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectSetupSlot(slot) {
+      setupSelectedSlot = slot;
+      renderSetupSlots();
+      renderSetupPlayerPicker();
+    }
+
+    function clearSetupSlot(slot, e) {
+      if (e) e.stopPropagation();
+      delete setupLineup[slot];
+      setupSelectedSlot = slot;
+      renderSetupSlots();
+      renderSetupPlayerPicker();
+      renderSetupAvailGrid();
+    }
+
+    function renderSetupPlayerPicker() {
+      const container = document.getElementById('setupPlayerPicker');
+      const label = document.getElementById('setupPickerLabel');
+      if (!container) return;
+
+      if (label) {
+        label.textContent = setupSelectedSlot 
+          ? `Assign to ${setupSelectedSlot}: (Tap player)`
+          : 'Select a position slot on left';
+      }
+
+      const sq = SQUADS[activeSquadKey];
+      // Available players (not marked OUT)
+      const avail = sq.roster.filter(p => !setupOut.has(p.jersey)).sort((a,b) => a.jersey - b.jersey);
+
+      container.innerHTML = avail.map(p => {
+        // Check if assigned in setupLineup
+        const assignedSlot = Object.keys(setupLineup).find(s => setupLineup[s] === p.jersey);
+        const isCurrentSlot = setupSelectedSlot && setupLineup[setupSelectedSlot] === p.jersey;
+
+        const cls = isCurrentSlot
+          ? 'bg-teal-500/30 text-white border-teal-400 font-bold ring-2 ring-teal-400/40'
+          : assignedSlot
+            ? 'bg-pitch/90 text-teal-200 border-teal-500/40 font-medium'
+            : 'bg-surface hover:bg-slate-700 text-slate-200 border-border';
+
+        return `
+          <button type="button" onclick="assignPlayerToSetupSlot(${p.jersey})"
+            class="min-h-[44px] p-2 rounded-xl border text-left transition flex items-center justify-between gap-1 active:scale-95 ${cls}">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="w-7 h-7 rounded-md bg-pitch flex items-center justify-center font-mono font-bold text-xs text-teal-300 shrink-0">
+                #${p.jersey}
+              </span>
+              <span class="text-xs font-bold truncate max-w-[80px]">${p.name.split(' ')[0]}</span>
+            </div>
+            ${assignedSlot ? `
+              <span class="text-[9px] mono uppercase px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 font-bold shrink-0">
+                ${assignedSlot}
+              </span>
+            ` : `
+              <span class="text-[9px] mono uppercase text-slate-500 shrink-0">Bench</span>
+            `}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function assignPlayerToSetupSlot(jersey) {
+      const slots = Object.keys(FORMATIONS[setupFormationKey] || {});
+      if (!setupSelectedSlot) {
+        setupSelectedSlot = slots.find(s => !setupLineup[s]) || slots[0];
+      }
+      const targetSlot = setupSelectedSlot;
+
+      // If this player is already starting in another slot, swap or reassign!
+      const prevSlot = Object.keys(setupLineup).find(s => setupLineup[s] === jersey);
+      const existingInTarget = setupLineup[targetSlot];
+
+      if (prevSlot && prevSlot !== targetSlot) {
+        if (existingInTarget) {
+          setupLineup[prevSlot] = existingInTarget;
+        } else {
+          delete setupLineup[prevSlot];
+        }
+      }
+
+      setupLineup[targetSlot] = jersey;
+
+      // Auto-advance to next empty slot!
+      const nextEmpty = slots.find(s => !setupLineup[s]);
+      if (nextEmpty) {
+        setupSelectedSlot = nextEmpty;
+      }
+
+      renderSetupSlots();
+      renderSetupPlayerPicker();
+      renderSetupAvailGrid();
+    }
+
+    function setupAutoFill(doRender = true) {
+      setupLineup = {};
+      const slots = Object.keys(FORMATIONS[setupFormationKey] || {});
+      const sq = SQUADS[activeSquadKey];
+      const avail = sq.roster.filter(p => !setupOut.has(p.jersey));
+      const defs = (sq.defaultStarters || []).filter(j => !setupOut.has(j));
+      const used = new Set();
+
+      slots.forEach((slot, i) => {
+        let pick = defs[i];
+        if (!pick || used.has(pick)) {
+          const remaining = avail.find(p => !used.has(p.jersey));
+          if (remaining) pick = remaining.jersey;
+        }
+        if (pick) {
+          setupLineup[slot] = pick;
+          used.add(pick);
+        }
+      });
+
+      const nextEmpty = slots.find(s => !setupLineup[s]);
+      setupSelectedSlot = nextEmpty || slots[0] || null;
+
+      if (doRender) {
+        renderSetupSlots();
+        renderSetupPlayerPicker();
+        renderSetupAvailGrid();
+        showToast('Auto-filled starting 11');
+      }
+    }
+
+    function setupClearLineup() {
+      setupLineup = {};
+      const slots = Object.keys(FORMATIONS[setupFormationKey] || {});
+      setupSelectedSlot = slots[0] || null;
+      renderSetupSlots();
+      renderSetupPlayerPicker();
+      renderSetupAvailGrid();
+      showToast('Lineup cleared');
     }
 
     function applyMatchSetup() {
@@ -1611,10 +1944,68 @@
       competitionName = document.getElementById('setupComp').value.trim() || 'GA & ASPIRE 26_27';
       halfLengthMinutes = parseInt(document.getElementById('setupHalfLength').value, 10) || 40;
 
+      absentPlayers = new Set(setupOut);
+      currentFormation = setupFormationKey;
+      onPitchPlayers = { ...setupLineup };
+
+      document.getElementById('formationSelect').value = currentFormation;
+
+      // Sync player stats for starters, bench, and absent players
+      const sq = SQUADS[activeSquadKey];
+      sq.roster.forEach(p => {
+        if (!playerStats[p.jersey]) {
+          playerStats[p.jersey] = {
+            name: p.name,
+            jersey: p.jersey,
+            mins: 0,
+            goals: 0,
+            assists: 0,
+            shots: 0,
+            sot: 0,
+            soff: 0,
+            corners: 0,
+            crosses: 0,
+            turnovers: 0,
+            toD: 0,
+            toM: 0,
+            toA: 0,
+            fouls: 0,
+            saves: 0,
+            keyPasses: 0,
+            duelsWon: 0,
+            duelsLost: 0,
+            posMins: {},
+            benchMins: 0,
+            onPitch: false,
+            currentPos: 'Sub'
+          };
+        }
+
+        const stat = playerStats[p.jersey];
+        if (absentPlayers.has(p.jersey)) {
+          stat.onPitch = false;
+          stat.currentPos = 'Out';
+        } else {
+          const startingSlot = Object.keys(onPitchPlayers).find(s => onPitchPlayers[s] === p.jersey);
+          if (startingSlot) {
+            stat.onPitch = true;
+            stat.currentPos = startingSlot;
+          } else {
+            stat.onPitch = false;
+            stat.currentPos = 'Sub';
+          }
+        }
+      });
+
       closeModal('setupModal');
       updateScoreboard();
+      renderPitch();
+      renderBench();
+      renderMinutesStream();
       saveState();
-      showToast(`Match setup saved: vs ${opponentName}`);
+
+      const startersCount = Object.keys(onPitchPlayers).length;
+      showToast(`Lineup & match saved: vs ${opponentName} (${startersCount}/11 starters)`);
     }
 
     function closeModal(modalId) {
@@ -1699,7 +2090,8 @@
         onPitchPlayers,
         playerStats,
         matchEvents,
-        oppStats
+        oppStats,
+        absentPlayers: Array.from(absentPlayers)
       };
       try {
         localStorage.setItem('ajax_sideline_tracker_state', JSON.stringify(state));
@@ -1725,6 +2117,7 @@
         playerStats = state.playerStats || {};
         matchEvents = state.matchEvents || [];
         oppStats = state.oppStats || { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 };
+        absentPlayers = new Set(state.absentPlayers || []);
 
         document.getElementById('teamSelector').value = activeSquadKey;
         document.getElementById('formationSelect').value = currentFormation;

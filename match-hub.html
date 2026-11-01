@@ -1073,8 +1073,11 @@
             </div>
           </div>
 
-          <!-- Top Controls: Amber Flag Film Button + Prominent Commit to Match Hub + Reset Match -->
+          <!-- Top Controls: Match Setup & Lineup + Amber Flag Film Button + Prominent Commit to Match Hub + Reset Match -->
           <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openTrackerSetupModal()" class="bg-surface hover:bg-slate-700 text-teal-300 border border-teal-500/40 px-3 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95" title="Pre-game match setup, opponent & starting lineup">
+              <span>⚙️ Match Setup &amp; Lineup</span>
+            </button>
             <button onclick="flagTrackerBookmark()" class="bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 font-bold text-xs px-3.5 py-2.5 rounded-xl border-2 border-amber-400/70 transition shadow-md flex items-center gap-1.5 active:scale-95">
               <span>📌 Flag Moment for Film</span>
             </button>
@@ -1432,6 +1435,86 @@
         </button>
       </div>
       <button onclick="closeModal('turnoverModal')" class="w-full py-2 rounded-xl bg-pitch text-slate-400 hover:text-white text-xs font-semibold">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Modal: Pre-Game Match Setup & Lineup Builder -->
+  <div id="trackerSetupModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4" onclick="if(event.target===this) closeModal('trackerSetupModal')">
+    <div class="bg-surface border border-border rounded-2xl max-w-3xl w-full p-4 sm:p-5 shadow-2xl relative space-y-4 max-h-[94vh] overflow-y-auto" role="dialog" aria-modal="true">
+      <button onclick="closeModal('trackerSetupModal')" class="absolute top-4 right-4 w-11 h-11 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+      <div>
+        <div class="mono text-[10px] uppercase text-teal-400 font-bold">Pre-Game Configuration</div>
+        <h3 class="display text-2xl text-white">Match Setup &amp; Lineup</h3>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Opponent Name</label>
+          <input type="text" id="trackerSetupOpponent" value="La Morinda" placeholder="e.g. Woodland, Rocklin, Crossfire"
+            class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Competition</label>
+            <input type="text" id="trackerSetupComp" value="GA &amp; ASPIRE 26_27"
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Half Length (Mins)</label>
+            <input type="number" id="trackerSetupHalfLength" value="40"
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Formation</label>
+            <select id="trackerSetupFormation" onchange="onTrackerSetupFormationChange(this.value)"
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-teal-300 font-bold focus:outline-none focus:border-brand-500">
+              <option value="4-3-3">4-3-3</option>
+              <option value="4-2-3-1">4-2-3-1</option>
+              <option value="3-5-2">3-5-2</option>
+              <option value="4-4-2">4-4-2</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- STEP 1: AVAILABILITY -->
+        <div class="p-3 rounded-xl bg-pitch/60 border border-border/70 space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <div class="text-[11px] font-bold text-white">1 · Who's Out Today?</div>
+              <div class="text-[10px] text-slate-400">Tap to mark injured / absent. Out players won't appear on the bench or collect bench minutes.</div>
+            </div>
+            <span class="mono text-[10px] text-amber-300" id="trackerSetupAvailCount"></span>
+          </div>
+          <div id="trackerSetupAvailGrid" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- STEP 2: STARTING XI -->
+        <div class="p-3 rounded-xl bg-pitch/60 border border-border/70 space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <div class="text-[11px] font-bold text-white">2 · Starting XI</div>
+              <div class="text-[10px] text-slate-400">Tap a position, then tap a player. Picking a player already starting swaps them.</div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="trackerSetupAutoFill()" class="min-h-[36px] px-2.5 rounded-lg bg-surface border border-border text-[10px] text-teal-300 font-bold active:scale-95">⚡ Auto-Fill</button>
+              <button type="button" onclick="trackerSetupClearLineup()" class="min-h-[36px] px-2.5 rounded-lg bg-surface border border-border text-[10px] text-slate-300 font-bold active:scale-95">Clear</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div id="trackerSetupSlotList" class="grid grid-cols-1 gap-1.5"></div>
+            <div class="space-y-1.5">
+              <div class="mono text-[10px] uppercase text-slate-400 font-bold" id="trackerSetupPickerLabel">Tap a position on the left</div>
+              <div id="trackerSetupPlayerPicker" class="grid grid-cols-2 gap-1.5"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="trackerSetupLockNote" class="hidden p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/40 text-[11px] text-amber-200">
+          ⚠️ This match is already in progress. Saving a new lineup moves players without logging subs — use the bench tray for in-game substitutions.
+        </div>
+        <button onclick="applyTrackerMatchSetup()" class="w-full min-h-[48px] py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition">
+          Save Lineup &amp; Go to Pitch
+        </button>
+      </div>
     </div>
   </div>
 
@@ -3807,13 +3890,20 @@
       oppGoals: 0,
       oppShots: 0,
       oppSubs: 0,
-      oppCorners: 0
+      oppCorners: 0,
+      absentPlayers: []
     };
 
     let trackerTimerInterval = null;
     let trackerSelectedSlot = null;
     let trackerSelectedJersey = null;
     let trackerSwapMode = false;
+
+    // Tracker Pre-Game Lineup Builder State
+    let trackerSetupLineup = {};
+    let trackerSetupOut = new Set();
+    let trackerSetupSelectedSlot = null;
+    let trackerSetupFormationKey = '4-3-3';
 
     function initTrackerState() {
       const aspPlayers = (DATA['AJAX ASPIRE U15']?.players || []).map(p => {
@@ -3916,8 +4006,9 @@
         });
 
         const activeOnPitch = new Set(Object.values(trackerState.onPitch));
+        const absentSet = new Set(trackerState.absentPlayers || []);
         Object.values(trackerState.playerStats).forEach(p => {
-          if (!activeOnPitch.has(p.jersey)) {
+          if (!activeOnPitch.has(p.jersey) && !absentSet.has(p.jersey)) {
             p.benchMins++;
           }
         });
@@ -4119,8 +4210,10 @@
       const container = $('trackerBenchGrid');
       if (!container) return;
       const onPitchSet = new Set(Object.values(trackerState.onPitch));
-      const bench = Object.values(trackerState.playerStats).filter(p => !onPitchSet.has(p.jersey));
-      $('trackerBenchCount').textContent = bench.length;
+      const absentSet = new Set(trackerState.absentPlayers || []);
+      const bench = Object.values(trackerState.playerStats).filter(p => !onPitchSet.has(p.jersey) && !absentSet.has(p.jersey));
+      const outCount = (trackerState.absentPlayers || []).length;
+      $('trackerBenchCount').textContent = bench.length + (outCount ? ` · ${outCount} Out` : '');
 
       container.innerHTML = bench.map(p => `
         <button type="button" onclick="onTapTrackerBenchPlayer(${p.jersey})"
@@ -4800,6 +4893,326 @@
       renderTrackerMinutesStream();
       saveTrackerState();
       showToast(`⭐ Added #${jersey} ${name} to bench! Tap to put on pitch.`);
+    }
+
+    /* =========================================================
+       TRACKER PRE-GAME LINEUP BUILDER & MATCH SETUP WIZARD
+       ========================================================= */
+    function openTrackerSetupModal() {
+      if ($('trackerSetupOpponent')) $('trackerSetupOpponent').value = trackerState.opponent || 'Opponent';
+      if ($('trackerSetupComp')) $('trackerSetupComp').value = trackerState.competition || 'GA & ASPIRE 26_27';
+      if ($('trackerSetupHalfLength')) $('trackerSetupHalfLength').value = trackerState.halfLength || 40;
+      if ($('trackerSetupFormation')) $('trackerSetupFormation').value = trackerState.formation || '4-3-3';
+
+      trackerSetupFormationKey = trackerState.formation || '4-3-3';
+      trackerSetupOut = new Set(trackerState.absentPlayers || []);
+
+      // Clone existing onPitch assignments
+      trackerSetupLineup = { ...(trackerState.onPitch || {}) };
+
+      const slots = Object.keys(TRACKER_FORMATIONS[trackerSetupFormationKey] || {});
+      if (Object.keys(trackerSetupLineup).length === 0) {
+        trackerSetupAutoFill(false);
+      } else {
+        // Remove players who are marked out
+        Object.entries(trackerSetupLineup).forEach(([slot, j]) => {
+          if (trackerSetupOut.has(j)) delete trackerSetupLineup[slot];
+        });
+      }
+
+      trackerSetupSelectedSlot = slots.find(s => !trackerSetupLineup[s]) || slots[0] || null;
+
+      const lockNote = $('trackerSetupLockNote');
+      if (lockNote) {
+        if (trackerState.running || trackerState.matchSeconds > 0) {
+          lockNote.classList.remove('hidden');
+        } else {
+          lockNote.classList.add('hidden');
+        }
+      }
+
+      renderTrackerSetupAvailGrid();
+      renderTrackerSetupSlots();
+      renderTrackerSetupPlayerPicker();
+
+      $('trackerSetupModal').classList.replace('hidden', 'flex');
+    }
+
+    function renderTrackerSetupAvailGrid() {
+      const container = $('trackerSetupAvailGrid');
+      const countEl = $('trackerSetupAvailCount');
+      if (!container) return;
+
+      const allPlayers = Object.values(trackerState.playerStats).sort((a,b) => a.jersey - b.jersey);
+
+      if (countEl) {
+        countEl.textContent = trackerSetupOut.size > 0
+          ? `${trackerSetupOut.size} player${trackerSetupOut.size === 1 ? '' : 's'} out / absent`
+          : 'All players available';
+      }
+
+      container.innerHTML = allPlayers.map(p => {
+        const isOut = trackerSetupOut.has(p.jersey);
+        const isStarting = Object.values(trackerSetupLineup).includes(p.jersey);
+        const cls = isOut
+          ? 'bg-rose-500/20 text-rose-300 border-rose-500/60 font-bold'
+          : isStarting
+            ? 'bg-teal-500/15 text-teal-300 border-teal-500/40 font-medium'
+            : 'bg-pitch/90 text-slate-300 border-border hover:border-slate-500';
+
+        return `
+          <button type="button" onclick="toggleTrackerSetupPlayerAvail(${p.jersey})"
+            class="min-h-[38px] px-2.5 py-1 rounded-lg border text-xs flex items-center gap-1.5 transition active:scale-95 ${cls}"
+            title="${isOut ? 'Mark available' : 'Mark injured / absent'}">
+            <span class="font-mono font-bold">#${p.jersey}</span>
+            <span class="truncate max-w-[70px]">${p.name.split(' ')[0]}</span>
+            ${isOut ? '<span class="text-[9px] uppercase px-1 rounded bg-rose-500/30 text-rose-200 font-bold">OUT</span>' : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function toggleTrackerSetupPlayerAvail(jersey) {
+      if (trackerSetupOut.has(jersey)) {
+        trackerSetupOut.delete(jersey);
+      } else {
+        trackerSetupOut.add(jersey);
+        Object.entries(trackerSetupLineup).forEach(([slot, j]) => {
+          if (j === jersey) delete trackerSetupLineup[slot];
+        });
+      }
+      renderTrackerSetupAvailGrid();
+      renderTrackerSetupSlots();
+      renderTrackerSetupPlayerPicker();
+    }
+
+    function onTrackerSetupFormationChange(formKey) {
+      trackerSetupFormationKey = formKey;
+      const validSlots = Object.keys(TRACKER_FORMATIONS[formKey] || {});
+      const newLineup = {};
+      validSlots.forEach(slot => {
+        if (trackerSetupLineup[slot]) newLineup[slot] = trackerSetupLineup[slot];
+      });
+      trackerSetupLineup = newLineup;
+
+      if (!validSlots.includes(trackerSetupSelectedSlot)) {
+        trackerSetupSelectedSlot = validSlots.find(s => !trackerSetupLineup[s]) || validSlots[0] || null;
+      }
+
+      renderTrackerSetupSlots();
+      renderTrackerSetupPlayerPicker();
+    }
+
+    function renderTrackerSetupSlots() {
+      const container = $('trackerSetupSlotList');
+      if (!container) return;
+      const slots = Object.keys(TRACKER_FORMATIONS[trackerSetupFormationKey] || {});
+
+      container.innerHTML = slots.map(slot => {
+        const j = trackerSetupLineup[slot];
+        const player = j ? trackerState.playerStats[j] : null;
+        const isSelected = trackerSetupSelectedSlot === slot;
+
+        const borderCls = isSelected 
+          ? 'border-teal-400 bg-teal-500/20 shadow-md ring-2 ring-teal-400/30'
+          : j 
+            ? 'border-border bg-pitch/80 hover:border-slate-500'
+            : 'border-dashed border-border/80 bg-pitch/30 hover:border-teal-500/50';
+
+        return `
+          <div onclick="selectTrackerSetupSlot('${slot}')"
+            class="min-h-[44px] p-2 rounded-xl border flex items-center justify-between cursor-pointer transition active:scale-[0.99] ${borderCls}">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-10 h-8 rounded-lg bg-surface border border-border flex items-center justify-center font-mono font-bold text-xs text-teal-300 shrink-0">
+                ${slot}
+              </span>
+              ${player ? `
+                <div class="truncate">
+                  <span class="font-bold text-white text-xs">#${player.jersey} ${player.name}</span>
+                </div>
+              ` : `
+                <span class="text-xs text-slate-500 italic">-- Open / Tap to assign --</span>
+              `}
+            </div>
+            ${j ? `
+              <button type="button" onclick="clearTrackerSetupSlot('${slot}', event)"
+                class="w-8 h-8 rounded-lg bg-surface hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 flex items-center justify-center text-xs font-bold transition shrink-0 ml-1"
+                title="Remove from slot">✕</button>
+            ` : `
+              <span class="text-[10px] mono text-teal-400 px-1.5 py-0.5 rounded bg-surface border border-border shrink-0">ASSIGN</span>
+            `}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectTrackerSetupSlot(slot) {
+      trackerSetupSelectedSlot = slot;
+      renderTrackerSetupSlots();
+      renderTrackerSetupPlayerPicker();
+    }
+
+    function clearTrackerSetupSlot(slot, e) {
+      if (e) e.stopPropagation();
+      delete trackerSetupLineup[slot];
+      trackerSetupSelectedSlot = slot;
+      renderTrackerSetupSlots();
+      renderTrackerSetupPlayerPicker();
+      renderTrackerSetupAvailGrid();
+    }
+
+    function renderTrackerSetupPlayerPicker() {
+      const container = $('trackerSetupPlayerPicker');
+      const label = $('trackerSetupPickerLabel');
+      if (!container) return;
+
+      if (label) {
+        label.textContent = trackerSetupSelectedSlot
+          ? `Assign to ${trackerSetupSelectedSlot}: (Tap player)`
+          : 'Select a position slot on left';
+      }
+
+      const avail = Object.values(trackerState.playerStats)
+        .filter(p => !trackerSetupOut.has(p.jersey))
+        .sort((a,b) => a.jersey - b.jersey);
+
+      container.innerHTML = avail.map(p => {
+        const assignedSlot = Object.keys(trackerSetupLineup).find(s => trackerSetupLineup[s] === p.jersey);
+        const isCurrentSlot = trackerSetupSelectedSlot && trackerSetupLineup[trackerSetupSelectedSlot] === p.jersey;
+
+        const cls = isCurrentSlot
+          ? 'bg-teal-500/30 text-white border-teal-400 font-bold ring-2 ring-teal-400/40'
+          : assignedSlot
+            ? 'bg-pitch/90 text-teal-200 border-teal-500/40 font-medium'
+            : 'bg-surface hover:bg-slate-700 text-slate-200 border-border';
+
+        return `
+          <button type="button" onclick="assignPlayerToTrackerSetupSlot(${p.jersey})"
+            class="min-h-[44px] p-2 rounded-xl border text-left transition flex items-center justify-between gap-1 active:scale-95 ${cls}">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="w-7 h-7 rounded-md bg-pitch flex items-center justify-center font-mono font-bold text-xs text-teal-300 shrink-0">
+                #${p.jersey}
+              </span>
+              <span class="text-xs font-bold truncate max-w-[80px]">${p.name.split(' ')[0]}</span>
+            </div>
+            ${assignedSlot ? `
+              <span class="text-[9px] mono uppercase px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 font-bold shrink-0">
+                ${assignedSlot}
+              </span>
+            ` : `
+              <span class="text-[9px] mono uppercase text-slate-500 shrink-0">Bench</span>
+            `}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function assignPlayerToTrackerSetupSlot(jersey) {
+      const slots = Object.keys(TRACKER_FORMATIONS[trackerSetupFormationKey] || {});
+      if (!trackerSetupSelectedSlot) {
+        trackerSetupSelectedSlot = slots.find(s => !trackerSetupLineup[s]) || slots[0];
+      }
+      const targetSlot = trackerSetupSelectedSlot;
+
+      const prevSlot = Object.keys(trackerSetupLineup).find(s => trackerSetupLineup[s] === jersey);
+      const existingInTarget = trackerSetupLineup[targetSlot];
+
+      if (prevSlot && prevSlot !== targetSlot) {
+        if (existingInTarget) {
+          trackerSetupLineup[prevSlot] = existingInTarget;
+        } else {
+          delete trackerSetupLineup[prevSlot];
+        }
+      }
+
+      trackerSetupLineup[targetSlot] = jersey;
+
+      const nextEmpty = slots.find(s => !trackerSetupLineup[s]);
+      if (nextEmpty) {
+        trackerSetupSelectedSlot = nextEmpty;
+      }
+
+      renderTrackerSetupSlots();
+      renderTrackerSetupPlayerPicker();
+      renderTrackerSetupAvailGrid();
+    }
+
+    function trackerSetupAutoFill(doRender = true) {
+      trackerSetupLineup = {};
+      const slots = Object.keys(TRACKER_FORMATIONS[trackerSetupFormationKey] || {});
+      const defaults = [88, 9, 50, 89, 19, 8, 14, 24, 33, 23, 2].filter(j => !trackerSetupOut.has(j));
+      const avail = Object.values(trackerState.playerStats)
+        .filter(p => !trackerSetupOut.has(p.jersey))
+        .sort((a,b) => a.jersey - b.jersey);
+      const used = new Set();
+
+      slots.forEach((slot, i) => {
+        let pick = defaults[i];
+        if (!pick || used.has(pick)) {
+          const rem = avail.find(p => !used.has(p.jersey));
+          if (rem) pick = rem.jersey;
+        }
+        if (pick) {
+          trackerSetupLineup[slot] = pick;
+          used.add(pick);
+        }
+      });
+
+      const nextEmpty = slots.find(s => !trackerSetupLineup[s]);
+      trackerSetupSelectedSlot = nextEmpty || slots[0] || null;
+
+      if (doRender) {
+        renderTrackerSetupSlots();
+        renderTrackerSetupPlayerPicker();
+        renderTrackerSetupAvailGrid();
+        showToast('Auto-filled starting 11');
+      }
+    }
+
+    function trackerSetupClearLineup() {
+      trackerSetupLineup = {};
+      const slots = Object.keys(TRACKER_FORMATIONS[trackerSetupFormationKey] || {});
+      trackerSetupSelectedSlot = slots[0] || null;
+      renderTrackerSetupSlots();
+      renderTrackerSetupPlayerPicker();
+      renderTrackerSetupAvailGrid();
+      showToast('Lineup cleared');
+    }
+
+    function applyTrackerMatchSetup() {
+      trackerState.opponent = ($('trackerSetupOpponent')?.value || 'Opponent').trim();
+      trackerState.competition = ($('trackerSetupComp')?.value || 'GA & ASPIRE 26_27').trim();
+      trackerState.halfLength = parseInt($('trackerSetupHalfLength')?.value, 10) || 40;
+      trackerState.absentPlayers = Array.from(trackerSetupOut);
+      trackerState.formation = trackerSetupFormationKey;
+      trackerState.onPitch = { ...trackerSetupLineup };
+
+      if ($('trackerOpponentInput')) $('trackerOpponentInput').value = trackerState.opponent;
+      if ($('trackerFormationSelect')) $('trackerFormationSelect').value = trackerState.formation;
+
+      // Sync player stats
+      Object.values(trackerState.playerStats).forEach(p => {
+        if (trackerSetupOut.has(p.jersey)) {
+          p.currentPos = 'Out';
+        } else {
+          const startingSlot = Object.keys(trackerState.onPitch).find(s => trackerState.onPitch[s] === p.jersey);
+          if (startingSlot) {
+            p.currentPos = startingSlot;
+          } else {
+            p.currentPos = 'Sub';
+          }
+        }
+      });
+
+      closeModal('trackerSetupModal');
+      updateTrackerScoreboard();
+      renderTrackerPitch();
+      renderTrackerBench();
+      renderTrackerMinutesStream();
+      saveTrackerState();
+
+      const startersCount = Object.keys(trackerState.onPitch).length;
+      showToast(`Lineup & match saved: vs ${trackerState.opponent} (${startersCount}/11 starters)`);
     }
 
     /* =========================================================
