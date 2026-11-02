@@ -181,6 +181,101 @@
         </div>
       </div>
     </div>
+
+    <!-- SUMMARY DASHBOARD COMPONENT (HUD): SHOTS, PRESSING, TERRITORY & HALFTIME AI -->
+    <div id="summaryDashboardHud" class="pt-2 border-t border-border/70 space-y-2">
+      <!-- KPI Row: 4 Metric Cards + AI Halftime Button -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+        <!-- Card 1: Shots Split -->
+        <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
+            <span>Shots Split</span>
+            <span class="text-teal-400 font-bold" id="hudShotsSummary">0 vs 0</span>
+          </div>
+          <div class="text-sm font-black text-white mt-1 flex items-baseline gap-1.5">
+            <span id="hudAjaxShots">0</span>
+            <span class="text-[10px] text-slate-400 font-normal">(<span id="hudAjaxSot">0</span> on / <span id="hudAjaxOut18">0</span> out 18)</span>
+          </div>
+          <div class="text-[9px] text-slate-400 mt-0.5">Opp: <span id="hudOppShots">0</span> shots</div>
+        </div>
+
+        <!-- Card 2: Press Efficiency -->
+        <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
+            <span>Press Rate</span>
+            <span class="text-teal-400 font-bold" id="hudPressPct">--%</span>
+          </div>
+          <div class="text-sm font-black text-white mt-1 flex items-baseline gap-1">
+            <span id="hudPressWon">0</span><span class="text-xs text-slate-400">/</span><span id="hudPressTotal" class="text-xs text-slate-400">0</span>
+            <span class="text-[9px] text-emerald-400 font-semibold ml-1">Won</span>
+          </div>
+          <div class="w-full bg-surface h-1.5 rounded-full overflow-hidden mt-1">
+            <div id="hudPressBar" class="bg-teal-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Card 3: Territory Flow (Defending vs Attacking GK) -->
+        <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
+            <span>Territory Flow</span>
+            <span class="text-teal-400 font-bold" id="hudTerritoryTilt">50/50</span>
+          </div>
+          <div class="text-xs font-bold text-white mt-1">
+            <span class="text-emerald-300" id="hudGkDef">0</span> Def GK <span class="text-slate-500 font-normal">(High Press)</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5">
+            <span class="text-sky-300" id="hudGkAtt">0</span> Att GK (Build-Out)
+          </div>
+        </div>
+
+        <!-- Card 4: Disciplinary (Fouls & Cards) -->
+        <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
+            <span>Discipline</span>
+            <span class="text-amber-400 font-bold" id="hudCardsCount">0 🟨</span>
+          </div>
+          <div class="text-xs font-bold text-white mt-1 flex items-center gap-1.5">
+            <span>Ajax: <span id="hudAjaxFouls" class="text-amber-300 font-mono">0</span>F</span>
+            <span id="hudAjaxCardsBadge" class="hidden items-center gap-0.5"></span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5">Opp: <span id="hudOppFouls" class="font-mono text-slate-300">0</span>F</div>
+        </div>
+
+        <!-- Card 5: Halftime AI Tactical Report Trigger -->
+        <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-teal-900/40 via-pitch/90 to-amber-900/30 p-2 rounded-xl border border-teal-500/40 flex flex-col justify-between shadow-lg">
+          <div class="flex items-center justify-between text-[10px] text-teal-300 font-bold uppercase mono">
+            <span>AI Tactical Coach</span>
+            <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+          </div>
+          <button onclick="openHalftimeAIModal()" class="w-full mt-1 py-1.5 px-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-pitch font-black text-xs flex items-center justify-center gap-1 transition active:scale-95 shadow">
+            <span>⚡ AI Halftime Report</span>
+          </button>
+          <div class="text-[9px] text-center text-slate-400 mt-0.5">Game flow &amp; adjustments</div>
+        </div>
+      </div>
+
+      <!-- Quick Phase & Possession Bar (Build-out, High Press, Press Duels, Crosses) -->
+      <div class="flex items-center justify-between bg-card p-2 rounded-xl border border-border/80 text-xs flex-wrap gap-1.5">
+        <span class="text-[10px] mono uppercase text-teal-400 font-bold shrink-0">Phase &amp; Press:</span>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button onclick="logPhaseEvent('goal_kick_att')" class="px-2.5 py-1 rounded-lg bg-surface hover:bg-slate-700 text-slate-200 border border-border flex items-center gap-1 active:scale-95" title="Ajax Build-Out from deep (Our Goal Kick)">
+            <span>🧱 Our Goal Kick (Build)</span>
+          </button>
+          <button onclick="logPhaseEvent('goal_kick_def')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1 active:scale-95" title="Opponent Goal Kick / High Press Territory">
+            <span>🎯 Opp Goal Kick (Press)</span>
+          </button>
+          <button onclick="logPhaseEvent('press_won')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-bold flex items-center gap-1 active:scale-95">
+            <span>⚡ Press Won</span>
+          </button>
+          <button onclick="logPhaseEvent('press_lost')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 font-semibold flex items-center gap-1 active:scale-95">
+            <span>💨 Press Lost</span>
+          </button>
+          <button onclick="openCrossModal()" class="px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/40 font-semibold flex items-center gap-1 active:scale-95">
+            <span>👟 Cross Attempt</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </header>
 
   <!-- MAIN TWO-COLUMN WORKSPACE: TACTICAL PITCH BOARD & LIVE BENCH -->
@@ -286,8 +381,8 @@
           <button id="deselectBtn" onclick="deselectPlayer()" class="hidden text-slate-400 hover:text-white text-sm font-bold w-7 h-7 rounded-full bg-pitch items-center justify-center border border-border">✕</button>
         </div>
 
-        <!-- 1-Tap Stat Event Buttons (12 Buttons · Auto-deselects player on tap) -->
-        <div class="grid grid-cols-3 gap-1.5 text-xs font-semibold">
+        <!-- 1-Tap Stat Event Buttons (16 Quick Actions · Auto-deselects player on tap) -->
+        <div class="grid grid-cols-4 sm:grid-cols-4 gap-1.5 text-[11px] font-semibold">
           <button onclick="logSelectedEvent('goal')" class="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">⚽</span>
             <span>Goal</span>
@@ -300,6 +395,19 @@
             <span class="text-base">🔑</span>
             <span>Key Pass</span>
           </button>
+          <button onclick="logSelectedEvent('sot')" class="p-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">🎯</span>
+            <span>Shot On</span>
+          </button>
+
+          <button onclick="logSelectedEvent('soff')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">🥅</span>
+            <span>Shot Off</span>
+          </button>
+          <button onclick="openShotOut18Modal()" class="p-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 flex flex-col items-center gap-0.5 transition active:scale-95" title="Shot taken from outside the 18-yard penalty area">
+            <span class="text-base">🚀</span>
+            <span>Out 18</span>
+          </button>
           <button onclick="logSelectedEvent('duelWon')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">💪</span>
             <span>Duel Won</span>
@@ -308,29 +416,35 @@
             <span class="text-base">❌</span>
             <span>Duel Lost</span>
           </button>
+
           <button onclick="promptTurnoverZone()" class="p-2 rounded-xl bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 border border-rose-500/50 flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">⚠️</span>
             <span>Turnover</span>
           </button>
-          <button onclick="logSelectedEvent('sot')" class="p-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
-            <span class="text-base">🎯</span>
-            <span>Shot On</span>
+          <button onclick="logSelectedEvent('foul')" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">🛑</span>
+            <span>Foul</span>
           </button>
-          <button onclick="logSelectedEvent('soff')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
-            <span class="text-base">🥅</span>
-            <span>Shot Off</span>
+          <button onclick="logSelectedEvent('yellow')" class="p-2 rounded-xl bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">🟨</span>
+            <span>Yellow</span>
           </button>
           <button onclick="logSelectedEvent('save')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">🧤</span>
-            <span>Save (GK)</span>
+            <span>Save GK</span>
           </button>
-          <button onclick="logSelectedEvent('cross')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
+
+          <button onclick="logSelectedEvent('pressWon')" class="p-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">⚡</span>
+            <span>Press Won</span>
+          </button>
+          <button onclick="logSelectedEvent('pressLost')" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+            <span class="text-base">💨</span>
+            <span>Press Lost</span>
+          </button>
+          <button onclick="openCrossModal()" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">👟</span>
             <span>Cross</span>
-          </button>
-          <button onclick="logSelectedEvent('corner')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
-            <span class="text-base">🚩</span>
-            <span>Corner</span>
           </button>
           <button onclick="flagSidelineBookmark()" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
             <span class="text-base">📌</span>
@@ -534,6 +648,229 @@
     </div>
   </div>
 
+  <!-- ======================================================== -->
+  <!-- MODAL: SHOT OUTSIDE 18 ACCURACY SELECTOR -->
+  <!-- ======================================================== -->
+  <div id="shotOut18Modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative space-y-3 text-center">
+      <div class="mono text-[10px] uppercase text-indigo-400 font-bold">Shot Outside the 18 Box</div>
+      <h3 class="display text-xl text-white" id="shotOut18PlayerName">Log Outside 18 Shot</h3>
+      <p class="text-xs text-slate-400">Did the long-range strike hit the target?</p>
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <button onclick="commitShotOut18(true)" class="p-3.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/50 flex flex-col items-center gap-1 active:scale-95">
+          <span class="text-2xl">🎯</span>
+          <span class="font-bold text-xs">On Target</span>
+          <span class="text-[9px] text-sky-400">Forces GK save</span>
+        </button>
+        <button onclick="commitShotOut18(false)" class="p-3.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border border-border flex flex-col items-center gap-1 active:scale-95">
+          <span class="text-2xl">🥅</span>
+          <span class="font-bold text-xs">Off Target</span>
+          <span class="text-[9px] text-slate-400">Wide or high</span>
+        </button>
+      </div>
+      <button onclick="closeModal('shotOut18Modal')" class="mt-2 text-xs text-slate-400 hover:text-white">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CROSS ATTEMPT SELECTOR -->
+  <!-- ======================================================== -->
+  <div id="crossModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative space-y-3">
+      <div class="flex items-center justify-between border-b border-border pb-2">
+        <div>
+          <div class="mono text-[10px] uppercase text-purple-400 font-bold">Phase Action</div>
+          <h3 class="display text-xl text-white">Log Cross Attempt</h3>
+        </div>
+        <button onclick="closeModal('crossModal')" class="text-slate-400 hover:text-white text-sm font-bold w-6 h-6 rounded-full bg-pitch flex items-center justify-center">✕</button>
+      </div>
+
+      <!-- Step 1: Flank Side -->
+      <div class="space-y-1">
+        <label class="mono text-[10px] text-slate-400 uppercase font-bold">Flank / Wing Channel:</label>
+        <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+          <button type="button" id="crossSideLeft" onclick="setCrossSide('left')" class="p-2.5 rounded-xl border border-teal-500/50 bg-teal-500/20 text-teal-300 flex items-center justify-center gap-1.5">
+            <span>👈 Left Flank (LW/LB)</span>
+          </button>
+          <button type="button" id="crossSideRight" onclick="setCrossSide('right')" class="p-2.5 rounded-xl border border-border bg-pitch text-slate-300 hover:border-slate-500 flex items-center justify-center gap-1.5">
+            <span>👉 Right Flank (RW/RB)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Outcome -->
+      <div class="space-y-1">
+        <label class="mono text-[10px] text-slate-400 uppercase font-bold">Cross Delivery Outcome:</label>
+        <div class="grid grid-cols-3 gap-1.5 text-xs font-semibold">
+          <button type="button" onclick="commitCross('shot')" class="p-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-0.5 active:scale-95">
+            <span class="text-lg">🎯</span>
+            <span>Shot / Goal</span>
+          </button>
+          <button type="button" onclick="commitCross('cleared')" class="p-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 active:scale-95">
+            <span class="text-lg">🛡️</span>
+            <span>Cleared</span>
+          </button>
+          <button type="button" onclick="commitCross('out_of_play')" class="p-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 active:scale-95">
+            <span class="text-lg">💨</span>
+            <span>Over / Out</span>
+          </button>
+        </div>
+      </div>
+      <button onclick="closeModal('crossModal')" class="w-full py-1 text-xs text-slate-400 hover:text-white text-center">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: HALFTIME AI TACTICAL REPORT (GEMINI ENGINE + FALLBACK) -->
+  <!-- ======================================================== -->
+  <div id="halftimeAiModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-surface border border-teal-500/40 rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl relative space-y-4 max-h-[92vh] overflow-y-auto">
+      <button onclick="closeModal('halftimeAiModal')" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between gap-3 border-b border-border/80 pb-3 pr-8">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="mono text-[10px] uppercase text-teal-400 font-black tracking-wider">HALFTIME AI ENGINE · GEMINI 2.5 FLASH</span>
+            <span id="aiSentimentBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/50">DOMINANT</span>
+          </div>
+          <h2 class="display text-2xl text-white mt-0.5">Tactical Halftime Assessment</h2>
+          <p class="text-xs text-slate-400">Telemetry-driven field tilt, pressing efficiency &amp; actionable player adjustments.</p>
+        </div>
+      </div>
+
+      <!-- Telemetry Overview Strips -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+        <div class="bg-pitch/80 p-2.5 rounded-xl border border-border/80">
+          <div class="text-[9px] mono uppercase text-slate-400">Total Shots</div>
+          <div class="text-base font-black text-white mt-0.5" id="aiMetricShots">0 - 0</div>
+          <div class="text-[9px] text-teal-300" id="aiMetricSot">0 SOT · 0 Out 18</div>
+        </div>
+        <div class="bg-pitch/80 p-2.5 rounded-xl border border-border/80">
+          <div class="text-[9px] mono uppercase text-slate-400">Press Efficiency</div>
+          <div class="text-base font-black text-white mt-0.5" id="aiMetricPress">--%</div>
+          <div class="text-[9px] text-emerald-300" id="aiMetricPressWon">0 Won / 0 Total</div>
+        </div>
+        <div class="bg-pitch/80 p-2.5 rounded-xl border border-border/80">
+          <div class="text-[9px] mono uppercase text-slate-400">Territory Tilt</div>
+          <div class="text-base font-black text-white mt-0.5" id="aiMetricTerritory">50% Opp</div>
+          <div class="text-[9px] text-sky-300" id="aiMetricGks">0 Def GK : 0 Att GK</div>
+        </div>
+        <div class="bg-pitch/80 p-2.5 rounded-xl border border-border/80">
+          <div class="text-[9px] mono uppercase text-slate-400">Discipline</div>
+          <div class="text-base font-black text-amber-300 mt-0.5" id="aiMetricFouls">0 Fouls</div>
+          <div class="text-[9px] text-slate-400" id="aiMetricCards">0 Yellows</div>
+        </div>
+      </div>
+
+      <!-- AI Content Loading State -->
+      <div id="aiLoadingSpinner" class="hidden p-6 text-center space-y-2">
+        <div class="w-8 h-8 mx-auto border-2 border-teal-400 border-t-transparent rounded-full animate-spin"></div>
+        <div class="text-xs text-teal-300 font-bold">Synthesizing 1st-Half Telemetry with Gemini AI...</div>
+      </div>
+
+      <!-- AI Analysis Result Card -->
+      <div id="aiReportContent" class="space-y-3 text-xs">
+        <!-- 1. Game Flow Summary -->
+        <div class="p-3 rounded-xl bg-pitch/90 border border-border/80 space-y-1">
+          <div class="mono text-[10px] uppercase text-teal-400 font-bold flex items-center gap-1.5">
+            <span>📋 Game Flow &amp; Territorial Overview</span>
+          </div>
+          <p id="aiGameFlowText" class="text-slate-200 leading-relaxed font-medium">
+            Generating tactical analysis...
+          </p>
+        </div>
+
+        <!-- 2. Tactical Insights -->
+        <div class="p-3 rounded-xl bg-pitch/90 border border-border/80 space-y-1.5">
+          <div class="mono text-[10px] uppercase text-sky-400 font-bold flex items-center gap-1.5">
+            <span>💡 Tactical Insights &amp; Phase Patterns</span>
+          </div>
+          <ul id="aiTacticalInsightsList" class="space-y-1 text-slate-300 list-disc list-inside"></ul>
+        </div>
+
+        <!-- 3. Risk Alerts & Disciplinary Management -->
+        <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1.5">
+          <div class="mono text-[10px] uppercase text-amber-300 font-bold flex items-center gap-1.5">
+            <span>⚠️ Risk Alerts &amp; Yellow Card Management</span>
+          </div>
+          <ul id="aiRiskAlertsList" class="space-y-1 text-amber-200/90 list-disc list-inside"></ul>
+        </div>
+
+        <!-- 4. Recommended 2nd-Half Adjustments -->
+        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1.5">
+          <div class="mono text-[10px] uppercase text-emerald-300 font-bold flex items-center gap-1.5">
+            <span>🎯 Actionable Adjustments for 2nd Half Talk</span>
+          </div>
+          <ul id="aiAdjustmentsList" class="space-y-1 text-emerald-200/90 list-disc list-inside"></ul>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-border/80 flex-wrap">
+        <button onclick="copyHalftimeTalk()" class="px-3.5 py-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border border-border font-bold text-xs flex items-center gap-1.5 active:scale-95">
+          <span>📋 Copy Talk Notes</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="generateHalftimeReport(true)" class="px-3 py-2 rounded-xl bg-pitch hover:bg-surface text-teal-300 border border-teal-500/40 text-xs font-semibold active:scale-95">
+            <span>🔄 Re-Analyze</span>
+          </button>
+          <button onclick="closeModal('halftimeAiModal')" class="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs active:scale-95 shadow">
+            <span>Close &amp; Continue Match</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: COMMIT CONFIRMATION RECEIPT -->
+  <!-- ======================================================== -->
+  <div id="commitConfirmModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-surface border border-emerald-500/50 rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4 text-center">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/50 flex items-center justify-center text-3xl shadow-lg">
+        ⚡
+      </div>
+      <div>
+        <div class="mono text-[10px] uppercase text-emerald-400 font-bold tracking-wider">Match Committed Successfully</div>
+        <h3 class="display text-2xl text-white mt-1" id="commitConfirmTitle">Match vs. Opponent Saved</h3>
+        <p class="text-xs text-slate-400 mt-1" id="commitConfirmSubtitle">Stats, cumulative minutes, and film moments committed to Match Hub and Google Sheets.</p>
+      </div>
+
+      <div class="bg-pitch/90 p-3.5 rounded-xl border border-border/80 text-left text-xs space-y-1.5">
+        <div class="flex justify-between text-slate-300">
+          <span>Final Score:</span>
+          <span class="font-bold font-mono text-white" id="commitScoreText">0 - 0</span>
+        </div>
+        <div class="flex justify-between text-slate-300">
+          <span>Match Duration:</span>
+          <span class="font-bold font-mono text-white" id="commitMinsText">80 mins</span>
+        </div>
+        <div class="flex justify-between text-slate-300">
+          <span>Players Updated:</span>
+          <span class="font-bold text-teal-300" id="commitPlayersCount">16 players</span>
+        </div>
+        <div class="flex justify-between text-slate-300">
+          <span>Film Moments Logged:</span>
+          <span class="font-bold text-amber-300" id="commitMomentsCount">0 moments</span>
+        </div>
+        <div class="flex justify-between text-slate-300 border-t border-border/60 pt-1.5">
+          <span>Google Sheet (Player_IDP):</span>
+          <span class="font-bold text-emerald-400" id="commitSheetStatus">Synced ☁️</span>
+        </div>
+      </div>
+
+      <div class="pt-1 flex items-center justify-center gap-2">
+        <button onclick="closeModal('commitConfirmModal')" class="flex-1 py-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border text-xs font-semibold">
+          Dismiss
+        </button>
+        <button onclick="goToMatchHub()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg active:scale-95">
+          View in Match Hub ↗
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none duration-300 z-50"></div>
 
@@ -683,7 +1020,26 @@
     let setupSelectedSlot = null;
     let setupFormationKey = '4-3-3';
 
-    let oppStats = { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 };
+    let phaseStats = {
+      pressWon: 0,
+      pressLost: 0,
+      goalKicksAttacking: 0,
+      goalKicksDefending: 0,
+      crossesLeft: 0,
+      crossesRight: 0
+    };
+
+    let oppStats = {
+      goals: 0,
+      shots: 0,
+      sot: 0,
+      soff: 0,
+      shotsOutside18: 0,
+      subs: 0,
+      corners: 0,
+      fouls: 0,
+      yellowCards: 0
+    };
     const API_URL = "https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec";
 
     /* =========================================================
@@ -731,6 +1087,7 @@
           shots: 0,
           sot: 0,
           soff: 0,
+          shotsOutside18: 0,
           corners: 0,
           crosses: 0,
           turnovers: 0,
@@ -738,6 +1095,11 @@
           toM: 0,
           toA: 0,
           fouls: 0,
+          yellowCards: 0,
+          hasYellow: false,
+          hasRed: false,
+          pressWon: 0,
+          pressLost: 0,
           saves: 0,
           keyPasses: 0,
           duelsWon: 0,
@@ -762,7 +1124,8 @@
       });
 
       matchEvents = [];
-      oppStats = { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 };
+      oppStats = { goals: 0, shots: 0, sot: 0, soff: 0, shotsOutside18: 0, subs: 0, corners: 0, fouls: 0, yellowCards: 0 };
+      phaseStats = { pressWon: 0, pressLost: 0, goalKicksAttacking: 0, goalKicksDefending: 0, crossesLeft: 0, crossesRight: 0 };
       matchSeconds = 0;
       currentPeriod = 1;
       timerRunning = false;
@@ -861,7 +1224,8 @@
           if (timerRunning) toggleTimer();
           updateClockDisplay();
           logMatchSystemEvent('Half Time Reached');
-          showToast('1st Half completed. 2nd Half ready.');
+          showToast('1st Half completed. Opening Halftime AI...');
+          openHalftimeAIModal();
         }
       } else if (currentPeriod === 2) {
         if (confirm('Full-Time whistle! Complete match?')) {
@@ -888,18 +1252,31 @@
         const isSelected = selectedSlot === slot;
         const shortName = p ? p.name.split(' ')[0] : 'Open';
         const mins = p ? p.mins : 0;
+        const hasGoal = p && p.goals > 0;
+        const hasYellow = p && p.yellowCards > 0;
+        const hasRed = p && (p.hasRed || p.yellowCards >= 2);
+        const hasFouls = p && p.fouls > 0;
 
         return `
           <div class="player-node ${isSelected ? 'selected-node' : ''}" style="left: ${pos.x}%; top: ${pos.y}%;" onclick="onTapPitchNode('${slot}')">
             <div class="flex flex-col items-center">
               <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 ${isSelected ? 'border-brand-400 bg-teal-600 scale-110' : 'border-white/80 bg-pitch/90'} text-white flex items-center justify-center font-mono font-black text-xs sm:text-sm shadow-xl relative">
                 ${jersey ? '#' + jersey : '?'}
-                ${p && p.goals > 0 ? `<span class="absolute -top-1 -right-1 bg-emerald-500 text-white rounded-full text-[8px] w-4 h-4 flex items-center justify-center font-bold">⚽${p.goals > 1 ? p.goals : ''}</span>` : ''}
+                ${hasGoal ? `<span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white rounded-full text-[8px] px-1 py-0.2 flex items-center justify-center font-bold shadow">⚽${p.goals > 1 ? p.goals : ''}</span>` : ''}
+                ${hasYellow ? `
+                  <span class="absolute -top-1.5 -left-1.5 flex items-center gap-0.5">
+                    <span class="inline-block w-2 h-3 bg-[#FFD700] border border-[#B8860B] rounded-[1px] shadow-sm" title="Yellow Card"></span>
+                    ${hasRed ? '<span class="inline-block w-2 h-3 bg-[#EF4444] border border-[#B91C1C] rounded-[1px] shadow-sm" title="Red Card / Sent Off"></span>' : ''}
+                  </span>
+                ` : ''}
               </div>
               <div class="mt-0.5 px-1.5 py-0.2 rounded bg-pitch/90 border border-white/20 text-center leading-none">
                 <span class="text-[9px] font-bold text-teal-300 block">${slot}</span>
                 <span class="text-[10px] font-semibold text-white block truncate max-w-[65px]">${shortName}</span>
-                <span class="text-[8px] font-mono text-amber-300">${mins}'</span>
+                <div class="flex items-center justify-center gap-1">
+                  <span class="text-[8px] font-mono text-amber-300">${mins}'</span>
+                  ${hasFouls ? `<span class="text-[8px] font-mono text-rose-300 font-bold" title="${p.fouls} fouls">F:${p.fouls}</span>` : ''}
+                </div>
               </div>
             </div>
           </div>
@@ -1044,7 +1421,11 @@
         return `
           <button type="button" onclick="onTapBenchPlayer(${p.jersey})"
             class="p-2 rounded-xl bg-pitch/80 hover:bg-slate-800 border border-border/80 text-left transition flex items-center space-x-2 shrink-0 active:scale-95">
-            <span class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center font-mono font-bold text-xs text-teal-300 border border-border/80">#${p.jersey}</span>
+            <span class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center font-mono font-bold text-xs text-teal-300 border border-border/80 relative">
+              #${p.jersey}
+              ${stat.goals > 0 ? `<span class="absolute -top-1 -right-1 text-[8px]">⚽</span>` : ''}
+              ${stat.yellowCards > 0 ? `<span class="absolute -top-1 -left-1 inline-block w-1.5 h-2.5 bg-[#FFD700] border border-[#B8860B] rounded-[1px]"></span>` : ''}
+            </span>
             <div class="min-w-0 pr-1">
               <span class="text-xs font-bold text-white block truncate max-w-[85px]">${p.name.split(' ')[0]}</span>
               <span class="text-[9px] font-mono text-slate-400 block">${stat.mins}' in / ${stat.benchMins}' bench</span>
@@ -1185,10 +1566,38 @@
         p.saves++;
         logMatchEvent({ time: curMins, type: 'save', desc: `SAVE: #${j} ${p.name.split(' ')[0]} (GK) at ${curMins}'`, jersey: j, zone: 'D3' });
         showToast(`🧤 Save logged for goalkeeper!`);
+      } else if (eventType === 'foul') {
+        p.fouls = (p.fouls || 0) + 1;
+        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'foul', desc: `🛑 FOUL COMMITTED: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        showToast(`🛑 Foul logged for #${j}`);
+      } else if (eventType === 'yellow') {
+        p.yellowCards = (p.yellowCards || 0) + 1;
+        p.hasYellow = true;
+        if (p.yellowCards >= 2) {
+          p.hasRed = true;
+          logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'redCard', desc: `🟥 2ND YELLOW / RED CARD: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+          alert(`🟥 RED CARD! 2nd Yellow Card for #${j} ${p.name}! Player is sent off.`);
+          showToast(`🟥 Red card logged for #${j}`);
+        } else {
+          logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'yellowCard', desc: `🟨 YELLOW CARD: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+          showToast(`🟨 Yellow card logged for #${j}`);
+        }
+      } else if (eventType === 'pressWon') {
+        p.pressWon = (p.pressWon || 0) + 1;
+        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'pressWon', desc: `⚡ PRESS WON: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`⚡ Press won logged for #${j}`);
+      } else if (eventType === 'pressLost') {
+        p.pressLost = (p.pressLost || 0) + 1;
+        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'pressLost', desc: `💨 PRESS LOST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        showToast(`💨 Press lost logged for #${j}`);
       }
 
       // Auto-deselect player immediately after completing the action
       deselectPlayer();
+      renderPitch();
+      renderBench();
+      updateScoreboard();
+      updateSummaryHud();
       saveState();
     }
 
@@ -1248,11 +1657,126 @@
       showToast(`📌 Film Bookmark saved at ${timeStr}${who}!`);
     }
 
+    /* Shot Outside 18 & Cross Attempt Handlers */
+    function openShotOut18Modal() {
+      if (!selectedPlayerJersey || !playerStats[selectedPlayerJersey]) {
+        showToast('Please select a player on the pitch first.');
+        return;
+      }
+      const p = playerStats[selectedPlayerJersey];
+      document.getElementById('shotOut18PlayerName').textContent = `#${selectedPlayerJersey} ${p.name}`;
+      document.getElementById('shotOut18Modal').classList.replace('hidden', 'flex');
+    }
+
+    function commitShotOut18(onTarget) {
+      closeModal('shotOut18Modal');
+      if (!selectedPlayerJersey || !playerStats[selectedPlayerJersey]) return;
+      const j = selectedPlayerJersey;
+      const p = playerStats[j];
+      const curMins = Math.floor(matchSeconds / 60);
+
+      p.shots++;
+      p.shotsOutside18 = (p.shotsOutside18 || 0) + 1;
+      if (onTarget) p.sot++;
+      else p.soff++;
+
+      logMatchEvent({
+        time: curMins,
+        half: currentPeriod <= 1 ? 'H1' : 'H2',
+        type: 'shot_outside_18',
+        onTarget,
+        jersey: j,
+        zone: 'A3',
+        desc: `🚀 SHOT OUTSIDE 18 (${onTarget ? 'On Target' : 'Off Target'}): #${j} ${p.name.split(' ')[0]} at ${curMins}'`
+      });
+
+      deselectPlayer();
+      renderPitch();
+      updateScoreboard();
+      updateSummaryHud();
+      saveState();
+      showToast(`🚀 Shot outside 18 (${onTarget ? 'Target' : 'Off'}) logged for #${j}`);
+    }
+
+    let currentCrossSide = 'left';
+    function openCrossModal() {
+      document.getElementById('crossModal').classList.replace('hidden', 'flex');
+    }
+
+    function setCrossSide(side) {
+      currentCrossSide = side;
+      if (side === 'left') {
+        document.getElementById('crossSideLeft').className = 'p-2.5 rounded-xl border border-teal-500/50 bg-teal-500/20 text-teal-300 flex items-center justify-center gap-1.5';
+        document.getElementById('crossSideRight').className = 'p-2.5 rounded-xl border border-border bg-pitch text-slate-300 hover:border-slate-500 flex items-center justify-center gap-1.5';
+      } else {
+        document.getElementById('crossSideLeft').className = 'p-2.5 rounded-xl border border-border bg-pitch text-slate-300 hover:border-slate-500 flex items-center justify-center gap-1.5';
+        document.getElementById('crossSideRight').className = 'p-2.5 rounded-xl border border-teal-500/50 bg-teal-500/20 text-teal-300 flex items-center justify-center gap-1.5';
+      }
+    }
+
+    function commitCross(outcome) {
+      closeModal('crossModal');
+      const curMins = Math.floor(matchSeconds / 60);
+      const j = selectedPlayerJersey;
+      const p = j ? playerStats[j] : null;
+
+      if (currentCrossSide === 'left') phaseStats.crossesLeft = (phaseStats.crossesLeft || 0) + 1;
+      else phaseStats.crossesRight = (phaseStats.crossesRight || 0) + 1;
+
+      if (p) p.crosses = (p.crosses || 0) + 1;
+
+      logMatchEvent({
+        time: curMins,
+        half: currentPeriod <= 1 ? 'H1' : 'H2',
+        type: 'cross_attempt',
+        side: currentCrossSide,
+        outcome,
+        jersey: j || '',
+        zone: 'A3',
+        desc: `👟 CROSS (${currentCrossSide.toUpperCase()} -> ${outcome.toUpperCase()}): ${p ? '#' + j + ' ' + p.name.split(' ')[0] : 'Team'} at ${curMins}'`
+      });
+
+      if (selectedPlayerJersey) deselectPlayer();
+      renderPitch();
+      updateScoreboard();
+      updateSummaryHud();
+      saveState();
+      showToast(`👟 Cross (${currentCrossSide} -> ${outcome}) logged`);
+    }
+
+    /* Phase & Set-Piece Events */
+    function logPhaseEvent(type) {
+      const curMins = Math.floor(matchSeconds / 60);
+      const half = currentPeriod <= 1 ? 'H1' : 'H2';
+
+      if (type === 'goal_kick_att') {
+        phaseStats.goalKicksAttacking = (phaseStats.goalKicksAttacking || 0) + 1;
+        logMatchEvent({ time: curMins, half, type: 'goal_kick_att', zone: 'D3', desc: `🧱 AJAX BUILD-OUT (Goal Kick #${phaseStats.goalKicksAttacking}) at ${curMins}'` });
+        showToast(`🧱 Our Goal Kick logged (Total: ${phaseStats.goalKicksAttacking})`);
+      } else if (type === 'goal_kick_def') {
+        phaseStats.goalKicksDefending = (phaseStats.goalKicksDefending || 0) + 1;
+        logMatchEvent({ time: curMins, half, type: 'goal_kick_def', zone: 'A3', desc: `🎯 OPPONENT GOAL KICK (High Press #${phaseStats.goalKicksDefending}) at ${curMins}'` });
+        showToast(`🎯 Opponent Goal Kick logged (Total: ${phaseStats.goalKicksDefending})`);
+      } else if (type === 'press_won') {
+        phaseStats.pressWon = (phaseStats.pressWon || 0) + 1;
+        logMatchEvent({ time: curMins, half, type: 'pressWon', zone: 'M3', desc: `⚡ TEAM PRESS WON at ${curMins}'` });
+        showToast(`⚡ Team Press Won logged`);
+      } else if (type === 'press_lost') {
+        phaseStats.pressLost = (phaseStats.pressLost || 0) + 1;
+        logMatchEvent({ time: curMins, half, type: 'pressLost', zone: 'M3', desc: `💨 TEAM PRESS BREAKDOWN at ${curMins}'` });
+        showToast(`💨 Press Lost logged`);
+      }
+
+      updateSummaryHud();
+      saveState();
+    }
+
     /* Opponent Events */
     function logOpponentGoal() {
       oppStats.goals++;
       oppStats.shots++;
       updateScoreboard();
+      updateSummaryHud();
       logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppGoal', desc: `OPPONENT GOAL conceded (${Math.floor(matchSeconds / 60)}')`, zone: 'D3' });
       showToast('Opponent goal logged.');
     }
@@ -1262,6 +1786,7 @@
       if (el) el.textContent = oppStats.shots;
       logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppShot', desc: `OPPONENT SHOT against (${Math.floor(matchSeconds / 60)}')`, zone: 'D3' });
       showToast(`Opponent shot logged (Total: ${oppStats.shots})`);
+      updateSummaryHud();
       saveState();
     }
     function logOpponentSub() {
@@ -1281,6 +1806,8 @@
       oppStats.fouls++;
       document.getElementById('oppFoulsCount').textContent = oppStats.fouls;
       showToast('Opponent foul logged.');
+      updateSummaryHud();
+      saveState();
     }
 
     function logMatchEvent(ev) {
@@ -1340,6 +1867,76 @@
       if (document.getElementById('oppSubsCount')) document.getElementById('oppSubsCount').textContent = oppStats.subs || 0;
       if (document.getElementById('oppCornersCount')) document.getElementById('oppCornersCount').textContent = oppStats.corners || 0;
       if (document.getElementById('oppFoulsCount')) document.getElementById('oppFoulsCount').textContent = oppStats.fouls || 0;
+      updateSummaryHud();
+    }
+
+    function updateSummaryHud() {
+      let ajaxShots = 0, ajaxSot = 0, ajaxOut18 = 0;
+      let ajaxFouls = 0, ajaxYellows = 0, ajaxReds = 0;
+      let playerPressWon = 0, playerPressLost = 0;
+      const cardBadges = [];
+
+      Object.values(playerStats).forEach(p => {
+        ajaxShots += (p.shots || 0);
+        ajaxSot += (p.sot || 0);
+        ajaxOut18 += (p.shotsOutside18 || 0);
+        ajaxFouls += (p.fouls || 0);
+        ajaxYellows += (p.yellowCards || 0);
+        if (p.hasRed || p.yellowCards >= 2) ajaxReds++;
+        if (p.yellowCards > 0) {
+          cardBadges.push(`<span class="inline-block w-2 h-3 bg-[#FFD700] border border-[#B8860B] rounded-[1px]" title="#${p.jersey} Yellow"></span>`);
+        }
+        playerPressWon += (p.pressWon || 0);
+        playerPressLost += (p.pressLost || 0);
+      });
+
+      const oppShots = oppStats.shots || 0;
+      const oppFouls = oppStats.fouls || 0;
+
+      const elShotsSum = document.getElementById('hudShotsSummary');
+      if (elShotsSum) elShotsSum.textContent = `${ajaxShots} vs ${oppShots}`;
+      if (document.getElementById('hudAjaxShots')) document.getElementById('hudAjaxShots').textContent = ajaxShots;
+      if (document.getElementById('hudAjaxSot')) document.getElementById('hudAjaxSot').textContent = ajaxSot;
+      if (document.getElementById('hudAjaxOut18')) document.getElementById('hudAjaxOut18').textContent = ajaxOut18;
+      if (document.getElementById('hudOppShots')) document.getElementById('hudOppShots').textContent = oppShots;
+
+      // Press Rate
+      const totalWon = (phaseStats.pressWon || 0) + playerPressWon;
+      const totalLost = (phaseStats.pressLost || 0) + playerPressLost;
+      const totalPress = totalWon + totalLost;
+      const pressPct = totalPress > 0 ? Math.round((totalWon / totalPress) * 100) : 0;
+
+      if (document.getElementById('hudPressPct')) document.getElementById('hudPressPct').textContent = totalPress > 0 ? `${pressPct}%` : '--%';
+      if (document.getElementById('hudPressWon')) document.getElementById('hudPressWon').textContent = totalWon;
+      if (document.getElementById('hudPressTotal')) document.getElementById('hudPressTotal').textContent = totalPress;
+      if (document.getElementById('hudPressBar')) document.getElementById('hudPressBar').style.width = `${pressPct}%`;
+
+      // Territory Flow
+      const defGk = phaseStats.goalKicksDefending || 0;
+      const attGk = phaseStats.goalKicksAttacking || 0;
+      const totalGk = defGk + attGk;
+      const oppHalfPct = totalGk > 0 ? Math.round((defGk / totalGk) * 100) : 50;
+
+      if (document.getElementById('hudTerritoryTilt')) document.getElementById('hudTerritoryTilt').textContent = `${oppHalfPct}% Opp`;
+      if (document.getElementById('hudGkDef')) document.getElementById('hudGkDef').textContent = defGk;
+      if (document.getElementById('hudGkAtt')) document.getElementById('hudGkAtt').textContent = attGk;
+
+      // Discipline
+      if (document.getElementById('hudCardsCount')) document.getElementById('hudCardsCount').textContent = `${ajaxYellows} 🟨${ajaxReds ? ' ' + ajaxReds + ' 🟥' : ''}`;
+      if (document.getElementById('hudAjaxFouls')) document.getElementById('hudAjaxFouls').textContent = ajaxFouls;
+      if (document.getElementById('hudOppFouls')) document.getElementById('hudOppFouls').textContent = oppFouls;
+
+      const cardBadgeContainer = document.getElementById('hudAjaxCardsBadge');
+      if (cardBadgeContainer) {
+        if (cardBadges.length > 0) {
+          cardBadgeContainer.innerHTML = cardBadges.join('');
+          cardBadgeContainer.classList.remove('hidden');
+          cardBadgeContainer.classList.add('flex');
+        } else {
+          cardBadgeContainer.classList.add('hidden');
+          cardBadgeContainer.classList.remove('flex');
+        }
+      }
     }
 
     /* =========================================================
@@ -1504,6 +2101,235 @@
     }
 
     /* =========================================================
+       HALFTIME AI ENGINE (GEMINI 2.5 FLASH + LOCAL RULE ENGINE)
+       ========================================================= */
+    let cachedHalftimeReport = null;
+
+    async function openHalftimeAIModal() {
+      document.getElementById('halftimeAiModal').classList.replace('hidden', 'flex');
+      await generateHalftimeReport(false);
+    }
+
+    async function generateHalftimeReport(forceRegen = false) {
+      if (cachedHalftimeReport && !forceRegen) {
+        renderHalftimeReport(cachedHalftimeReport);
+        return;
+      }
+
+      document.getElementById('aiLoadingSpinner').classList.remove('hidden');
+      document.getElementById('aiReportContent').classList.add('hidden');
+
+      // Compile 1st-Half telemetry
+      let ajaxGoals = 0, ajaxShots = 0, ajaxSot = 0, ajaxSoff = 0, ajaxOut18 = 0;
+      let ajaxFouls = 0, ajaxYellows = 0;
+      let playerPressWon = 0, playerPressLost = 0;
+      let cardedPlayers = [];
+
+      Object.values(playerStats).forEach(p => {
+        ajaxGoals += (p.goals || 0);
+        ajaxShots += (p.shots || 0);
+        ajaxSot += (p.sot || 0);
+        ajaxSoff += (p.soff || 0);
+        ajaxOut18 += (p.shotsOutside18 || 0);
+        ajaxFouls += (p.fouls || 0);
+        ajaxYellows += (p.yellowCards || 0);
+        if (p.yellowCards > 0) cardedPlayers.push(`#${p.jersey} ${p.name.split(' ')[0]}`);
+        playerPressWon += (p.pressWon || 0);
+        playerPressLost += (p.pressLost || 0);
+      });
+
+      const totalPressWon = (phaseStats.pressWon || 0) + playerPressWon;
+      const totalPressLost = (phaseStats.pressLost || 0) + playerPressLost;
+      const totalPress = totalPressWon + totalPressLost;
+      const pressEfficiency = totalPress > 0 ? Math.round((totalPressWon / totalPress) * 100) + '%' : '0%';
+
+      const defGk = phaseStats.goalKicksDefending || 0;
+      const attGk = phaseStats.goalKicksAttacking || 0;
+      const totalGk = defGk + attGk;
+      const territoryTilt = totalGk > 0 ? Math.round((defGk / totalGk) * 100) + '% in Opponent Half' : 'Balanced (50/50)';
+
+      const recentEventsSummary = matchEvents.slice(0, 8).map(e => `${e.time}': ${e.desc}`).join('; ');
+
+      const telemetry = {
+        opponent: opponentName,
+        ajaxScore: ajaxGoals,
+        oppScore: oppStats.goals || 0,
+        ajaxShots,
+        ajaxSot,
+        ajaxSoff,
+        shotsOutside18: ajaxOut18,
+        oppShots: oppStats.shots || 0,
+        pressWon: totalPressWon,
+        pressLost: totalPressLost,
+        pressEfficiency,
+        goalKicksDefending: defGk,
+        goalKicksAttacking: attGk,
+        territoryTilt,
+        crosses: (phaseStats.crossesLeft || 0) + (phaseStats.crossesRight || 0),
+        ajaxFouls,
+        ajaxYellows,
+        cardedPlayers: cardedPlayers.join(', ') || 'None',
+        oppFouls: oppStats.fouls || 0,
+        recentEventsSummary
+      };
+
+      // Update metric strips on modal
+      if (document.getElementById('aiMetricShots')) document.getElementById('aiMetricShots').textContent = `${ajaxShots} - ${oppStats.shots || 0}`;
+      if (document.getElementById('aiMetricSot')) document.getElementById('aiMetricSot').textContent = `${ajaxSot} SOT · ${ajaxOut18} Out 18`;
+      if (document.getElementById('aiMetricPress')) document.getElementById('aiMetricPress').textContent = pressEfficiency;
+      if (document.getElementById('aiMetricPressWon')) document.getElementById('aiMetricPressWon').textContent = `${totalPressWon} Won / ${totalPress} Total`;
+      if (document.getElementById('aiMetricTerritory')) document.getElementById('aiMetricTerritory').textContent = territoryTilt;
+      if (document.getElementById('aiMetricGks')) document.getElementById('aiMetricGks').textContent = `${defGk} Def GK : ${attGk} Att GK`;
+      if (document.getElementById('aiMetricFouls')) document.getElementById('aiMetricFouls').textContent = `${ajaxFouls} Ajax · ${oppStats.fouls || 0} Opp`;
+      if (document.getElementById('aiMetricCards')) document.getElementById('aiMetricCards').textContent = `${ajaxYellows} Yellows`;
+
+      let reportData = null;
+
+      // 1. Try Asynchronous Call to Netlify Halftime AI Function (Gemini 2.5 Flash)
+      try {
+        const resp = await fetch('/.netlify/functions/halftime-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ telemetry })
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res && res.report) reportData = res.report;
+        }
+      } catch (err) {
+        console.warn('Halftime AI function notice:', err);
+      }
+
+      // 2. Fallback to Local Tactical Rule Engine if offline or error
+      if (!reportData) {
+        reportData = runLocalHalftimeRuleEngine(telemetry);
+      }
+
+      cachedHalftimeReport = reportData;
+      renderHalftimeReport(reportData);
+    }
+
+    function runLocalHalftimeRuleEngine(t) {
+      let sentiment = 'Contested';
+      const goalDiff = t.ajaxScore - t.oppScore;
+      const shotDiff = t.ajaxShots - t.oppShots;
+      const pressRate = parseInt(t.pressEfficiency, 10) || 0;
+
+      if (goalDiff >= 2 || (shotDiff >= 4 && t.goalKicksDefending >= t.goalKicksAttacking)) {
+        sentiment = 'Dominant';
+      } else if (goalDiff <= -2 || (shotDiff <= -4 && pressRate < 40)) {
+        sentiment = 'Under Pressure';
+      }
+
+      const gameFlowSummary = `Ajax established a ${t.territoryTilt} field tilt against ${t.opponent}, registering ${t.ajaxShots} total shots with ${t.ajaxSot} on target. Counter-pressing registered at ${t.pressEfficiency} (${t.pressWon}/${t.pressWon + t.pressLost} duel attempts won).`;
+
+      const tacticalInsights = [];
+      if (t.goalKicksDefending > t.goalKicksAttacking) {
+        tacticalInsights.push(`Territorial dominance: Forced ${t.goalKicksDefending} opponent defending goal kicks, pinning ${t.opponent} into low-block build-out territory.`);
+      } else if (t.goalKicksAttacking > t.goalKicksDefending) {
+        tacticalInsights.push(`Build-out under pressure: Required ${t.goalKicksAttacking} defensive goal kicks; need quicker central pivot outlets to escape opponent high press.`);
+      } else {
+        tacticalInsights.push(`Balanced territorial tilt: Neutral exchange of territory in middle third with even set-piece volume.`);
+      }
+
+      if (t.shotsOutside18 > 0 && t.shotsOutside18 >= t.ajaxShots * 0.4) {
+        tacticalInsights.push(`Shot selection: ${t.shotsOutside18} shots taken outside 18 box indicates opponent low block density; work third-man combinations inside the box.`);
+      } else if (t.ajaxSot >= 3) {
+        tacticalInsights.push(`Effective penetration: Created high-quality chances inside the box with ${t.ajaxSot} shots testing the goalkeeper.`);
+      }
+
+      if (pressRate >= 60) {
+        tacticalInsights.push(`High press execution: ${t.pressEfficiency} press win rate successfully suffocated opponent forward progression.`);
+      } else if (t.pressLost >= 3) {
+        tacticalInsights.push(`Transition vulnerability: ${t.pressLost} counter-press breakdowns opened space behind the fullbacks.`);
+      }
+
+      const riskAlerts = [];
+      if (t.ajaxYellows > 0) {
+        riskAlerts.push(`Yellow card discipline: ${t.cardedPlayers} on yellow; instruct them to avoid diving into secondary challenges.`);
+      }
+      if (t.pressLost >= 2) {
+        riskAlerts.push(`Rest defense exposure: Maintain central midfield balance to prevent ${t.opponent} direct counter-attacks.`);
+      }
+      if (!riskAlerts.length) {
+        riskAlerts.push(`No critical disciplinary or rest defense risks detected in the 1st half.`);
+      }
+
+      const adjustments = [];
+      if (t.shotsOutside18 >= 2) {
+        adjustments.push(`Patient box penetration: When reaching the 18 box, look for cutbacks to trailing midfielders rather than contested long shots.`);
+      }
+      if (t.goalKicksDefending >= 2) {
+        adjustments.push(`Defending goal kicks: Lock down the opponent's short passing options and position the #6 and #8 to win second balls at the midfield stripe.`);
+      }
+      if (t.ajaxScore <= t.oppScore) {
+        adjustments.push(`Width & Overloads: Accelerate ball movement from side to side; isolate wide wingers in 1v1 situations.`);
+      } else {
+        adjustments.push(`Game Management: Control tempo with possession sequences in the middle third; make opponent chase.`);
+      }
+
+      return {
+        sentiment,
+        gameFlowSummary,
+        tacticalInsights,
+        riskAlerts,
+        recommendedHalfTimeAdjustments: adjustments
+      };
+    }
+
+    function renderHalftimeReport(report) {
+      document.getElementById('aiLoadingSpinner').classList.add('hidden');
+      document.getElementById('aiReportContent').classList.remove('hidden');
+
+      const badge = document.getElementById('aiSentimentBadge');
+      const sentiment = (report.sentiment || 'Contested').toUpperCase();
+      badge.textContent = sentiment;
+      if (sentiment === 'DOMINANT') {
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/50';
+      } else if (sentiment === 'UNDER PRESSURE') {
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/50';
+      } else {
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/50';
+      }
+
+      document.getElementById('aiGameFlowText').textContent = report.gameFlowSummary || 'No summary generated.';
+
+      const insightsList = document.getElementById('aiTacticalInsightsList');
+      insightsList.innerHTML = (report.tacticalInsights || []).map(item => `<li>${item}</li>`).join('');
+
+      const alertsList = document.getElementById('aiRiskAlertsList');
+      alertsList.innerHTML = (report.riskAlerts || []).map(item => `<li>${item}</li>`).join('');
+
+      const adjList = document.getElementById('aiAdjustmentsList');
+      adjList.innerHTML = (report.recommendedHalfTimeAdjustments || []).map(item => `<li>${item}</li>`).join('');
+    }
+
+    function copyHalftimeTalk() {
+      if (!cachedHalftimeReport) return;
+      const text = `AJAX ASPIRE U15 · HALFTIME TACTICAL TALK (${opponentName})
+--------------------------------------------------
+SENTIMENT: ${cachedHalftimeReport.sentiment}
+
+GAME FLOW:
+${cachedHalftimeReport.gameFlowSummary}
+
+KEY TACTICAL INSIGHTS:
+${(cachedHalftimeReport.tacticalInsights || []).map(b => '• ' + b).join('\n')}
+
+RISK ALERTS:
+${(cachedHalftimeReport.riskAlerts || []).map(b => '• ' + b).join('\n')}
+
+2ND-HALF ADJUSTMENTS:
+${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + b).join('\n')}`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Halftime tactical talk copied to clipboard!');
+      }).catch(() => {
+        showToast('Talk ready on screen.');
+      });
+    }
+
+    /* =========================================================
        ZERO-UPLOAD COMMITTOR: COMMIT DIRECTLY TO MATCH HUB & GOOGLE SHEET
        ========================================================= */
     function commitMatchToHub() {
@@ -1515,12 +2341,49 @@
 
       if (!confirm(`Commit Match vs. ${opponentName} (${ajaxGoals} - ${oppGoals}, ${matchMins}') directly to Match Hub and sync to Team Hub Google Sheet?`)) return;
 
-      // 1. Read existing Match Hub custom data from localStorage if available
+      // 1. Read existing Match Hub custom data from localStorage if available, or create template
       let customData = null;
       try {
         const raw = localStorage.getItem('matchhub_custom_data');
         if (raw) customData = JSON.parse(raw);
       } catch (e) {}
+
+      if (!customData || typeof customData !== 'object') {
+        customData = {};
+      }
+
+      // Ensure squad entries exist in customData
+      const sq = SQUADS[activeSquadKey];
+      const squadKeysToUpdate = activeSquadKey === 'aspire'
+        ? ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)']
+        : ['AJAX GA U15'];
+
+      squadKeysToUpdate.forEach(key => {
+        if (!customData[key]) {
+          customData[key] = {
+            totals: { games: 0, mins: 0, won: 0, tied: 0, lost: 0, gf: 0, ga: 0, gd: 0, shots: 0, sot: 0, soff: 0, fouls: 0, corners: 0, cleanSheets: 0, winPct: 0 },
+            players: sq.roster.map(r => ({
+              name: r.name,
+              jersey: r.jersey,
+              roles: r.roles || [r.defaultPos],
+              posBreakdown: [],
+              gp: 0,
+              mins: 0,
+              goals: 0,
+              assists: 0,
+              shots: 0,
+              sot: 0,
+              soff: 0,
+              fouls: 0,
+              toD: 0,
+              keyPasses: 0,
+              duelsWon: 0,
+              benchMins: 0
+            })),
+            filmEvents: []
+          };
+        }
+      });
 
       // 2. Prepare cumulative update for the Google Sheet (Player_IDP tab)
       const statsPayload = {};
@@ -1529,81 +2392,87 @@
       Object.values(playerStats).forEach(ps => {
         if (!ps || !ps.name) return;
         const norm = cleanNorm(ps.name);
-        
-        // Find existing cumulative if present in local Match Hub cache
-        let existingP = null;
-        if (customData && customData[targetTeam] && Array.isArray(customData[targetTeam].players)) {
-          existingP = customData[targetTeam].players.find(p => cleanNorm(p.name) === norm);
-        }
 
-        const prevGp = existingP ? (existingP.gp || 0) : 0;
-        const prevMins = existingP ? (existingP.mins || 0) : 0;
-        const prevGoals = existingP ? (existingP.goals || 0) : 0;
-        const prevAssists = existingP ? (existingP.assists || 0) : 0;
-        const prevShots = existingP ? (existingP.shots || 0) : 0;
-        const prevSot = existingP ? (existingP.sot || 0) : 0;
-        const prevSoff = existingP ? (existingP.soff || 0) : 0;
-        const prevToD = existingP ? (existingP.toD || 0) : 0;
-        const prevKp = existingP ? (existingP.keyPasses || 0) : 0;
-        const prevDuels = existingP ? (existingP.duelsWon || 0) : 0;
+        squadKeysToUpdate.forEach(key => {
+          let p = customData[key].players.find(x => cleanNorm(x.name) === norm);
+          if (!p) {
+            p = {
+              name: ps.name,
+              jersey: ps.jersey,
+              roles: [ps.currentPos || 'Sub'],
+              posBreakdown: [],
+              gp: 0,
+              mins: 0,
+              goals: 0,
+              assists: 0,
+              shots: 0,
+              sot: 0,
+              soff: 0,
+              fouls: 0,
+              toD: 0,
+              keyPasses: 0,
+              duelsWon: 0,
+              benchMins: 0
+            };
+            customData[key].players.push(p);
+          }
 
-        const newGp = prevGp + (ps.mins > 0 ? 1 : 0);
-        const newMins = prevMins + ps.mins;
-        const newGoals = prevGoals + ps.goals;
-        const newAssists = prevAssists + ps.assists;
-        const newSot = prevSot + ps.sot;
-        const newSoff = prevSoff + ps.soff;
-        const newToD = prevToD + ps.toD;
-        const newKp = prevKp + (ps.keyPasses || 0);
-        const newDuels = prevDuels + (ps.duelsWon || 0);
+          if (ps.mins > 0) {
+            p.gp = (p.gp || 0) + 1;
+            p.mins = (p.mins || 0) + ps.mins;
+            p.goals = (p.goals || 0) + ps.goals;
+            p.assists = (p.assists || 0) + ps.assists;
+            p.shots = (p.shots || 0) + ps.shots;
+            p.sot = (p.sot || 0) + ps.sot;
+            p.soff = (p.soff || 0) + ps.soff;
+            p.fouls = (p.fouls || 0) + (ps.fouls || 0);
+            p.toD = (p.toD || 0) + ps.toD;
+            p.keyPasses = (p.keyPasses || 0) + (ps.keyPasses || 0);
+            p.duelsWon = (p.duelsWon || 0) + (ps.duelsWon || 0);
+            p.benchMins = (p.benchMins || 0) + ps.benchMins;
+          }
+        });
 
+        // Google Sheet payload
         statsPayload[norm] = {
           name: ps.name,
           jersey: ps.jersey,
-          gp: newGp,
-          mins: newMins,
-          goals: newGoals,
-          assists: newAssists,
-          sot: newSot,
-          soff: newSoff,
+          gp: ps.mins > 0 ? 1 : 0,
+          mins: ps.mins,
+          goals: ps.goals,
+          assists: ps.assists,
+          sot: ps.sot,
+          soff: ps.soff,
           fouls: ps.fouls || 0,
-          toD: newToD,
-          keyPasses: newKp,
-          duelsWon: newDuels
+          toD: ps.toD,
+          keyPasses: ps.keyPasses || 0,
+          duelsWon: ps.duelsWon || 0
         };
-
-        if (existingP) {
-          existingP.gp = newGp;
-          existingP.mins = newMins;
-          existingP.goals = newGoals;
-          existingP.assists = newAssists;
-          existingP.shots = prevShots + ps.shots;
-          existingP.sot = newSot;
-          existingP.soff = newSoff;
-          existingP.toD = newToD;
-          existingP.keyPasses = newKp;
-          existingP.duelsWon = newDuels;
-        }
       });
 
-      if (customData && customData[targetTeam]) {
-        const tot = customData[targetTeam].totals || { games: 0, mins: 0, gf: 0, ga: 0, gd: 0, won: 0, tied: 0, lost: 0 };
-        tot.games += 1;
-        tot.mins += matchMins;
-        tot.gf += ajaxGoals;
-        tot.ga += oppGoals;
+      // Update team totals in customData
+      squadKeysToUpdate.forEach(key => {
+        const tot = customData[key].totals;
+        tot.games = (tot.games || 0) + 1;
+        tot.mins = (tot.mins || 0) + matchMins;
+        tot.gf = (tot.gf || 0) + ajaxGoals;
+        tot.ga = (tot.ga || 0) + oppGoals;
         tot.gd = tot.gf - tot.ga;
-        if (ajaxGoals > oppGoals) tot.won += 1;
-        else if (ajaxGoals === oppGoals) tot.tied += 1;
-        else tot.lost += 1;
-        customData[targetTeam].totals = tot;
-        try {
-          localStorage.setItem('matchhub_custom_data', JSON.stringify(customData));
-        } catch(e) {}
+        if (ajaxGoals > oppGoals) tot.won = (tot.won || 0) + 1;
+        else if (ajaxGoals === oppGoals) tot.tied = (tot.tied || 0) + 1;
+        else tot.lost = (tot.lost || 0) + 1;
+        tot.winPct = tot.games > 0 ? Math.round((tot.won / tot.games) * 100) : 0;
+        tot.cleanSheets = (tot.cleanSheets || 0) + (oppGoals === 0 ? 1 : 0);
+      });
+
+      // Save customData permanently
+      try {
+        localStorage.setItem('matchhub_custom_data', JSON.stringify(customData));
+      } catch(e) {
+        console.error('LocalStorage write error:', e);
       }
 
       const coachPin = localStorage.getItem('ajax_coach_pin') || '4111';
-
       const matchSummary = {
         date: new Date().toISOString(),
         team: targetTeam,
@@ -1614,13 +2483,14 @@
         oppShots: oppStats.shots || 0,
         oppSubs: oppStats.subs || 0,
         oppCorners: oppStats.corners || 0,
+        oppFouls: oppStats.fouls || 0,
         eventCount: matchEvents.length
       };
 
       // Background POST directly into Google Sheets (Player_IDP)
+      // IMPORTANT: Omit Content-Type header to avoid CORS OPTIONS preflight blockage
       fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'updateSeasonStats',
           pin: coachPin,
@@ -1630,15 +2500,28 @@
       }).then(r => r.json()).then(res => {
         if (res && res.success) {
           showToast(`☁️ Google Sheets (Player_IDP) synced: ${res.updated || 0} players updated!`);
+          if (document.getElementById('commitSheetStatus')) {
+            document.getElementById('commitSheetStatus').textContent = `Synced (${res.updated || 0} rows) ☁️`;
+          }
         }
       }).catch(err => {
         console.warn('Google Sheet background sync notice:', err);
       });
 
-      showToast(`🎉 Match vs ${opponentName} committed! Opening Match Hub...`);
-      setTimeout(() => {
-        window.location.href = `match-hub.html#${activeSquadKey}`;
-      }, 1200);
+      // Show Confirmation Modal Receipt
+      if (document.getElementById('commitConfirmTitle')) {
+        document.getElementById('commitConfirmTitle').textContent = `Ajax Aspire ${ajaxGoals} - ${oppGoals} ${opponentName}`;
+        document.getElementById('commitScoreText').textContent = `${ajaxGoals} - ${oppGoals}`;
+        document.getElementById('commitMinsText').textContent = `${matchMins} mins`;
+        document.getElementById('commitPlayersCount').textContent = `${Object.keys(statsPayload).length} roster players updated`;
+        document.getElementById('commitMomentsCount').textContent = `${matchEvents.filter(e => e.type !== 'sys' && e.type !== 'sub').length} moments recorded`;
+      }
+      document.getElementById('commitConfirmModal').classList.replace('hidden', 'flex');
+      showToast(`🎉 Match vs ${opponentName} committed to Match Hub!`);
+    }
+
+    function goToMatchHub() {
+      window.location.href = `match-hub.html#${activeSquadKey}`;
     }
 
     function resetCurrentMatch() {
@@ -2091,6 +2974,7 @@
         playerStats,
         matchEvents,
         oppStats,
+        phaseStats,
         absentPlayers: Array.from(absentPlayers)
       };
       try {
@@ -2117,6 +3001,7 @@
         playerStats = state.playerStats || {};
         matchEvents = state.matchEvents || [];
         oppStats = state.oppStats || { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 };
+        phaseStats = state.phaseStats || { pressWon: 0, pressLost: 0, goalKicksAttacking: 0, goalKicksDefending: 0, crossesLeft: 0, crossesRight: 0 };
         absentPlayers = new Set(state.absentPlayers || []);
 
         document.getElementById('teamSelector').value = activeSquadKey;

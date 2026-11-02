@@ -1119,6 +1119,107 @@
               <button onclick="logTrackerOpponentCorner()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
                 + Corner (<span id="trackerOppCorners">0</span>)
               </button>
+              <button onclick="logTrackerOpponentFoul()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
+                + Foul (<span id="trackerOppFouls">0</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRACKER SUMMARY DASHBOARD (HUD): SHOTS, PRESSING, TERRITORY & HALFTIME AI -->
+        <div id="trackerSummaryHud" class="pt-2 border-t border-border/70 space-y-2">
+          <!-- KPI Row: 4 Metric Cards + AI Halftime Button -->
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+            <!-- Card 1: Shots Split -->
+            <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
+              <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
+                <span>Shots Split</span>
+                <span class="text-teal-400 font-bold" id="trackerHudShotsSummary">0 vs 0</span>
+              </div>
+              <div class="text-sm font-black text-white mt-1 flex items-baseline gap-1.5">
+                <span id="trackerHudAjaxShots">0</span>
+                <span class="text-[10px] text-slate-400 font-normal">(<span id="trackerHudAjaxSot">0</span> on / <span id="trackerHudAjaxOut18">0</span> out 18)</span>
+              </div>
+              <div class="text-[9px] text-slate-400 mt-0.5">Opp: <span id="trackerHudOppShots">0</span> shots</div>
+            </div>
+
+            <!-- Card 2: Press Efficiency -->
+            <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
+              <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
+                <span>Press Rate</span>
+                <span class="text-teal-400 font-bold" id="trackerHudPressPct">--%</span>
+              </div>
+              <div class="text-sm font-black text-white mt-1 flex items-baseline gap-1">
+                <span id="trackerHudPressWon">0</span><span class="text-xs text-slate-400">/</span><span id="trackerHudPressTotal" class="text-xs text-slate-400">0</span>
+                <span class="text-[9px] text-emerald-400 font-semibold ml-1">Won</span>
+              </div>
+              <div class="w-full bg-surface h-1.5 rounded-full overflow-hidden mt-1">
+                <div id="trackerHudPressBar" class="bg-teal-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Card 3: Territory Flow -->
+            <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
+              <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
+                <span>Territory Flow</span>
+                <span class="text-teal-400 font-bold" id="trackerHudTerritoryTilt">50% Opp</span>
+              </div>
+              <div class="text-xs font-bold text-white mt-1">
+                <span class="text-emerald-300" id="trackerHudGkDef">0</span> Def GK <span class="text-slate-500 font-normal">(High Press)</span>
+              </div>
+              <div class="text-[10px] text-slate-400 mt-0.5">
+                <span class="text-sky-300" id="trackerHudGkAtt">0</span> Att GK (Build-Out)
+              </div>
+            </div>
+
+            <!-- Card 4: Disciplinary -->
+            <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
+              <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
+                <span>Discipline</span>
+                <span class="text-amber-400 font-bold" id="trackerHudCardsCount">0 🟨</span>
+              </div>
+              <div class="text-xs font-bold text-white mt-1 flex items-center gap-1.5">
+                <span>Ajax: <span id="trackerHudAjaxFouls" class="text-amber-300 font-mono">0</span>F</span>
+                <span id="trackerHudAjaxCardsBadge" class="hidden items-center gap-0.5"></span>
+              </div>
+              <div class="text-[10px] text-slate-400 mt-0.5">Opp: <span id="trackerHudOppFouls" class="font-mono text-slate-300">0</span>F</div>
+            </div>
+
+            <!-- Card 5: Halftime AI Tactical Report Trigger -->
+            <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-teal-900/40 via-pitch/90 to-amber-900/30 p-2 rounded-xl border border-teal-500/40 flex flex-col justify-between shadow-lg">
+              <div class="flex items-center justify-between text-[10px] text-teal-300 font-bold uppercase mono">
+                <span>AI Tactical Coach</span>
+                <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+              </div>
+              <button onclick="openTrackerHalftimeAiModal()" class="w-full mt-1 py-1.5 px-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-pitch font-black text-xs flex items-center justify-center gap-1 transition active:scale-95 shadow">
+                <span>⚡ AI Halftime Report</span>
+              </button>
+              <div class="text-[9px] text-center text-slate-400 mt-0.5">Game flow &amp; adjustments</div>
+            </div>
+          </div>
+
+          <!-- Quick Phase & Possession Bar (Build-out, High Press, Press Duels, Crosses) -->
+          <div class="flex items-center justify-between bg-card p-2 rounded-xl border border-border/80 text-xs flex-wrap gap-1.5">
+            <span class="text-[10px] mono uppercase text-teal-400 font-bold shrink-0">Phase &amp; Press:</span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button onclick="logTrackerPhaseEvent('goal_kick_att')" class="px-2.5 py-1 rounded-lg bg-surface hover:bg-slate-700 text-slate-200 border border-border flex items-center gap-1 active:scale-95" title="Ajax Build-Out from deep (Our Goal Kick)">
+                <span>🧱 Our Goal Kick (Build)</span>
+              </button>
+              <button onclick="logTrackerPhaseEvent('goal_kick_def')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1 active:scale-95" title="Opponent Goal Kick / High Press Territory">
+                <span>🎯 Opp Goal Kick (Press)</span>
+              </button>
+              <button onclick="logTrackerPhaseEvent('press_won')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-bold flex items-center gap-1 active:scale-95">
+                <span>⚡ Press Won</span>
+              </button>
+              <button onclick="logTrackerPhaseEvent('press_lost')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 font-semibold flex items-center gap-1 active:scale-95">
+                <span>💨 Press Lost</span>
+              </button>
+              <button onclick="openTrackerCrossModal()" class="px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/40 font-semibold flex items-center gap-1 active:scale-95">
+                <span>👟 Cross Attempt</span>
+              </button>
+            </div>
+          </div>
+        </div>
             </div>
           </div>
         </div>
@@ -1226,56 +1327,72 @@
               <button id="trackerDeselectBtn" onclick="deselectTrackerPlayer()" class="hidden text-slate-400 hover:text-white text-sm font-bold w-6 h-6 rounded-full bg-pitch flex items-center justify-center shrink-0">✕</button>
             </div>
 
-            <!-- 1-Tap Stat Buttons (12-Action Grid) -->
-            <div class="grid grid-cols-3 gap-1.5 text-xs font-semibold">
-              <button onclick="logTrackerEvent('goal')" class="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+            <!-- 1-Tap Stat Buttons (16-Action Grid) -->
+            <div class="grid grid-cols-4 gap-1.5 text-[11px] font-semibold">
+              <button onclick="logTrackerEvent('goal')" class="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
                 <span class="text-base">⚽</span>
                 <span>Goal (+3)</span>
               </button>
-              <button onclick="logTrackerEvent('assist')" class="p-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+              <button onclick="logTrackerEvent('assist')" class="p-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
                 <span class="text-base">🅰️</span>
                 <span>Assist (+2)</span>
               </button>
-              <button onclick="logTrackerEvent('keyPass')" class="p-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+              <button onclick="logTrackerEvent('keyPass')" class="p-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
                 <span class="text-base">🔑</span>
                 <span>Key Pass</span>
               </button>
-
-              <button onclick="logTrackerEvent('duelWon')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1 transition active:scale-95">
-                <span class="text-base">💪</span>
-                <span>Duel Won</span>
-              </button>
-              <button onclick="logTrackerEvent('duelLost')" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 flex flex-col items-center gap-1 transition active:scale-95">
-                <span class="text-base">❌</span>
-                <span>Duel Lost</span>
-              </button>
-              <button onclick="promptTrackerTurnoverZone()" class="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 transition active:scale-95">
-                <span class="text-base">⚠️</span>
-                <span>Turnover</span>
-              </button>
-
-              <button onclick="logTrackerEvent('sot')" class="p-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+              <button onclick="logTrackerEvent('sot')" class="p-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
                 <span class="text-base">🎯</span>
                 <span>Shot On</span>
               </button>
-              <button onclick="logTrackerEvent('soff')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
+
+              <button onclick="logTrackerEvent('soff')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
                 <span class="text-base">🥅</span>
                 <span>Shot Off</span>
               </button>
-              <button onclick="logTrackerEvent('save')" class="p-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 flex flex-col items-center gap-1 transition active:scale-95">
-                <span class="text-base">🧤</span>
-                <span>Save (GK)</span>
+              <button onclick="openTrackerShotOut18Modal()" class="p-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 flex flex-col items-center gap-0.5 transition active:scale-95" title="Shot from outside the 18-yard box">
+                <span class="text-base">🚀</span>
+                <span>Out 18</span>
+              </button>
+              <button onclick="logTrackerEvent('duelWon')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-0.5 transition active:scale-95">
+                <span class="text-base">💪</span>
+                <span>Duel Won</span>
+              </button>
+              <button onclick="logTrackerEvent('duelLost')" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 flex flex-col items-center gap-0.5 transition active:scale-95">
+                <span class="text-base">❌</span>
+                <span>Duel Lost</span>
               </button>
 
-              <button onclick="logTrackerEvent('cross')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
+              <button onclick="promptTrackerTurnoverZone()" class="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+                <span class="text-base">⚠️</span>
+                <span>Turnover</span>
+              </button>
+              <button onclick="logTrackerEvent('foul')" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+                <span class="text-base">🛑</span>
+                <span>Foul</span>
+              </button>
+              <button onclick="logTrackerEvent('yellow')" class="p-2 rounded-xl bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+                <span class="text-base">🟨</span>
+                <span>Yellow</span>
+              </button>
+              <button onclick="logTrackerEvent('save')" class="p-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+                <span class="text-base">🧤</span>
+                <span>Save GK</span>
+              </button>
+
+              <button onclick="logTrackerEvent('pressWon')" class="p-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+                <span class="text-base">⚡</span>
+                <span>Press Won</span>
+              </button>
+              <button onclick="logTrackerEvent('pressLost')" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+                <span class="text-base">💨</span>
+                <span>Press Lost</span>
+              </button>
+              <button onclick="openTrackerCrossModal()" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
                 <span class="text-base">👟</span>
                 <span>Cross</span>
               </button>
-              <button onclick="logTrackerEvent('corner')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 transition active:scale-95">
-                <span class="text-base">🚩</span>
-                <span>Corner</span>
-              </button>
-              <button onclick="flagTrackerBookmark()" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-1 transition active:scale-95">
+              <button onclick="flagTrackerBookmark()" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
                 <span class="text-base">📌</span>
                 <span>Flag Film</span>
               </button>
@@ -1557,6 +1674,206 @@
         <button onclick="closeModal('trackerAddGuestModal')" class="px-3 py-1.5 rounded-xl bg-pitch border border-border text-xs text-slate-400 hover:text-white">Cancel</button>
         <button onclick="saveTrackerGuestPlayer()" class="px-4 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs active:scale-95 shadow">Add to Roster</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal: Tracker Shot Outside 18 Accuracy Selector -->
+  <div id="trackerShotOut18Modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative space-y-3 text-center">
+      <div class="mono text-[10px] uppercase text-indigo-400 font-bold">Shot Outside the 18 Box</div>
+      <h3 class="display text-xl text-white" id="trackerShotOut18PlayerName">Log Outside 18 Shot</h3>
+      <p class="text-xs text-slate-400">Did the long-range strike hit the target?</p>
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <button onclick="commitTrackerShotOut18(true)" class="p-3.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/50 flex flex-col items-center gap-1 active:scale-95">
+          <span class="text-2xl">🎯</span>
+          <span class="font-bold text-xs">On Target</span>
+          <span class="text-[9px] text-sky-400">Forces GK save</span>
+        </button>
+        <button onclick="commitTrackerShotOut18(false)" class="p-3.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border border-border flex flex-col items-center gap-1 active:scale-95">
+          <span class="text-2xl">🥅</span>
+          <span class="font-bold text-xs">Off Target</span>
+          <span class="text-[9px] text-slate-400">Wide or high</span>
+        </button>
+      </div>
+      <button onclick="closeModal('trackerShotOut18Modal')" class="mt-2 text-xs text-slate-400 hover:text-white">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Modal: Tracker Cross Attempt Selector -->
+  <div id="trackerCrossModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative space-y-3">
+      <div class="flex items-center justify-between border-b border-border pb-2">
+        <div>
+          <div class="mono text-[10px] uppercase text-purple-400 font-bold">Phase Action</div>
+          <h3 class="display text-xl text-white">Log Cross Attempt</h3>
+        </div>
+        <button onclick="closeModal('trackerCrossModal')" class="text-slate-400 hover:text-white text-sm font-bold w-6 h-6 rounded-full bg-pitch flex items-center justify-center">✕</button>
+      </div>
+
+      <!-- Step 1: Flank Side -->
+      <div class="space-y-1">
+        <label class="mono text-[10px] text-slate-400 uppercase font-bold">Flank / Wing Channel:</label>
+        <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+          <button type="button" id="trackerCrossSideLeft" onclick="setTrackerCrossSide('left')" class="p-2.5 rounded-xl border border-teal-500/50 bg-teal-500/20 text-teal-300 flex items-center justify-center gap-1.5">
+            <span>👈 Left Flank (LW/LB)</span>
+          </button>
+          <button type="button" id="trackerCrossSideRight" onclick="setTrackerCrossSide('right')" class="p-2.5 rounded-xl border border-border bg-pitch text-slate-300 hover:border-slate-500 flex items-center justify-center gap-1.5">
+            <span>👉 Right Flank (RW/RB)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Outcome -->
+      <div class="space-y-1">
+        <label class="mono text-[10px] text-slate-400 uppercase font-bold">Cross Delivery Outcome:</label>
+        <div class="grid grid-cols-3 gap-1.5 text-xs font-semibold">
+          <button type="button" onclick="commitTrackerCross('shot')" class="p-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-0.5 active:scale-95">
+            <span class="text-lg">🎯</span>
+            <span>Shot / Goal</span>
+          </button>
+          <button type="button" onclick="commitTrackerCross('cleared')" class="p-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 active:scale-95">
+            <span class="text-lg">🛡️</span>
+            <span>Cleared</span>
+          </button>
+          <button type="button" onclick="commitTrackerCross('out_of_play')" class="p-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 active:scale-95">
+            <span class="text-lg">💨</span>
+            <span>Over / Out</span>
+          </button>
+        </div>
+      </div>
+      <button onclick="closeModal('trackerCrossModal')" class="w-full py-1 text-xs text-slate-400 hover:text-white text-center">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Modal: Tracker Halftime AI Tactical Report -->
+  <div id="trackerHalftimeAiModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-surface border border-teal-500/40 rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl relative space-y-4 max-h-[92vh] overflow-y-auto">
+      <button onclick="closeModal('trackerHalftimeAiModal')" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between gap-3 border-b border-border/80 pb-3 pr-8">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="mono text-[10px] uppercase text-teal-400 font-black tracking-wider">HALFTIME AI ENGINE · GEMINI 2.5 FLASH</span>
+            <span id="trackerAiSentimentBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/50">DOMINANT</span>
+          </div>
+          <h2 class="display text-2xl text-white mt-0.5">Tactical Halftime Assessment</h2>
+          <p class="text-xs text-slate-400">Telemetry-driven field tilt, pressing efficiency &amp; actionable player adjustments.</p>
+        </div>
+      </div>
+
+      <!-- Telemetry Overview Strips -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+        <div class="bg-pitch/80 p-2.5 rounded-xl border border-border/80">
+          <div class="text-[9px] mono uppercase text-slate-400">Total Shots</div>
+          <div class="text-base font-black text-white mt-0.5" id="trackerAiMetricShots">0 - 0</div>
+          <div class="text-[9px] text-teal-300" id="trackerAiMetricSot">0 SOT · 0 Out 18</div>
+        </div>
+        <div class="bg-pitch/80 p-2.5 rounded-xl border border-border/80">
+          <div class="text-[9px] mono uppercase text-slate-400">Press Efficiency</div>
+          <div class="text-base font-black text-white mt-0.5" id="trackerAiMetricPress">--%</div>
+          <div class="text-[9px] text-emerald-300" id="trackerAiMetricPressWon">0 Won / 0 Total</div>
+        </div>
+        <div class="bg-pitch/80 p-2.5 rounded-xl border border-border/80">
+          <div class="text-[9px] mono uppercase text-slate-400">Territory Tilt</div>
+          <div class="text-base font-black text-white mt-0.5" id="trackerAiMetricTerritory">50% Opp</div>
+          <div class="text-[9px] text-sky-300" id="trackerAiMetricGks">0 Def GK : 0 Att GK</div>
+        </div>
+        <div class="bg-pitch/80 p-2.5 rounded-xl border border-border/80">
+          <div class="text-[9px] mono uppercase text-slate-400">Discipline</div>
+          <div class="text-base font-black text-amber-300 mt-0.5" id="trackerAiMetricFouls">0 Fouls</div>
+          <div class="text-[9px] text-slate-400" id="trackerAiMetricCards">0 Yellows</div>
+        </div>
+      </div>
+
+      <!-- AI Content Loading State -->
+      <div id="trackerAiLoadingSpinner" class="hidden p-6 text-center space-y-2">
+        <div class="w-8 h-8 mx-auto border-2 border-teal-400 border-t-transparent rounded-full animate-spin"></div>
+        <div class="text-xs text-teal-300 font-bold">Synthesizing 1st-Half Telemetry with Gemini AI...</div>
+      </div>
+
+      <!-- AI Analysis Result Card -->
+      <div id="trackerAiReportContent" class="space-y-3 text-xs">
+        <div class="p-3 rounded-xl bg-pitch/90 border border-border/80 space-y-1">
+          <div class="mono text-[10px] uppercase text-teal-400 font-bold">📋 Game Flow &amp; Territorial Overview</div>
+          <p id="trackerAiGameFlowText" class="text-slate-200 leading-relaxed font-medium">Generating tactical analysis...</p>
+        </div>
+        <div class="p-3 rounded-xl bg-pitch/90 border border-border/80 space-y-1.5">
+          <div class="mono text-[10px] uppercase text-sky-400 font-bold">💡 Tactical Insights &amp; Phase Patterns</div>
+          <ul id="trackerAiTacticalInsightsList" class="space-y-1 text-slate-300 list-disc list-inside"></ul>
+        </div>
+        <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1.5">
+          <div class="mono text-[10px] uppercase text-amber-300 font-bold">⚠️ Risk Alerts &amp; Yellow Card Management</div>
+          <ul id="trackerAiRiskAlertsList" class="space-y-1 text-amber-200/90 list-disc list-inside"></ul>
+        </div>
+        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1.5">
+          <div class="mono text-[10px] uppercase text-emerald-300 font-bold">🎯 Actionable Adjustments for 2nd Half Talk</div>
+          <ul id="trackerAiAdjustmentsList" class="space-y-1 text-emerald-200/90 list-disc list-inside"></ul>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-border/80 flex-wrap">
+        <button onclick="copyTrackerHalftimeTalk()" class="px-3.5 py-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border border-border font-bold text-xs flex items-center gap-1.5 active:scale-95">
+          <span>📋 Copy Talk Notes</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="generateTrackerHalftimeReport(true)" class="px-3 py-2 rounded-xl bg-pitch hover:bg-surface text-teal-300 border border-teal-500/40 text-xs font-semibold active:scale-95">
+            <span>🔄 Re-Analyze</span>
+          </button>
+          <button onclick="closeModal('trackerHalftimeAiModal')" class="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs active:scale-95 shadow">
+            <span>Close &amp; Continue Match</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Tracker Match Commit Confirmation Receipt -->
+  <div id="trackerCommitConfirmModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-surface border border-emerald-500/50 rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4 text-center">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/50 flex items-center justify-center text-3xl shadow-lg">
+        ⚡
+      </div>
+      <div>
+        <div class="mono text-[10px] uppercase text-emerald-400 font-bold tracking-wider">Match Committed Successfully</div>
+        <h3 class="display text-2xl text-white mt-1" id="trackerCommitConfirmTitle">Match vs. Opponent Saved</h3>
+        <p class="text-xs text-slate-400 mt-1">Stats, cumulative minutes, and film moments committed to Match Hub.</p>
+      </div>
+
+      <div class="bg-pitch/90 p-3.5 rounded-xl border border-border/80 text-left text-xs space-y-1.5">
+        <div class="flex justify-between text-slate-300">
+          <span>Final Score:</span>
+          <span class="font-bold font-mono text-white" id="trackerCommitScoreText">0 - 0</span>
+        </div>
+        <div class="flex justify-between text-slate-300">
+          <span>Match Duration:</span>
+          <span class="font-bold font-mono text-white" id="trackerCommitMinsText">80 mins</span>
+        </div>
+        <div class="flex justify-between text-slate-300">
+          <span>Players Updated:</span>
+          <span class="font-bold text-teal-300" id="trackerCommitPlayersCount">16 players</span>
+        </div>
+        <div class="flex justify-between text-slate-300">
+          <span>Film Moments Logged:</span>
+          <span class="font-bold text-amber-300" id="trackerCommitMomentsCount">0 moments</span>
+        </div>
+        <div class="flex justify-between text-slate-300 border-t border-border/60 pt-1.5">
+          <span>Google Sheet (Player_IDP):</span>
+          <span class="font-bold text-emerald-400" id="trackerCommitSheetStatus">Synced ☁️</span>
+        </div>
+      </div>
+
+      <div class="pt-1 flex items-center justify-center gap-2">
+        <button onclick="closeModal('trackerCommitConfirmModal')" class="flex-1 py-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border text-xs font-semibold">
+          Stay on Tracker
+        </button>
+        <button onclick="closeModal('trackerCommitConfirmModal'); switchTab('tab-roster');" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg active:scale-95">
+          View Roster Splits ↗
+        </button>
+      </div>
+    </div>
+  </div>
     </div>
   </div>
 
@@ -3891,6 +4208,13 @@
       oppShots: 0,
       oppSubs: 0,
       oppCorners: 0,
+      oppFouls: 0,
+      pressWon: 0,
+      pressLost: 0,
+      goalKicksAttacking: 0,
+      goalKicksDefending: 0,
+      crossesLeft: 0,
+      crossesRight: 0,
       absentPlayers: []
     };
 
@@ -3934,12 +4258,19 @@
           shots: 0,
           sot: 0,
           soff: 0,
+          shotsOutside18: 0,
           corners: 0,
           crosses: 0,
           turnovers: 0,
           toD: 0,
           toM: 0,
           toA: 0,
+          fouls: 0,
+          yellowCards: 0,
+          hasYellow: false,
+          hasRed: false,
+          pressWon: 0,
+          pressLost: 0,
           saves: 0,
           keyPasses: 0,
           duelsWon: 0,
@@ -4056,6 +4387,7 @@
           updateTrackerClockDisplay();
           logTrackerSystemEvent('Half Time Whistle');
           showToast('1st Half completed. 2nd Half ready.');
+          openTrackerHalftimeAiModal();
         }
       } else if (trackerState.period === 2) {
         if (confirm('Full-Time whistle! Complete match?')) {
@@ -4080,18 +4412,31 @@
         const isSelected = trackerSelectedSlot === slot;
         const shortName = p ? p.name.split(' ')[0] : 'Open';
         const mins = p ? p.mins : 0;
+        const hasGoal = p && p.goals > 0;
+        const hasYellow = p && p.yellowCards > 0;
+        const hasRed = p && (p.hasRed || p.yellowCards >= 2);
+        const hasFouls = p && p.fouls > 0;
 
         return `
           <div class="player-node ${isSelected ? 'selected-node' : ''}" style="left: ${pos.x}%; top: ${pos.y}%;" onclick="onTapTrackerPitchNode('${slot}')">
             <div class="flex flex-col items-center">
               <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 ${isSelected ? 'border-brand-400 bg-teal-600 scale-110' : 'border-white/80 bg-pitch/90'} text-white flex items-center justify-center font-mono font-black text-xs sm:text-sm shadow-xl relative">
                 ${jersey ? '#' + jersey : '?'}
-                ${p && p.goals > 0 ? `<span class="absolute -top-1 -right-1 bg-emerald-500 text-white rounded-full text-[8px] w-4 h-4 flex items-center justify-center font-bold">⚽${p.goals > 1 ? p.goals : ''}</span>` : ''}
+                ${hasGoal ? `<span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white rounded-full text-[8px] px-1 py-0.2 flex items-center justify-center font-bold shadow">⚽${p.goals > 1 ? p.goals : ''}</span>` : ''}
+                ${hasYellow ? `
+                  <span class="absolute -top-1.5 -left-1.5 flex items-center gap-0.5">
+                    <span class="inline-block w-2 h-3 bg-[#FFD700] border border-[#B8860B] rounded-[1px] shadow-sm" title="Yellow Card"></span>
+                    ${hasRed ? '<span class="inline-block w-2 h-3 bg-[#EF4444] border border-[#B91C1C] rounded-[1px] shadow-sm" title="Red Card / Sent Off"></span>' : ''}
+                  </span>
+                ` : ''}
               </div>
               <div class="mt-0.5 px-1.5 py-0.2 rounded bg-pitch/90 border border-white/20 text-center leading-none">
                 <span class="text-[9px] font-bold text-teal-300 block">${slot}</span>
                 <span class="text-[10px] font-semibold text-white block truncate max-w-[65px]">${shortName}</span>
-                <span class="text-[8px] font-mono text-amber-300">${mins}'</span>
+                <div class="flex items-center justify-center gap-1">
+                  <span class="text-[8px] font-mono text-amber-300">${mins}'</span>
+                  ${hasFouls ? `<span class="text-[8px] font-mono text-rose-300 font-bold" title="${p.fouls} fouls">F:${p.fouls}</span>` : ''}
+                </div>
               </div>
             </div>
           </div>
@@ -4218,7 +4563,11 @@
       container.innerHTML = bench.map(p => `
         <button type="button" onclick="onTapTrackerBenchPlayer(${p.jersey})"
           class="p-2 rounded-xl bg-pitch/80 hover:bg-slate-800 border border-border/80 text-left transition flex items-center space-x-2 shrink-0 active:scale-95">
-          <span class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center font-mono font-bold text-xs text-teal-300 border border-border/80">#${p.jersey}</span>
+          <span class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center font-mono font-bold text-xs text-teal-300 border border-border/80 relative">
+            #${p.jersey}
+            ${p.goals > 0 ? `<span class="absolute -top-1 -right-1 text-[8px]">⚽</span>` : ''}
+            ${p.yellowCards > 0 ? `<span class="absolute -top-1 -left-1 inline-block w-1.5 h-2.5 bg-[#FFD700] border border-[#B8860B] rounded-[1px]"></span>` : ''}
+          </span>
           <div class="min-w-0 pr-1">
             <span class="text-xs font-bold text-white block truncate max-w-[85px]">${p.name.split(' ')[0]}</span>
             <span class="text-[9px] font-mono text-slate-400 block">${p.mins}' in / ${p.benchMins}' bench</span>
@@ -4370,11 +4719,154 @@
         p.saves++;
         logTrackerEventRecord({ time: curMins, type: 'save', desc: `SAVE: #${j} ${p.name.split(' ')[0]} (GK) at ${curMins}'`, jersey: j, zone: 'D3' });
         showToast(`🧤 Save logged for goalkeeper!`);
+      } else if (type === 'foul') {
+        p.fouls = (p.fouls || 0) + 1;
+        logTrackerEventRecord({ time: curMins, half: trackerState.period <= 1 ? 'H1' : 'H2', type: 'foul', desc: `🛑 FOUL COMMITTED: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        showToast(`🛑 Foul logged for #${j}`);
+      } else if (type === 'yellow') {
+        p.yellowCards = (p.yellowCards || 0) + 1;
+        p.hasYellow = true;
+        if (p.yellowCards >= 2) {
+          p.hasRed = true;
+          logTrackerEventRecord({ time: curMins, half: trackerState.period <= 1 ? 'H1' : 'H2', type: 'redCard', desc: `🟥 2ND YELLOW / RED CARD: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+          alert(`🟥 RED CARD! 2nd Yellow Card for #${j} ${p.name}! Player is sent off.`);
+          showToast(`🟥 Red card logged for #${j}`);
+        } else {
+          logTrackerEventRecord({ time: curMins, half: trackerState.period <= 1 ? 'H1' : 'H2', type: 'yellowCard', desc: `🟨 YELLOW CARD: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+          showToast(`🟨 Yellow card logged for #${j}`);
+        }
+      } else if (type === 'pressWon') {
+        p.pressWon = (p.pressWon || 0) + 1;
+        logTrackerEventRecord({ time: curMins, half: trackerState.period <= 1 ? 'H1' : 'H2', type: 'pressWon', desc: `⚡ PRESS WON: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        showToast(`⚡ Press won logged for #${j}`);
+      } else if (type === 'pressLost') {
+        p.pressLost = (p.pressLost || 0) + 1;
+        logTrackerEventRecord({ time: curMins, half: trackerState.period <= 1 ? 'H1' : 'H2', type: 'pressLost', desc: `💨 PRESS LOST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        showToast(`💨 Press lost logged for #${j}`);
       }
 
       // Automatically unselect player after action to complete event and prevent accidental swaps
       deselectTrackerPlayer();
       renderTrackerPitch();
+      renderTrackerBench();
+      updateTrackerScoreboard();
+      updateTrackerSummaryHud();
+      saveTrackerState();
+    }
+
+    /* Shot Outside 18 Handlers */
+    function openTrackerShotOut18Modal() {
+      if (!trackerSelectedJersey || !trackerState.playerStats[trackerSelectedJersey]) {
+        showToast('Please select a player on the pitch first.');
+        return;
+      }
+      const p = trackerState.playerStats[trackerSelectedJersey];
+      if ($('trackerShotOut18PlayerName')) $('trackerShotOut18PlayerName').textContent = `#${trackerSelectedJersey} ${p.name}`;
+      $('trackerShotOut18Modal').classList.replace('hidden', 'flex');
+    }
+
+    function commitTrackerShotOut18(onTarget) {
+      closeModal('trackerShotOut18Modal');
+      if (!trackerSelectedJersey || !trackerState.playerStats[trackerSelectedJersey]) return;
+      const j = trackerSelectedJersey;
+      const p = trackerState.playerStats[j];
+      const curMins = Math.floor(trackerState.matchSeconds / 60);
+
+      p.shots++;
+      p.shotsOutside18 = (p.shotsOutside18 || 0) + 1;
+      if (onTarget) p.sot++;
+      else p.soff++;
+
+      logTrackerEventRecord({
+        time: curMins,
+        half: trackerState.period <= 1 ? 'H1' : 'H2',
+        type: 'shot_outside_18',
+        onTarget,
+        jersey: j,
+        zone: 'A3',
+        desc: `🚀 SHOT OUTSIDE 18 (${onTarget ? 'On Target' : 'Off Target'}): #${j} ${p.name.split(' ')[0]} at ${curMins}'`
+      });
+
+      deselectTrackerPlayer();
+      renderTrackerPitch();
+      renderTrackerBench();
+      updateTrackerScoreboard();
+      updateTrackerSummaryHud();
+      saveTrackerState();
+      showToast(`🚀 Shot outside 18 (${onTarget ? 'Target' : 'Off'}) logged for #${j}`);
+    }
+
+    /* Cross Attempt Handlers */
+    let trackerCrossSide = 'left';
+    function openTrackerCrossModal() {
+      $('trackerCrossModal').classList.replace('hidden', 'flex');
+    }
+
+    function setTrackerCrossSide(side) {
+      trackerCrossSide = side;
+      if (side === 'left') {
+        if ($('trackerCrossSideLeft')) $('trackerCrossSideLeft').className = 'p-2.5 rounded-xl border border-teal-500/50 bg-teal-500/20 text-teal-300 flex items-center justify-center gap-1.5';
+        if ($('trackerCrossSideRight')) $('trackerCrossSideRight').className = 'p-2.5 rounded-xl border border-border bg-pitch text-slate-300 hover:border-slate-500 flex items-center justify-center gap-1.5';
+      } else {
+        if ($('trackerCrossSideLeft')) $('trackerCrossSideLeft').className = 'p-2.5 rounded-xl border border-border bg-pitch text-slate-300 hover:border-slate-500 flex items-center justify-center gap-1.5';
+        if ($('trackerCrossSideRight')) $('trackerCrossSideRight').className = 'p-2.5 rounded-xl border border-teal-500/50 bg-teal-500/20 text-teal-300 flex items-center justify-center gap-1.5';
+      }
+    }
+
+    function commitTrackerCross(outcome) {
+      closeModal('trackerCrossModal');
+      const curMins = Math.floor(trackerState.matchSeconds / 60);
+      const j = trackerSelectedJersey;
+      const p = j ? trackerState.playerStats[j] : null;
+
+      if (trackerCrossSide === 'left') trackerState.crossesLeft = (trackerState.crossesLeft || 0) + 1;
+      else trackerState.crossesRight = (trackerState.crossesRight || 0) + 1;
+
+      if (p) p.crosses = (p.crosses || 0) + 1;
+
+      logTrackerEventRecord({
+        time: curMins,
+        half: trackerState.period <= 1 ? 'H1' : 'H2',
+        type: 'cross_attempt',
+        side: trackerCrossSide,
+        outcome,
+        jersey: j || '',
+        zone: 'A3',
+        desc: `👟 CROSS (${trackerCrossSide.toUpperCase()} -> ${outcome.toUpperCase()}): ${p ? '#' + j + ' ' + p.name.split(' ')[0] : 'Team'} at ${curMins}'`
+      });
+
+      if (trackerSelectedJersey) deselectTrackerPlayer();
+      renderTrackerPitch();
+      updateTrackerScoreboard();
+      updateTrackerSummaryHud();
+      saveTrackerState();
+      showToast(`👟 Cross (${trackerCrossSide} -> ${outcome}) logged`);
+    }
+
+    /* Phase & Set-Piece Events */
+    function logTrackerPhaseEvent(type) {
+      const curMins = Math.floor(trackerState.matchSeconds / 60);
+      const half = trackerState.period <= 1 ? 'H1' : 'H2';
+
+      if (type === 'goal_kick_att') {
+        trackerState.goalKicksAttacking = (trackerState.goalKicksAttacking || 0) + 1;
+        logTrackerEventRecord({ time: curMins, half, type: 'goal_kick_att', zone: 'D3', desc: `🧱 AJAX BUILD-OUT (Goal Kick #${trackerState.goalKicksAttacking}) at ${curMins}'` });
+        showToast(`🧱 Our Goal Kick logged (Total: ${trackerState.goalKicksAttacking})`);
+      } else if (type === 'goal_kick_def') {
+        trackerState.goalKicksDefending = (trackerState.goalKicksDefending || 0) + 1;
+        logTrackerEventRecord({ time: curMins, half, type: 'goal_kick_def', zone: 'A3', desc: `🎯 OPPONENT GOAL KICK (High Press #${trackerState.goalKicksDefending}) at ${curMins}'` });
+        showToast(`🎯 Opponent Goal Kick logged (Total: ${trackerState.goalKicksDefending})`);
+      } else if (type === 'press_won') {
+        trackerState.pressWon = (trackerState.pressWon || 0) + 1;
+        logTrackerEventRecord({ time: curMins, half, type: 'pressWon', zone: 'M3', desc: `⚡ TEAM PRESS WON at ${curMins}'` });
+        showToast(`⚡ Team Press Won logged`);
+      } else if (type === 'press_lost') {
+        trackerState.pressLost = (trackerState.pressLost || 0) + 1;
+        logTrackerEventRecord({ time: curMins, half, type: 'pressLost', zone: 'M3', desc: `💨 TEAM PRESS BREAKDOWN at ${curMins}'` });
+        showToast(`💨 Press Lost logged`);
+      }
+
+      updateTrackerSummaryHud();
       saveTrackerState();
     }
 
@@ -4437,6 +4929,7 @@
       trackerState.oppGoals++;
       trackerState.oppShots++;
       updateTrackerScoreboard();
+      updateTrackerSummaryHud();
       logTrackerEventRecord({ time: Math.floor(trackerState.matchSeconds / 60), type: 'oppGoal', desc: `OPPONENT GOAL conceded (${Math.floor(trackerState.matchSeconds / 60)}')`, zone: 'D3' });
       showToast('Opponent goal logged.');
     }
@@ -4445,6 +4938,7 @@
       if ($('trackerOppShots')) $('trackerOppShots').textContent = trackerState.oppShots;
       logTrackerEventRecord({ time: Math.floor(trackerState.matchSeconds / 60), type: 'oppShot', desc: `OPPONENT SHOT against (${Math.floor(trackerState.matchSeconds / 60)}')`, zone: 'D3' });
       showToast(`Opponent shot logged (Total: ${trackerState.oppShots})`);
+      updateTrackerSummaryHud();
       saveTrackerState();
     }
     function logTrackerOpponentSub() {
@@ -4458,6 +4952,314 @@
       trackerState.oppCorners++;
       if ($('trackerOppCorners')) $('trackerOppCorners').textContent = trackerState.oppCorners;
       showToast('Opponent corner logged.');
+      saveTrackerState();
+    }
+    function logTrackerOpponentFoul() {
+      trackerState.oppFouls = (trackerState.oppFouls || 0) + 1;
+      if ($('trackerOppFouls')) $('trackerOppFouls').textContent = trackerState.oppFouls;
+      showToast('Opponent foul logged.');
+      updateTrackerSummaryHud();
+      saveTrackerState();
+    }
+
+    function updateTrackerSummaryHud() {
+      let ajaxShots = 0, ajaxSot = 0, ajaxOut18 = 0;
+      let ajaxFouls = 0, ajaxYellows = 0, ajaxReds = 0;
+      let playerPressWon = 0, playerPressLost = 0;
+      const cardBadges = [];
+
+      Object.values(trackerState.playerStats || {}).forEach(p => {
+        ajaxShots += (p.shots || 0);
+        ajaxSot += (p.sot || 0);
+        ajaxOut18 += (p.shotsOutside18 || 0);
+        ajaxFouls += (p.fouls || 0);
+        ajaxYellows += (p.yellowCards || 0);
+        if (p.hasRed || p.yellowCards >= 2) ajaxReds++;
+        if (p.yellowCards > 0) {
+          cardBadges.push(`<span class="inline-block w-2 h-3 bg-[#FFD700] border border-[#B8860B] rounded-[1px]" title="#${p.jersey} Yellow"></span>`);
+        }
+        playerPressWon += (p.pressWon || 0);
+        playerPressLost += (p.pressLost || 0);
+      });
+
+      const oppShots = trackerState.oppShots || 0;
+      const oppFouls = trackerState.oppFouls || 0;
+
+      if ($('trackerHudShotsSummary')) $('trackerHudShotsSummary').textContent = `${ajaxShots} vs ${oppShots}`;
+      if ($('trackerHudAjaxShots')) $('trackerHudAjaxShots').textContent = ajaxShots;
+      if ($('trackerHudAjaxSot')) $('trackerHudAjaxSot').textContent = ajaxSot;
+      if ($('trackerHudAjaxOut18')) $('trackerHudAjaxOut18').textContent = ajaxOut18;
+      if ($('trackerHudOppShots')) $('trackerHudOppShots').textContent = oppShots;
+
+      // Press Rate
+      const totalWon = (trackerState.pressWon || 0) + playerPressWon;
+      const totalLost = (trackerState.pressLost || 0) + playerPressLost;
+      const totalPress = totalWon + totalLost;
+      const pressPct = totalPress > 0 ? Math.round((totalWon / totalPress) * 100) : 0;
+
+      if ($('trackerHudPressPct')) $('trackerHudPressPct').textContent = totalPress > 0 ? `${pressPct}%` : '--%';
+      if ($('trackerHudPressWon')) $('trackerHudPressWon').textContent = totalWon;
+      if ($('trackerHudPressTotal')) $('trackerHudPressTotal').textContent = totalPress;
+      if ($('trackerHudPressBar')) $('trackerHudPressBar').style.width = `${pressPct}%`;
+
+      // Territory Flow
+      const defGk = trackerState.goalKicksDefending || 0;
+      const attGk = trackerState.goalKicksAttacking || 0;
+      const totalGk = defGk + attGk;
+      const oppHalfPct = totalGk > 0 ? Math.round((defGk / totalGk) * 100) : 50;
+
+      if ($('trackerHudTerritoryTilt')) $('trackerHudTerritoryTilt').textContent = `${oppHalfPct}% Opp`;
+      if ($('trackerHudGkDef')) $('trackerHudGkDef').textContent = defGk;
+      if ($('trackerHudGkAtt')) $('trackerHudGkAtt').textContent = attGk;
+
+      // Discipline
+      if ($('trackerHudCardsCount')) $('trackerHudCardsCount').textContent = `${ajaxYellows} 🟨${ajaxReds ? ' ' + ajaxReds + ' 🟥' : ''}`;
+      if ($('trackerHudAjaxFouls')) $('trackerHudAjaxFouls').textContent = ajaxFouls;
+      if ($('trackerHudOppFouls')) $('trackerHudOppFouls').textContent = oppFouls;
+
+      const cardBadgeContainer = $('trackerHudAjaxCardsBadge');
+      if (cardBadgeContainer) {
+        if (cardBadges.length > 0) {
+          cardBadgeContainer.innerHTML = cardBadges.join('');
+          cardBadgeContainer.classList.remove('hidden');
+          cardBadgeContainer.classList.add('flex');
+        } else {
+          cardBadgeContainer.classList.add('hidden');
+          cardBadgeContainer.classList.remove('flex');
+        }
+      }
+    }
+
+    /* =========================================================
+       HALFTIME AI ANALYSIS ENGINE (GEMINI 2.5 FLASH + LOCAL ENGINE)
+       ========================================================= */
+    let cachedTrackerHalftimeReport = null;
+
+    async function openTrackerHalftimeAiModal() {
+      $('trackerHalftimeAiModal').classList.replace('hidden', 'flex');
+      await generateTrackerHalftimeReport(false);
+    }
+
+    async function generateTrackerHalftimeReport(forceRegen = false) {
+      if (cachedTrackerHalftimeReport && !forceRegen) {
+        renderTrackerHalftimeReport(cachedTrackerHalftimeReport);
+        return;
+      }
+
+      if ($('trackerAiLoadingSpinner')) $('trackerAiLoadingSpinner').classList.remove('hidden');
+      if ($('trackerAiReportContent')) $('trackerAiReportContent').classList.add('hidden');
+
+      // Compile 1st-Half telemetry
+      let ajaxGoals = 0, ajaxShots = 0, ajaxSot = 0, ajaxSoff = 0, ajaxOut18 = 0;
+      let ajaxFouls = 0, ajaxYellows = 0;
+      let playerPressWon = 0, playerPressLost = 0;
+      let cardedPlayers = [];
+
+      Object.values(trackerState.playerStats || {}).forEach(p => {
+        ajaxGoals += (p.goals || 0);
+        ajaxShots += (p.shots || 0);
+        ajaxSot += (p.sot || 0);
+        ajaxSoff += (p.soff || 0);
+        ajaxOut18 += (p.shotsOutside18 || 0);
+        ajaxFouls += (p.fouls || 0);
+        ajaxYellows += (p.yellowCards || 0);
+        if (p.yellowCards > 0) cardedPlayers.push(`#${p.jersey} ${p.name.split(' ')[0]}`);
+        playerPressWon += (p.pressWon || 0);
+        playerPressLost += (p.pressLost || 0);
+      });
+
+      const totalPressWon = (trackerState.pressWon || 0) + playerPressWon;
+      const totalPressLost = (trackerState.pressLost || 0) + playerPressLost;
+      const totalPress = totalPressWon + totalPressLost;
+      const pressEfficiency = totalPress > 0 ? Math.round((totalPressWon / totalPress) * 100) + '%' : '0%';
+
+      const defGk = trackerState.goalKicksDefending || 0;
+      const attGk = trackerState.goalKicksAttacking || 0;
+      const totalGk = defGk + attGk;
+      const territoryTilt = totalGk > 0 ? Math.round((defGk / totalGk) * 100) + '% in Opponent Half' : 'Balanced (50/50)';
+
+      const recentEventsSummary = (trackerState.events || []).slice(0, 8).map(e => `${e.time}': ${e.desc}`).join('; ');
+
+      const telemetry = {
+        opponent: trackerState.opponent || 'Opponent',
+        ajaxScore: ajaxGoals,
+        oppScore: trackerState.oppGoals || 0,
+        ajaxShots,
+        ajaxSot,
+        ajaxSoff,
+        shotsOutside18: ajaxOut18,
+        oppShots: trackerState.oppShots || 0,
+        pressWon: totalPressWon,
+        pressLost: totalPressLost,
+        pressEfficiency,
+        goalKicksDefending: defGk,
+        goalKicksAttacking: attGk,
+        territoryTilt,
+        crosses: (trackerState.crossesLeft || 0) + (trackerState.crossesRight || 0),
+        ajaxFouls,
+        ajaxYellows,
+        cardedPlayers: cardedPlayers.join(', ') || 'None',
+        oppFouls: trackerState.oppFouls || 0,
+        recentEventsSummary
+      };
+
+      // Update metric strips on modal
+      if ($('trackerAiMetricShots')) $('trackerAiMetricShots').textContent = `${ajaxShots} - ${trackerState.oppShots || 0}`;
+      if ($('trackerAiMetricSot')) $('trackerAiMetricSot').textContent = `${ajaxSot} SOT · ${ajaxOut18} Out 18`;
+      if ($('trackerAiMetricPress')) $('trackerAiMetricPress').textContent = pressEfficiency;
+      if ($('trackerAiMetricPressWon')) $('trackerAiMetricPressWon').textContent = `${totalPressWon} Won / ${totalPress} Total`;
+      if ($('trackerAiMetricTerritory')) $('trackerAiMetricTerritory').textContent = territoryTilt;
+      if ($('trackerAiMetricGks')) $('trackerAiMetricGks').textContent = `${defGk} Def GK : ${attGk} Att GK`;
+      if ($('trackerAiMetricFouls')) $('trackerAiMetricFouls').textContent = `${ajaxFouls} Ajax · ${trackerState.oppFouls || 0} Opp`;
+      if ($('trackerAiMetricCards')) $('trackerAiMetricCards').textContent = `${ajaxYellows} Yellows`;
+
+      let reportData = null;
+
+      // 1. Try Asynchronous Call to Netlify Halftime AI Function (Gemini 2.5 Flash)
+      try {
+        const resp = await fetch('/.netlify/functions/halftime-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ telemetry })
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res && res.report) reportData = res.report;
+        }
+      } catch (err) {
+        console.warn('Halftime AI function notice:', err);
+      }
+
+      // 2. Fallback to Local Tactical Rule Engine if offline or error
+      if (!reportData) {
+        reportData = runTrackerLocalRuleEngine(telemetry);
+      }
+
+      cachedTrackerHalftimeReport = reportData;
+      renderTrackerHalftimeReport(reportData);
+    }
+
+    function runTrackerLocalRuleEngine(t) {
+      let sentiment = 'Contested';
+      const goalDiff = t.ajaxScore - t.oppScore;
+      const shotDiff = t.ajaxShots - t.oppShots;
+      const pressRate = parseInt(t.pressEfficiency, 10) || 0;
+
+      if (goalDiff >= 2 || (shotDiff >= 4 && t.goalKicksDefending >= t.goalKicksAttacking)) {
+        sentiment = 'Dominant';
+      } else if (goalDiff <= -2 || (shotDiff <= -4 && pressRate < 40)) {
+        sentiment = 'Under Pressure';
+      }
+
+      const gameFlowSummary = `Ajax established a ${t.territoryTilt} field tilt against ${t.opponent}, registering ${t.ajaxShots} total shots with ${t.ajaxSot} on target. Counter-pressing registered at ${t.pressEfficiency} (${t.pressWon}/${t.pressWon + t.pressLost} duel attempts won).`;
+
+      const tacticalInsights = [];
+      if (t.goalKicksDefending > t.goalKicksAttacking) {
+        tacticalInsights.push(`Territorial dominance: Forced ${t.goalKicksDefending} opponent defending goal kicks, pinning ${t.opponent} into low-block build-out territory.`);
+      } else if (t.goalKicksAttacking > t.goalKicksDefending) {
+        tacticalInsights.push(`Build-out under pressure: Required ${t.goalKicksAttacking} defensive goal kicks; need quicker central pivot outlets to escape opponent high press.`);
+      } else {
+        tacticalInsights.push(`Balanced territorial tilt: Neutral exchange of territory in middle third with even set-piece volume.`);
+      }
+
+      if (t.shotsOutside18 > 0 && t.shotsOutside18 >= t.ajaxShots * 0.4) {
+        tacticalInsights.push(`Shot selection: ${t.shotsOutside18} shots taken outside 18 box indicates opponent low block density; work third-man combinations inside the box.`);
+      } else if (t.ajaxSot >= 3) {
+        tacticalInsights.push(`Effective penetration: Created high-quality chances inside the box with ${t.ajaxSot} shots testing the goalkeeper.`);
+      }
+
+      if (pressRate >= 60) {
+        tacticalInsights.push(`High press execution: ${t.pressEfficiency} press win rate successfully suffocated opponent forward progression.`);
+      } else if (t.pressLost >= 3) {
+        tacticalInsights.push(`Transition vulnerability: ${t.pressLost} counter-press breakdowns opened space behind the fullbacks.`);
+      }
+
+      const riskAlerts = [];
+      if (t.ajaxYellows > 0) {
+        riskAlerts.push(`Yellow card discipline: ${t.cardedPlayers} on yellow; instruct them to avoid diving into secondary challenges.`);
+      }
+      if (t.pressLost >= 2) {
+        riskAlerts.push(`Rest defense exposure: Maintain central midfield balance to prevent ${t.opponent} direct counter-attacks.`);
+      }
+      if (!riskAlerts.length) {
+        riskAlerts.push(`No critical disciplinary or rest defense risks detected in the 1st half.`);
+      }
+
+      const adjustments = [];
+      if (t.shotsOutside18 >= 2) {
+        adjustments.push(`Patient box penetration: When reaching the 18 box, look for cutbacks to trailing midfielders rather than contested long shots.`);
+      }
+      if (t.goalKicksDefending >= 2) {
+        adjustments.push(`Defending goal kicks: Lock down the opponent's short passing options and position the #6 and #8 to win second balls at the midfield stripe.`);
+      }
+      if (t.ajaxScore <= t.oppScore) {
+        adjustments.push(`Width & Overloads: Accelerate ball movement from side to side; isolate wide wingers in 1v1 situations.`);
+      } else {
+        adjustments.push(`Game Management: Control tempo with possession sequences in the middle third; make opponent chase.`);
+      }
+
+      return {
+        sentiment,
+        gameFlowSummary,
+        tacticalInsights,
+        riskAlerts,
+        recommendedHalfTimeAdjustments: adjustments
+      };
+    }
+
+    function renderTrackerHalftimeReport(report) {
+      if ($('trackerAiLoadingSpinner')) $('trackerAiLoadingSpinner').classList.add('hidden');
+      if ($('trackerAiReportContent')) $('trackerAiReportContent').classList.remove('hidden');
+
+      const badge = $('trackerAiSentimentBadge');
+      const sentiment = (report.sentiment || 'Contested').toUpperCase();
+      if (badge) {
+        badge.textContent = sentiment;
+        if (sentiment === 'DOMINANT') {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/50';
+        } else if (sentiment === 'UNDER PRESSURE') {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/50';
+        } else {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/50';
+        }
+      }
+
+      if ($('trackerAiGameFlowText')) $('trackerAiGameFlowText').textContent = report.gameFlowSummary || 'No summary generated.';
+
+      const insightsList = $('trackerAiTacticalInsightsList');
+      if (insightsList) insightsList.innerHTML = (report.tacticalInsights || []).map(item => `<li>${item}</li>`).join('');
+
+      const alertsList = $('trackerAiRiskAlertsList');
+      if (alertsList) alertsList.innerHTML = (report.riskAlerts || []).map(item => `<li>${item}</li>`).join('');
+
+      const adjList = $('trackerAiAdjustmentsList');
+      if (adjList) adjList.innerHTML = (report.recommendedHalfTimeAdjustments || []).map(item => `<li>${item}</li>`).join('');
+    }
+
+    function copyTrackerHalftimeTalk() {
+      if (!cachedTrackerHalftimeReport) return;
+      const opp = trackerState.opponent || 'Opponent';
+      const text = `AJAX ASPIRE U15 · HALFTIME TACTICAL TALK (${opp})
+--------------------------------------------------
+SENTIMENT: ${cachedTrackerHalftimeReport.sentiment}
+
+GAME FLOW:
+${cachedTrackerHalftimeReport.gameFlowSummary}
+
+KEY TACTICAL INSIGHTS:
+${(cachedTrackerHalftimeReport.tacticalInsights || []).map(b => '• ' + b).join('\n')}
+
+RISK ALERTS:
+${(cachedTrackerHalftimeReport.riskAlerts || []).map(b => '• ' + b).join('\n')}
+
+2ND-HALF ADJUSTMENTS:
+${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + b).join('\n')}`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Halftime tactical talk copied to clipboard!');
+      }).catch(() => {
+        showToast('Talk ready on screen.');
+      });
     }
 
     function logTrackerEventRecord(ev) {
@@ -4491,13 +5293,15 @@
 
     function updateTrackerScoreboard() {
       let ajaxGoals = 0;
-      Object.values(trackerState.playerStats).forEach(p => ajaxGoals += (p.goals || 0));
+      Object.values(trackerState.playerStats || {}).forEach(p => ajaxGoals += (p.goals || 0));
       if ($('trackerScoreAjax')) $('trackerScoreAjax').textContent = ajaxGoals;
       if ($('trackerScoreOpp')) $('trackerScoreOpp').textContent = trackerState.oppGoals || 0;
       if ($('trackerOppHeader')) $('trackerOppHeader').textContent = (trackerState.opponent || 'OPPONENT').toUpperCase();
       if ($('trackerOppShots')) $('trackerOppShots').textContent = trackerState.oppShots || 0;
       if ($('trackerOppSubs')) $('trackerOppSubs').textContent = trackerState.oppSubs || 0;
       if ($('trackerOppCorners')) $('trackerOppCorners').textContent = trackerState.oppCorners || 0;
+      if ($('trackerOppFouls')) $('trackerOppFouls').textContent = trackerState.oppFouls || 0;
+      updateTrackerSummaryHud();
     }
 
     function renderTrackerMinutesStream() {
@@ -4547,6 +5351,7 @@
           if ($('trackerFormationSelect')) $('trackerFormationSelect').value = trackerState.formation || '4-3-3';
           updateTrackerClockDisplay();
           updateTrackerScoreboard();
+          updateTrackerSummaryHud();
         } else {
           initTrackerState();
         }
@@ -4560,204 +5365,215 @@
        ========================================================= */
     function commitMatchToHub() {
       let ajaxGoals = 0;
-      Object.values(trackerState.playerStats).forEach(p => ajaxGoals += (p.goals || 0));
-      const oppGoals = trackerState.oppGoals;
+      Object.values(trackerState.playerStats || {}).forEach(p => ajaxGoals += (p.goals || 0));
+      const oppGoals = trackerState.oppGoals || 0;
       const oppName = trackerState.opponent || 'Opponent Match';
       const matchMins = trackerState.matchSeconds > 0 ? Math.round(trackerState.matchSeconds / 60) : 80;
 
       if (!confirm(`Commit Match vs. ${oppName} (${ajaxGoals} - ${oppGoals}, ${matchMins}') directly to Match Hub? This updates team record, player minutes, splits, and film moments without any CSV uploads.`)) return;
 
-      const teamObj = DATA['AJAX ASPIRE U15'];
-      if (!teamObj) {
+      const teamObjAspire = DATA['AJAX ASPIRE U15'];
+      const teamObjLeague = DATA['AJAX ASPIRE U15 (LEAGUE)'];
+      const targetTeams = [teamObjAspire, teamObjLeague].filter(Boolean);
+
+      if (!targetTeams.length) {
         showToast('Error: Aspire team data not found.');
         return;
       }
 
-      // 1. Update Team Totals
-      const tot = teamObj.totals;
-      tot.games += 1;
-      tot.mins += matchMins;
-      tot.gf += ajaxGoals;
-      tot.ga += oppGoals;
-      tot.gd = tot.gf - tot.ga;
-      if (ajaxGoals > oppGoals) tot.won += 1;
-      else if (ajaxGoals === oppGoals) tot.tied += 1;
-      else tot.lost += 1;
+      let totalMomentsCreated = 0;
 
-      // 2. Update Players Cumulative Minutes & Positions
-      const byName = {};
-      (teamObj.players || []).forEach(p => { byName[p.name.toLowerCase()] = p; });
-
-      Object.values(trackerState.playerStats).forEach(ps => {
-        let p = byName[ps.name.toLowerCase()];
-        if (!p) {
-          // If guest player (e.g. Madisyn Craig), create entry in team players array
-          p = {
-            name: ps.name,
-            jersey: ps.jersey,
-            roles: [ps.currentPos ? simplifyTrackerPos(ps.currentPos) : 'CM'],
-            posBreakdown: [],
-            benchMins: 0,
-            squadGames: 0,
-            gp: 0,
-            mins: 0,
-            goals: 0,
-            assists: 0,
-            shots: 0,
-            sot: 0,
-            soff: 0,
-            corners: 0,
-            crosses: 0,
-            turnovers: 0,
-            toD: 0,
-            toM: 0,
-            toA: 0,
-            saves: 0,
-            keyPasses: 0,
-            duelsWon: 0,
-            duelsLost: 0,
-            fouls: 0,
-            cleanSheets: 0,
-            winPct: 0
-          };
-          teamObj.players.push(p);
-          byName[ps.name.toLowerCase()] = p;
+      targetTeams.forEach(teamObj => {
+        // 1. Update Team Totals
+        const tot = teamObj.totals;
+        if (tot) {
+          tot.games = (tot.games || 0) + 1;
+          tot.mins = (tot.mins || 0) + matchMins;
+          tot.gf = (tot.gf || 0) + ajaxGoals;
+          tot.ga = (tot.ga || 0) + oppGoals;
+          tot.gd = tot.gf - tot.ga;
+          if (ajaxGoals > oppGoals) tot.won = (tot.won || 0) + 1;
+          else if (ajaxGoals === oppGoals) tot.tied = (tot.tied || 0) + 1;
+          else tot.lost = (tot.lost || 0) + 1;
         }
 
-        if (ps.mins > 0) {
-          p.gp = (p.gp || 0) + 1;
-          p.mins = (p.mins || 0) + ps.mins;
-          p.goals = (p.goals || 0) + ps.goals;
-          p.assists = (p.assists || 0) + ps.assists;
-          p.shots = (p.shots || 0) + ps.shots;
-          p.sot = (p.sot || 0) + ps.sot;
-          p.soff = (p.soff || 0) + ps.soff;
-          p.corners = (p.corners || 0) + ps.corners;
-          p.crosses = (p.crosses || 0) + ps.crosses;
-          p.turnovers = (p.turnovers || 0) + ps.turnovers;
-          p.toD = (p.toD || 0) + ps.toD;
-          p.toM = (p.toM || 0) + ps.toM;
-          p.toA = (p.toA || 0) + ps.toA;
-          p.saves = (p.saves || 0) + ps.saves;
-          p.keyPasses = (p.keyPasses || 0) + ps.keyPasses;
-          p.duelsWon = (p.duelsWon || 0) + (ps.duelsWon || 0);
-          p.duelsLost = (p.duelsLost || 0) + (ps.duelsLost || 0);
-          p.benchMins = (p.benchMins || 0) + ps.benchMins;
+        // 2. Update Players Cumulative Minutes & Positions
+        const byName = {};
+        (teamObj.players || []).forEach(p => { byName[p.name.toLowerCase()] = p; });
 
-          // Merge positional minutes into p.posBreakdown
-          p.posBreakdown = p.posBreakdown || [];
-          Object.entries(ps.posMins).forEach(([pos, minsAtPos]) => {
-            if (minsAtPos > 0) {
-              let pb = p.posBreakdown.find(r => r.pos === pos);
-              if (!pb) {
-                pb = { pos, gp: 0, mins: 0, goals: 0, assists: 0, shots: 0, sot: 0, turnovers: 0, keyPasses: 0 };
-                p.posBreakdown.push(pb);
+        Object.values(trackerState.playerStats || {}).forEach(ps => {
+          let p = byName[ps.name.toLowerCase()];
+          if (!p) {
+            // If guest player (e.g. Madisyn Craig), create entry in team players array
+            p = {
+              name: ps.name,
+              jersey: ps.jersey,
+              roles: [ps.currentPos ? simplifyTrackerPos(ps.currentPos) : 'CM'],
+              posBreakdown: [],
+              benchMins: 0,
+              squadGames: 0,
+              gp: 0,
+              mins: 0,
+              goals: 0,
+              assists: 0,
+              shots: 0,
+              sot: 0,
+              soff: 0,
+              corners: 0,
+              crosses: 0,
+              turnovers: 0,
+              toD: 0,
+              toM: 0,
+              toA: 0,
+              saves: 0,
+              keyPasses: 0,
+              duelsWon: 0,
+              duelsLost: 0,
+              fouls: 0,
+              cleanSheets: 0,
+              winPct: 0
+            };
+            teamObj.players.push(p);
+            byName[ps.name.toLowerCase()] = p;
+          }
+
+          if (ps.mins > 0) {
+            p.gp = (p.gp || 0) + 1;
+            p.mins = (p.mins || 0) + ps.mins;
+            p.goals = (p.goals || 0) + ps.goals;
+            p.assists = (p.assists || 0) + ps.assists;
+            p.shots = (p.shots || 0) + ps.shots;
+            p.sot = (p.sot || 0) + ps.sot;
+            p.soff = (p.soff || 0) + ps.soff;
+            p.corners = (p.corners || 0) + ps.corners;
+            p.crosses = (p.crosses || 0) + ps.crosses;
+            p.turnovers = (p.turnovers || 0) + ps.turnovers;
+            p.toD = (p.toD || 0) + ps.toD;
+            p.toM = (p.toM || 0) + ps.toM;
+            p.toA = (p.toA || 0) + ps.toA;
+            p.saves = (p.saves || 0) + ps.saves;
+            p.keyPasses = (p.keyPasses || 0) + ps.keyPasses;
+            p.duelsWon = (p.duelsWon || 0) + (ps.duelsWon || 0);
+            p.duelsLost = (p.duelsLost || 0) + (ps.duelsLost || 0);
+            p.fouls = (p.fouls || 0) + (ps.fouls || 0);
+            p.benchMins = (p.benchMins || 0) + ps.benchMins;
+
+            // Merge positional minutes into p.posBreakdown
+            p.posBreakdown = p.posBreakdown || [];
+            Object.entries(ps.posMins || {}).forEach(([pos, minsAtPos]) => {
+              if (minsAtPos > 0) {
+                let pb = p.posBreakdown.find(r => r.pos === pos);
+                if (!pb) {
+                  pb = { pos, gp: 0, mins: 0, goals: 0, assists: 0, shots: 0, sot: 0, turnovers: 0, keyPasses: 0 };
+                  p.posBreakdown.push(pb);
+                }
+                pb.gp += 1;
+                pb.mins += minsAtPos;
+                pb.goals += ps.goals;
+                pb.assists += ps.assists;
+                pb.shots += ps.shots;
+                pb.sot += ps.sot;
+                pb.turnovers += ps.turnovers;
               }
-              pb.gp += 1;
-              pb.mins += minsAtPos;
-              pb.goals += ps.goals;
-              pb.assists += ps.assists;
-              pb.shots += ps.shots;
-              pb.sot += ps.sot;
-              pb.turnovers += ps.turnovers;
-            }
-          });
-          p.roles = p.posBreakdown.sort((a,b) => b.mins - a.mins).map(r => r.pos);
-        }
-      });
-
-      // 3. Convert Tracked Events & Bookmarks into Film Events
-      let maxId = (teamObj.filmEvents || []).reduce((max, e) => Math.max(max, e.id || 0), 0);
-      const newFilmMoments = [];
-
-      trackerState.events.forEach(ev => {
-        if (ev.type === 'sys' || ev.type === 'sub') return;
-        maxId++;
-        const pObj = trackerState.playerStats[ev.jersey];
-        const pName = pObj ? pObj.name : 'Team';
-        const isGoal = ev.type === 'goal';
-        const isAssist = ev.type === 'assist';
-        const isKeyPass = ev.type === 'keyPass';
-        const isDuelWon = ev.type === 'duelWon';
-        const isDuelLost = ev.type === 'duelLost';
-        const isSave = ev.type === 'save';
-        const isOppGoal = ev.type === 'oppGoal';
-        const isTO = ev.type === 'turnover';
-        const isBm = ev.isBookmark;
-
-        let category = 'Film Review';
-        let tag = 'Flagged on Sideline';
-        let qualityRaw = 'Neutral / Complete';
-        let outcome = 'Neutral';
-
-        if (isGoal) {
-          category = 'Offensive Moment';
-          tag = 'Decision on the Ball';
-          qualityRaw = 'Goal Scored';
-          outcome = 'Glow';
-        } else if (isAssist) {
-          category = 'Offensive Moment';
-          tag = 'Decision on the Ball';
-          qualityRaw = 'Good / Positive';
-          outcome = 'Glow';
-        } else if (isKeyPass) {
-          category = 'Offensive Moment';
-          tag = 'Key Pass / Line Breaker';
-          qualityRaw = 'Good / Positive';
-          outcome = 'Glow';
-        } else if (isDuelWon) {
-          category = 'Defensive Moment';
-          tag = 'Good Press / Duel Won';
-          qualityRaw = 'Good / Positive';
-          outcome = 'Glow';
-        } else if (isDuelLost) {
-          category = 'Defensive Moment';
-          tag = 'Defensive Duel Lost';
-          qualityRaw = 'Poor / Grow';
-          outcome = 'Grow';
-        } else if (isSave) {
-          category = 'Defensive Moment';
-          tag = 'Save';
-          qualityRaw = 'Good / Positive';
-          outcome = 'Glow';
-        } else if (isOppGoal) {
-          category = 'Defensive Moment';
-          tag = 'Defensive Duel Lost';
-          qualityRaw = 'Goal Conceded';
-          outcome = 'Grow';
-        } else if (isTO) {
-          category = 'Turnover';
-          tag = 'Turned into Pressure';
-          qualityRaw = 'Poor / Grow';
-          outcome = 'Grow';
-        }
-
-        newFilmMoments.push({
-          id: maxId,
-          match: oppName,
-          time: `${String(ev.time).padStart(2, '0')}:00`,
-          half: ev.time <= 40 ? 'H1' : 'H2',
-          zone: ev.zone || 'M3',
-          zoneDetail: ev.zone || 'M3',
-          jerseys: ev.jersey ? [ev.jersey] : [],
-          players: ev.jersey ? [`#${ev.jersey} ${pName}`] : ['Team'],
-          playersRaw: ev.jersey ? String(ev.jersey) : 'Team',
-          category,
-          tag,
-          qualityRaw,
-          outcome,
-          note: ev.desc || `Sideline logged ${ev.type}`,
-          filmReview: isBm || isOppGoal,
-          isCritical: isOppGoal
+            });
+            p.roles = p.posBreakdown.sort((a,b) => b.mins - a.mins).map(r => r.pos);
+          }
         });
+
+        // 3. Convert Tracked Events & Bookmarks into Film Events
+        let maxId = (teamObj.filmEvents || []).reduce((max, e) => Math.max(max, e.id || 0), 0);
+        const newFilmMoments = [];
+
+        (trackerState.events || []).forEach(ev => {
+          if (ev.type === 'sys' || ev.type === 'sub') return;
+          maxId++;
+          const pObj = trackerState.playerStats[ev.jersey];
+          const pName = pObj ? pObj.name : 'Team';
+          const isGoal = ev.type === 'goal';
+          const isAssist = ev.type === 'assist';
+          const isKeyPass = ev.type === 'keyPass';
+          const isDuelWon = ev.type === 'duelWon';
+          const isDuelLost = ev.type === 'duelLost';
+          const isSave = ev.type === 'save';
+          const isOppGoal = ev.type === 'oppGoal';
+          const isTO = ev.type === 'turnover';
+          const isBm = ev.isBookmark;
+
+          let category = 'Film Review';
+          let tag = 'Flagged on Sideline';
+          let qualityRaw = 'Neutral / Complete';
+          let outcome = 'Neutral';
+
+          if (isGoal) {
+            category = 'Offensive Moment';
+            tag = 'Decision on the Ball';
+            qualityRaw = 'Goal Scored';
+            outcome = 'Glow';
+          } else if (isAssist) {
+            category = 'Offensive Moment';
+            tag = 'Decision on the Ball';
+            qualityRaw = 'Good / Positive';
+            outcome = 'Glow';
+          } else if (isKeyPass) {
+            category = 'Offensive Moment';
+            tag = 'Key Pass / Line Breaker';
+            qualityRaw = 'Good / Positive';
+            outcome = 'Glow';
+          } else if (isDuelWon) {
+            category = 'Defensive Moment';
+            tag = 'Good Press / Duel Won';
+            qualityRaw = 'Good / Positive';
+            outcome = 'Glow';
+          } else if (isDuelLost) {
+            category = 'Defensive Moment';
+            tag = 'Defensive Duel Lost';
+            qualityRaw = 'Poor / Grow';
+            outcome = 'Grow';
+          } else if (isSave) {
+            category = 'Defensive Moment';
+            tag = 'Save';
+            qualityRaw = 'Good / Positive';
+            outcome = 'Glow';
+          } else if (isOppGoal) {
+            category = 'Defensive Moment';
+            tag = 'Defensive Duel Lost';
+            qualityRaw = 'Goal Conceded';
+            outcome = 'Grow';
+          } else if (isTO) {
+            category = 'Turnover';
+            tag = 'Turned into Pressure';
+            qualityRaw = 'Poor / Grow';
+            outcome = 'Grow';
+          }
+
+          newFilmMoments.push({
+            id: maxId,
+            match: oppName,
+            time: `${String(ev.time).padStart(2, '0')}:00`,
+            half: ev.time <= 40 ? 'H1' : 'H2',
+            zone: ev.zone || 'M3',
+            zoneDetail: ev.zone || 'M3',
+            jerseys: ev.jersey ? [ev.jersey] : [],
+            players: ev.jersey ? [`#${ev.jersey} ${pName}`] : ['Team'],
+            playersRaw: ev.jersey ? String(ev.jersey) : 'Team',
+            category,
+            tag,
+            qualityRaw,
+            outcome,
+            note: ev.desc || `Sideline logged ${ev.type}`,
+            filmReview: isBm || isOppGoal,
+            isCritical: isOppGoal
+          });
+        });
+
+        teamObj.filmEvents = (teamObj.filmEvents || []).concat(newFilmMoments);
+        totalMomentsCreated = newFilmMoments.length;
+
+        // 4. Re-calculate v3 Film Index and net metrics
+        applyNetMetrics(teamObj);
       });
 
-      teamObj.filmEvents = (teamObj.filmEvents || []).concat(newFilmMoments);
-
-      // 4. Re-calculate v3 Film Index and net metrics
-      applyNetMetrics(teamObj);
-
-      // 5. Save to LocalStorage permanently
+      // 5. Save to LocalStorage permanently under custom data key
       try {
         localStorage.setItem('matchhub_custom_data', JSON.stringify(DATA));
         localStorage.removeItem('matchhub_takeaways_aspire');
@@ -4765,9 +5581,10 @@
       } catch (err) {}
 
       // 6. Build cumulative season stats map to sync directly with Google Sheet (Player_IDP)
+      const primaryTeam = teamObjAspire || teamObjLeague;
       const cleanNorm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const statsPayload = {};
-      (teamObj.players || []).forEach(p => {
+      (primaryTeam.players || []).forEach(p => {
         const norm = cleanNorm(p.name);
         statsPayload[norm] = {
           name: p.name,
@@ -4795,13 +5612,25 @@
         oppShots: trackerState.oppShots || 0,
         oppSubs: trackerState.oppSubs || 0,
         oppCorners: trackerState.oppCorners || 0,
-        eventCount: trackerState.events.length
+        eventCount: (trackerState.events || []).length
       };
 
+      // Populate Commit Confirmation Receipt Modal
+      if ($('trackerCommitConfirmTitle')) $('trackerCommitConfirmTitle').textContent = `Match vs. ${oppName} Saved`;
+      if ($('trackerCommitScoreText')) $('trackerCommitScoreText').textContent = `${ajaxGoals} - ${oppGoals}`;
+      if ($('trackerCommitMinsText')) $('trackerCommitMinsText').textContent = `${matchMins} mins`;
+      if ($('trackerCommitPlayersCount')) $('trackerCommitPlayersCount').textContent = `${Object.keys(trackerState.playerStats || {}).length} players`;
+      if ($('trackerCommitMomentsCount')) $('trackerCommitMomentsCount').textContent = `${totalMomentsCreated} moments`;
+      if ($('trackerCommitSheetStatus')) $('trackerCommitSheetStatus').textContent = 'Syncing ☁️...';
+
+      if ($('trackerCommitConfirmModal')) {
+        $('trackerCommitConfirmModal').classList.replace('hidden', 'flex');
+      }
+
       // Background async sync to Google Sheets Master Data Hub (Player_IDP)
+      // NOTE: DO NOT use headers: {'Content-Type': 'application/json'} to prevent CORS preflight OPTIONS rejection
       fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'updateSeasonStats',
           pin: coachPin,
@@ -4810,18 +5639,21 @@
         })
       }).then(r => r.json()).then(res => {
         if (res && res.success) {
+          if ($('trackerCommitSheetStatus')) $('trackerCommitSheetStatus').textContent = `Synced ☁️ (${res.updated || 0} players)`;
           showToast(`☁️ Google Sheet (Player_IDP) synced: ${res.updated || 0} players updated!`);
+        } else {
+          if ($('trackerCommitSheetStatus')) $('trackerCommitSheetStatus').textContent = 'Saved Local Only (Cloud offline)';
         }
       }).catch(err => {
         console.warn('Background sheet sync notice:', err);
+        if ($('trackerCommitSheetStatus')) $('trackerCommitSheetStatus').textContent = 'Saved Locally';
       });
 
-      // Reset tracker for next game
-      initTrackerState();
-
+      // Re-render UI views immediately
+      selectTeam(team.id);
       renderAll();
+
       showToast(`🎉 Match vs ${oppName} committed directly to Match Hub! Standing, roster splits, film log & report cards updated.`);
-      switchTab('tab-overview');
     }
 
     function resetTrackerMatch() {
