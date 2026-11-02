@@ -2621,8 +2621,6 @@
       ceiling:     99,
       minEvents:   15,    // sample gate
       minMinutes:  120,   // sample gate
-      endProductGoal:   3.0,  // +3.0 pts per goal scored (direct match-winning value)
-      endProductAssist: 2.0,  // +2.0 pts per assist / key creation
       criticalErrorPenalty: -2.50 // -2.50 pts for fatal mistake directly conceding a goal
     };
 
@@ -2678,11 +2676,8 @@
 
       const pureGlow = Math.max(0, glow - mixed);
       const pureGrow = Math.max(0, grow - mixed);
-      const goals = Number(p.goals) || 0;
-      const assists = Number(p.assists) || 0;
-      const endProduct = (goals * INDEX_CONFIG.endProductGoal) + (assists * INDEX_CONFIG.endProductAssist);
 
-      p.netPts = Number((pureGlow * AGG_WEIGHTS.glow - pureGrow * AGG_WEIGHTS.grow + mixed * AGG_WEIGHTS.mixed + endProduct).toFixed(2));
+      p.netPts = Number((pureGlow * AGG_WEIGHTS.glow - pureGrow * AGG_WEIGHTS.grow + mixed * AGG_WEIGHTS.mixed).toFixed(2));
       p.netPer80 = mins > 0 ? Number((p.netPts * 80 / mins).toFixed(1)) : 0;
       p.groupWeights = getPlayerGroupWeights(p);
       p.posGroup = positionGroupOf(p);
@@ -2700,7 +2695,7 @@
       const players = (teamObj.players || []).filter(p => p && Number(p.mins) > 0);
       const events  = teamObj.filmEvents || [];
 
-      // 1. Raw event pass + end-product bonus (Goals +3.0, Assists +2.0)
+      // 1. Raw event pass (clean single-charge event weighting)
       if (events.length) {
         const byId = {};
         events.forEach(e => { byId[e.id] = e; });
@@ -2715,15 +2710,21 @@
               pts += eventWeight(e.outcome, e.zone, isCrit);
             }
           }
-          const goals = Number(p.goals) || 0;
-          const assists = Number(p.assists) || 0;
-          const endProduct = (goals * C.endProductGoal) + (assists * C.endProductAssist);
           p.rawFilmPts = Number(pts.toFixed(2));
-          p.endProductBonus = Number(endProduct.toFixed(2));
-          p.netPts = Number((pts + endProduct).toFixed(2));
+          p.netPts = Number(pts.toFixed(2));
           p.netPer80 = Number((p.netPts * 80 / Number(p.mins)).toFixed(1));
           p.netSource = 'events';
         });
+
+        // Compute team totals net score from film events
+        let teamNetPts = 0;
+        events.forEach(e => {
+          const isCrit = e.id === 567 || e.isCritical || (e.zone === 'D3' && /conceded goal|fumbles.*goal/i.test(e.note));
+          teamNetPts += eventWeight(e.outcome, e.zone, isCrit);
+        });
+        teamObj.totals.netPts = Number(teamNetPts.toFixed(2));
+        const tMins = Number(teamObj.totals.mins) || 0;
+        teamObj.totals.netPer80 = tMins > 0 ? Number((teamObj.totals.netPts * 80 / tMins).toFixed(1)) : 0;
       }
 
       // 2. Par line per position group (from players with >=120' mins and (>=15 events or >=200' mins))
@@ -2911,9 +2912,11 @@
         });
         const tGlow = Number(teamObj.totals.glow) || 0;
         const tGrow = Number(teamObj.totals.grow) || 0;
-        const tToD = Number(teamObj.totals.toD) || 0;
+        const tMixed = Number(teamObj.totals.glowAndGrow) || 0;
         const tMins = Number(teamObj.totals.mins) || 0;
-        teamObj.totals.netPts = Number(((tGlow * 1.25) - (tGrow * 1.0) - (tToD * 0.75)).toFixed(2));
+        const pureGlow = Math.max(0, tGlow - tMixed);
+        const pureGrow = Math.max(0, tGrow - tMixed);
+        teamObj.totals.netPts = Number((pureGlow * AGG_WEIGHTS.glow - pureGrow * AGG_WEIGHTS.grow + tMixed * AGG_WEIGHTS.mixed).toFixed(2));
         teamObj.totals.netPer80 = tMins > 0 ? Number((teamObj.totals.netPts * 80 / tMins).toFixed(1)) : 0;
         (teamObj.players || []).forEach(p => {
           const wv = Number(p.winPct) || 0;
@@ -3470,7 +3473,7 @@
 
       // Zone Cards (D3, M3, A3)
       const zoneMeta = {
-        D3: { name: 'Defending 3rd (D3)', color: 'text-rose-400', bar: '#ef4444', desc: 'Build-out, clearances & box defense (-0.75 TO weight)' },
+        D3: { name: 'Defending 3rd (D3)', color: 'text-rose-400', bar: '#ef4444', desc: 'Build-out, clearances & box defense (High leverage: ±1.50 weight)' },
         M3: { name: 'Middle 3rd (M3)', color: 'text-sky-400', bar: '#3b82f6', desc: 'Progression, midfield duels & press' },
         A3: { name: 'Attacking 3rd (A3)', color: 'text-amber-300', bar: '#f59e0b', desc: 'Final pass, combination play & finishing' }
       };
@@ -4348,7 +4351,7 @@
 
     const ASPIRE_ROSTER = [
       { jersey: 1, name: "Sola Alberto", nicknames: ["sola", "alberto"] },
-      { jersey: 2, name: "Giselle Rosales", nicknames: ["giselle", "rosales", " g "] },
+      { jersey: 2, name: "Giselle Rosales", nicknames: ["giselle", "rosales"] },
       { jersey: 4, name: "Arianna Zamora", nicknames: ["arianna", "ari", "zamora"] },
       { jersey: 5, name: "Grace Krimmel", nicknames: ["grace", "ellie", "krimmel"] },
       { jersey: 7, name: "MacKenzie Castro", nicknames: ["mackenzie", "mack", "castro"] },
@@ -4358,13 +4361,13 @@
       { jersey: 15, name: "Alessandra Fernandez", nicknames: ["alessandra", "ally", "allie", "fernandez"] },
       { jersey: 19, name: "Amy Godínez Vargas", nicknames: ["amy", "godinez", "vargas"] },
       { jersey: 23, name: "Sophia Culver", nicknames: ["sophia", "sophie", "culver"] },
-      { jersey: 24, name: "Evelyn Lopez", nicknames: ["evelyn", "ev", "lopez"] },
+      { jersey: 24, name: "Evelyn Lopez", nicknames: ["evelyn", "lopez"] },
       { jersey: 25, name: "Ella Simmons", nicknames: ["ella", "simmons"] },
       { jersey: 34, name: "Nairobi Mcgadney", nicknames: ["nairobi", "mcgadney"] },
-      { jersey: 36, name: "Alex Marigorda", nicknames: ["marigorda"] },
+      { jersey: 36, name: "Alex Marigorda", nicknames: ["alex", "marigorda"] },
       { jersey: 37, name: "Brooklyn Brewer", nicknames: ["brooklyn", "brewer"] },
       { jersey: 50, name: "Alexa Chipres", nicknames: ["alexa", "chipres"] },
-      { jersey: 88, name: "Sonia Vera", nicknames: ["sonia", "vera"] },
+      { jersey: 88, name: "Sonia Vera", nicknames: ["sonia", "vera", "keeper", "goalie"] },
       { jersey: 89, name: "Carlee Gowan", nicknames: ["carlee", "carly", "gowan"] }
     ];
 
@@ -4385,17 +4388,38 @@
       if (lower.includes('first half') || lower.includes('1st half') || /\bh1\b/.test(lower)) half = 'H1';
       else if (lower.includes('second half') || lower.includes('2nd half') || /\bh2\b/.test(lower)) half = 'H2';
 
+      // Zone extraction (explicit tokens take priority over descriptive phrases)
       let zone = 'M3';
-      if (/\bd3\b|defending third|defensive third|own box|back line/i.test(text)) zone = 'D3';
-      else if (/\ba3\b|attacking third|final third|opponent box|opponent 18/i.test(text)) zone = 'A3';
-      else if (/\bm3\b|middle third|midfield/i.test(text)) zone = 'M3';
+      const explicitZone = text.match(/\b(d3|m3|a3)\b/i);
+      if (explicitZone) {
+        zone = explicitZone[1].toUpperCase();
+      } else if (/\b(?:defending third|defensive third|own box|back line)\b/i.test(text)) {
+        zone = 'D3';
+      } else if (/\b(?:attacking third|final third|opponent box|opponent 18)\b/i.test(text)) {
+        zone = 'A3';
+      } else if (/\b(?:middle third|midfield)\b/i.test(text)) {
+        zone = 'M3';
+      }
 
+      // Player resolution (strip time references first so minutes like 14:22 or 24 mins don't match jersey numbers)
+      const textWithoutTime = text
+        .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g, ' ')
+        .replace(/\b\d{1,2}\s*(?:mins?|minutes?|')\b/gi, ' ');
+
+      const normText = (textWithoutTime || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
       const foundJerseys = new Set();
       ASPIRE_ROSTER.forEach(p => {
-        const numRegex = new RegExp(`(?:#|\\b)${p.jersey}\\b`, 'i');
-        if (numRegex.test(text)) foundJerseys.add(p.jersey);
+        // Check jersey number with word boundary or # (preventing colon/time false matches)
+        const numRegex = new RegExp(`(?:#\\s*${p.jersey}\\b|(?<![\\d:]\\s*)\\b${p.jersey}\\b(?![\\s:]*\\d|\\s*[']|\\s*mins?\\b|\\s*minutes?\\b))`, 'i');
+        if (numRegex.test(textWithoutTime)) foundJerseys.add(p.jersey);
+        // Check nicknames (must be at least 3 chars and match on word boundaries)
         p.nicknames.forEach(nick => {
-          if (lower.includes(nick.toLowerCase().trim())) foundJerseys.add(p.jersey);
+          const clean = (nick || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+          if (clean.length >= 3) {
+            const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const nickRegex = new RegExp(`\\b${escaped}\\b`, 'i');
+            if (nickRegex.test(normText)) foundJerseys.add(p.jersey);
+          }
         });
       });
 
@@ -7527,12 +7551,6 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
         computePlayerNetMetrics(p);
       });
       applyNetMetrics(teamObj);
-      const tGlow = Number(teamObj.totals.glow) || 0;
-      const tGrow = Number(teamObj.totals.grow) || 0;
-      const tToD = Number(teamObj.totals.toD) || 0;
-      const tMins = Number(teamObj.totals.mins) || 0;
-      teamObj.totals.netPts = Number(((tGlow * 1.25) - (tGrow * 1.0) - (tToD * 0.75)).toFixed(2));
-      teamObj.totals.netPer80 = tMins > 0 ? Number((teamObj.totals.netPts * 80 / tMins).toFixed(1)) : 0;
     }
 
     /* ---------- CSV / XLSX Import + Standalone HTML Export ---------- */

@@ -424,7 +424,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
        ========================================================= */
     const ASPIRE_ROSTER = [
       { jersey: 1, name: "Sola Alberto", nicknames: ["sola", "alberto"] },
-      { jersey: 2, name: "Giselle Rosales", nicknames: ["giselle", "rosales", " g "] },
+      { jersey: 2, name: "Giselle Rosales", nicknames: ["giselle", "rosales"] },
       { jersey: 4, name: "Arianna Zamora", nicknames: ["arianna", "ari", "zamora"] },
       { jersey: 5, name: "Grace Krimmel", nicknames: ["grace", "ellie", "krimmel"] },
       { jersey: 7, name: "MacKenzie Castro", nicknames: ["mackenzie", "mack", "castro"] },
@@ -434,7 +434,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       { jersey: 15, name: "Alessandra Fernandez", nicknames: ["alessandra", "ally", "allie", "fernandez"] },
       { jersey: 19, name: "Amy Godínez Vargas", nicknames: ["amy", "godinez", "vargas"] },
       { jersey: 23, name: "Sophia Culver", nicknames: ["sophia", "sophie", "culver"] },
-      { jersey: 24, name: "Evelyn Lopez", nicknames: ["evelyn", "ev", "lopez"] },
+      { jersey: 24, name: "Evelyn Lopez", nicknames: ["evelyn", "lopez"] },
       { jersey: 25, name: "Ella Simmons", nicknames: ["ella", "simmons"] },
       { jersey: 34, name: "Nairobi Mcgadney", nicknames: ["nairobi", "mcgadney"] },
       { jersey: 36, name: "Alex Marigorda", nicknames: ["alex", "marigorda"] },
@@ -714,21 +714,38 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       if (lower.includes('first half') || lower.includes('1st half') || /\bh1\b/.test(lower)) half = 'H1';
       else if (lower.includes('second half') || lower.includes('2nd half') || /\bh2\b/.test(lower)) half = 'H2';
 
-      // 3. Zone extraction
+      // 3. Zone extraction (explicit tokens take priority over descriptive phrases)
       let zone = 'M3';
-      if (/\bd3\b|defending third|defensive third|own box|back line/i.test(text)) zone = 'D3';
-      else if (/\ba3\b|attacking third|final third|opponent box|opponent 18/i.test(text)) zone = 'A3';
-      else if (/\bm3\b|middle third|midfield/i.test(text)) zone = 'M3';
+      const explicitZone = text.match(/\b(d3|m3|a3)\b/i);
+      if (explicitZone) {
+        zone = explicitZone[1].toUpperCase();
+      } else if (/\b(?:defending third|defensive third|own box|back line)\b/i.test(text)) {
+        zone = 'D3';
+      } else if (/\b(?:attacking third|final third|opponent box|opponent 18)\b/i.test(text)) {
+        zone = 'A3';
+      } else if (/\b(?:middle third|midfield)\b/i.test(text)) {
+        zone = 'M3';
+      }
 
-      // 4. Player resolution
+      // 4. Player resolution (strip time references first so minutes like 14:22 or 24 mins don't match jersey numbers)
+      const textWithoutTime = text
+        .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g, ' ')
+        .replace(/\b\d{1,2}\s*(?:mins?|minutes?|')\b/gi, ' ');
+
+      const normText = (textWithoutTime || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
       const foundJerseys = new Set();
       ASPIRE_ROSTER.forEach(p => {
-        // Check jersey number with word boundary or #
-        const numRegex = new RegExp(`(?:#|\\b)${p.jersey}\\b`, 'i');
-        if (numRegex.test(text)) foundJerseys.add(p.jersey);
-        // Check nicknames
+        // Check jersey number with word boundary or # (preventing colon/time false matches)
+        const numRegex = new RegExp(`(?:#\\s*${p.jersey}\\b|(?<![\\d:]\\s*)\\b${p.jersey}\\b(?![\\s:]*\\d|\\s*[']|\\s*mins?\\b|\\s*minutes?\\b))`, 'i');
+        if (numRegex.test(textWithoutTime)) foundJerseys.add(p.jersey);
+        // Check nicknames (must be at least 3 chars and match on word boundaries)
         p.nicknames.forEach(nick => {
-          if (lower.includes(nick.toLowerCase().trim())) foundJerseys.add(p.jersey);
+          const clean = (nick || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+          if (clean.length >= 3) {
+            const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const nickRegex = new RegExp(`\\b${escaped}\\b`, 'i');
+            if (nickRegex.test(normText)) foundJerseys.add(p.jersey);
+          }
         });
       });
 
