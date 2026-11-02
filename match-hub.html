@@ -826,6 +826,11 @@
             <textarea id="filmDirectInputText" rows="3" class="w-full bg-pitch border border-border rounded-xl p-3 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-teal-400 transition" placeholder='Dictate or paste notes here, e.g.:
 "14:22, M3. Scarlett line breaking pass to Giselle wide. Glow."
 "23:14, D3. Sonia rushed punt down middle straight to attacker. Grow."'></textarea>
+            <div id="filmDirectMicLive" class="hidden text-[11px] text-teal-300 bg-teal-950/60 border border-teal-500/30 rounded-lg p-2 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
+              <span class="font-bold text-slate-300">Listening:</span>
+              <span id="filmDirectMicLiveText" class="text-white font-mono italic">Speak observation...</span>
+            </div>
           </div>
 
           <!-- Action Buttons -->
@@ -2746,9 +2751,18 @@
         }
       });
 
+      // Compute overall team average net/80 across all eligible players
+      const teamAvgNet = eligible.length > 0
+        ? eligible.reduce((sum, p) => sum + (Number(p.netPer80) || 0), 0) / eligible.length
+        : 0;
+
       const par = {};
       for (const [g, cnt] of Object.entries(groupCounts)) {
-        par[g] = Number((groupSums[g] / cnt).toFixed(2));
+        const rawGroupPar = cnt > 0 ? (groupSums[g] / cnt) : teamAvgNet;
+        // Bayesian shrinkage for small sample position pools (cnt <= 8):
+        // Pulls outlier-distorted position groups gently towards team baseline
+        const w = cnt / (cnt + 4);
+        par[g] = Number((w * rawGroupPar + (1 - w) * teamAvgNet).toFixed(2));
       }
 
       // 3. Score each player against their minutes-weighted blended par
@@ -7252,6 +7266,50 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       showToast(`Loaded bookmark for ${time}!`);
     }
 
+    function cleanVoiceTranscript(raw) {
+      if (!raw) return '';
+      let text = ' ' + raw + ' ';
+
+      // Zones: Dee three -> D3, Empty three -> M3, Eighty three -> A3
+      text = text.replace(/\b(?:dee|the|d)\s*(?:three|3)\b/gi, ' D3 ');
+      text = text.replace(/\b(?:dee|the|d)\s*(?:two|2)\b/gi, ' D2 ');
+      text = text.replace(/\b(?:dee|the|d)\s*(?:one|1)\b/gi, ' D1 ');
+      text = text.replace(/\b(?:empty|entry|m)\s*(?:three|3)\b/gi, ' M3 ');
+      text = text.replace(/\b(?:empty|entry|m)\s*(?:two|2)\b/gi, ' M2 ');
+      text = text.replace(/\b(?:empty|entry|m)\s*(?:one|1)\b/gi, ' M1 ');
+      text = text.replace(/\b(?:8|eighty|a)\s*(?:three|3)\b/gi, ' A3 ');
+      text = text.replace(/\b(?:8|eighty|a)\s*(?:two|2)\b/gi, ' A2 ');
+      text = text.replace(/\b(?:8|eighty|a)\s*(?:one|1)\b/gi, ' A1 ');
+      text = text.replace(/\b([dma])\s*([123])\b/gi, (m, z, n) => z.toUpperCase() + n);
+
+      // Halves
+      text = text.replace(/\b(?:first\s+half|half\s+one|h\s*1|age\s*one)\b/gi, ' H1 ');
+      text = text.replace(/\b(?:second\s+half|half\s+two|h\s*2|age\s*two)\b/gi, ' H2 ');
+
+      // Outcomes
+      text = text.replace(/\b(?:glow\s*and\s*grow|glow\s*&\s*grow)\b/gi, ' Glow & Grow ');
+      text = text.replace(/\b(?:glo|blow|good\s+action)\b/gi, ' Glow ');
+      text = text.replace(/\b(?:gro|bro|poor\s+action|bad\s+action)\b/gi, ' Grow ');
+
+      // Time expressions
+      text = text.replace(/\b(\d{1,2})\s*(?:minute|minutes|min|mins)\b/gi, ' $1:00 ');
+      text = text.replace(/\b(\d{1,2})\s*(?:and|point)\s*(\d{1,2})\b/gi, ' $1:$2 ');
+
+      // Player names & common speech engine misrecognitions
+      text = text.replace(/\b(?:go\s*diners|godines)\b/gi, 'GodÃ­nez');
+      text = text.replace(/\b(?:ship\s*rest|shipres)\b/gi, 'Chipres');
+      text = text.replace(/\b(?:grace\s+crumble|grace\s+crimmel)\b/gi, 'Grace Krimmel');
+      text = text.replace(/\b(?:cammy)\b/gi, 'Camila');
+      text = text.replace(/\b(?:jazel|gizelle)\b/gi, 'Giselle');
+      text = text.replace(/\b(?:carly\s+gowan)\b/gi, 'Carlee Gowan');
+      text = text.replace(/\b(?:solar\s+alberto)\b/gi, 'Sola Alberto');
+      text = text.replace(/\b(?:sonya\s+vera)\b/gi, 'Sonia Vera');
+      text = text.replace(/\b(?:mc\s*gafney|mcgaffney)\b/gi, 'McGadney');
+      text = text.replace(/\b(?:fray\s*tas|fratas)\b/gi, 'Freitas');
+
+      return text.replace(/\s+/g, ' ').trim();
+    }
+
     function toggleFilmTabSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -7262,12 +7320,15 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       const micDot = $('filmTabMicDot');
       const micText = $('filmTabMicText');
       const input = $('filmDirectInputText');
+      const liveBox = $('filmDirectMicLive');
+      const liveText = $('filmDirectMicLiveText');
 
       if (filmTabRecording) {
         if (filmTabSpeechRec) filmTabSpeechRec.stop();
         filmTabRecording = false;
         micDot.classList.remove('recording-pulse');
         micText.textContent = 'Dictate (Web Mic)';
+        if (liveBox) liveBox.classList.add('hidden');
         showToast('Stopped dictation.');
         return;
       }
@@ -7275,23 +7336,38 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       try {
         filmTabSpeechRec = new SpeechRecognition();
         filmTabSpeechRec.continuous = true;
-        filmTabSpeechRec.interimResults = false;
+        filmTabSpeechRec.interimResults = true;
         filmTabSpeechRec.lang = 'en-US';
 
         filmTabSpeechRec.onstart = () => {
           filmTabRecording = true;
           micDot.classList.add('recording-pulse');
           micText.textContent = 'Listening... Speak';
+          if (liveBox) {
+            liveBox.classList.remove('hidden');
+            liveText.textContent = 'Listening...';
+          }
           showToast('Mic active! Dictate your film observations.');
         };
 
         filmTabSpeechRec.onresult = (e) => {
-          let str = '';
+          let interim = '';
+          let final = '';
           for (let i = e.resultIndex; i < e.results.length; i++) {
-            str += e.results[i][0].transcript + ' ';
+            const transcript = e.results[i][0].transcript;
+            if (e.results[i].isFinal) {
+              final += transcript + ' ';
+            } else {
+              interim += transcript;
+            }
           }
-          if (str) {
-            input.value += (input.value ? '\n\n' : '') + `"${str.trim()}"`;
+          if (interim && liveText) {
+            liveText.textContent = interim;
+          }
+          if (final) {
+            const cleaned = cleanVoiceTranscript(final);
+            input.value += (input.value ? '\n\n' : '') + `"${cleaned.trim()}"`;
+            if (liveText) liveText.textContent = cleaned.trim();
           }
         };
 
@@ -7299,17 +7375,19 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
           filmTabRecording = false;
           micDot.classList.remove('recording-pulse');
           micText.textContent = 'Dictate (Web Mic)';
+          if (liveBox) liveBox.classList.add('hidden');
         };
 
         filmTabSpeechRec.onend = () => {
           filmTabRecording = false;
           micDot.classList.remove('recording-pulse');
           micText.textContent = 'Dictate (Web Mic)';
+          if (liveBox) liveBox.classList.add('hidden');
         };
 
         filmTabSpeechRec.start();
       } catch (err) {
-        showToast('Could not initialize microphone.');
+        showToast('Could not initialize microphone: ' + err.message);
       }
     }
 

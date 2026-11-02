@@ -131,6 +131,13 @@
           </div>
         </div>
 
+        <!-- Live Speech Recognition Streaming Feedback -->
+        <div id="voiceLiveFeedback" class="hidden text-xs text-teal-300 bg-teal-950/60 border border-teal-500/30 rounded-xl p-3 flex items-center gap-2.5">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shrink-0"></span>
+          <span class="font-bold text-slate-300 shrink-0">Live Voice Stream:</span>
+          <span id="voiceLiveText" class="text-white font-mono italic truncate">Listening...</span>
+        </div>
+
         <!-- Transcript Input Area -->
         <div class="space-y-1.5">
           <div class="flex items-center justify-between text-xs">
@@ -229,7 +236,7 @@
               🟡 Glow &amp; Grow (Mixed)
             </button>
             <button type="button" onclick="setRapidOutcome('Goal Scored')" id="outBtn-Goal" class="out-btn py-2 rounded-xl border border-border bg-surface text-slate-300">
-              ⚽ Goal Scored (+3)
+              ⚽ Goal Scored
             </button>
             <button type="button" onclick="setRapidOutcome('Goal Conceded')" id="outBtn-Conceded" class="out-btn py-2 rounded-xl border border-border bg-surface text-slate-300">
               🥅 Conceded (-2.5)
@@ -246,31 +253,105 @@
           <div id="rosterPickGrid" class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-7 gap-1.5"></div>
         </div>
 
-        <!-- Primary Action Trigger -->
-        <div class="space-y-1.5">
-          <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Primary Action Trigger / Tag</label>
-          <div class="flex flex-wrap gap-1.5 text-xs" id="quickTagList">
-            <button type="button" onclick="setRapidTag('Forced Pass')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Forced Pass</button>
-            <button type="button" onclick="setRapidTag('Turned into Pressure')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Turned into Pressure</button>
-            <button type="button" onclick="setRapidTag('Heavy Touch')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Heavy Touch</button>
-            <button type="button" onclick="setRapidTag('Key Pass / Line Breaker')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Key Pass / Line Breaker</button>
-            <button type="button" onclick="setRapidTag('Good Press / Duel Won')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Good Press / Duel Won</button>
-            <button type="button" onclick="setRapidTag('Decision on the Ball')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Decision on the Ball</button>
-            <button type="button" onclick="setRapidTag('Decision off the Ball')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Decision off the Ball</button>
-            <button type="button" onclick="setRapidTag('Defensive Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Defensive Shape</button>
-            <button type="button" onclick="setRapidTag('Lost Mark / Bad Recovery')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Lost Mark / Bad Recovery</button>
-            <button type="button" onclick="setRapidTag('Clearance')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Clearance</button>
-            <button type="button" onclick="setRapidTag('Save')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Save</button>
-            <button type="button" onclick="setRapidTag('Quality Shot')" class="tag-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-300">Quality Shot</button>
+        <!-- Primary Action Trigger & Quick Clusters -->
+        <div class="space-y-2.5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/50 pb-2">
+            <div>
+              <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Primary Action Trigger / Tag</label>
+              <p class="text-[10px] text-slate-500">1 tap sets action, category, and default outcome.</p>
+            </div>
+            <!-- Category Filter Chips -->
+            <div class="flex items-center gap-1 overflow-x-auto pb-0.5 text-[11px] font-semibold" id="actionFilterChips">
+              <button type="button" onclick="filterActionCategory('all')" id="afc-all" class="afc-btn px-2.5 py-1 rounded-lg border border-teal-500/50 bg-teal-500/20 text-teal-300 font-bold whitespace-nowrap transition">All (47)</button>
+              <button type="button" onclick="filterActionCategory('turnover')" id="afc-turnover" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🔴 Turnovers (13)</button>
+              <button type="button" onclick="filterActionCategory('passing')" id="afc-passing" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🟢 Passing (8)</button>
+              <button type="button" onclick="filterActionCategory('defending')" id="afc-defending" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🛡️ Defending (9)</button>
+              <button type="button" onclick="filterActionCategory('finishing')" id="afc-finishing" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">⚡ Finishing (6)</button>
+              <button type="button" onclick="filterActionCategory('movement')" id="afc-movement" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🧠 Decisions (6)</button>
+              <button type="button" onclick="filterActionCategory('gk')" id="afc-gk" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🧤 Goalkeeping (5)</button>
+            </div>
+          </div>
+
+          <!-- Actions Grid (Filtered dynamically by filterActionCategory) -->
+          <div class="flex flex-wrap gap-1.5 text-xs max-h-[220px] overflow-y-auto pr-1" id="quickTagList">
+            <!-- 🔴 Turnovers (13) -->
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Forced Pass', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Forced Pass</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Turned into Pressure', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Turned into Pressure</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Heavy Touch', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Heavy Touch</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Forced Pass into Def', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Forced Pass into Def</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Pass off target / Poor Quality', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Pass Off Target</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Didn\'t Scan or Didn\'t have a Plan', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Didn't Scan / No Plan</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Lost Mark / Bad Recovery', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Lost Mark / Bad Recovery</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Stabbed at the Ball', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Stabbed at the Ball</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Defensive Duel Lost', 'Grow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Defensive Duel Lost</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Poor Clearance', 'Grow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Poor Clearance</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('Poor Shot Selection', 'Grow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Poor Shot Selection</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('No Challenge on 50/50', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">No Challenge on 50/50</button>
+            <button type="button" data-cat="turnover" onclick="setRapidTag('No Off Ball Movement', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">No Off-Ball Movement</button>
+
+            <!-- 🟢 Passing & Creation (8) -->
+            <button type="button" data-cat="passing" onclick="setRapidTag('Key Pass / Line Breaker', 'Glow', 'Key Pass')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Key Pass / Line Breaker</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Combination Play', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Combination Play (1-2s)</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Switch Point of Attack', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Switch Point of Attack</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Through Ball into Space', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Through Ball into Space</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Direct Entry to 9', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Direct Entry to 9</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Composed Build-Out Escape', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Composed Build-Out Escape</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Crossing', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Crossing / Box Delivery</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Positive Action', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Positive Possession</button>
+
+            <!-- 🛡️ Defending & Pressing (9) -->
+            <button type="button" data-cat="defending" onclick="setRapidTag('Good Press / Duel Won', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Good Press / Duel Won</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Tackle & Secure Possession', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Tackle & Secure Possession</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Defensive Shape', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Defensive Shape / Shift</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Recovery Run', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Recovery Tracking Run</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Clearance', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Clearance (Strong)</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Blocked Shot', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Blocked Shot / Cross</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Stabbed at the Ball', 'Grow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-900/40 transition">Stabbed at Ball</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Lost Mark / Didn\'t Track Back', 'Grow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-900/40 transition">Didn't Track Back</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Foul Committed', 'Grow', 'Foul')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Foul Committed</button>
+
+            <!-- ⚡ Finishing & Attacking (6) -->
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Goal Scored', 'Goal Scored', 'Goal')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-400/50 bg-amber-500/20 text-amber-300 font-bold hover:bg-amber-500/30 transition">⚽ Goal Scored</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Assist', 'Glow', 'Assist')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Assist / Chance Created</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Shot on Target', 'Glow', 'Shot on Target')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Shot on Target</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Quality Shot', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Quality Shot</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('1v1 Dribble Won', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">1v1 Dribble Won / Escape</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Shot Off Target', 'Grow', 'Shot')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Shot Off Target</button>
+
+            <!-- 🧠 Movement & Decisions (6) -->
+            <button type="button" data-cat="movement" onclick="setRapidTag('Decision on the Ball', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Decision on the Ball</button>
+            <button type="button" data-cat="movement" onclick="setRapidTag('Decision off the Ball', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Decision off the Ball</button>
+            <button type="button" data-cat="movement" onclick="setRapidTag('Scanning & Pre-Orientation', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Scanning & Pre-Orientation</button>
+            <button type="button" data-cat="movement" onclick="setRapidTag('Support Angle Offered', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Support Angle Offered</button>
+            <button type="button" data-cat="movement" onclick="setRapidTag('Made Run', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Made Penetrating Run</button>
+            <button type="button" data-cat="movement" onclick="setRapidTag('Offensive Shape', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Offensive Shape & Width</button>
+
+            <!-- 🧤 Goalkeeping (5) -->
+            <button type="button" data-cat="gk" onclick="setRapidTag('Save', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Save (Clean / Held)</button>
+            <button type="button" data-cat="gk" onclick="setRapidTag('Save (Parried)', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Save (Parried Wide)</button>
+            <button type="button" data-cat="gk" onclick="setRapidTag('Box Aerial Claim', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Box Aerial Punch / Claim</button>
+            <button type="button" data-cat="gk" onclick="setRapidTag('Build-out Distribution', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Build-out Distribution</button>
+            <button type="button" data-cat="gk" onclick="setRapidTag('Goal Conceded', 'Goal Conceded', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/50 bg-rose-950/40 text-rose-300 font-bold hover:bg-rose-900/50 transition">🥅 Goal Conceded</button>
           </div>
         </div>
 
         <!-- Coaching Comment / Voice Input -->
         <div class="space-y-1.5">
-          <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Coaching Note / Observation</label>
+          <div class="flex items-center justify-between">
+            <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Coaching Note / Observation</label>
+            <button type="button" id="rapidMicBtn" onclick="toggleRapidMic()" class="px-2.5 py-1 rounded-lg bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95 shadow-sm">
+              <span id="rapidMicDot" class="w-2 h-2 rounded-full bg-teal-400"></span>
+              <span id="rapidMicText">🎙️ Dictate Note</span>
+            </button>
+          </div>
           <div class="relative">
             <textarea id="rapidNotes" rows="2" placeholder="Describe the moment, tactical instruction, or what to review on film..."
               class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white placeholder-slate-600 focus:outline-none focus:border-brand-500"></textarea>
+            <div id="rapidMicLive" class="hidden text-[11px] text-teal-300 bg-teal-950/60 border border-teal-500/30 rounded-lg p-2 mt-1 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
+              <span class="font-bold text-slate-300">Listening:</span>
+              <span id="rapidMicLiveText" class="text-white font-mono italic">Speak observation...</span>
+            </div>
           </div>
         </div>
 
@@ -461,8 +542,11 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     let currentRapidZone = 'D3';
     let currentRapidOutcome = 'Glow';
     let currentRapidTag = 'Forced Pass';
+    let currentRapidCategory = 'Turnover';
     let isRecording = false;
     let recognition = null;
+    let isRapidRecording = false;
+    let rapidRecognition = null;
 
     /* Initialize today date */
     document.addEventListener('DOMContentLoaded', () => {
@@ -570,15 +654,36 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       });
     }
 
-    function setRapidTag(tag) {
-      currentRapidTag = tag;
-      document.querySelectorAll('#quickTagList .tag-btn').forEach(btn => {
-        const active = btn.textContent.trim() === tag;
-        btn.classList.toggle('bg-teal-500/20', active);
+    function filterActionCategory(cat) {
+      document.querySelectorAll('#actionFilterChips .afc-btn').forEach(btn => {
+        const active = btn.id === `afc-${cat}`;
         btn.classList.toggle('border-teal-500/50', active);
+        btn.classList.toggle('bg-teal-500/20', active);
         btn.classList.toggle('text-teal-300', active);
-        btn.classList.toggle('bg-surface', !active);
+        btn.classList.toggle('font-bold', active);
         btn.classList.toggle('border-border', !active);
+        btn.classList.toggle('bg-surface', !active);
+        btn.classList.toggle('text-slate-400', !active);
+      });
+
+      document.querySelectorAll('#quickTagList .tag-btn').forEach(btn => {
+        const bCat = btn.getAttribute('data-cat');
+        const show = cat === 'all' || bCat === cat;
+        btn.classList.toggle('hidden', !show);
+      });
+    }
+
+    function setRapidTag(tag, defaultOutcome, defaultCategory) {
+      currentRapidTag = tag;
+      if (defaultOutcome) setRapidOutcome(defaultOutcome);
+      if (defaultCategory) currentRapidCategory = defaultCategory;
+
+      document.querySelectorAll('#quickTagList .tag-btn').forEach(btn => {
+        const txt = btn.textContent.trim();
+        const active = txt === tag || txt.startsWith(tag);
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-teal-400', active);
+        btn.classList.toggle('font-bold', active);
       });
     }
 
@@ -612,10 +717,10 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         : currentRapidOutcome === 'Glow & Grow' ? 'Glow and Grow (Good actions and Not so Good action)'
         : currentRapidOutcome;
 
-      let category = currentRapidOutcome.includes('Goal') ? 'Offensive Moment'
-        : currentRapidTag.includes('Pass') || currentRapidTag.includes('Touch') || currentRapidTag.includes('Turned') ? 'Turnover'
-        : currentRapidTag.includes('Duel') || currentRapidTag.includes('Clearance') || currentRapidTag.includes('Shape') ? 'Defensive Moment'
-        : 'Offensive Moment';
+      let category = currentRapidCategory
+        || (currentRapidOutcome.includes('Goal') ? 'Offensive Moment'
+          : currentRapidOutcome === 'Grow' ? 'Turnover'
+          : 'Offensive Moment');
 
       const momentObj = {
         date: new Date().toISOString().replace('T', ' ').slice(0, 19),
@@ -797,6 +902,53 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     }
 
     /* =========================================================
+       SOCCER VOCABULARY & SPEECH PHONETIC POST-PROCESSOR
+       ========================================================= */
+    function cleanVoiceTranscript(raw) {
+      if (!raw) return '';
+      let text = ' ' + raw + ' ';
+
+      // Zones: Dee three -> D3, Empty three -> M3, Eighty three -> A3
+      text = text.replace(/\b(?:dee|the|d)\s*(?:three|3)\b/gi, ' D3 ');
+      text = text.replace(/\b(?:dee|the|d)\s*(?:two|2)\b/gi, ' D2 ');
+      text = text.replace(/\b(?:dee|the|d)\s*(?:one|1)\b/gi, ' D1 ');
+      text = text.replace(/\b(?:empty|entry|m)\s*(?:three|3)\b/gi, ' M3 ');
+      text = text.replace(/\b(?:empty|entry|m)\s*(?:two|2)\b/gi, ' M2 ');
+      text = text.replace(/\b(?:empty|entry|m)\s*(?:one|1)\b/gi, ' M1 ');
+      text = text.replace(/\b(?:8|eighty|a)\s*(?:three|3)\b/gi, ' A3 ');
+      text = text.replace(/\b(?:8|eighty|a)\s*(?:two|2)\b/gi, ' A2 ');
+      text = text.replace(/\b(?:8|eighty|a)\s*(?:one|1)\b/gi, ' A1 ');
+      text = text.replace(/\b([dma])\s*([123])\b/gi, (m, z, n) => z.toUpperCase() + n);
+
+      // Halves
+      text = text.replace(/\b(?:first\s+half|half\s+one|h\s*1|age\s*one)\b/gi, ' H1 ');
+      text = text.replace(/\b(?:second\s+half|half\s+two|h\s*2|age\s*two)\b/gi, ' H2 ');
+
+      // Outcomes
+      text = text.replace(/\b(?:glow\s*and\s*grow|glow\s*&\s*grow)\b/gi, ' Glow & Grow ');
+      text = text.replace(/\b(?:glo|blow|good\s+action)\b/gi, ' Glow ');
+      text = text.replace(/\b(?:gro|bro|poor\s+action|bad\s+action)\b/gi, ' Grow ');
+
+      // Time expressions
+      text = text.replace(/\b(\d{1,2})\s*(?:minute|minutes|min|mins)\b/gi, ' $1:00 ');
+      text = text.replace(/\b(\d{1,2})\s*(?:and|point)\s*(\d{1,2})\b/gi, ' $1:$2 ');
+
+      // Player names & common speech engine misrecognitions
+      text = text.replace(/\b(?:go\s*diners|godines)\b/gi, 'Godínez');
+      text = text.replace(/\b(?:ship\s*rest|shipres)\b/gi, 'Chipres');
+      text = text.replace(/\b(?:grace\s+crumble|grace\s+crimmel)\b/gi, 'Grace Krimmel');
+      text = text.replace(/\b(?:cammy)\b/gi, 'Camila');
+      text = text.replace(/\b(?:jazel|gizelle)\b/gi, 'Giselle');
+      text = text.replace(/\b(?:carly\s+gowan)\b/gi, 'Carlee Gowan');
+      text = text.replace(/\b(?:solar\s+alberto)\b/gi, 'Sola Alberto');
+      text = text.replace(/\b(?:sonya\s+vera)\b/gi, 'Sonia Vera');
+      text = text.replace(/\b(?:mc\s*gafney|mcgaffney)\b/gi, 'McGadney');
+      text = text.replace(/\b(?:fray\s*tas|fratas)\b/gi, 'Freitas');
+
+      return text.replace(/\s+/g, ' ').trim();
+    }
+
+    /* =========================================================
        LIVE SPEECH RECOGNITION (WEB SPEECH API)
        ========================================================= */
     function toggleSpeechRecognition() {
@@ -806,16 +958,18 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         return;
       }
 
-      const micBtn = document.getElementById('micBtn');
       const micDot = document.getElementById('micDot');
       const micText = document.getElementById('micText');
       const input = document.getElementById('voiceInputText');
+      const liveFeedback = document.getElementById('voiceLiveFeedback');
+      const liveText = document.getElementById('voiceLiveText');
 
       if (isRecording) {
         if (recognition) recognition.stop();
         isRecording = false;
-        micDot.classList.remove('recording-pulse');
+        micDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
         micText.textContent = 'Live Dictate (Web Mic)';
+        if (liveFeedback) liveFeedback.classList.add('hidden');
         showToast('Stopped recording.');
         return;
       }
@@ -823,42 +977,140 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       try {
         recognition = new SpeechRecognition();
         recognition.continuous = true;
-        recognition.interimResults = false;
+        recognition.interimResults = true;
         recognition.lang = 'en-US';
 
         recognition.onstart = () => {
           isRecording = true;
-          micDot.classList.add('recording-pulse');
+          micDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 recording-pulse';
           micText.textContent = 'Listening... Speak now';
+          if (liveFeedback) {
+            liveFeedback.classList.remove('hidden');
+            liveText.textContent = 'Listening...';
+          }
           showToast('Mic active! Dictate your moment observations.');
         };
 
         recognition.onresult = (e) => {
-          let transcript = '';
+          let interim = '';
+          let final = '';
           for (let i = e.resultIndex; i < e.results.length; i++) {
-            transcript += e.results[i][0].transcript + ' ';
+            const transcript = e.results[i][0].transcript;
+            if (e.results[i].isFinal) {
+              final += transcript + ' ';
+            } else {
+              interim += transcript;
+            }
           }
-          if (transcript) {
-            input.value += (input.value ? '\n\n' : '') + `"${transcript.trim()}"`;
+          if (interim && liveText) {
+            liveText.textContent = interim;
+          }
+          if (final) {
+            const cleaned = cleanVoiceTranscript(final);
+            input.value += (input.value ? '\n\n' : '') + `"${cleaned.trim()}"`;
+            if (liveText) liveText.textContent = cleaned.trim();
           }
         };
 
         recognition.onerror = (err) => {
           showToast(`Mic error: ${err.error || 'Check microphone permissions'}`);
           isRecording = false;
-          micDot.classList.remove('recording-pulse');
+          micDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
           micText.textContent = 'Live Dictate (Web Mic)';
+          if (liveFeedback) liveFeedback.classList.add('hidden');
         };
 
         recognition.onend = () => {
           isRecording = false;
-          micDot.classList.remove('recording-pulse');
+          micDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
           micText.textContent = 'Live Dictate (Web Mic)';
+          if (liveFeedback) liveFeedback.classList.add('hidden');
         };
 
         recognition.start();
       } catch (err) {
-        showToast('Could not initialize microphone.');
+        showToast(`Could not initialize microphone: ${err.message}`);
+      }
+    }
+
+    /* 1-Tap Quick Note Dictation (Rapid Logger Tab) */
+    function toggleRapidMic() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast('Speech Recognition not supported in this browser.');
+        return;
+      }
+
+      const micDot = document.getElementById('rapidMicDot');
+      const micText = document.getElementById('rapidMicText');
+      const liveBox = document.getElementById('rapidMicLive');
+      const liveText = document.getElementById('rapidMicLiveText');
+      const notesInput = document.getElementById('rapidNotes');
+
+      if (isRapidRecording) {
+        if (rapidRecognition) rapidRecognition.stop();
+        isRapidRecording = false;
+        micDot.className = 'w-2 h-2 rounded-full bg-teal-400';
+        micText.textContent = '🎙️ Dictate Note';
+        liveBox.classList.add('hidden');
+        showToast('Note dictation ended.');
+        return;
+      }
+
+      try {
+        rapidRecognition = new SpeechRecognition();
+        rapidRecognition.continuous = true;
+        rapidRecognition.interimResults = true;
+        rapidRecognition.lang = 'en-US';
+
+        rapidRecognition.onstart = () => {
+          isRapidRecording = true;
+          micDot.className = 'w-2 h-2 rounded-full bg-rose-500 recording-pulse';
+          micText.textContent = 'Listening...';
+          liveBox.classList.remove('hidden');
+          liveText.textContent = 'Listening... speak observation';
+        };
+
+        rapidRecognition.onresult = (e) => {
+          let interim = '';
+          let final = '';
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            const transcript = e.results[i][0].transcript;
+            if (e.results[i].isFinal) {
+              final += transcript + ' ';
+            } else {
+              interim += transcript;
+            }
+          }
+          if (interim) {
+            liveText.textContent = interim;
+          }
+          if (final) {
+            const cleaned = cleanVoiceTranscript(final);
+            const cur = notesInput.value.trim();
+            notesInput.value = (cur ? cur + ' ' : '') + cleaned;
+            liveText.textContent = cleaned;
+          }
+        };
+
+        rapidRecognition.onerror = (err) => {
+          isRapidRecording = false;
+          micDot.className = 'w-2 h-2 rounded-full bg-teal-400';
+          micText.textContent = '🎙️ Dictate Note';
+          liveBox.classList.add('hidden');
+          showToast(`Mic error: ${err.error || 'Check mic permission'}`);
+        };
+
+        rapidRecognition.onend = () => {
+          isRapidRecording = false;
+          micDot.className = 'w-2 h-2 rounded-full bg-teal-400';
+          micText.textContent = '🎙️ Dictate Note';
+          liveBox.classList.add('hidden');
+        };
+
+        rapidRecognition.start();
+      } catch (err) {
+        showToast(`Mic error: ${err.message}`);
       }
     }
 
