@@ -2853,7 +2853,16 @@
         const savedData = JSON.parse(localStorage.getItem('matchhub_custom_data') || 'null');
         if (savedData && typeof savedData === 'object') {
           for (const [k, v] of Object.entries(savedData)) {
-            if (v && v.totals && Array.isArray(v.players)) DATA[k] = v;
+            const defaultGames = DEFAULT_DATA[k]?.totals?.games || 0;
+            const savedGames = v?.totals?.games || 0;
+            if (v && v.totals && Array.isArray(v.players)) {
+              if (savedGames >= defaultGames) {
+                DATA[k] = v;
+              } else {
+                console.warn(`[Auto-Heal] Ignored stale/partial customData for ${k} (${savedGames} GP < default ${defaultGames} GP). Preserving verified baseline.`);
+                localStorage.removeItem('matchhub_custom_data');
+              }
+            }
           }
         }
       } catch (e) {}
@@ -6638,7 +6647,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
 
       // 6. Build cumulative season stats map to sync directly with Google Sheet (Player_IDP)
       const primaryTeam = teamObjAspire || teamObjLeague;
-      const cleanNorm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const cleanNorm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const statsPayload = {};
       (primaryTeam.players || []).forEach(p => {
         const norm = cleanNorm(p.name);

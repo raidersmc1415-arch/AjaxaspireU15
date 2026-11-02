@@ -69,6 +69,9 @@ All features, UI tweaks, and workflow changes should support making this interac
 2. **Update the Script, Keep the URL:** When updating Google Apps Script code, always deploy as a *new version* of the existing deployment. Creating a brand new deployment changes the endpoint URL and breaks the live front-end.
 3. **Spreadsheet First, Code Last:** Content items (challenges, video clips, recognitions, announcements) are spreadsheet rows. Only structural and design updates require site code deploys.
 4. **Column Names Are Exact:** Front-end and Google Apps Script functions find data by column header name, not hardcoded column index. Columns can be rearranged, but never renamed without updating the code.
+5. **Diacritic-Insensitive Name Matching & Roster Verification:**
+   - All player name comparison, indexing, and normalization routines (`normName`, `cleanNorm`, lookup dictionaries in both JavaScript and Google Apps Script) MUST decompose and strip diacritical marks using `.normalize('NFD').replace(/[\u0300-\u036f]/g, '')` before matching. This prevents silent drops, duplicated rows, or mismatched stats between accented and unaccented variations (e.g., `"Amy Godínez Vargas"` vs. `"Amy Godinez Vargas"`).
+   - Never assume a player did not participate in a match based solely on an unchanged spreadsheet cell or un-updated metric without first checking match export files (`Statistics_*.csv`), raw substitution logs, or active lineups.
 
 ---
 

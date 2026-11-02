@@ -3433,16 +3433,39 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         customData = {};
       }
 
-      // Ensure squad entries exist in customData
+      // Ensure squad entries exist in customData with verified multi-game baseline
       const sq = SQUADS[activeSquadKey];
       const squadKeysToUpdate = activeSquadKey === 'aspire'
         ? ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)']
         : ['AJAX GA U15'];
 
+      // Verified historical baseline defaults if local customData is absent or partial
+      const BASELINE_TOTALS = {
+        'AJAX ASPIRE U15': {
+          games: 5, mins: 413, won: 1, tied: 0, lost: 4, gf: 7, ga: 12, gd: -5,
+          shots: 37, sot: 27, soff: 10, shotsAgainst: 19, saves: 13, cleanSheets: 1,
+          corners: 17, crosses: 5, fouls: 17, offsides: 6, turnovers: 264,
+          toA: 62, toM: 112, toD: 87, keyPasses: 7, passes: 11, shotAcc: 73, conv: 19, winPct: 20
+        },
+        'AJAX ASPIRE U15 (LEAGUE)': {
+          games: 5, mins: 413, won: 1, tied: 0, lost: 4, gf: 7, ga: 12, gd: -5,
+          shots: 37, sot: 27, soff: 10, shotsAgainst: 19, saves: 13, cleanSheets: 1,
+          corners: 17, crosses: 5, fouls: 17, offsides: 6, turnovers: 264,
+          toA: 62, toM: 112, toD: 87, keyPasses: 7, passes: 11, shotAcc: 73, conv: 19, winPct: 20
+        },
+        'AJAX GA U15': {
+          games: 4, mins: 321, won: 3, tied: 1, lost: 0, gf: 14, ga: 1, gd: 13,
+          shots: 50, sot: 34, soff: 16, shotsAgainst: 15, saves: 2, cleanSheets: 3,
+          corners: 25, crosses: 15, fouls: 18, offsides: 4, turnovers: 0,
+          toA: 0, toM: 0, toD: 0, keyPasses: 0, passes: 10, shotAcc: 68, conv: 28, winPct: 75
+        }
+      };
+
       squadKeysToUpdate.forEach(key => {
-        if (!customData[key]) {
+        const base = BASELINE_TOTALS[key] || { games: 0, mins: 0, won: 0, tied: 0, lost: 0, gf: 0, ga: 0, gd: 0, shots: 0, sot: 0, soff: 0, fouls: 0, corners: 0, cleanSheets: 0, winPct: 0 };
+        if (!customData[key] || !customData[key].totals || (customData[key].totals.games < base.games)) {
           customData[key] = {
-            totals: { games: 0, mins: 0, won: 0, tied: 0, lost: 0, gf: 0, ga: 0, gd: 0, shots: 0, sot: 0, soff: 0, fouls: 0, corners: 0, cleanSheets: 0, winPct: 0 },
+            totals: Object.assign({}, base),
             players: sq.roster.map(r => ({
               name: r.name,
               jersey: r.jersey,
@@ -3466,12 +3489,36 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         }
       });
 
-      // 2. Prepare cumulative update for the Google Sheet (Player_IDP tab)
+      // 2. Prepare update for the Google Sheet (Player_IDP tab)
       const statsPayload = {};
-      const cleanNorm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const cleanNorm = s => String(s || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+
+      // Calculate team-level match increments from player actions
+      let matchShots = 0, matchSot = 0, matchSoff = 0, matchFouls = 0;
+      let matchTurnovers = 0, matchToD = 0, matchToM = 0, matchToA = 0;
+      let matchKeyPasses = 0, matchDuelsWon = 0, matchDuelsLost = 0, matchSaves = 0;
+      let matchCorners = (oppStats.corners || 0);
+      let matchCrosses = (phaseStats.crossesLeft || 0) + (phaseStats.crossesRight || 0);
 
       Object.values(playerStats).forEach(ps => {
         if (!ps || !ps.name) return;
+        matchShots += (ps.shots || 0);
+        matchSot += (ps.sot || 0);
+        matchSoff += (ps.soff || 0);
+        matchFouls += (ps.fouls || 0);
+        matchTurnovers += (ps.turnovers || 0);
+        matchToD += (ps.toD || 0);
+        matchToM += (ps.toM || 0);
+        matchToA += (ps.toA || 0);
+        matchKeyPasses += (ps.keyPasses || 0);
+        matchDuelsWon += (ps.duelsWon || 0);
+        matchDuelsLost += (ps.duelsLost || 0);
+        matchSaves += (ps.saves || 0);
+
         const norm = cleanNorm(ps.name);
 
         squadKeysToUpdate.forEach(key => {
@@ -3514,18 +3561,18 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
           }
         });
 
-        // Google Sheet payload
+        // Google Sheet incremental payload
         statsPayload[norm] = {
           name: ps.name,
           jersey: ps.jersey,
           gp: ps.mins > 0 ? 1 : 0,
-          mins: ps.mins,
-          goals: ps.goals,
-          assists: ps.assists,
-          sot: ps.sot,
-          soff: ps.soff,
+          mins: ps.mins || 0,
+          goals: ps.goals || 0,
+          assists: ps.assists || 0,
+          sot: ps.sot || 0,
+          soff: ps.soff || 0,
           fouls: ps.fouls || 0,
-          toD: ps.toD,
+          toD: ps.toD || 0,
           keyPasses: ps.keyPasses || 0,
           duelsWon: ps.duelsWon || 0
         };
@@ -3544,6 +3591,79 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         else tot.lost = (tot.lost || 0) + 1;
         tot.winPct = tot.games > 0 ? Math.round((tot.won / tot.games) * 100) : 0;
         tot.cleanSheets = (tot.cleanSheets || 0) + (oppGoals === 0 ? 1 : 0);
+
+        tot.shots = (tot.shots || 0) + matchShots;
+        tot.sot = (tot.sot || 0) + matchSot;
+        tot.soff = (tot.soff || 0) + matchSoff;
+        tot.shotsAgainst = (tot.shotsAgainst || 0) + (oppStats.shots || 0);
+        tot.turnovers = (tot.turnovers || 0) + matchTurnovers;
+        tot.toD = (tot.toD || 0) + matchToD;
+        tot.toM = (tot.toM || 0) + matchToM;
+        tot.toA = (tot.toA || 0) + matchToA;
+        tot.fouls = (tot.fouls || 0) + matchFouls;
+        tot.corners = (tot.corners || 0) + matchCorners;
+        tot.crosses = (tot.crosses || 0) + matchCrosses;
+        tot.saves = (tot.saves || 0) + matchSaves;
+        tot.keyPasses = (tot.keyPasses || 0) + matchKeyPasses;
+        tot.duelsWon = (tot.duelsWon || 0) + matchDuelsWon;
+        tot.duelsLost = (tot.duelsLost || 0) + matchDuelsLost;
+
+        tot.shotAcc = tot.shots > 0 ? Math.round((tot.sot / tot.shots) * 100) : 0;
+        tot.conv = tot.shots > 0 ? Math.round((tot.gf / tot.shots) * 100) : 0;
+      });
+
+      // Convert tracked matchEvents into filmEvents for Match Hub
+      squadKeysToUpdate.forEach(key => {
+        let teamObj = customData[key];
+        teamObj.filmEvents = teamObj.filmEvents || [];
+        let maxId = teamObj.filmEvents.reduce((m, e) => Math.max(m, e.id || 0), 0);
+
+        const newFilmMoments = [];
+        (matchEvents || []).forEach(ev => {
+          if (ev.type === 'sys' || ev.type === 'sub') return;
+          maxId++;
+          const pObj = ev.jersey ? playerStats[ev.jersey] : null;
+          const pName = pObj ? pObj.name : 'Team';
+          const isGoal = ev.type === 'goal';
+          const isAssist = ev.type === 'assist';
+          const isKeyPass = ev.type === 'keyPass';
+          const isSOT = ev.type === 'sot' || (ev.type === 'shot' && ev.onTarget);
+          const isDuelWon = ev.type === 'duelWon';
+          const isPressWon = ev.type === 'pressWon';
+          const isSave = ev.type === 'save';
+          const isGlow = isGoal || isAssist || isKeyPass || isSOT || isDuelWon || isPressWon || isSave;
+
+          let cat = 'Tactical Moment';
+          if (isGoal) cat = 'Goal';
+          else if (isAssist) cat = 'Assist';
+          else if (isKeyPass) cat = 'Key Pass';
+          else if (isSOT) cat = 'Shot on Target';
+          else if (ev.type === 'turnover') cat = 'Turnover';
+          else if (ev.type === 'foul') cat = 'Foul';
+          else if (ev.type === 'duelWon' || ev.type === 'duelLost') cat = 'Duel';
+          else if (ev.type === 'yellow' || ev.type === 'yellowCard') cat = 'Disciplinary';
+          else if (ev.type === 'bookmark') cat = 'Coach Film Bookmark';
+
+          newFilmMoments.push({
+            id: maxId,
+            match: `${opponentName} (${ajaxGoals}-${oppGoals})`,
+            time: `${ev.time}:00`,
+            half: ev.half || (ev.time <= 40 ? 'H1' : 'H2'),
+            zone: ev.zone || 'M3',
+            zoneDetail: ev.zone || 'M3',
+            jerseys: ev.jersey ? [ev.jersey] : [],
+            players: ev.jersey ? [`#${ev.jersey} ${pName}`] : ['Team'],
+            playersRaw: ev.jersey ? String(ev.jersey) : 'Team',
+            category: cat,
+            tag: ev.tag || cat,
+            qualityRaw: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' ? 'Grow' : 'Neutral'),
+            outcome: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' ? 'Grow' : 'Neutral'),
+            note: ev.desc || `Sideline logged event at ${ev.time}'`,
+            filmReview: !!ev.isBookmark
+          });
+        });
+
+        teamObj.filmEvents = teamObj.filmEvents.concat(newFilmMoments);
       });
 
       // Save customData permanently
@@ -3575,6 +3695,7 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         body: JSON.stringify({
           action: 'updateSeasonStats',
           pin: coachPin,
+          isIncremental: true,
           playerStats: statsPayload,
           matchSummary: matchSummary
         })

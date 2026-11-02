@@ -10,9 +10,21 @@
 // ============================================================
 
 // GLOBAL: normalize a player name so "Carlee,Gowan", "Carlee Gowan",
-// and "carlee  gowan " all resolve to the same player everywhere.
+// and "Amy Godínez Vargas" all resolve cleanly and diacritic-insensitively everywhere.
 function normName(s) {
-  return String(s || '').replace(/,/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+  return String(s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/,/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+// Global JSON Output Helper for Web App
+function jsonOut(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // True when a Raw_Match_Stats row is the TEAM aggregate line, not a player
@@ -177,6 +189,7 @@ function doGet(e) {
   if (e.parameter.action === 'teamStats')            return getTeamStats();
   if (e.parameter.action === 'filmMoments')          return getFilmMoments();
   if (e.parameter.action === 'matchHub')             return getMatchHubData(e.parameter.pin);
+  if (e.parameter.action === 'syncMatchData')        return handleSyncMatchData(e.parameter.pin);
   return handlePlayerLogin(e);
 }
 
@@ -1109,7 +1122,20 @@ function handleSaveMatchHubData(payload) {
   return jsonOut({ success: true });
 }
 
-// --- PART 14: AUTOMATED SEASON STATS SYNC TO PLAYER_IDP ---
+// --- PART 14: RESTORE & SYNC PLAYER_IDP FROM RAW_MATCH_STATS ---
+function handleSyncMatchData(pin) {
+  try {
+    if (!isValidCoachPin(pin)) {
+      return jsonOut({ success: false, error: 'Unauthorized coach PIN' });
+    }
+    syncMatchData();
+    return jsonOut({ success: true, message: 'Player_IDP successfully restored and synced from Raw_Match_Stats!' });
+  } catch (err) {
+    return jsonOut({ success: false, error: err.toString() });
+  }
+}
+
+// --- PART 15: AUTOMATED SEASON STATS SYNC TO PLAYER_IDP ---
 // Called by the Sideline Tracker when Coach commits a match. Updates
 // cumulative minutes, goals, assists, shots, duels, key passes directly in
 // the Player_IDP sheet so Team Hub & Player IDP portals reflect real-time stats.
@@ -1144,6 +1170,7 @@ function handleUpdateSeasonStats(payload) {
     var iDuels   = headers.indexOf('Duels');
 
     var statsMap = payload.playerStats || {}; // normalized name or jersey -> stat object
+    var isIncremental = !!payload.isIncremental;
     var updateCount = 0;
 
     for (var i = 1; i < data.length; i++) {
@@ -1152,6 +1179,11 @@ function handleUpdateSeasonStats(payload) {
       var nKey = normName(rowName);
 
       var ps = statsMap[nKey];
+      if (!ps) {
+        // Also check spaceless key match (e.g. "amygodinezvargas")
+        var spaceless = nKey.replace(/[^a-z0-9]/g, '');
+        ps = statsMap[spaceless];
+      }
       if (!ps) {
         // Fallback: match by matching player object name
         for (var k in statsMap) {
@@ -1169,21 +1201,48 @@ function handleUpdateSeasonStats(payload) {
         }
       };
 
-      if (ps.gp !== undefined) setCell(iGames, ps.gp);
-      if (ps.mins !== undefined) {
-        setCell(iMins, ps.mins);
-        if (iAvg !== -1 && ps.gp > 0) {
-          setCell(iAvg, Math.round(ps.mins / ps.gp));
+      var numCell = function(colIdx) {
+        if (colIdx === -1) return 0;
+        var v = parseFloat(String(data[i][colIdx] || '').replace('%', ''));
+        return isNaN(v) ? 0 : v;
+      };
+
+      if (isIncremental) {
+        var newGP = numCell(iGames) + (ps.gp || 0);
+        var newMins = numCell(iMins) + (ps.mins || 0);
+        if (ps.gp !== undefined) setCell(iGames, newGP);
+        if (ps.mins !== undefined) {
+          setCell(iMins, newMins);
+          if (iAvg !== -1 && newGP > 0) {
+            setCell(iAvg, Math.round(newMins / newGP));
+          }
         }
+        if (ps.goals !== undefined) setCell(iGoals, numCell(iGoals) + (ps.goals || 0));
+        if (ps.assists !== undefined) setCell(iAssists, numCell(iAssists) + (ps.assists || 0));
+        if (ps.sot !== undefined) setCell(iShots, numCell(iShots) + (ps.sot || 0));
+        if (ps.soff !== undefined) setCell(iShotsOff, numCell(iShotsOff) + (ps.soff || 0));
+        if (ps.fouls !== undefined) setCell(iFouls, numCell(iFouls) + (ps.fouls || 0));
+        if (ps.toD !== undefined) setCell(iTO, numCell(iTO) + (ps.toD || 0));
+        if (ps.keyPasses !== undefined) setCell(iKP, numCell(iKP) + (ps.keyPasses || 0));
+        if (ps.duelsWon !== undefined) setCell(iDuels, numCell(iDuels) + (ps.duelsWon || 0));
+      } else {
+        // Direct cumulative value write
+        if (ps.gp !== undefined) setCell(iGames, ps.gp);
+        if (ps.mins !== undefined) {
+          setCell(iMins, ps.mins);
+          if (iAvg !== -1 && ps.gp > 0) {
+            setCell(iAvg, Math.round(ps.mins / ps.gp));
+          }
+        }
+        if (ps.goals !== undefined) setCell(iGoals, ps.goals);
+        if (ps.assists !== undefined) setCell(iAssists, ps.assists);
+        if (ps.sot !== undefined) setCell(iShots, ps.sot);
+        if (ps.soff !== undefined) setCell(iShotsOff, ps.soff);
+        if (ps.fouls !== undefined) setCell(iFouls, ps.fouls);
+        if (ps.toD !== undefined) setCell(iTO, ps.toD);
+        if (ps.keyPasses !== undefined) setCell(iKP, ps.keyPasses);
+        if (ps.duelsWon !== undefined) setCell(iDuels, ps.duelsWon);
       }
-      if (ps.goals !== undefined) setCell(iGoals, ps.goals);
-      if (ps.assists !== undefined) setCell(iAssists, ps.assists);
-      if (ps.sot !== undefined) setCell(iShots, ps.sot);
-      if (ps.soff !== undefined) setCell(iShotsOff, ps.soff);
-      if (ps.fouls !== undefined) setCell(iFouls, ps.fouls);
-      if (ps.toD !== undefined) setCell(iTO, ps.toD);
-      if (ps.keyPasses !== undefined) setCell(iKP, ps.keyPasses);
-      if (ps.duelsWon !== undefined) setCell(iDuels, ps.duelsWon);
 
       updateCount++;
     }

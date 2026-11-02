@@ -2630,6 +2630,14 @@
     // ═══════════════════════════════════════════════
     let teamStatsLoaded = false;
 
+    function formatPct(val) {
+      if (val === undefined || val === null || val === '') return '0%';
+      const n = parseFloat(String(val).replace('%', ''));
+      if (isNaN(n)) return '0%';
+      if (n > 0 && n <= 1) return Math.round(n * 100) + '%';
+      return Math.round(n) + '%';
+    }
+
     async function loadTeamStats() {
       if (teamStatsLoaded) return;
       try {
@@ -2647,14 +2655,14 @@
         if (tm) {
           document.getElementById('ts-totals').innerHTML = `
             <div class="ts-total-card"><div class="ts-total-num">${tm.won}-${tm.tied}-${tm.lost}</div><div class="ts-total-label">Record</div></div>
-            <div class="ts-total-card"><div class="ts-total-num">${tm.winPct}%</div><div class="ts-total-label">Win %</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${formatPct(tm.winPct)}</div><div class="ts-total-label">Win %</div></div>
             <div class="ts-total-card"><div class="ts-total-num">${tm.goals}</div><div class="ts-total-label">Goals For</div></div>
             <div class="ts-total-card"><div class="ts-total-num">${tm.ga}</div><div class="ts-total-label">Goals Against</div></div>
             <div class="ts-total-card"><div class="ts-total-num">${tm.gd > 0 ? '+' : ''}${tm.gd}</div><div class="ts-total-label">Goal Diff</div></div>
             <div class="ts-total-card"><div class="ts-total-num">${tm.cs}</div><div class="ts-total-label">Clean Sheets</div></div>
             <div class="ts-total-card"><div class="ts-total-num">${tm.shots}</div><div class="ts-total-label">Shots</div></div>
-            <div class="ts-total-card"><div class="ts-total-num">${tm.shotAcc}%</div><div class="ts-total-label">Shot Accuracy</div></div>
-            <div class="ts-total-card"><div class="ts-total-num">${tm.conv}%</div><div class="ts-total-label">Goal Conversion</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${formatPct(tm.shotAcc)}</div><div class="ts-total-label">Shot Accuracy</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${formatPct(tm.conv)}</div><div class="ts-total-label">Goal Conversion</div></div>
             <div class="ts-total-card"><div class="ts-total-num">${tm.corners}</div><div class="ts-total-label">Corners</div></div>`;
         } else {
           // Fallback: compute from player rows if no team line found
@@ -2667,7 +2675,7 @@
           const teamCS  = Math.max(...players.map(p => p.cs || 0));
           document.getElementById('ts-totals').innerHTML = `
             <div class="ts-total-card"><div class="ts-total-num">${gp}</div><div class="ts-total-label">Games</div></div>
-            <div class="ts-total-card"><div class="ts-total-num">${teamWin}%</div><div class="ts-total-label">Win %</div></div>
+            <div class="ts-total-card"><div class="ts-total-num">${formatPct(teamWin)}</div><div class="ts-total-label">Win %</div></div>
             <div class="ts-total-card"><div class="ts-total-num">${tot.goals}</div><div class="ts-total-label">Goals</div></div>
             <div class="ts-total-card"><div class="ts-total-num">${tot.assists}</div><div class="ts-total-label">Assists</div></div>
             <div class="ts-total-card"><div class="ts-total-num">${teamCS}</div><div class="ts-total-label">Clean Sheets</div></div>
@@ -2698,7 +2706,7 @@
           <tr>
             <td>${p.name}</td>
             <td>${p.gp}</td><td>${p.mins}</td><td>${p.goals}</td><td>${p.assists}</td>
-            <td>${p.shotsOn}</td><td>${p.shotsOff}</td><td>${p.cs}</td><td>${p.winPct}%</td><td>${p.fouls}</td>
+            <td>${p.shotsOn}</td><td>${p.shotsOff}</td><td>${p.cs}</td><td>${formatPct(p.winPct)}</td><td>${p.fouls}</td>
           </tr>`).join('');
 
         teamStatsLoaded = true;
