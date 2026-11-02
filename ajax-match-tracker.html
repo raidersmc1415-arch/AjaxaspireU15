@@ -1018,6 +1018,80 @@
     </div>
   </div>
 
+  <!-- ======================================================== -->
+  <!-- MODAL: EDIT / CORRECT MATCH EVENT (SIDELINE STAT FIXER) -->
+  <!-- ======================================================== -->
+  <div id="editEventModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-surface border border-teal-500/50 rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-2xl relative space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <!-- Close Button -->
+      <button onclick="closeEditEventModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold text-sm">✕</button>
+
+      <!-- Modal Header -->
+      <div class="flex items-center gap-2.5 border-b border-border/80 pb-3 pr-8">
+        <span class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-300 border border-teal-500/40 flex items-center justify-center text-xl shrink-0" id="eemIcon">✏️</span>
+        <div>
+          <div class="mono text-[10px] uppercase text-teal-400 font-bold">Edit / Correct Match Event</div>
+          <h3 class="display text-xl text-white mt-0.5" id="eemTitle">Event Correction</h3>
+        </div>
+      </div>
+
+      <!-- Minute & Timestamp Adjuster -->
+      <div class="bg-pitch/80 p-3 rounded-xl border border-border/80 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold text-white block">Match Minute</span>
+          <span class="text-[10px] text-slate-400">Timestamp when event occurred</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="adjustEditEventMinute(-1)" class="w-8 h-8 rounded-lg bg-surface hover:bg-slate-700 text-white font-mono font-bold text-sm flex items-center justify-center border border-border active:scale-95">–</button>
+          <span id="eemMinuteDisplay" class="mono text-base font-black text-teal-300 w-12 text-center">24'</span>
+          <button type="button" onclick="adjustEditEventMinute(1)" class="w-8 h-8 rounded-lg bg-surface hover:bg-slate-700 text-white font-mono font-bold text-sm flex items-center justify-center border border-border active:scale-95">+</button>
+        </div>
+      </div>
+
+      <!-- Player Assignment Selector -->
+      <div class="space-y-1.5" id="eemPlayerSection">
+        <label class="mono text-[10px] uppercase text-slate-400 font-bold flex items-center justify-between">
+          <span>Assigned Player:</span>
+          <span id="eemCurrentPlayerLabel" class="text-teal-300 font-bold">#8 Stella Craig</span>
+        </label>
+        <div id="eemPlayerGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- Event Type Switcher (1-Tap Grid) -->
+      <div class="space-y-1.5">
+        <label class="mono text-[10px] uppercase text-slate-400 font-bold">Change Event Type:</label>
+        <div id="eemTypeGrid" class="grid grid-cols-4 gap-1.5 text-[11px] font-semibold"></div>
+      </div>
+
+      <!-- Pitch Third / Zone Selector -->
+      <div class="space-y-1.5">
+        <label class="mono text-[10px] uppercase text-slate-400 font-bold">Pitch Zone / Third:</label>
+        <div class="grid grid-cols-3 gap-1.5 text-xs font-bold">
+          <button type="button" id="eemZoneD3" onclick="setEditEventZone('D3')" class="p-2 rounded-xl border border-border bg-pitch text-slate-300 transition">D3 · Defending</button>
+          <button type="button" id="eemZoneM3" onclick="setEditEventZone('M3')" class="p-2 rounded-xl border border-border bg-pitch text-slate-300 transition">M3 · Middle</button>
+          <button type="button" id="eemZoneA3" onclick="setEditEventZone('A3')" class="p-2 rounded-xl border border-border bg-pitch text-slate-300 transition">A3 · Attacking</button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-2 border-t border-border/80 flex items-center justify-between gap-2 flex-wrap">
+        <button type="button" onclick="deleteEvent()" class="px-3.5 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 active:scale-95">
+          <span>🗑️ Delete Event</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeEditEventModal()" class="px-3 py-2 rounded-xl bg-pitch hover:bg-surface text-slate-400 hover:text-white border border-border text-xs">
+            Cancel
+          </button>
+          <button type="button" onclick="saveEventEdits()" class="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs active:scale-95 shadow">
+            Save Corrections 💾
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none duration-300 z-50"></div>
 
@@ -2370,6 +2444,7 @@
     }
 
     function logMatchEvent(ev) {
+      if (!ev.id) ev.id = 'ev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
       matchEvents.unshift(ev);
       renderEventsFeed();
     }
@@ -2381,15 +2456,10 @@
     function undoLastEvent() {
       if (!matchEvents.length) return;
       const ev = matchEvents.shift();
-      if (ev.type === 'goal' && playerStats[ev.jersey]) {
-        playerStats[ev.jersey].goals--;
-        playerStats[ev.jersey].shots--;
-        playerStats[ev.jersey].sot--;
-      } else if (ev.type === 'oppGoal') {
-        oppStats.goals = Math.max(0, oppStats.goals - 1);
-        oppStats.shots = Math.max(0, oppStats.shots - 1);
-      }
+      reverseEventStats(ev);
       updateScoreboard();
+      renderPitch();
+      renderBench();
       renderEventsFeed();
       saveState();
       showToast(`Undid: ${ev.desc}`);
@@ -2405,15 +2475,467 @@
         return;
       }
 
-      container.innerHTML = matchEvents.map(e => `
-        <div class="p-2 rounded-xl bg-pitch/60 border border-border/60 flex items-center justify-between text-xs">
-          <div class="flex items-center gap-2">
-            <span class="font-mono text-teal-400 font-bold">${e.time}'</span>
-            <span class="text-slate-200">${e.desc}</span>
+      container.innerHTML = matchEvents.map(e => {
+        if (!e.id) e.id = 'ev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+        return `
+          <div onclick="openEditEventModal('${e.id}')" class="p-2 rounded-xl bg-pitch/60 hover:bg-slate-800/80 border border-border/60 hover:border-teal-500/50 flex items-center justify-between text-xs cursor-pointer transition group" title="Click to edit or delete event">
+            <div class="flex items-center gap-2 min-w-0 pr-1">
+              <span class="font-mono text-teal-400 font-bold shrink-0">${e.time}'</span>
+              <span class="text-slate-200 truncate group-hover:text-white">${e.desc}</span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              ${e.zone ? `<span class="mono text-[9px] px-1 py-0.2 rounded border ${e.zone==='D3'?'bg-rose-500/20 text-rose-300 border-rose-500/30':e.zone==='M3'?'bg-sky-500/20 text-sky-300 border-sky-500/30':'bg-amber-500/20 text-amber-300 border-amber-500/30'}">${e.zone}</span>` : ''}
+              <span class="text-[10px] text-slate-500 group-hover:text-teal-400 transition ml-0.5">✏️</span>
+            </div>
           </div>
-          ${e.zone ? `<span class="mono text-[9px] px-1 py-0.2 rounded border ${e.zone==='D3'?'bg-rose-500/20 text-rose-300 border-rose-500/30':e.zone==='M3'?'bg-sky-500/20 text-sky-300 border-sky-500/30':'bg-amber-500/20 text-amber-300 border-amber-500/30'}">${e.zone}</span>` : ''}
-        </div>
-      `).join('');
+        `;
+      }).join('');
+    }
+
+    /* =========================================================
+       MATCH EVENT EDITOR & REVERSAL ENGINE
+       ========================================================= */
+    let editActiveEventId = null;
+    let editMinute = 0;
+    let editJersey = null;
+    let editType = 'goal';
+    let editZone = 'M3';
+    let editExtra = {};
+
+    const EVENT_TYPE_OPTIONS = [
+      { type: 'goal', label: 'Goal', icon: '⚽' },
+      { type: 'assist', label: 'Assist', icon: '🅰️' },
+      { type: 'sot', label: 'Shot on Target', icon: '🎯' },
+      { type: 'soff', label: 'Shot off Target', icon: '🥅' },
+      { type: 'shot_outside_18', label: 'Shot Outside 18', icon: '🚀' },
+      { type: 'keyPass', label: 'Key Pass', icon: '🔑' },
+      { type: 'duelWon', label: 'Duel Won', icon: '💪' },
+      { type: 'duelLost', label: 'Duel Lost', icon: '❌' },
+      { type: 'turnover', label: 'Turnover', icon: '⚠️' },
+      { type: 'foul', label: 'Foul', icon: '🛑' },
+      { type: 'yellow', label: 'Yellow Card', icon: '🟨' },
+      { type: 'redCard', label: 'Red Card', icon: '🟥' },
+      { type: 'save', label: 'GK Save', icon: '🧤' },
+      { type: 'corner', label: 'Corner Kick', icon: '🚩' },
+      { type: 'cross', label: 'Cross', icon: '👟' },
+      { type: 'pressWon', label: 'Press Won', icon: '⚡' },
+      { type: 'pressLost', label: 'Press Lost', icon: '💨' },
+      { type: 'goal_kick_att', label: 'Our Goal Kick', icon: '🧱' },
+      { type: 'goal_kick_def', label: 'Opp Goal Kick', icon: '🎯' },
+      { type: 'oppGoal', label: 'Opp Goal', icon: '🚨' },
+      { type: 'oppShot', label: 'Opp Shot', icon: '⚡' },
+      { type: 'oppFoul', label: 'Opp Foul', icon: '⚠️' },
+      { type: 'oppCorner', label: 'Opp Corner', icon: '🚩' },
+      { type: 'bookmark', label: 'Film Bookmark', icon: '📌' },
+    ];
+
+    function reverseEventStats(ev) {
+      if (!ev) return;
+      const p = ev.jersey ? playerStats[ev.jersey] : null;
+
+      if (ev.type === 'goal') {
+        if (p) {
+          p.goals = Math.max(0, (p.goals || 0) - 1);
+          p.shots = Math.max(0, (p.shots || 0) - 1);
+          p.sot = Math.max(0, (p.sot || 0) - 1);
+        }
+      } else if (ev.type === 'assist') {
+        if (p) p.assists = Math.max(0, (p.assists || 0) - 1);
+      } else if (ev.type === 'keyPass') {
+        if (p) p.keyPasses = Math.max(0, (p.keyPasses || 0) - 1);
+      } else if (ev.type === 'sot') {
+        if (p) {
+          p.shots = Math.max(0, (p.shots || 0) - 1);
+          p.sot = Math.max(0, (p.sot || 0) - 1);
+        }
+      } else if (ev.type === 'soff') {
+        if (p) {
+          p.shots = Math.max(0, (p.shots || 0) - 1);
+          p.soff = Math.max(0, (p.soff || 0) - 1);
+        }
+      } else if (ev.type === 'shot') {
+        if (p) {
+          p.shots = Math.max(0, (p.shots || 0) - 1);
+          if (ev.onTarget) p.sot = Math.max(0, (p.sot || 0) - 1);
+          else p.soff = Math.max(0, (p.soff || 0) - 1);
+        }
+      } else if (ev.type === 'shot_outside_18') {
+        if (p) {
+          p.shots = Math.max(0, (p.shots || 0) - 1);
+          p.shotsOutside18 = Math.max(0, (p.shotsOutside18 || 0) - 1);
+          if (ev.onTarget) p.sot = Math.max(0, (p.sot || 0) - 1);
+          else p.soff = Math.max(0, (p.soff || 0) - 1);
+        }
+      } else if (ev.type === 'foul') {
+        if (p) p.fouls = Math.max(0, (p.fouls || 0) - 1);
+      } else if (ev.type === 'yellowCard' || ev.type === 'yellow') {
+        if (p) {
+          p.yellowCards = Math.max(0, (p.yellowCards || 0) - 1);
+          if (p.yellowCards <= 0) p.hasYellow = false;
+          if (p.yellowCards < 2) p.hasRed = false;
+        }
+      } else if (ev.type === 'redCard') {
+        if (p) {
+          p.yellowCards = Math.max(0, (p.yellowCards || 0) - 1);
+          p.hasRed = false;
+        }
+      } else if (ev.type === 'duelWon') {
+        if (p) p.duelsWon = Math.max(0, (p.duelsWon || 0) - 1);
+      } else if (ev.type === 'duelLost') {
+        if (p) p.duelsLost = Math.max(0, (p.duelsLost || 0) - 1);
+      } else if (ev.type === 'save') {
+        if (p) p.saves = Math.max(0, (p.saves || 0) - 1);
+      } else if (ev.type === 'corner') {
+        if (p) p.corners = Math.max(0, (p.corners || 0) - 1);
+      } else if (ev.type === 'cross') {
+        if (p) p.crosses = Math.max(0, (p.crosses || 0) - 1);
+      } else if (ev.type === 'cross_attempt') {
+        if (ev.side === 'left') phaseStats.crossesLeft = Math.max(0, (phaseStats.crossesLeft || 0) - 1);
+        else phaseStats.crossesRight = Math.max(0, (phaseStats.crossesRight || 0) - 1);
+        if (p) p.crosses = Math.max(0, (p.crosses || 0) - 1);
+      } else if (ev.type === 'turnover') {
+        if (p) {
+          p.turnovers = Math.max(0, (p.turnovers || 0) - 1);
+          if (ev.zone === 'D3') p.toD = Math.max(0, (p.toD || 0) - 1);
+          else if (ev.zone === 'M3') p.toM = Math.max(0, (p.toM || 0) - 1);
+          else if (ev.zone === 'A3') p.toA = Math.max(0, (p.toA || 0) - 1);
+        }
+      } else if (ev.type === 'pressWon') {
+        if (p) p.pressWon = Math.max(0, (p.pressWon || 0) - 1);
+        else phaseStats.pressWon = Math.max(0, (phaseStats.pressWon || 0) - 1);
+      } else if (ev.type === 'pressLost') {
+        if (p) p.pressLost = Math.max(0, (p.pressLost || 0) - 1);
+        else phaseStats.pressLost = Math.max(0, (phaseStats.pressLost || 0) - 1);
+      } else if (ev.type === 'goal_kick_att') {
+        phaseStats.goalKicksAttacking = Math.max(0, (phaseStats.goalKicksAttacking || 0) - 1);
+      } else if (ev.type === 'goal_kick_def') {
+        phaseStats.goalKicksDefending = Math.max(0, (phaseStats.goalKicksDefending || 0) - 1);
+      } else if (ev.type === 'oppGoal') {
+        oppStats.goals = Math.max(0, (oppStats.goals || 0) - 1);
+        oppStats.shots = Math.max(0, (oppStats.shots || 0) - 1);
+      } else if (ev.type === 'oppShot') {
+        oppStats.shots = Math.max(0, (oppStats.shots || 0) - 1);
+      } else if (ev.type === 'oppSub') {
+        oppStats.subs = Math.max(0, (oppStats.subs || 0) - 1);
+      } else if (ev.type === 'oppCorner') {
+        oppStats.corners = Math.max(0, (oppStats.corners || 0) - 1);
+      } else if (ev.type === 'oppFoul') {
+        oppStats.fouls = Math.max(0, (oppStats.fouls || 0) - 1);
+      }
+    }
+
+    function applyEventStats(ev) {
+      if (!ev) return;
+      const p = ev.jersey ? playerStats[ev.jersey] : null;
+
+      if (ev.type === 'goal') {
+        if (p) {
+          p.goals = (p.goals || 0) + 1;
+          p.shots = (p.shots || 0) + 1;
+          p.sot = (p.sot || 0) + 1;
+        }
+      } else if (ev.type === 'assist') {
+        if (p) p.assists = (p.assists || 0) + 1;
+      } else if (ev.type === 'keyPass') {
+        if (p) p.keyPasses = (p.keyPasses || 0) + 1;
+      } else if (ev.type === 'sot') {
+        if (p) {
+          p.shots = (p.shots || 0) + 1;
+          p.sot = (p.sot || 0) + 1;
+        }
+      } else if (ev.type === 'soff') {
+        if (p) {
+          p.shots = (p.shots || 0) + 1;
+          p.soff = (p.soff || 0) + 1;
+        }
+      } else if (ev.type === 'shot') {
+        if (p) {
+          p.shots = (p.shots || 0) + 1;
+          if (ev.onTarget) p.sot = (p.sot || 0) + 1;
+          else p.soff = (p.soff || 0) + 1;
+        }
+      } else if (ev.type === 'shot_outside_18') {
+        if (p) {
+          p.shots = (p.shots || 0) + 1;
+          p.shotsOutside18 = (p.shotsOutside18 || 0) + 1;
+          if (ev.onTarget) p.sot = (p.sot || 0) + 1;
+          else p.soff = (p.soff || 0) + 1;
+        }
+      } else if (ev.type === 'foul') {
+        if (p) p.fouls = (p.fouls || 0) + 1;
+      } else if (ev.type === 'yellowCard' || ev.type === 'yellow') {
+        if (p) {
+          p.yellowCards = (p.yellowCards || 0) + 1;
+          p.hasYellow = true;
+          if (p.yellowCards >= 2) p.hasRed = true;
+        }
+      } else if (ev.type === 'redCard') {
+        if (p) {
+          p.yellowCards = (p.yellowCards || 0) + 1;
+          p.hasRed = true;
+        }
+      } else if (ev.type === 'duelWon') {
+        if (p) p.duelsWon = (p.duelsWon || 0) + 1;
+      } else if (ev.type === 'duelLost') {
+        if (p) p.duelsLost = (p.duelsLost || 0) + 1;
+      } else if (ev.type === 'save') {
+        if (p) p.saves = (p.saves || 0) + 1;
+      } else if (ev.type === 'corner') {
+        if (p) p.corners = (p.corners || 0) + 1;
+      } else if (ev.type === 'cross') {
+        if (p) p.crosses = (p.crosses || 0) + 1;
+      } else if (ev.type === 'cross_attempt') {
+        if (ev.side === 'left') phaseStats.crossesLeft = (phaseStats.crossesLeft || 0) + 1;
+        else phaseStats.crossesRight = (phaseStats.crossesRight || 0) + 1;
+        if (p) p.crosses = (p.crosses || 0) + 1;
+      } else if (ev.type === 'turnover') {
+        if (p) {
+          p.turnovers = (p.turnovers || 0) + 1;
+          if (ev.zone === 'D3') p.toD = (p.toD || 0) + 1;
+          else if (ev.zone === 'M3') p.toM = (p.toM || 0) + 1;
+          else if (ev.zone === 'A3') p.toA = (p.toA || 0) + 1;
+        }
+      } else if (ev.type === 'pressWon') {
+        if (p) p.pressWon = (p.pressWon || 0) + 1;
+        else phaseStats.pressWon = (phaseStats.pressWon || 0) + 1;
+      } else if (ev.type === 'pressLost') {
+        if (p) p.pressLost = (p.pressLost || 0) + 1;
+        else phaseStats.pressLost = (phaseStats.pressLost || 0) + 1;
+      } else if (ev.type === 'goal_kick_att') {
+        phaseStats.goalKicksAttacking = (phaseStats.goalKicksAttacking || 0) + 1;
+      } else if (ev.type === 'goal_kick_def') {
+        phaseStats.goalKicksDefending = (phaseStats.goalKicksDefending || 0) + 1;
+      } else if (ev.type === 'oppGoal') {
+        oppStats.goals = (oppStats.goals || 0) + 1;
+        oppStats.shots = (oppStats.shots || 0) + 1;
+      } else if (ev.type === 'oppShot') {
+        oppStats.shots = (oppStats.shots || 0) + 1;
+      } else if (ev.type === 'oppSub') {
+        oppStats.subs = (oppStats.subs || 0) + 1;
+      } else if (ev.type === 'oppCorner') {
+        oppStats.corners = (oppStats.corners || 0) + 1;
+      } else if (ev.type === 'oppFoul') {
+        oppStats.fouls = (oppStats.fouls || 0) + 1;
+      }
+    }
+
+    function buildEventDesc(type, jersey, time, zone, extra) {
+      const p = jersey ? playerStats[jersey] : null;
+      const name = p ? p.name.split(' ')[0] : 'Team';
+      const who = jersey ? `#${jersey} ${name}` : 'Team';
+
+      switch (type) {
+        case 'goal': return `⚽ GOAL! ${who} scores at ${time}'`;
+        case 'assist': return `🅰️ ASSIST: ${who} at ${time}'`;
+        case 'keyPass': return `🔑 KEY PASS: ${who} at ${time}'`;
+        case 'sot': return `🎯 SHOT ON TARGET: ${who} at ${time}'`;
+        case 'soff': return `🥅 SHOT OFF TARGET: ${who} at ${time}'`;
+        case 'shot': return `${extra?.onTarget ? '🎯 SHOT ON TARGET' : '🥅 SHOT OFF TARGET'}: ${who} at ${time}'`;
+        case 'shot_outside_18': return `🚀 SHOT OUTSIDE 18 (${extra?.onTarget ? 'On Target' : 'Off Target'}): ${who} at ${time}'`;
+        case 'duelWon': return `💪 DUEL WON: ${who} at ${time}'`;
+        case 'duelLost': return `❌ DUEL LOST: ${who} at ${time}'`;
+        case 'turnover': return `⚠️ TURNOVER in ${zone || 'M3'}: ${who} at ${time}'`;
+        case 'foul': return `🛑 FOUL COMMITTED: ${who} at ${time}'`;
+        case 'yellowCard':
+        case 'yellow': return `🟨 YELLOW CARD: ${who} at ${time}'`;
+        case 'redCard': return `🟥 RED CARD: ${who} at ${time}'`;
+        case 'save': return `🧤 SAVE (GK): ${who} at ${time}'`;
+        case 'corner': return `🚩 CORNER KICK: ${who} at ${time}'`;
+        case 'cross': return `👟 CROSS: ${who} at ${time}'`;
+        case 'cross_attempt': return `👟 CROSS (${(extra?.side || 'left').toUpperCase()}): ${who} at ${time}'`;
+        case 'pressWon': return `⚡ PRESS WON: ${who} at ${time}'`;
+        case 'pressLost': return `💨 PRESS LOST: ${who} at ${time}'`;
+        case 'bookmark': return `📌 Flagged for Film Review (${time}'): ${who}`;
+        case 'oppGoal': return `OPPONENT GOAL conceded (${time}')`;
+        case 'oppShot': return `OPPONENT SHOT against (${time}')`;
+        case 'oppSub': return `OPPONENT SUB made (${time}')`;
+        case 'oppCorner': return `OPPONENT CORNER conceded (${time}')`;
+        case 'oppFoul': return `OPPONENT FOUL conceded (${time}')`;
+        case 'goal_kick_att': return `🧱 AJAX BUILD-OUT (Goal Kick) at ${time}'`;
+        case 'goal_kick_def': return `🎯 OPPONENT GOAL KICK (High Press) at ${time}'`;
+        default: return `${type.toUpperCase()}: ${who} at ${time}'`;
+      }
+    }
+
+    function openEditEventModal(eventId) {
+      const ev = (matchEvents || []).find(e => e.id === eventId);
+      if (!ev) {
+        showToast('Event not found.');
+        return;
+      }
+
+      editActiveEventId = eventId;
+      editMinute = parseInt(ev.time, 10) || 0;
+      editJersey = ev.jersey || null;
+      editType = (ev.type === 'yellowCard' || ev.type === 'yellow') ? 'yellow' : (ev.type === 'shot' ? (ev.onTarget ? 'sot' : 'soff') : ev.type);
+      editZone = ev.zone || 'M3';
+      editExtra = {
+        onTarget: ev.onTarget !== undefined ? ev.onTarget : (editType === 'sot' || editType === 'goal'),
+        side: ev.side || 'left',
+        outcome: ev.outcome || 'shot'
+      };
+
+      const minDisp = document.getElementById('eemMinuteDisplay');
+      if (minDisp) minDisp.textContent = `${editMinute}'`;
+      const titleElem = document.getElementById('eemTitle');
+      if (titleElem) titleElem.textContent = `Correct Event (${editMinute}')`;
+      const iconElem = document.getElementById('eemIcon');
+      if (iconElem) {
+        const opt = EVENT_TYPE_OPTIONS.find(o => o.type === editType);
+        iconElem.textContent = opt ? opt.icon : '✏️';
+      }
+
+      renderEditEventPlayerGrid();
+      renderEditEventTypeGrid();
+      setEditEventZone(editZone);
+
+      const modal = document.getElementById('editEventModal');
+      if (modal) modal.classList.replace('hidden', 'flex');
+    }
+
+    function closeEditEventModal() {
+      const modal = document.getElementById('editEventModal');
+      if (modal) modal.classList.replace('flex', 'hidden');
+      editActiveEventId = null;
+    }
+
+    function adjustEditEventMinute(delta) {
+      editMinute = Math.max(0, editMinute + delta);
+      const minDisp = document.getElementById('eemMinuteDisplay');
+      if (minDisp) minDisp.textContent = `${editMinute}'`;
+      const titleElem = document.getElementById('eemTitle');
+      if (titleElem) titleElem.textContent = `Correct Event (${editMinute}')`;
+    }
+
+    function renderEditEventPlayerGrid() {
+      const container = document.getElementById('eemPlayerGrid');
+      if (!container) return;
+
+      const pObj = editJersey ? playerStats[editJersey] : null;
+      const lbl = document.getElementById('eemCurrentPlayerLabel');
+      if (lbl) {
+        lbl.textContent = pObj ? `#${pObj.jersey} ${pObj.name}` : 'Team / General (No Player)';
+      }
+
+      const players = Object.values(playerStats || {}).sort((a,b) => a.jersey - b.jersey);
+
+      const teamBtn = `
+        <button type="button" onclick="setEditEventJersey(null)"
+          class="p-2 rounded-xl text-left border text-xs transition active:scale-95 flex items-center gap-1.5 ${!editJersey ? 'border-teal-400 bg-teal-500/20 text-white font-bold' : 'border-border bg-pitch text-slate-400 hover:text-white'}">
+          <span class="w-6 h-6 rounded bg-surface font-mono flex items-center justify-center text-[10px] shrink-0">👥</span>
+          <span class="truncate">Team / None</span>
+        </button>
+      `;
+
+      const playerBtns = players.map(p => {
+        const isSelected = editJersey === p.jersey;
+        return `
+          <button type="button" onclick="setEditEventJersey(${p.jersey})"
+            class="p-2 rounded-xl text-left border text-xs transition active:scale-95 flex items-center gap-1.5 ${isSelected ? 'border-teal-400 bg-teal-500/20 text-white font-bold' : 'border-border bg-pitch text-slate-300 hover:border-slate-500'}">
+            <span class="w-6 h-6 rounded bg-surface font-mono text-teal-300 font-bold flex items-center justify-center text-[10px] shrink-0">#${p.jersey}</span>
+            <span class="truncate">${p.name.split(' ')[0]}</span>
+          </button>
+        `;
+      }).join('');
+
+      container.innerHTML = teamBtn + playerBtns;
+    }
+
+    function setEditEventJersey(jersey) {
+      editJersey = jersey;
+      renderEditEventPlayerGrid();
+    }
+
+    function renderEditEventTypeGrid() {
+      const container = document.getElementById('eemTypeGrid');
+      if (!container) return;
+
+      container.innerHTML = EVENT_TYPE_OPTIONS.map(opt => {
+        const isSelected = editType === opt.type;
+        return `
+          <button type="button" onclick="setEditEventType('${opt.type}')"
+            class="p-2 rounded-xl border flex flex-col items-center gap-0.5 text-[11px] transition active:scale-95 ${isSelected ? 'border-teal-400 bg-teal-500/25 text-teal-200 font-bold shadow-md' : 'border-border bg-pitch text-slate-300 hover:border-slate-500'}">
+            <span class="text-lg">${opt.icon}</span>
+            <span class="truncate max-w-full">${opt.label}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function setEditEventType(type) {
+      editType = type;
+      renderEditEventTypeGrid();
+      const opt = EVENT_TYPE_OPTIONS.find(o => o.type === type);
+      const iconElem = document.getElementById('eemIcon');
+      if (iconElem && opt) iconElem.textContent = opt.icon;
+    }
+
+    function setEditEventZone(zone) {
+      editZone = zone;
+      ['D3', 'M3', 'A3'].forEach(z => {
+        const btn = document.getElementById(`eemZone${z}`);
+        if (!btn) return;
+        if (z === zone) {
+          btn.className = 'p-2 rounded-xl border border-teal-400 bg-teal-500/20 text-teal-300 font-bold transition';
+        } else {
+          btn.className = 'p-2 rounded-xl border border-border bg-pitch text-slate-400 hover:text-white transition';
+        }
+      });
+    }
+
+    function deleteEvent() {
+      if (!editActiveEventId) return;
+      const idx = (matchEvents || []).findIndex(e => e.id === editActiveEventId);
+      if (idx === -1) return;
+
+      const ev = matchEvents[idx];
+      if (!confirm(`Delete this event?\n\n"${ev.desc}"\n\nThis will automatically reverse the stats and card counts associated with it.`)) return;
+
+      reverseEventStats(ev);
+      matchEvents.splice(idx, 1);
+
+      updateScoreboard();
+      renderPitch();
+      renderBench();
+      renderEventsFeed();
+      saveState();
+
+      closeEditEventModal();
+      showToast('🗑️ Event deleted and stats reversed cleanly.');
+    }
+
+    function saveEventEdits() {
+      if (!editActiveEventId) return;
+      const ev = (matchEvents || []).find(e => e.id === editActiveEventId);
+      if (!ev) return;
+
+      // 1. Reverse stats for previous event state
+      reverseEventStats(ev);
+
+      // 2. Update properties
+      ev.time = editMinute;
+      ev.half = editMinute <= 40 ? 'H1' : 'H2';
+      ev.jersey = editJersey;
+      ev.type = editType === 'yellow' ? 'yellowCard' : editType;
+      ev.zone = editZone;
+      if (editType === 'bookmark') ev.isBookmark = true;
+      if (editType === 'shot_outside_18') ev.onTarget = editExtra.onTarget !== false;
+
+      // 3. Generate updated description
+      ev.desc = buildEventDesc(editType, editJersey, editMinute, editZone, editExtra);
+
+      // 4. Apply stats for new event state
+      applyEventStats(ev);
+
+      // 5. Re-render UI & save
+      updateScoreboard();
+      renderPitch();
+      renderBench();
+      renderEventsFeed();
+      saveState();
+
+      closeEditEventModal();
+      showToast(`💾 Event corrected: ${ev.desc}`);
     }
 
     function updateScoreboard() {
