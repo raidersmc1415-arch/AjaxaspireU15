@@ -871,6 +871,153 @@
     </div>
   </div>
 
+  <!-- ======================================================== -->
+  <!-- MODAL / BOTTOM SHEET: INSTANT CONTEXTUAL PLAYER ACTION & SUB MODAL -->
+  <!-- ======================================================== -->
+  <div id="trackerPlayerActionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-surface border-t sm:border border-teal-500/50 rounded-t-3xl sm:rounded-2xl max-w-lg w-full p-4 sm:p-5 shadow-2xl relative space-y-3.5 max-h-[92vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
+      
+      <!-- Close Button -->
+      <button onclick="closeTrackerPlayerActionModal()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold text-sm">✕</button>
+
+      <!-- Player Header Card -->
+      <div class="flex items-center gap-3 pr-8">
+        <div id="pamJersey" class="w-12 h-12 rounded-xl bg-teal-500/20 text-teal-300 border-2 border-teal-500/50 font-mono font-black text-lg flex items-center justify-center shrink-0">#–</div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 id="pamName" class="font-bold text-white text-base leading-tight truncate">Select Player</h3>
+            <span id="pamRole" class="mono text-xs font-black px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/40">POS</span>
+            <div id="pamBadges" class="flex items-center gap-1"></div>
+          </div>
+          <div class="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-2 flex-wrap">
+            <span id="pamMins" class="text-amber-300 font-bold">0' in / 0' bench</span>
+            <span>·</span>
+            <span id="pamStats" class="text-slate-300">0G · 0A · 0TO</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segment Selector: 3 Instant Action Tabs -->
+      <div class="grid grid-cols-3 gap-1 p-1 bg-pitch rounded-xl border border-border text-xs font-bold">
+        <button id="pamTabStatsBtn" type="button" onclick="switchPamTab('stats')" class="py-2 rounded-lg bg-teal-500 text-slate-950 shadow font-black transition">
+          ⚡ Quick Stats
+        </button>
+        <button id="pamTabSubBtn" type="button" onclick="switchPamTab('sub')" class="py-2 rounded-lg text-slate-400 hover:text-white transition">
+          🔄 Sub Bench (<span id="pamBenchCount">0</span>)
+        </button>
+        <button id="pamTabSwapBtn" type="button" onclick="switchPamTab('swap')" class="py-2 rounded-lg text-slate-400 hover:text-white transition">
+          🔀 Swap Pos
+        </button>
+      </div>
+
+      <!-- TAB 1: QUICK STATS GRID -->
+      <div id="pamViewStats" class="space-y-3">
+        <div class="grid grid-cols-4 gap-1.5 text-[11px] font-semibold">
+          <button type="button" onclick="logTrackerEventFromModal('goal')" class="p-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">⚽</span>
+            <span>Goal</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('assist')" class="p-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🅰️</span>
+            <span>Assist</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('keyPass')" class="p-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🔑</span>
+            <span>Key Pass</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('sot')" class="p-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🎯</span>
+            <span>Shot On</span>
+          </button>
+
+          <button type="button" onclick="logTrackerEventFromModal('soff')" class="p-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🥅</span>
+            <span>Shot Off</span>
+          </button>
+          <button type="button" onclick="openTrackerShotOut18FromModal()" class="p-2.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🚀</span>
+            <span>Out 18</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('duelWon')" class="p-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">💪</span>
+            <span>Duel Won</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('duelLost')" class="p-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">❌</span>
+            <span>Duel Lost</span>
+          </button>
+
+          <button type="button" onclick="promptTrackerTurnoverFromModal()" class="p-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">⚠️</span>
+            <span>Turnover</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('foul')" class="p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🛑</span>
+            <span>Foul</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('yellow')" class="p-2.5 rounded-xl bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🟨</span>
+            <span>Yellow</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('save')" class="p-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🧤</span>
+            <span>Save GK</span>
+          </button>
+
+          <button type="button" onclick="logTrackerEventFromModal('pressWon')" class="p-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">⚡</span>
+            <span>Press Won</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('pressLost')" class="p-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">💨</span>
+            <span>Press Lost</span>
+          </button>
+          <button type="button" onclick="openTrackerCrossFromModal()" class="p-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">👟</span>
+            <span>Cross</span>
+          </button>
+          <button type="button" onclick="flagTrackerBookmarkFromModal()" class="p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">📌</span>
+            <span>Film Flag</span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-border/70 text-xs">
+          <button type="button" onclick="subCurrentPamPlayerOff()" class="text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 active:scale-95">
+            <span>⬇️ Sub Off to Bench</span>
+          </button>
+          <button type="button" onclick="closeTrackerPlayerActionModal()" class="text-slate-400 hover:text-white font-medium">
+            Done
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 2: INSTANT BENCH SUB PICKER -->
+      <div id="pamViewSub" class="hidden space-y-2.5">
+        <div class="text-[11px] text-slate-300 font-semibold flex items-center justify-between">
+          <span>Tap a bench player to put in at <span id="pamSubSlotName" class="text-teal-300 font-bold font-mono">POS</span>:</span>
+          <span class="text-[10px] mono text-slate-400">1-Tap Sub &amp; Done</span>
+        </div>
+        <div id="pamBenchList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1"></div>
+        <div class="pt-2 border-t border-border/70">
+          <button type="button" onclick="subCurrentPamPlayerOff()" class="w-full py-2.5 bg-surface hover:bg-slate-700 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95">
+            <span>⬇️ Take Off (Leave Position Vacant)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 3: INSTANT ON-PITCH POSITION SWAP PICKER -->
+      <div id="pamViewSwap" class="hidden space-y-2.5">
+        <div class="text-[11px] text-slate-300 font-semibold flex items-center justify-between">
+          <span>Swap <span id="pamSwapCurrentPlayer" class="text-teal-300 font-bold">Player</span> with:</span>
+          <span class="text-[10px] mono text-slate-400">1-Tap Swap &amp; Done</span>
+        </div>
+        <div id="pamSwapList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1"></div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none duration-300 z-50"></div>
 
@@ -1258,9 +1405,21 @@
         const hasFouls = p && p.fouls > 0;
 
         return `
-          <div class="player-node ${isSelected ? 'selected-node' : ''}" style="left: ${pos.x}%; top: ${pos.y}%;" onclick="onTapPitchNode('${slot}')">
+          <div class="player-node ${isSelected ? 'selected-node' : ''} cursor-pointer touch-none select-none transition-transform"
+            data-pitch-slot="${slot}"
+            data-jersey="${jersey || ''}"
+            draggable="true"
+            ondragstart="onNodeDragStart(event, 'pitch', '${slot}', ${jersey || 0})"
+            ondragover="onNodeDragOver(event)"
+            ondragleave="onNodeDragLeave(event)"
+            ondrop="onNodeDrop(event, 'pitch', '${slot}')"
+            ontouchstart="onNodeTouchStart(event, 'pitch', '${slot}', ${jersey || 0})"
+            ontouchmove="onNodeTouchMove(event)"
+            ontouchend="onNodeTouchEnd(event, 'pitch', '${slot}')"
+            onclick="onTapPitchNode('${slot}')"
+            style="left: ${pos.x}%; top: ${pos.y}%;">
             <div class="flex flex-col items-center">
-              <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 ${isSelected ? 'border-brand-400 bg-teal-600 scale-110' : 'border-white/80 bg-pitch/90'} text-white flex items-center justify-center font-mono font-black text-xs sm:text-sm shadow-xl relative">
+              <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 ${isSelected ? 'border-brand-400 bg-teal-600 scale-110' : 'border-white/80 bg-pitch/90'} text-white flex items-center justify-center font-mono font-black text-xs sm:text-sm shadow-xl relative pointer-events-none">
                 ${jersey ? '#' + jersey : '?'}
                 ${hasGoal ? `<span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white rounded-full text-[8px] px-1 py-0.2 flex items-center justify-center font-bold shadow">⚽${p.goals > 1 ? p.goals : ''}</span>` : ''}
                 ${hasYellow ? `
@@ -1270,7 +1429,7 @@
                   </span>
                 ` : ''}
               </div>
-              <div class="mt-0.5 px-1.5 py-0.2 rounded bg-pitch/90 border border-white/20 text-center leading-none">
+              <div class="mt-0.5 px-1.5 py-0.2 rounded bg-pitch/90 border border-white/20 text-center leading-none pointer-events-none">
                 <span class="text-[9px] font-bold text-teal-300 block">${slot}</span>
                 <span class="text-[10px] font-semibold text-white block truncate max-w-[65px]">${shortName}</span>
                 <div class="flex items-center justify-center gap-1">
@@ -1301,21 +1460,14 @@
         return;
       }
 
-      // Case 2: Tapping the same already-selected player unselects them
-      if (selectedSlot === slot) {
-        deselectPlayer();
-        return;
-      }
-
-      // Case 3: Select this slot & player (never accidentally swaps positions!)
-      swapMode = false;
-      updateSwapButtonUI();
+      // Case 2: Select slot & open Contextual Action Modal
       selectedSlot = slot;
       const jersey = onPitchPlayers[slot];
       if (jersey && playerStats[jersey]) {
         selectPlayer(jersey);
+        openTrackerPlayerActionModal(slot, 'stats');
       } else {
-        document.getElementById('activeSubPrompt').textContent = `Slot ${slot} selected. Tap a bench player to put in!`;
+        openTrackerPlayerActionModal(slot, 'sub');
       }
       renderPitch();
     }
@@ -1416,17 +1568,29 @@
       const outPlayers = sq.roster.filter(p => absentPlayers.has(p.jersey));
       document.getElementById('benchCount').textContent = benchPlayers.length + (outPlayers.length ? ` · ${outPlayers.length} Out` : '');
 
+      // Enable drop zone on bench grid for dragging player off to bench
+      container.ondragover = onNodeDragOver;
+      container.ondragleave = onNodeDragLeave;
+      container.ondrop = (e) => onNodeDrop(e, 'benchGrid', null);
+
       container.innerHTML = benchPlayers.map(p => {
         const stat = playerStats[p.jersey] || { mins: 0, benchMins: 0 };
         return `
-          <button type="button" onclick="onTapBenchPlayer(${p.jersey})"
-            class="p-2 rounded-xl bg-pitch/80 hover:bg-slate-800 border border-border/80 text-left transition flex items-center space-x-2 shrink-0 active:scale-95">
-            <span class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center font-mono font-bold text-xs text-teal-300 border border-border/80 relative">
+          <button type="button"
+            data-bench-jersey="${p.jersey}"
+            draggable="true"
+            ondragstart="onNodeDragStart(event, 'bench', null, ${p.jersey})"
+            ontouchstart="onNodeTouchStart(event, 'bench', null, ${p.jersey})"
+            ontouchmove="onNodeTouchMove(event)"
+            ontouchend="onNodeTouchEnd(event, 'bench', null)"
+            onclick="onTapBenchPlayer(${p.jersey})"
+            class="p-2 rounded-xl bg-pitch/80 hover:bg-slate-800 border border-border/80 text-left transition flex items-center space-x-2 shrink-0 active:scale-95 touch-none select-none">
+            <span class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center font-mono font-bold text-xs text-teal-300 border border-border/80 relative pointer-events-none">
               #${p.jersey}
               ${stat.goals > 0 ? `<span class="absolute -top-1 -right-1 text-[8px]">⚽</span>` : ''}
               ${stat.yellowCards > 0 ? `<span class="absolute -top-1 -left-1 inline-block w-1.5 h-2.5 bg-[#FFD700] border border-[#B8860B] rounded-[1px]"></span>` : ''}
             </span>
-            <div class="min-w-0 pr-1">
+            <div class="min-w-0 pr-1 pointer-events-none">
               <span class="text-xs font-bold text-white block truncate max-w-[85px]">${p.name.split(' ')[0]}</span>
               <span class="text-[9px] font-mono text-slate-400 block">${stat.mins}' in / ${stat.benchMins}' bench</span>
             </div>
@@ -1499,6 +1663,401 @@
       renderBench();
       renderMinutesStream();
       saveState();
+    }
+
+    /* =========================================================
+       DRAG & DROP ENGINE: TOUCH + MOUSE (POS SWAP & SUBS)
+       ========================================================= */
+    let trackerDragSource = null;
+    let trackerTouchData = null;
+
+    function onNodeDragStart(e, type, slot, jersey) {
+      trackerDragSource = { type, slot, jersey };
+      if (e.dataTransfer) {
+        e.dataTransfer.setData('text/plain', JSON.stringify({ type, slot, jersey }));
+        e.dataTransfer.effectAllowed = 'move';
+      }
+    }
+
+    function onNodeDragOver(e) {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      const node = e.currentTarget;
+      if (node && !node.classList.contains('drag-hover')) {
+        node.classList.add('drag-hover', 'ring-2', 'ring-teal-400');
+      }
+    }
+
+    function onNodeDragLeave(e) {
+      const node = e.currentTarget;
+      if (node) {
+        node.classList.remove('drag-hover', 'ring-2', 'ring-teal-400');
+      }
+    }
+
+    function onNodeDrop(e, targetType, targetSlot) {
+      e.preventDefault();
+      const node = e.currentTarget;
+      if (node) node.classList.remove('drag-hover', 'ring-2', 'ring-teal-400');
+
+      let source = trackerDragSource;
+      if (!source && e.dataTransfer) {
+        try {
+          source = JSON.parse(e.dataTransfer.getData('text/plain'));
+        } catch (err) {}
+      }
+      if (!source) return;
+
+      executeNodeDropAction(source, targetType, targetSlot);
+      trackerDragSource = null;
+    }
+
+    function executeNodeDropAction(source, targetType, targetSlot) {
+      if (!source) return;
+
+      // 1. Pitch Node dropped onto another Pitch Node -> SWAP POSITIONS
+      if (source.type === 'pitch' && targetType === 'pitch') {
+        if (source.slot === targetSlot) return;
+        const j1 = onPitchPlayers[source.slot];
+        const j2 = onPitchPlayers[targetSlot];
+
+        onPitchPlayers[source.slot] = j2;
+        onPitchPlayers[targetSlot] = j1;
+        if (j1 && playerStats[j1]) playerStats[j1].currentPos = targetSlot;
+        if (j2 && playerStats[j2]) playerStats[j2].currentPos = source.slot;
+
+        logMatchSystemEvent(`Position Swap (Drag): #${j1 || '?'} to ${targetSlot}, #${j2 || '?'} to ${source.slot}`);
+        showToast(`🔄 Swapped positions: #${j1 || '?'} and #${j2 || '?'}`);
+        deselectPlayer();
+        renderPitch();
+        renderBench();
+        saveState();
+        return;
+      }
+
+      // 2. Bench Player dropped onto Pitch Node -> SUB IN
+      if (source.type === 'bench' && targetType === 'pitch') {
+        selectedSlot = targetSlot;
+        onTapBenchPlayer(source.jersey);
+        showToast(`🔄 Drag-subbed #${source.jersey} onto pitch at ${targetSlot}`);
+        return;
+      }
+
+      // 3. Pitch Node dropped onto Bench Tray -> SUB OFF TO BENCH
+      if (source.type === 'pitch' && targetType === 'benchGrid') {
+        selectedSlot = source.slot;
+        selectedPlayerJersey = source.jersey;
+        subSelectedPlayerOff();
+        showToast(`⬇️ Subbed #${source.jersey} off to bench`);
+        return;
+      }
+    }
+
+    // Touch Event Handlers for Mobile & iPad Screens
+    function onNodeTouchStart(e, type, slot, jersey) {
+      if (e.touches.length > 1) return;
+      const touch = e.touches[0];
+      trackerTouchData = {
+        type,
+        slot,
+        jersey,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        startTime: Date.now(),
+        isDragging: false,
+        ghostEl: null
+      };
+    }
+
+    function onNodeTouchMove(e) {
+      if (!trackerTouchData) return;
+      const touch = e.touches[0];
+      const dist = Math.hypot(touch.clientX - trackerTouchData.startX, touch.clientY - trackerTouchData.startY);
+
+      if (dist > 14) {
+        trackerTouchData.isDragging = true;
+        if (e.cancelable) e.preventDefault();
+
+        if (!trackerTouchData.ghostEl) {
+          const p = playerStats[trackerTouchData.jersey];
+          const ghost = document.createElement('div');
+          ghost.className = 'fixed pointer-events-none z-[100] px-3 py-1.5 rounded-xl bg-teal-500 text-slate-950 font-black text-xs font-mono shadow-2xl flex items-center gap-1.5 border border-white scale-110 -translate-x-1/2 -translate-y-1/2';
+          ghost.innerHTML = `<span>#${trackerTouchData.jersey || '?'}</span><span>${p ? p.name.split(' ')[0] : (trackerTouchData.slot || '')}</span>`;
+          document.body.appendChild(ghost);
+          trackerTouchData.ghostEl = ghost;
+        }
+
+        if (trackerTouchData.ghostEl) {
+          trackerTouchData.ghostEl.style.left = `${touch.clientX}px`;
+          trackerTouchData.ghostEl.style.top = `${touch.clientY}px`;
+        }
+
+        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        const pitchNode = targetEl?.closest('[data-pitch-slot]');
+        document.querySelectorAll('.player-node').forEach(n => n.classList.remove('ring-2', 'ring-teal-400', 'scale-105'));
+        if (pitchNode && pitchNode.dataset.pitchSlot !== trackerTouchData.slot) {
+          pitchNode.classList.add('ring-2', 'ring-teal-400', 'scale-105');
+        }
+      }
+    }
+
+    function onNodeTouchEnd(e, type, slot) {
+      if (!trackerTouchData) return;
+      const touch = e.changedTouches[0];
+
+      if (trackerTouchData.ghostEl) {
+        trackerTouchData.ghostEl.remove();
+        trackerTouchData.ghostEl = null;
+      }
+      document.querySelectorAll('.player-node').forEach(n => n.classList.remove('ring-2', 'ring-teal-400', 'scale-105'));
+
+      if (trackerTouchData.isDragging) {
+        const dropEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        const pitchTarget = dropEl?.closest('[data-pitch-slot]');
+        const benchTarget = dropEl?.closest('#benchRosterGrid');
+
+        if (pitchTarget) {
+          const targetSlot = pitchTarget.dataset.pitchSlot;
+          executeNodeDropAction(trackerTouchData, 'pitch', targetSlot);
+        } else if (benchTarget) {
+          executeNodeDropAction(trackerTouchData, 'benchGrid', null);
+        }
+      } else {
+        if (type === 'pitch') {
+          onTapPitchNode(slot);
+        } else if (type === 'bench') {
+          onTapBenchPlayer(trackerTouchData.jersey);
+        }
+      }
+
+      trackerTouchData = null;
+    }
+
+    /* =========================================================
+       INSTANT CONTEXTUAL PLAYER ACTION MODAL CONTROLLER
+       ========================================================= */
+    let pamCurrentSlot = null;
+
+    function openTrackerPlayerActionModal(slot, initialTab = 'stats') {
+      pamCurrentSlot = slot;
+      selectedSlot = slot;
+      const jersey = onPitchPlayers[slot];
+      const p = jersey ? playerStats[jersey] : null;
+
+      const pamJerseyEl = document.getElementById('pamJersey');
+      if (pamJerseyEl) pamJerseyEl.textContent = jersey ? `#${jersey}` : '#–';
+      const pamNameEl = document.getElementById('pamName');
+      if (pamNameEl) pamNameEl.textContent = p ? p.name : `Vacant Position (${slot})`;
+      const pamRoleEl = document.getElementById('pamRole');
+      if (pamRoleEl) pamRoleEl.textContent = `${slot} (${simplifyPos(slot)})`;
+      const pamMinsEl = document.getElementById('pamMins');
+      if (pamMinsEl) pamMinsEl.textContent = p ? `${p.mins}' in / ${p.benchMins}' bench` : 'Vacant Position';
+      const pamStatsEl = document.getElementById('pamStats');
+      if (pamStatsEl) pamStatsEl.textContent = p ? `${p.goals}G · ${p.assists}A · ${p.shots}S · ${p.turnovers}TO` : 'Tap Sub Bench to put player in';
+      const pamSubSlotNameEl = document.getElementById('pamSubSlotName');
+      if (pamSubSlotNameEl) pamSubSlotNameEl.textContent = slot;
+      const pamSwapCurrentPlayerEl = document.getElementById('pamSwapCurrentPlayer');
+      if (pamSwapCurrentPlayerEl) pamSwapCurrentPlayerEl.textContent = p ? `#${jersey} ${p.name.split(' ')[0]}` : slot;
+
+      // Render Disciplinary Badges
+      const badgesContainer = document.getElementById('pamBadges');
+      if (badgesContainer) {
+        const badges = [];
+        if (p && p.goals > 0) badges.push(`<span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">⚽${p.goals > 1 ? p.goals : ''}</span>`);
+        if (p && p.yellowCards > 0) badges.push(`<span class="inline-block w-2.5 h-3.5 bg-[#FFD700] border border-[#B8860B] rounded-[1px]" title="Yellow Card"></span>`);
+        if (p && (p.hasRed || p.yellowCards >= 2)) badges.push(`<span class="inline-block w-2.5 h-3.5 bg-[#EF4444] border border-[#B91C1C] rounded-[1px]" title="Red Card"></span>`);
+        if (p && p.fouls > 0) badges.push(`<span class="mono text-[10px] font-bold text-rose-300 px-1 py-0.2 rounded bg-rose-500/20 border border-rose-500/30">${p.fouls}F</span>`);
+        badgesContainer.innerHTML = badges.join('');
+      }
+
+      renderPamBenchList();
+      renderPamSwapList();
+
+      if (!p) initialTab = 'sub';
+      switchPamTab(initialTab);
+
+      const modal = document.getElementById('trackerPlayerActionModal');
+      if (modal) modal.classList.replace('hidden', 'flex');
+    }
+
+    function closeTrackerPlayerActionModal() {
+      const modal = document.getElementById('trackerPlayerActionModal');
+      if (modal) modal.classList.replace('flex', 'hidden');
+      pamCurrentSlot = null;
+    }
+
+    function switchPamTab(tab) {
+      const statsBtn = document.getElementById('pamTabStatsBtn');
+      const subBtn = document.getElementById('pamTabSubBtn');
+      const swapBtn = document.getElementById('pamTabSwapBtn');
+      const viewStats = document.getElementById('pamViewStats');
+      const viewSub = document.getElementById('pamViewSub');
+      const viewSwap = document.getElementById('pamViewSwap');
+
+      const activeCls = 'py-2 rounded-lg bg-teal-500 text-slate-950 shadow font-black transition';
+      const inactiveCls = 'py-2 rounded-lg text-slate-400 hover:text-white transition';
+
+      if (tab === 'stats') {
+        if (statsBtn) statsBtn.className = activeCls;
+        if (subBtn) subBtn.className = inactiveCls;
+        if (swapBtn) swapBtn.className = inactiveCls;
+        if (viewStats) viewStats.classList.remove('hidden');
+        if (viewSub) viewSub.classList.add('hidden');
+        if (viewSwap) viewSwap.classList.add('hidden');
+      } else if (tab === 'sub') {
+        if (statsBtn) statsBtn.className = inactiveCls;
+        if (subBtn) subBtn.className = activeCls;
+        if (swapBtn) swapBtn.className = inactiveCls;
+        if (viewStats) viewStats.classList.add('hidden');
+        if (viewSub) viewSub.classList.remove('hidden');
+        if (viewSwap) viewSwap.classList.add('hidden');
+      } else if (tab === 'swap') {
+        if (statsBtn) statsBtn.className = inactiveCls;
+        if (subBtn) subBtn.className = inactiveCls;
+        if (swapBtn) swapBtn.className = activeCls;
+        if (viewStats) viewStats.classList.add('hidden');
+        if (viewSub) viewSub.classList.add('hidden');
+        if (viewSwap) viewSwap.classList.remove('hidden');
+      }
+    }
+
+    function renderPamBenchList() {
+      const container = document.getElementById('pamBenchList');
+      if (!container) return;
+      const sq = SQUADS[activeSquadKey];
+      const onPitchSet = new Set(Object.values(onPitchPlayers));
+      const bench = sq.roster.filter(p => !onPitchSet.has(p.jersey) && !absentPlayers.has(p.jersey));
+
+      const countEl = document.getElementById('pamBenchCount');
+      if (countEl) countEl.textContent = bench.length;
+
+      if (!bench.length) {
+        container.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs italic col-span-2">No bench substitutes available.</div>`;
+        return;
+      }
+
+      container.innerHTML = bench.map(p => {
+        const stat = playerStats[p.jersey] || { mins: 0, benchMins: 0 };
+        return `
+          <button type="button" onclick="commitTrackerSubFromModal(${p.jersey})"
+            class="p-2.5 rounded-xl bg-pitch hover:bg-slate-800 border border-border/80 flex items-center justify-between text-left active:scale-95 transition">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center font-mono font-bold text-xs text-teal-300 border border-border/80">#${p.jersey}</span>
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-white block truncate">${p.name.split(' ')[0]}</span>
+                <span class="text-[9px] font-mono text-slate-400 block">${stat.mins}' in / ${stat.benchMins}' bench</span>
+              </div>
+            </div>
+            <span class="mono text-[10px] font-bold text-emerald-400 px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 shrink-0">SUB IN ↗</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function commitTrackerSubFromModal(benchJersey) {
+      if (!pamCurrentSlot) return;
+      selectedSlot = pamCurrentSlot;
+      onTapBenchPlayer(benchJersey);
+      closeTrackerPlayerActionModal();
+    }
+
+    function renderPamSwapList() {
+      const container = document.getElementById('pamSwapList');
+      if (!container) return;
+      const coords = FORMATIONS[currentFormation] || FORMATIONS['4-3-3'];
+      const otherSlots = Object.keys(coords).filter(s => s !== pamCurrentSlot);
+
+      container.innerHTML = otherSlots.map(s => {
+        const j = onPitchPlayers[s];
+        const p = j ? playerStats[j] : null;
+        return `
+          <button type="button" onclick="commitTrackerSwapFromModal('${s}')"
+            class="p-2.5 rounded-xl bg-pitch hover:bg-slate-800 border border-border/80 flex items-center justify-between text-left active:scale-95 transition">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/40 font-mono font-bold text-xs">${s}</span>
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-white block truncate">${p ? '#' + p.jersey + ' ' + p.name.split(' ')[0] : 'Vacant'}</span>
+                <span class="text-[9px] font-mono text-slate-400 block">${p ? p.mins + "' played" : ''}</span>
+              </div>
+            </div>
+            <span class="mono text-[10px] font-bold text-sky-400 px-2 py-1 rounded bg-sky-500/10 border border-sky-500/30 shrink-0">SWAP 🔄</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function commitTrackerSwapFromModal(targetSlot) {
+      if (!pamCurrentSlot || pamCurrentSlot === targetSlot) return;
+      const j1 = onPitchPlayers[pamCurrentSlot];
+      const j2 = onPitchPlayers[targetSlot];
+
+      onPitchPlayers[pamCurrentSlot] = j2;
+      onPitchPlayers[targetSlot] = j1;
+      if (j1 && playerStats[j1]) playerStats[j1].currentPos = targetSlot;
+      if (j2 && playerStats[j2]) playerStats[j2].currentPos = pamCurrentSlot;
+
+      logMatchSystemEvent(`Position Swap: #${j1 || '?'} to ${targetSlot}, #${j2 || '?'} to ${pamCurrentSlot}`);
+      showToast(`🔄 Swapped positions: #${j1 || '?'} and #${j2 || '?'}`);
+      closeTrackerPlayerActionModal();
+      deselectPlayer();
+      renderPitch();
+      renderBench();
+      saveState();
+    }
+
+    function logTrackerEventFromModal(type) {
+      if (!pamCurrentSlot) return;
+      const jersey = onPitchPlayers[pamCurrentSlot];
+      if (!jersey || !playerStats[jersey]) {
+        showToast('Please sub a player into this position first.');
+        return;
+      }
+      selectedPlayerJersey = jersey;
+      selectedSlot = pamCurrentSlot;
+      logSelectedEvent(type);
+      closeTrackerPlayerActionModal();
+    }
+
+    function openTrackerShotOut18FromModal() {
+      if (!pamCurrentSlot) return;
+      const jersey = onPitchPlayers[pamCurrentSlot];
+      if (!jersey) return;
+      selectedPlayerJersey = jersey;
+      selectedSlot = pamCurrentSlot;
+      closeTrackerPlayerActionModal();
+      openShotOut18Modal();
+    }
+
+    function openTrackerCrossFromModal() {
+      if (!pamCurrentSlot) return;
+      selectedPlayerJersey = onPitchPlayers[pamCurrentSlot];
+      selectedSlot = pamCurrentSlot;
+      closeTrackerPlayerActionModal();
+      openCrossModal();
+    }
+
+    function promptTrackerTurnoverFromModal() {
+      if (!pamCurrentSlot) return;
+      selectedPlayerJersey = onPitchPlayers[pamCurrentSlot];
+      selectedSlot = pamCurrentSlot;
+      closeTrackerPlayerActionModal();
+      promptTurnoverZone();
+    }
+
+    function flagTrackerBookmarkFromModal() {
+      if (!pamCurrentSlot) return;
+      selectedPlayerJersey = onPitchPlayers[pamCurrentSlot];
+      selectedSlot = pamCurrentSlot;
+      flagSidelineBookmark();
+      closeTrackerPlayerActionModal();
+    }
+
+    function subCurrentPamPlayerOff() {
+      if (!pamCurrentSlot) return;
+      selectedSlot = pamCurrentSlot;
+      selectedPlayerJersey = onPitchPlayers[pamCurrentSlot];
+      subSelectedPlayerOff();
+      closeTrackerPlayerActionModal();
     }
 
     function changeFormation(formKey) {
