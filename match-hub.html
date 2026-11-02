@@ -150,7 +150,8 @@
         print-color-adjust: exact !important;
       }
       header, #authGate, #teamSwitch, #scopeBar, #reportControlsBar, #playerModal, #shareModal, #toast,
-      #matchBanner, .contrast-block, .tab-content:not(#tab-reports), .no-print, button, input[type="file"], select.no-print {
+      #matchBanner, .contrast-block, .tab-content:not(#tab-reports), #tab-tracker, #tab-overview, #tab-roster,
+      #tab-film, #tab-charts, #tab-tactics, main > *:not(#tab-reports), .no-print, button, input[type="file"], select.no-print {
         display: none !important;
       }
       main {
@@ -1217,9 +1218,6 @@
               <button onclick="openTrackerCrossModal()" class="px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/40 font-semibold flex items-center gap-1 active:scale-95">
                 <span>ðŸ‘Ÿ Cross Attempt</span>
               </button>
-            </div>
-          </div>
-        </div>
             </div>
           </div>
         </div>
@@ -8658,6 +8656,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
     }
 
     function printReportCard() {
+      switchTab('tab-reports');
       syncAllReportTextareas();
       saveReportDraft();
       syncAllReportTextareas();
