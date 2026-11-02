@@ -3484,7 +3484,9 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
               duelsWon: 0,
               benchMins: 0
             })),
-            filmEvents: []
+            filmEvents: (customData[key] && Array.isArray(customData[key].filmEvents) && customData[key].filmEvents.length)
+              ? customData[key].filmEvents
+              : []
           };
         }
       });
@@ -3663,7 +3665,10 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
           });
         });
 
-        teamObj.filmEvents = teamObj.filmEvents.concat(newFilmMoments);
+        const existingFilm = Array.isArray(teamObj.filmEvents) ? teamObj.filmEvents : [];
+        const seenSigs = new Set(existingFilm.map(e => `${e.match}::${e.time}::${e.tag || ''}::${e.note || ''}`));
+        const dedupedNew = newFilmMoments.filter(e => !seenSigs.has(`${e.match}::${e.time}::${e.tag || ''}::${e.note || ''}`));
+        teamObj.filmEvents = existingFilm.concat(dedupedNew);
       });
 
       // Save customData permanently
@@ -3674,6 +3679,11 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
       }
 
       const coachPin = localStorage.getItem('ajax_coach_pin') || '4111';
+      const matchTotals = {
+        shots: matchEvents.filter(e => e.type === 'shot' || e.type === 'sot' || e.type === 'shot_outside_18' || e.type === 'goal').length,
+        sot: matchEvents.filter(e => e.type === 'sot' || e.type === 'goal' || (e.type === 'shot_outside_18' && e.onTarget)).length,
+        soff: matchEvents.filter(e => (e.type === 'shot' || (e.type === 'shot_outside_18' && !e.onTarget))).length
+      };
       const matchSummary = {
         date: new Date().toISOString(),
         team: targetTeam,
@@ -3697,7 +3707,8 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
           pin: coachPin,
           isIncremental: true,
           playerStats: statsPayload,
-          matchSummary: matchSummary
+          matchSummary: matchSummary,
+          matchTotals: matchTotals
         })
       }).then(r => r.json()).then(res => {
         if (res && res.success) {

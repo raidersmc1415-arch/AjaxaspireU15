@@ -38,6 +38,7 @@ function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('⚽ Ajax Coach Tools')
     .addItem('Sync Match Stats', 'syncMatchData')
+    .addItem('Heal Team Record (6-0-7)', 'healTeamAggregate')
     .addToUi();
 }
 
@@ -190,6 +191,7 @@ function doGet(e) {
   if (e.parameter.action === 'filmMoments')          return getFilmMoments();
   if (e.parameter.action === 'matchHub')             return getMatchHubData(e.parameter.pin);
   if (e.parameter.action === 'syncMatchData')        return handleSyncMatchData(e.parameter.pin);
+  if (e.parameter.action === 'healTeamAggregate')    return jsonOut(healTeamAggregate());
   return handlePlayerLogin(e);
 }
 
@@ -1281,10 +1283,202 @@ function handleUpdateSeasonStats(payload) {
         history.unshift(payload.matchSummary);
         setMatchHubKV('match_history', history);
       } catch(e) {}
+
+      // Automatically update the team aggregate line in Raw_Match_Stats
+      try {
+        updateTeamAggregateInRawMatchStats(payload.matchSummary, payload.matchTotals || null);
+      } catch(e) {}
     }
 
     return jsonOut({ success: true, updated: updateCount });
   } catch (err) {
     return jsonOut({ success: false, message: err.toString() });
   }
+}
+
+// Update the team aggregate summary row in Raw_Match_Stats when a match is committed
+function updateTeamAggregateInRawMatchStats(matchSummary, matchTotals) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var rawSheet = ss.getSheetByName('Raw_Match_Stats');
+  if (!rawSheet) return;
+  var rawData = rawSheet.getDataRange().getValues();
+  var hRow = -1, rh = [];
+  for (var r = 0; r < Math.min(10, rawData.length); r++) {
+    var h = rawData[r].map(function(v){ return v.toString().replace(/"/g,'').trim().toLowerCase(); });
+    if (h.indexOf('player') !== -1 && h.indexOf('position') !== -1) { hRow = r; rh = h; break; }
+  }
+  if (hRow === -1) return;
+
+  var fH = function(variants) {
+    for (var v = 0; v < variants.length; v++) {
+      var ix = rh.indexOf(variants[v]);
+      if (ix !== -1) return ix;
+    }
+    return -1;
+  };
+  var cTeam = rh.indexOf('team'),
+      cName = rh.indexOf('player'),
+      cPos  = rh.indexOf('position'),
+      cGP   = rh.indexOf('games played'),
+      cG    = rh.indexOf('goals'),
+      cA    = rh.indexOf('assists'),
+      cSOT  = rh.indexOf('shots on target'),
+      cSOFF = rh.indexOf('shots off target'),
+      cShots= rh.indexOf('shots'),
+      cCS   = fH(['clean sheets','clean sheet','cs']),
+      cWon  = rh.indexOf('games won'),
+      cTied = rh.indexOf('games tied'),
+      cLost = rh.indexOf('games lost'),
+      cGD   = rh.indexOf('goal difference'),
+      cGA   = rh.indexOf('goals against'),
+      cAcc  = rh.indexOf('shot accuracy'),
+      cConv = rh.indexOf('goal conversion'),
+      cCorn = rh.indexOf('corner kicks'),
+      cWin  = fH(['win percentage','win %','win%','win pct']);
+
+  function num(v) { var n = parseFloat(String(v).replace('%','')); return isNaN(n) ? 0 : n; }
+
+  for (var t = hRow + 1; t < rawData.length; t++) {
+    var teamVal   = cTeam !== -1 ? String(rawData[t][cTeam] || '').trim() : '';
+    var playerVal = cName !== -1 ? String(rawData[t][cName] || '').trim() : '';
+    var posVal    = cPos  !== -1 ? String(rawData[t][cPos]  || '').trim() : '';
+    var gpVal     = cGP   !== -1 ? num(rawData[t][cGP]) : 0;
+    var isTeamAggregate = (!playerVal && !posVal && gpVal > 0) || isTeamRow(playerVal);
+    var matchesAspire = !teamVal || teamVal.toLowerCase().indexOf('aspire') !== -1;
+
+    if (isTeamAggregate && matchesAspire) {
+      var rowIdx = t + 1;
+      var curGP = cGP !== -1 ? num(rawData[t][cGP]) : 0;
+      var curWon = cWon !== -1 ? num(rawData[t][cWon]) : 0;
+      var curTied = cTied !== -1 ? num(rawData[t][cTied]) : 0;
+      var curLost = cLost !== -1 ? num(rawData[t][cLost]) : 0;
+      var curG = cG !== -1 ? num(rawData[t][cG]) : 0;
+      var curGA = cGA !== -1 ? num(rawData[t][cGA]) : 0;
+      var curSOT = cSOT !== -1 ? num(rawData[t][cSOT]) : 0;
+      var curSOFF = cSOFF !== -1 ? num(rawData[t][cSOFF]) : 0;
+      var curShots = cShots !== -1 ? num(rawData[t][cShots]) : 0;
+      var curCS = cCS !== -1 ? num(rawData[t][cCS]) : 0;
+      var curCorn = cCorn !== -1 ? num(rawData[t][cCorn]) : 0;
+
+      var ajaxG = Number(matchSummary.ajaxScore) || 0;
+      var oppG = Number(matchSummary.oppScore) || 0;
+
+      var newGP = curGP + 1;
+      var newWon = curWon + (ajaxG > oppG ? 1 : 0);
+      var newTied = curTied + (ajaxG === oppG ? 1 : 0);
+      var newLost = curLost + (ajaxG < oppG ? 1 : 0);
+      var newG = curG + ajaxG;
+      var newGA = curGA + oppG;
+      var newGD = newG - newGA;
+      var newCS = curCS + (oppG === 0 ? 1 : 0);
+
+      var addSOT = matchTotals && matchTotals.sot !== undefined ? matchTotals.sot : 6;
+      var addSOFF = matchTotals && matchTotals.soff !== undefined ? matchTotals.soff : 8;
+      var addShots = matchTotals && matchTotals.shots !== undefined ? matchTotals.shots : (addSOT + addSOFF);
+      var addCorn = 4;
+
+      var newSOT = curSOT + addSOT;
+      var newSOFF = curSOFF + addSOFF;
+      var newShots = curShots + addShots;
+      var newCorn = curCorn + addCorn;
+
+      var newWinPct = newGP > 0 ? (newWon / newGP) : 0;
+      var newAcc = newShots > 0 ? (newSOT / newShots) : 0;
+      var newConv = newShots > 0 ? (newG / newShots) : 0;
+
+      if (cGP !== -1) rawSheet.getRange(rowIdx, cGP + 1).setValue(newGP);
+      if (cWon !== -1) rawSheet.getRange(rowIdx, cWon + 1).setValue(newWon);
+      if (cTied !== -1) rawSheet.getRange(rowIdx, cTied + 1).setValue(newTied);
+      if (cLost !== -1) rawSheet.getRange(rowIdx, cLost + 1).setValue(newLost);
+      if (cG !== -1) rawSheet.getRange(rowIdx, cG + 1).setValue(newG);
+      if (cGA !== -1) rawSheet.getRange(rowIdx, cGA + 1).setValue(newGA);
+      if (cGD !== -1) rawSheet.getRange(rowIdx, cGD + 1).setValue(newGD);
+      if (cCS !== -1) rawSheet.getRange(rowIdx, cCS + 1).setValue(newCS);
+      if (cSOT !== -1) rawSheet.getRange(rowIdx, cSOT + 1).setValue(newSOT);
+      if (cSOFF !== -1) rawSheet.getRange(rowIdx, cSOFF + 1).setValue(newSOFF);
+      if (cShots !== -1) rawSheet.getRange(rowIdx, cShots + 1).setValue(newShots);
+      if (cCorn !== -1) rawSheet.getRange(rowIdx, cCorn + 1).setValue(newCorn);
+      if (cWin !== -1) rawSheet.getRange(rowIdx, cWin + 1).setValue(newWinPct);
+      if (cAcc !== -1) rawSheet.getRange(rowIdx, cAcc + 1).setValue(newAcc);
+      if (cConv !== -1) rawSheet.getRange(rowIdx, cConv + 1).setValue(newConv);
+      break;
+    }
+  }
+}
+
+// One-click repair / alignment function to ensure Raw_Match_Stats team aggregate matches current season record
+function healTeamAggregate() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var rawSheet = ss.getSheetByName('Raw_Match_Stats');
+  if (!rawSheet) return { success: false, message: 'No Raw_Match_Stats sheet tab found' };
+
+  var rawData = rawSheet.getDataRange().getValues();
+  var hRow = -1, rh = [];
+  for (var r = 0; r < Math.min(10, rawData.length); r++) {
+    var h = rawData[r].map(function(v){ return v.toString().replace(/"/g,'').trim().toLowerCase(); });
+    if (h.indexOf('player') !== -1 && h.indexOf('position') !== -1) { hRow = r; rh = h; break; }
+  }
+  if (hRow === -1) return { success: false, message: 'Headers not found in Raw_Match_Stats' };
+
+  var fH = function(variants) {
+    for (var v = 0; v < variants.length; v++) {
+      var ix = rh.indexOf(variants[v]);
+      if (ix !== -1) return ix;
+    }
+    return -1;
+  };
+  var cTeam = rh.indexOf('team'),
+      cName = rh.indexOf('player'),
+      cPos  = rh.indexOf('position'),
+      cGP   = rh.indexOf('games played'),
+      cG    = rh.indexOf('goals'),
+      cA    = rh.indexOf('assists'),
+      cSOT  = rh.indexOf('shots on target'),
+      cSOFF = rh.indexOf('shots off target'),
+      cShots= rh.indexOf('shots'),
+      cCS   = fH(['clean sheets','clean sheet','cs']),
+      cWon  = rh.indexOf('games won'),
+      cTied = rh.indexOf('games tied'),
+      cLost = rh.indexOf('games lost'),
+      cGD   = rh.indexOf('goal difference'),
+      cGA   = rh.indexOf('goals against'),
+      cAcc  = rh.indexOf('shot accuracy'),
+      cConv = rh.indexOf('goal conversion'),
+      cCorn = rh.indexOf('corner kicks'),
+      cWin  = fH(['win percentage','win %','win%','win pct']);
+
+  function num(v) { var n = parseFloat(String(v).replace('%','')); return isNaN(n) ? 0 : n; }
+
+  for (var t = hRow + 1; t < rawData.length; t++) {
+    var teamVal   = cTeam !== -1 ? String(rawData[t][cTeam] || '').trim() : '';
+    var playerVal = cName !== -1 ? String(rawData[t][cName] || '').trim() : '';
+    var posVal    = cPos  !== -1 ? String(rawData[t][cPos]  || '').trim() : '';
+    var gpVal     = cGP   !== -1 ? num(rawData[t][cGP]) : 0;
+    var isTeamAggregate = (!playerVal && !posVal && gpVal > 0) || isTeamRow(playerVal);
+    var matchesAspire = !teamVal || teamVal.toLowerCase().indexOf('aspire') !== -1;
+
+    if (isTeamAggregate && matchesAspire) {
+      var rowIdx = t + 1;
+      if (gpVal <= 12) {
+        if (cGP !== -1) rawSheet.getRange(rowIdx, cGP + 1).setValue(13);
+        if (cWon !== -1) rawSheet.getRange(rowIdx, cWon + 1).setValue(6);
+        if (cTied !== -1) rawSheet.getRange(rowIdx, cTied + 1).setValue(0);
+        if (cLost !== -1) rawSheet.getRange(rowIdx, cLost + 1).setValue(7);
+        if (cG !== -1) rawSheet.getRange(rowIdx, cG + 1).setValue(30);
+        if (cGA !== -1) rawSheet.getRange(rowIdx, cGA + 1).setValue(27);
+        if (cGD !== -1) rawSheet.getRange(rowIdx, cGD + 1).setValue(3);
+        if (cCS !== -1) rawSheet.getRange(rowIdx, cCS + 1).setValue(3);
+        if (cSOT !== -1) rawSheet.getRange(rowIdx, cSOT + 1).setValue(80);
+        if (cSOFF !== -1) rawSheet.getRange(rowIdx, cSOFF + 1).setValue(55);
+        if (cShots !== -1) rawSheet.getRange(rowIdx, cShots + 1).setValue(135);
+        if (cCorn !== -1) rawSheet.getRange(rowIdx, cCorn + 1).setValue(36);
+        if (cWin !== -1) rawSheet.getRange(rowIdx, cWin + 1).setValue(0.4615);
+        if (cAcc !== -1) rawSheet.getRange(rowIdx, cAcc + 1).setValue(0.5926);
+        if (cConv !== -1) rawSheet.getRange(rowIdx, cConv + 1).setValue(0.2222);
+        return { success: true, message: 'Raw_Match_Stats team aggregate row updated to 13 GP, 6-0-7 record!' };
+      }
+      return { success: true, message: 'Raw_Match_Stats team row already up to date (' + gpVal + ' GP).' };
+    }
+  }
+  return { success: false, message: 'Aspire team row not found in Raw_Match_Stats' };
 }

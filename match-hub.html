@@ -2811,15 +2811,59 @@
       if (!ga || !ga.totals || !ga.totals.games) {
         DATA['AJAX GA U15'] = JSON.parse(JSON.stringify(DEFAULT_DATA['AJAX GA U15']));
       }
-      // Ensure filmEvents & filmSummary are always synchronized
-      if (DATA['AJAX ASPIRE U15']) {
-        const activeFilm = DATA['AJAX ASPIRE U15'].filmEvents?.length
-          ? DATA['AJAX ASPIRE U15'].filmEvents
-          : DEFAULT_DATA['AJAX ASPIRE U15']?.filmEvents;
-        if (activeFilm?.length) {
-          applyFilmEventsToTeam(DATA['AJAX ASPIRE U15'], activeFilm);
-        }
+      // Helper: merge baseline moments with newly logged/custom moments without duplicates
+      function mergeFilmMoments(baseEvents, incomingEvents) {
+        const base = Array.isArray(baseEvents) ? baseEvents : [];
+        const inc = Array.isArray(incomingEvents) ? incomingEvents : [];
+        if (!base.length) return inc.slice();
+        if (!inc.length) return base.slice();
+
+        const seenSigs = new Set();
+        const seenIds = new Set();
+        const merged = [];
+
+        base.forEach(e => {
+          const sig = `${e.match}::${e.time}::${e.category || ''}::${e.tag || ''}::${(e.note || '').slice(0, 30)}`;
+          seenSigs.add(sig);
+          if (e.id != null) seenIds.add(String(e.id));
+          merged.push(e);
+        });
+
+        let nextId = Math.max(...base.map(e => Number(e.id) || 0), 0) + 1;
+        inc.forEach(e => {
+          const sig = `${e.match}::${e.time}::${e.category || ''}::${e.tag || ''}::${(e.note || '').slice(0, 30)}`;
+          const isBaselineId = e.id != null && Number(e.id) <= base.length && !/rocklin/i.test(e.match || '');
+          if (!seenSigs.has(sig) && (!seenIds.has(String(e.id)) || !isBaselineId)) {
+            seenSigs.add(sig);
+            const copy = Object.assign({}, e);
+            if (!copy.id || isBaselineId) {
+              copy.id = nextId++;
+            }
+            seenIds.add(String(copy.id));
+            merged.push(copy);
+          }
+        });
+
+        return merged;
       }
+
+      // Ensure filmEvents & filmSummary are always complete across all Aspire scopes (AJAX ASPIRE U15 and AJAX ASPIRE U15 (LEAGUE))
+      const baseFilm = DEFAULT_DATA['AJAX ASPIRE U15']?.filmEvents || [];
+      const aspireKeys = ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)'];
+      let allCustomMoments = [];
+      aspireKeys.forEach(k => {
+        if (DATA[k] && Array.isArray(DATA[k].filmEvents) && DATA[k].filmEvents.length) {
+          allCustomMoments = allCustomMoments.concat(DATA[k].filmEvents);
+        }
+      });
+      const unifiedFilm = mergeFilmMoments(baseFilm, allCustomMoments);
+
+      aspireKeys.forEach(k => {
+        if (DATA[k]) {
+          DATA[k].filmEvents = unifiedFilm;
+          applyFilmEventsToTeam(DATA[k], unifiedFilm);
+        }
+      });
       // Heal percentage decimals (e.g. 0.73 -> 73) and compute Developmental Net / 80'
       for (const teamObj of Object.values(DATA)) {
         if (!teamObj || !teamObj.totals) continue;
@@ -3048,14 +3092,12 @@
       const topKP = [...players].sort((a, b) => (b.keyPasses || 0) - (a.keyPasses || 0))[0];
 
       $('kpis').innerHTML =
-        kpi('Total Shots', shots, `${sot} SOT · ${kp} Key Passes`, 'accent-text') +
+        kpi('Total Shots', shots, `${sot} on target · ${shots - sot} off target (${pct(sot, shots)}% acc)`, 'accent-text') +
         kpi('Shots Conceded', totals.shotsAgainst || 0, `${plural(ga, 'goal')} against (${totals.saves || sum('saves')} saves)`, 'text-blue-400') +
-        kpi('Corners & Crosses', `${totals.corners ?? sum('corners')} / ${totals.crosses ?? sum('crosses')}`, topCorner && topCorner.corners ? `${topCorner.corners} corners by ${shortName(topCorner.name)}` : 'Set piece volume') +
+        kpi('Chances Created', `${kp} Key Passes · ${totals.corners ?? sum('corners')} Corners`, topKP && topKP.keyPasses ? `Led by ${shortName(topKP.name)} (${topKP.keyPasses} KP)` : 'Key passes & corners', 'text-teal-400') +
         (hasFilm
           ? kpi('Glow vs. Grow', `${totals.glow} : ${totals.grow}`, `${pct(totals.glow, totals.glow + totals.grow)}% Positive · ${totals.glowAndGrow || 0} Mixed`, 'text-emerald-400')
-          : (season
-              ? kpi('Key Passes', kp, topKP && topKP.keyPasses ? `Led by ${shortName(topKP.name)} (${topKP.keyPasses})` : (gk ? `${shortName(gk.name)}: ${gk.mins}' in GK` : ''), 'text-emerald-400')
-              : kpi('Players Used', `${used} / ${players.length}`, `${players.length - used} unused on bench`, 'text-emerald-400')));
+          : kpi('Crosses & Corners', `${totals.crosses ?? sum('crosses')} / ${totals.corners ?? sum('corners')}`, 'Set piece volume', 'text-emerald-400'));
     }
 
     /* ---------- Leaders & Creation & Swing Players ---------- */
