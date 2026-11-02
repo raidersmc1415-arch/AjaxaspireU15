@@ -3442,16 +3442,16 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
       // Verified historical baseline defaults if local customData is absent or partial
       const BASELINE_TOTALS = {
         'AJAX ASPIRE U15': {
-          games: 5, mins: 413, won: 1, tied: 0, lost: 4, gf: 7, ga: 12, gd: -5,
-          shots: 37, sot: 27, soff: 10, shotsAgainst: 19, saves: 13, cleanSheets: 1,
-          corners: 17, crosses: 5, fouls: 17, offsides: 6, turnovers: 264,
-          toA: 62, toM: 112, toD: 87, keyPasses: 7, passes: 11, shotAcc: 73, conv: 19, winPct: 20
+          games: 6, mins: 496, won: 2, tied: 0, lost: 4, gf: 9, ga: 13, gd: -4,
+          shots: 51, sot: 33, soff: 18, shotsAgainst: 26, saves: 13, cleanSheets: 1,
+          corners: 19, crosses: 7, fouls: 21, offsides: 6, turnovers: 280,
+          toA: 65, toM: 122, toD: 93, keyPasses: 11, passes: 31, shotAcc: 65, conv: 18, winPct: 33
         },
         'AJAX ASPIRE U15 (LEAGUE)': {
-          games: 5, mins: 413, won: 1, tied: 0, lost: 4, gf: 7, ga: 12, gd: -5,
-          shots: 37, sot: 27, soff: 10, shotsAgainst: 19, saves: 13, cleanSheets: 1,
-          corners: 17, crosses: 5, fouls: 17, offsides: 6, turnovers: 264,
-          toA: 62, toM: 112, toD: 87, keyPasses: 7, passes: 11, shotAcc: 73, conv: 19, winPct: 20
+          games: 6, mins: 496, won: 2, tied: 0, lost: 4, gf: 9, ga: 13, gd: -4,
+          shots: 51, sot: 33, soff: 18, shotsAgainst: 26, saves: 13, cleanSheets: 1,
+          corners: 19, crosses: 7, fouls: 21, offsides: 6, turnovers: 280,
+          toA: 65, toM: 122, toD: 93, keyPasses: 11, passes: 31, shotAcc: 65, conv: 18, winPct: 33
         },
         'AJAX GA U15': {
           games: 4, mins: 321, won: 3, tied: 1, lost: 0, gf: 14, ga: 1, gd: 13,
@@ -3461,29 +3461,59 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         }
       };
 
+      const BASELINE_PLAYERS = {
+        'AJAX ASPIRE U15': [
+          { name: 'Alessandra Fernandez', jersey: 15, gp: 3, mins: 123, goals: 1, assists: 0, sot: 3, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Alex Marigorda', jersey: 36, gp: 5, mins: 169, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 1 },
+          { name: 'Alexa Chipres', jersey: 50, gp: 6, mins: 317, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Amy Godínez Vargas', jersey: 19, gp: 6, mins: 393, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Arianna Zamora', jersey: 4, gp: 6, mins: 268, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 1, keyPasses: 0 },
+          { name: 'Brooklyn Brewer', jersey: 37, gp: 6, mins: 220, goals: 0, assists: 0, sot: 0, soff: 2, fouls: 1, keyPasses: 1 },
+          { name: 'Camila Deleon', jersey: 9, gp: 6, mins: 378, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Carlee Gowan', jersey: 89, gp: 6, mins: 241, goals: 0, assists: 0, sot: 1, soff: 1, fouls: 0, keyPasses: 0 },
+          { name: 'Ella Simmons', jersey: 25, gp: 6, mins: 184, goals: 1, assists: 1, sot: 1, soff: 1, fouls: 1, keyPasses: 0 },
+          { name: 'Evelyn Lopez', jersey: 24, gp: 6, mins: 185, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Giselle Rosales', jersey: 2, gp: 6, mins: 341, goals: 2, assists: 1, sot: 9, soff: 5, fouls: 3, keyPasses: 2 },
+          { name: 'Grace Krimmel', jersey: 5, gp: 6, mins: 341, goals: 0, assists: 1, sot: 0, soff: 2, fouls: 1, keyPasses: 2 },
+          { name: 'Kendall Blair', jersey: 14, gp: 6, mins: 385, goals: 0, assists: 0, sot: 3, soff: 0, fouls: 5, keyPasses: 0 },
+          { name: 'MacKenzie Castro', jersey: 7, gp: 6, mins: 347, goals: 1, assists: 0, sot: 4, soff: 2, fouls: 2, keyPasses: 0 },
+          { name: 'Madisyn Craig', jersey: null, gp: 1, mins: 66, goals: 0, assists: 0, sot: 0, soff: 1, fouls: 0, keyPasses: 0 },
+          { name: 'Nairobi Mcgadney', jersey: 34, gp: 3, mins: 97, goals: 0, assists: 0, sot: 1, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Scarlett Freitas', jersey: 8, gp: 6, mins: 362, goals: 1, assists: 2, sot: 3, soff: 1, fouls: 2, keyPasses: 1 },
+          { name: 'Sola Alberto', jersey: 1, gp: 4, mins: 220, goals: 0, assists: 0, sot: 1, soff: 1, fouls: 0, keyPasses: 0 },
+          { name: 'Sonia Vera', jersey: 88, gp: 6, mins: 496, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Sophia Culver', jersey: 23, gp: 5, mins: 320, goals: 3, assists: 1, sot: 7, soff: 2, fouls: 5, keyPasses: 0 }
+        ]
+      };
+      BASELINE_PLAYERS['AJAX ASPIRE U15 (LEAGUE)'] = BASELINE_PLAYERS['AJAX ASPIRE U15'];
+
       squadKeysToUpdate.forEach(key => {
         const base = BASELINE_TOTALS[key] || { games: 0, mins: 0, won: 0, tied: 0, lost: 0, gf: 0, ga: 0, gd: 0, shots: 0, sot: 0, soff: 0, fouls: 0, corners: 0, cleanSheets: 0, winPct: 0 };
+        const baseRoster = BASELINE_PLAYERS[key] || [];
         if (!customData[key] || !customData[key].totals || (customData[key].totals.games < base.games)) {
           customData[key] = {
             totals: Object.assign({}, base),
-            players: sq.roster.map(r => ({
-              name: r.name,
-              jersey: r.jersey,
-              roles: r.roles || [r.defaultPos],
-              posBreakdown: [],
-              gp: 0,
-              mins: 0,
-              goals: 0,
-              assists: 0,
-              shots: 0,
-              sot: 0,
-              soff: 0,
-              fouls: 0,
-              toD: 0,
-              keyPasses: 0,
-              duelsWon: 0,
-              benchMins: 0
-            })),
+            players: sq.roster.map(r => {
+              const bp = baseRoster.find(b => cleanNorm(b.name) === cleanNorm(r.name)) || {};
+              return {
+                name: r.name,
+                jersey: r.jersey,
+                roles: r.roles || [r.defaultPos],
+                posBreakdown: [],
+                gp: bp.gp || 0,
+                mins: bp.mins || 0,
+                goals: bp.goals || 0,
+                assists: bp.assists || 0,
+                shots: (bp.sot || 0) + (bp.soff || 0),
+                sot: bp.sot || 0,
+                soff: bp.soff || 0,
+                fouls: bp.fouls || 0,
+                toD: 0,
+                keyPasses: bp.keyPasses || 0,
+                duelsWon: 0,
+                benchMins: 0
+              };
+            }),
             filmEvents: (customData[key] && Array.isArray(customData[key].filmEvents) && customData[key].filmEvents.length)
               ? customData[key].filmEvents
               : []
