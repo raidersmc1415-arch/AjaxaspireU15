@@ -63,6 +63,9 @@
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="syncMomentsToMatchHub()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5 active:scale-95">
+          <span>⚡ Push to Match Hub</span>
+        </button>
         <a href="match-hub.html#tab-film" target="_blank" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 hover:text-white px-3 py-2 rounded-xl font-semibold transition flex items-center gap-1.5">
           <span>Open Match Hub</span> ↗
         </a>
@@ -396,6 +399,9 @@
           <span class="text-[10px] bg-pitch text-teal-400 border border-border px-2 py-0.5 rounded mono" id="tableHeaderCount">0 clips</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="syncMomentsToMatchHub()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 active:scale-95">
+            <span>⚡ Push to Match Hub</span>
+          </button>
           <button onclick="copyCleanCsvToClipboard()" class="text-xs bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5">
             <span>📋 Copy CSV to Clipboard</span>
           </button>
@@ -1272,6 +1278,18 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       link.click();
       document.body.removeChild(link);
       showToast('Downloaded clean Aspire_Film_Log.csv!');
+    }
+
+    function syncMomentsToMatchHub() {
+      if (!LOGGED_MOMENTS.length) {
+        showToast('No moments logged to sync yet.');
+        return;
+      }
+      saveToLocalStorage();
+      showToast(`Saved ${LOGGED_MOMENTS.length} moments! Opening Match Hub...`);
+      setTimeout(() => {
+        window.open('match-hub.html#tab-film', '_blank');
+      }, 500);
     }
 
     function copyGeminiPrompt() {

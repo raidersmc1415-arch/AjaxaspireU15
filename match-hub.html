@@ -872,11 +872,15 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2">
             <input type="text" id="filmSearchInput" oninput="renderFilmLogList()" placeholder="Search notes, tag, #jersey..."
               class="bg-pitch text-xs px-3 py-2 rounded-xl border border-border text-white placeholder-slate-500 focus:outline-none focus:border-brand-500">
             <select id="filmMatchFilter" onchange="renderFilmLogList()" class="bg-pitch text-xs px-3 py-2 rounded-xl border border-border text-slate-200">
               <option value="ALL">All Matches</option>
+            </select>
+            <select id="filmSortFilter" onchange="renderFilmLogList()" class="bg-pitch text-xs px-3 py-2 rounded-xl border border-border text-slate-200">
+              <option value="newest">Latest Matches First (Nov 1 → Sep)</option>
+              <option value="oldest">Chronological (Sep → Nov 1)</option>
             </select>
             <select id="filmZoneFilter" onchange="renderFilmLogList()" class="bg-pitch text-xs px-3 py-2 rounded-xl border border-border text-slate-200">
               <option value="ALL">All Field Zones (D3/M3/A3)</option>
@@ -2547,12 +2551,12 @@
         coachShort: "Coach Shawn",
         exportName: "AJAX ASPIRE U15",
         matchLength: 80,
-        opponent: "", date: "", venue: "", homeAway: "", note: "1W-0D-4L · GA & Aspire 26/27",
+        opponent: "", date: "", venue: "", homeAway: "", note: "2W-0D-4L · GA Aspire League (6 GP · 496' mins)",
         takeaways: [
-          ["Shot Accuracy vs. Volume (1W-0D-4L)", "Across 5 games (413 mins, 7 GF : 12 GA), the squad has an impressive <strong>73% shot accuracy</strong> (27 of 37 shots on target, 19% conversion), averaging 7.4 shots/gm. Increasing final-third entries to 12+ shots/game will turn close games into wins."],
-          ["Film Review: Turnovers by Third & Primary Triggers (569 Clips)", "Across <strong>569 tagged film moments (264 turnovers · 200 Glow [39%] vs. 312 Grow)</strong> across 5 reviewed matches, <strong>112 turnovers occurred in the Middle 3rd (M3)</strong>, <strong>87 in the Defending 3rd (D3)</strong>, and <strong>62 in the Attacking 3rd (A3)</strong>. The #1 trigger is <strong>Forced Pass (106 TOs, 40%)</strong> followed by <strong>Turned into Pressure (50 TOs)</strong> and <strong>Heavy Touch (30 TOs)</strong>. Cleaning up forced vertical passes exiting D3 and M3 is our main focus."],
-          ["Film Impact Index (0–100) Leaders & Role Parity", "On our position-relative 0–100 Film Impact Index (where 80 is role par, evaluated via single-charge zone matrix, minutes-weighted positional par, and end-product rewards), <strong>Sophia Culver (#23)</strong> (88/100 · +6.6/80', 3G+1A), <strong>Giselle Rosales (#2)</strong> (88/100 · +7.2/80', 2G), <strong>Grace Krimmel (#5)</strong> (88/100 · +5.7/80', 62% Glow), <strong>Camila Deleon (#9)</strong> (88/100 · +0.7/80' vs DEF par), and <strong>Alexa Chipres (#50)</strong> (88/100 · +1.9/80' across CB/CM) lead the squad, alongside dependable fullback <strong>Amy Godínez Vargas (#19)</strong> (86/100 · 321' mins, only 2.5 TO/80')."],
-          ["Attacking Finishers & Midfield Playmaking", "Attacking production is led by <strong>Sophia Culver (#23)</strong> (3G + 1A in 263', 29 Glow, 50% Glow rate), <strong>Giselle Rosales (#2)</strong> (2G + 2 KP + 12 Corners in 287', 43 Glow, 54% Glow rate), and <strong>Scarlett Freitas (#8)</strong> (2A + 1 KP in 306', 41 Glow, 46% Glow rate)."]
+          ["Shot Accuracy vs. Volume (2W-0D-4L)", "Across 6 league games (496 mins, 9 GF : 13 GA), the squad holds an impressive <strong>65% shot accuracy</strong> (33 of 51 shots on target, 18% conversion), averaging 8.5 shots/gm. The 2-1 victory over Rocklin on Nov 1 capped off our strongest attacking transition performance of the season."],
+          ["Film Review: Turnovers by Third & Primary Triggers (642 Clips · 498 League)", "Across <strong>642 tagged film moments (498 League · 73 from Rocklin Nov 1)</strong> across 9 reviewed matches, Middle 3rd (M3) turnovers remain our primary tactical focus, with <strong>Forced Pass</strong> and <strong>Turned into Pressure</strong> as key triggers. Transition ball security was markedly sharper in our 2-1 win over Rocklin."],
+          ["Film Impact Index (0–100) Leaders & Role Parity", "On our position-relative 0–100 Film Impact Index (where 80 is role par, evaluated via single-charge zone matrix, minutes-weighted positional par, and end-product rewards), <strong>Sophia Culver (#23)</strong>, <strong>Giselle Rosales (#2)</strong>, <strong>Grace Krimmel (#5)</strong>, <strong>Camila Deleon (#9)</strong>, and <strong>Alexa Chipres (#50)</strong> lead the squad, alongside dependable fullback <strong>Amy Godínez Vargas (#19)</strong>."],
+          ["Attacking Finishers & Midfield Playmaking", "Attacking production is led by <strong>Sophia Culver (#23)</strong> (3G + 1A), <strong>Giselle Rosales (#2)</strong> (2G + 2 KP + 12 Corners), <strong>Scarlett Freitas (#8)</strong> (1G + 2A, opening goal vs Rocklin), and <strong>Ella Simmons (#25)</strong> (1G + 1A, game-winner chip vs Rocklin)."]
         ]
       }
     ];
@@ -3081,6 +3085,35 @@
           allCustomMoments = allCustomMoments.concat(DATA[k].filmEvents);
         }
       });
+
+      // Auto-bridge: Pull any moments logged in the standalone Film Moment Logger (film-moment-logger.html)
+      try {
+        const loggerRaw = localStorage.getItem('ajax_aspire_active_moments');
+        if (loggerRaw) {
+          const rawMoments = JSON.parse(loggerRaw);
+          if (Array.isArray(rawMoments) && rawMoments.length) {
+            rawMoments.forEach(m => {
+              const jerseys = m.jerseys || (m.playersRaw ? String(m.playersRaw).match(/\d+/g)?.map(Number) : []);
+              allCustomMoments.push({
+                match: m.match || 'Rocklin (Nov 1)',
+                time: m.time || '00:00',
+                half: m.half || 'H1',
+                zone: (m.zone || 'M3').slice(0, 2),
+                zoneDetail: m.zoneDetail || m.zone || 'M3',
+                category: m.category || 'Defensive Moment',
+                tag: m.tag || 'Action',
+                qualityRaw: m.quality || 'Good / Positive',
+                outcome: (m.quality && (m.quality.includes('Negative') || m.quality.includes('Conceded'))) ? 'Grow' : ((m.quality && m.quality.includes('Glow and Grow')) ? 'Glow & Grow' : 'Glow'),
+                note: m.notes || m.note || '',
+                jerseys: jerseys || [],
+                players: (jerseys && jerseys.length) ? jerseys.map(j => `#${j} ${ASPIRE_JERSEY_MAP[j]?.name || ''}`) : ['Team'],
+                playersRaw: (jerseys && jerseys.length) ? jerseys.join(', ') : 'Team',
+                filmReview: Boolean(m.filmReview)
+              });
+            });
+          }
+        }
+      } catch (e) {}
 
       const unifiedAllFilm = mergeFilmMoments(baseFilmAll, allCustomMoments);
       const unifiedLeagueFilm = unifiedAllFilm.filter(e => !TOURNEY_MATCHES.has(e.match));
@@ -3753,9 +3786,10 @@
         $('filmMatchesHeaderCount').textContent = `${(fs.matches || []).length} Reviewed Matches · ${totals.filmEventsCount || (fs.totalEvents || 0)} Tagged Moments`;
       }
 
-      // Match Cards
-      $('filmMatchCards').innerHTML = (fs.matches || []).map(m => `
-        <div onclick="$('filmMatchFilter').value='${esc(m.match)}'; renderFilmLogList();" class="bg-surface hover:border-brand-500/50 cursor-pointer p-3 rounded-xl border border-border/80 transition space-y-1">
+      // Match Cards (sorted newest match first so Rocklin Nov 1 is front and center!)
+      const sortedMatches = [...(fs.matches || [])].reverse();
+      $('filmMatchCards').innerHTML = sortedMatches.map(m => `
+        <div onclick="$('filmMatchFilter').value='${esc(m.match)}'; renderFilmLogList();" class="bg-surface hover:border-brand-500/50 cursor-pointer p-3 rounded-xl border border-border/80 transition space-y-1 ${m.match.includes('Nov 1') ? 'ring-1 ring-teal-500/50' : ''}">
           <div class="flex items-center justify-between">
             <span class="font-bold text-xs text-white truncate">${esc(m.match)}</span>
             <span class="text-[10px] font-mono bg-pitch px-1.5 py-0.5 rounded text-slate-300">${m.events} clips</span>
@@ -3772,7 +3806,7 @@
       // Populate Match & Player filter dropdowns if needed
       const mf = $('filmMatchFilter');
       const curM = mf.value || 'ALL';
-      mf.innerHTML = '<option value="ALL">All Matches</option>' + (fs.matches || []).map(m => `<option value="${esc(m.match)}">${esc(m.match)} (${m.events})</option>`).join('');
+      mf.innerHTML = '<option value="ALL">All Matches</option>' + sortedMatches.map(m => `<option value="${esc(m.match)}">${esc(m.match)} (${m.events} clips)</option>`).join('');
       mf.value = curM;
 
       const pf = $('filmPlayerFilter');
@@ -3875,6 +3909,7 @@
     function resetFilmFilters() {
       $('filmSearchInput').value = '';
       $('filmMatchFilter').value = 'ALL';
+      if ($('filmSortFilter')) $('filmSortFilter').value = 'newest';
       $('filmZoneFilter').value = 'ALL';
       $('filmOutcomeFilter').value = 'ALL';
       $('filmPlayerFilter').value = 'ALL';
@@ -3952,9 +3987,15 @@
         return true;
       });
 
-      $('filmLogCountLabel').textContent = `Showing ${filtered.length} of ${events.length} clips`;
-      $('filmLogList').innerHTML = filtered.length
-        ? filtered.slice(0, 150).map(e => formatFilmClipCard(e, false)).join('') + (filtered.length > 150 ? `<p class="text-center text-[11px] text-slate-400 py-2">Showing first 150 of ${filtered.length} matching clips. Narrow your filter above to see more.</p>` : '')
+      const sort = $('filmSortFilter')?.value || 'newest';
+      let displayList = filtered.slice();
+      if (sort === 'newest') {
+        displayList.reverse();
+      }
+
+      $('filmLogCountLabel').textContent = `Showing ${Math.min(displayList.length, 150)} of ${filtered.length} clips (${events.length} total)`;
+      $('filmLogList').innerHTML = displayList.length
+        ? displayList.slice(0, 150).map(e => formatFilmClipCard(e, false)).join('') + (displayList.length > 150 ? `<p class="text-center text-[11px] text-slate-400 py-2">Showing first 150 of ${displayList.length} matching clips. Select a specific match above to see all clips for that game.</p>` : '')
         : '<p class="text-xs text-slate-500 text-center py-6">No film moments match those filters.</p>';
     }
 
@@ -6806,11 +6847,11 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
 
     function loadTrackerState() {
       try {
-        const raw = localStorage.getItem('ajax_hub_tracker_state');
+        const raw = localStorage.getItem('ajax_hub_tracker_state') || localStorage.getItem('ajax_sideline_tracker_state');
         if (raw) {
           const s = JSON.parse(raw);
-          if (s && s.playerStats) trackerState = s;
-          if ($('trackerOpponentInput')) $('trackerOpponentInput').value = trackerState.opponent || 'La Morinda';
+          if (s && (s.playerStats || s.events)) trackerState = s;
+          if ($('trackerOpponentInput')) $('trackerOpponentInput').value = trackerState.opponent || 'Rocklin (Nov 1)';
           if ($('trackerFormationSelect')) $('trackerFormationSelect').value = trackerState.formation || '4-3-3';
           updateTrackerClockDisplay();
           updateTrackerScoreboard();
