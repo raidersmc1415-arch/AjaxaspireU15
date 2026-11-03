@@ -3666,19 +3666,26 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
           const isGlow = isGoal || isAssist || isKeyPass || isSOT || isDuelWon || isPressWon || isSave;
 
           let cat = 'Tactical Moment';
-          if (isGoal) cat = 'Goal';
-          else if (isAssist) cat = 'Assist';
-          else if (isKeyPass) cat = 'Key Pass';
-          else if (isSOT) cat = 'Shot on Target';
-          else if (ev.type === 'turnover') cat = 'Turnover';
-          else if (ev.type === 'foul') cat = 'Foul';
-          else if (ev.type === 'duelWon' || ev.type === 'duelLost') cat = 'Duel';
-          else if (ev.type === 'yellow' || ev.type === 'yellowCard') cat = 'Disciplinary';
-          else if (ev.type === 'bookmark') cat = 'Coach Film Bookmark';
+          let tag = ev.tag || cat;
+          if (isGoal) { cat = 'Offensive Moment'; tag = 'Quality Shot'; }
+          else if (isAssist) { cat = 'Offensive Moment'; tag = 'Decision on the Ball'; }
+          else if (isKeyPass) { cat = 'Offensive Moment'; tag = 'Key Pass / Line Breaker'; }
+          else if (isSOT) { cat = 'Offensive Moment'; tag = 'Shot on Target'; }
+          else if (ev.type === 'soff' || (ev.type === 'shot' && !ev.onTarget)) { cat = 'Offensive Moment'; tag = 'Shot Off Target'; }
+          else if (ev.type === 'turnover') { cat = 'Turnover'; tag = 'Turned into Pressure'; }
+          else if (ev.type === 'foul') { cat = 'Defensive Moment'; tag = 'Foul Committed'; }
+          else if (ev.type === 'duelWon') { cat = 'Defensive Moment'; tag = 'Good Press / Duel Won'; }
+          else if (ev.type === 'duelLost') { cat = 'Defensive Moment'; tag = 'Defensive Duel Lost'; }
+          else if (ev.type === 'yellow' || ev.type === 'yellowCard') { cat = 'Disciplinary'; tag = 'Caution / Yellow'; }
+          else if (ev.type === 'bookmark') { cat = 'Coach Film Bookmark'; tag = 'Bookmark'; }
+
+          const canonicalMatch = /rocklin.*(11|nov|26)/i.test(opponentName)
+            ? 'Rocklin (Nov 1)'
+            : (opponentName.includes('(') ? opponentName : `${opponentName} (${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`);
 
           newFilmMoments.push({
             id: maxId,
-            match: `${opponentName} (${ajaxGoals}-${oppGoals})`,
+            match: canonicalMatch,
             time: `${ev.time}:00`,
             half: ev.half || (ev.time <= 40 ? 'H1' : 'H2'),
             zone: ev.zone || 'M3',
@@ -3687,10 +3694,10 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
             players: ev.jersey ? [`#${ev.jersey} ${pName}`] : ['Team'],
             playersRaw: ev.jersey ? String(ev.jersey) : 'Team',
             category: cat,
-            tag: ev.tag || cat,
-            qualityRaw: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' ? 'Grow' : 'Neutral'),
-            outcome: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' ? 'Grow' : 'Neutral'),
-            note: ev.desc || `Sideline logged event at ${ev.time}'`,
+            tag: tag,
+            qualityRaw: isGoal ? 'Goal Scored' : (isGlow ? 'Good / Positive' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Poor / Negative' : 'Neutral')),
+            outcome: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Grow' : 'Neutral'),
+            note: ev.desc || `Sideline logged ${tag} at ${ev.time}'`,
             filmReview: !!ev.isBookmark
           });
         });
