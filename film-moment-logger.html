@@ -862,6 +862,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       let quality = 'Good / Positive';
       if (/goal scored|finish clean|scores|found the net/i.test(text)) quality = 'Goal Scored';
       else if (/goal conceded|conceding|fumbles.*goal|pk awarded/i.test(text)) quality = 'Goal Conceded';
+      else if (/shot off target|shot wide|over the bar|sails.*over|wide left|wide right|misses.*frame|misses.*wide/i.test(text)) quality = 'Poor / Negative';
+      else if (/cross out of bounds|overhit cross|delivery out of bounds|cross.*overhit|cross behind/i.test(text)) quality = 'Poor / Negative';
       else if (/glow and grow|mixed/i.test(text)) quality = 'Glow and Grow (Good actions and Not so Good action)';
       else if (/grow|turnover|poor|negative|mistake|forced|heavy touch|lost mark/i.test(text)) quality = 'Poor / Negative';
       else if (/glow|positive|good|nice|quality|line breaker|great/i.test(text)) quality = 'Good / Positive';
@@ -869,7 +871,12 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
       // 6. Action Tag & Category
       let tag = 'Decision on the Ball';
-      if (/forced pass/i.test(text)) tag = 'Forced Pass';
+      if (/shot off target|shot wide|over the bar|sails.*over|wide left|wide right|misses.*frame|misses.*wide/i.test(text)) tag = 'Shot Off Target';
+      else if (/shot on target|quality shot|shots? on goal/i.test(text)) tag = 'Quality Shot';
+      else if (/goal scored|scores|found the net/i.test(text)) tag = 'Goal Scored';
+      else if (/cross out of bounds|overhit cross|delivery out of bounds/i.test(text)) tag = 'Cross Out of Bounds';
+      else if (/dangerous cross|good cross|cross/i.test(text) && /glow|good|nice|quality|dangerous/i.test(text)) tag = 'Dangerous Cross / Delivery';
+      else if (/forced pass/i.test(text)) tag = 'Forced Pass';
       else if (/turned into pressure/i.test(text)) tag = 'Turned into Pressure';
       else if (/heavy touch/i.test(text)) tag = 'Heavy Touch';
       else if (/line breaker|key pass|through ball/i.test(text)) tag = 'Key Pass / Line Breaker';
@@ -879,9 +886,11 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       else if (/defensive shape/i.test(text)) tag = 'Defensive Shape';
       else if (/lost mark|bad recovery/i.test(text)) tag = 'Lost Mark / Bad Recovery';
       else if (/didn't scan|didn't have a plan/i.test(text)) tag = "Didn't Scan or Didn't have a Plan";
-      else if (/shot/i.test(text)) tag = 'Quality Shot';
+      else if (/shot/i.test(text)) tag = quality === 'Good / Positive' ? 'Quality Shot' : 'Shot Off Target';
 
-      let category = quality.includes('Goal') ? 'Offensive Moment'
+      let category = /shot/i.test(tag) ? 'Shot'
+        : /cross/i.test(tag) ? 'Cross'
+        : quality.includes('Goal') ? 'Offensive Moment'
         : tag.includes('Pass') || tag.includes('Touch') || tag.includes('Pressure') ? 'Turnover'
         : tag.includes('Duel') || tag.includes('Clearance') || tag.includes('Save') ? 'Defensive Moment'
         : 'Offensive Moment';
