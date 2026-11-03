@@ -703,7 +703,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     }
 
     function commitRapidMoment() {
-      const match = document.getElementById('rapidMatch').value.trim() || 'League Match';
+      let match = document.getElementById('rapidMatch').value.trim() || 'League Match';
+      if (/rocklin.*(11|nov|26)/i.test(match)) match = 'Rocklin (Nov 1)';
       const half = document.getElementById('rapidHalf').value;
       const time = document.getElementById('rapidTime').value.trim() || '00:00';
       const notes = document.getElementById('rapidNotes').value.trim();
@@ -779,7 +780,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         return;
       }
 
-      const matchName = document.getElementById('voiceMatchName').value.trim() || 'Match';
+      let matchName = document.getElementById('voiceMatchName').value.trim() || 'Match';
+      if (/rocklin.*(11|nov|26)/i.test(matchName)) matchName = 'Rocklin (Nov 1)';
       const defaultHalf = document.getElementById('voiceDefaultHalf').value || 'H2';
       const dateVal = document.getElementById('voiceDate').value || new Date().toISOString().split('T')[0];
 
@@ -1308,6 +1310,12 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     /* LocalStorage Persistence */
     function saveToLocalStorage() {
       try {
+        // Defensively normalize any Rocklin variants to canonical 'Rocklin (Nov 1)'
+        LOGGED_MOMENTS.forEach(m => {
+          if (/rocklin.*(11|nov|26)/i.test(m.match || '')) {
+            m.match = 'Rocklin (Nov 1)';
+          }
+        });
         localStorage.setItem('ajax_aspire_active_moments', JSON.stringify(LOGGED_MOMENTS));
       } catch (e) {}
     }
@@ -1316,6 +1324,11 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       try {
         const saved = JSON.parse(localStorage.getItem('ajax_aspire_active_moments') || '[]');
         if (Array.isArray(saved) && saved.length) {
+          saved.forEach(m => {
+            if (/rocklin.*(11|nov|26)/i.test(m.match || '')) {
+              m.match = 'Rocklin (Nov 1)';
+            }
+          });
           LOGGED_MOMENTS = saved;
           updateCountBadges();
           renderMomentsTable();
