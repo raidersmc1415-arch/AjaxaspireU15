@@ -3708,7 +3708,7 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         console.error('LocalStorage write error:', e);
       }
 
-      const coachPin = localStorage.getItem('ajax_coach_pin') || '4111';
+      const coachPin = (typeof CURRENT_COACH_PIN !== 'undefined' && CURRENT_COACH_PIN) || '';
       const matchTotals = {
         shots: matchEvents.filter(e => e.type === 'shot' || e.type === 'sot' || e.type === 'shot_outside_18' || e.type === 'goal').length,
         sot: matchEvents.filter(e => e.type === 'sot' || e.type === 'goal' || (e.type === 'shot_outside_18' && e.onTarget)).length,

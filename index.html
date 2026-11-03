@@ -2815,9 +2815,16 @@
           document.getElementById('player-avatar').innerText = data.name.charAt(0).toUpperCase();
           document.getElementById('display-notes').innerText = `"${data.notes || 'Keep working hard. See you at training.'}"`;
 
-          // If Coach logs in, remember Coach PIN and show direct Match Hub launch banner
+          // If Coach logs in, remember Coach session and show direct Match Hub launch banner
           if (data.name.toLowerCase().includes('coach')) {
-            try { localStorage.setItem('ajax_coach_pin', pin); } catch(e) {}
+            hashCoachPin(pin).then(h => {
+              if (h && COACH_AUTH_HASHES.includes(h)) {
+                try {
+                  localStorage.setItem('ajax_coach_auth_token', h);
+                  localStorage.removeItem('ajax_coach_pin');
+                } catch(e) {}
+              }
+            });
             let coachHubCard = document.getElementById('coach-matchhub-banner');
             if (!coachHubCard) {
               coachHubCard = document.createElement('a');
@@ -4120,14 +4127,35 @@
     // (handled inside switchTab below)
 
     // ═══════════════════════════════════════════════
-    // COACH MATCH HUB ACCESS GATE
+    // COACH MATCH HUB ACCESS GATE (CRYPTOGRAPHIC VERIFICATION)
     // ═══════════════════════════════════════════════
-    const VALID_COACH_PINS = ["4111", "2627", "1415"];
+    const COACH_AUTH_SALT = "ajax_u15_aspire_coach_auth_salt_2026";
+    const COACH_AUTH_HASHES = [
+      "09d775001b05d2c4acd194676b32a318e6863250ac33eff99c69627b8f5276b1",
+      "2d3c0d48ebf2a1968b6a40c3393957ac7a75b0993d9ba2d0d21f858b4cdb598a",
+      "696f0c3fa42c9f96aacf309331fc495eeee77f3d931c414b8857e42796704bde"
+    ];
+
+    async function hashCoachPin(pin) {
+      if (!pin) return '';
+      try {
+        const enc = new TextEncoder();
+        const data = enc.encode(COACH_AUTH_SALT + "::" + String(pin).trim());
+        const hashBuf = await crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch (err) {
+        return '';
+      }
+    }
 
     function openCoachAuthModal() {
-      let savedPin = '';
-      try { savedPin = localStorage.getItem('ajax_coach_pin') || ''; } catch(e) {}
-      if (VALID_COACH_PINS.includes(savedPin)) {
+      let savedToken = '';
+      try {
+        savedToken = localStorage.getItem('ajax_coach_auth_token') || '';
+        // Automatically purge any legacy plaintext PIN from local storage
+        localStorage.removeItem('ajax_coach_pin');
+      } catch(e) {}
+      if (COACH_AUTH_HASHES.includes(savedToken)) {
         window.location.href = 'match-hub.html';
         return;
       }
@@ -4149,12 +4177,16 @@
       if (modal) modal.style.display = 'none';
     }
 
-    function verifyCoachPinOnSite() {
+    async function verifyCoachPinOnSite() {
       const inp = document.getElementById('site-coach-pin');
       const pin = (inp ? inp.value : '').trim();
       const err = document.getElementById('site-coach-pin-err');
-      if (VALID_COACH_PINS.includes(pin)) {
-        try { localStorage.setItem('ajax_coach_pin', pin); } catch(e) {}
+      const hash = await hashCoachPin(pin);
+      if (COACH_AUTH_HASHES.includes(hash)) {
+        try {
+          localStorage.setItem('ajax_coach_auth_token', hash);
+          localStorage.removeItem('ajax_coach_pin');
+        } catch(e) {}
         if (err) err.style.display = 'none';
         window.location.href = 'match-hub.html';
       } else {
