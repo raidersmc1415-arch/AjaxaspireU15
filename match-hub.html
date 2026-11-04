@@ -1025,8 +1025,8 @@
           <button type="button" onclick="printReportCard()" class="bg-brand-600 hover:bg-brand-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95" title="Download or print PDF formatted for standard letter size">
             <span>Download / Print PDF</span>
           </button>
-          <button type="button" onclick="saveReportDraft()" class="bg-surface hover:bg-slate-800 text-slate-200 border border-border px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Save draft evaluation to browser">
-            <span>Save Notes</span>
+          <button type="button" id="saveReportNotesBtn" onclick="saveReportDraft()" class="bg-surface hover:bg-slate-800 text-slate-200 border border-border px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Save evaluation notes locally and sync to Master Data Hub">
+            <span id="saveReportNotesBtnText">Save Notes</span>
           </button>
           <button type="button" onclick="resetReportDraft()" class="bg-surface hover:bg-slate-800 text-rose-300 border border-border px-2.5 py-2.5 rounded-xl text-xs font-semibold transition" title="Reset evaluation notes for this player to Sheet default">
             <span>Reset</span>
@@ -4597,7 +4597,9 @@
       const key = noteKey(selectedPlayer);
       const val = $('modalNotes').value;
       NOTES[key] = val;
-      try { localStorage.setItem(key, val); } catch (e) {}
+      if (typeof safeSaveStorage === 'function') safeSaveStorage(key, val);
+      else { try { localStorage.setItem(key, val); } catch (e) {} }
+      if (typeof syncNoteToCloudHub === 'function') syncNoteToCloudHub(key, val);
       renderRoster();
       showToast(`Saved note for ${selectedPlayer.name}`);
       closePlayerModal();
@@ -8495,11 +8497,16 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       try {
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
-          if (k && k.startsWith('coach_note_')) {
+          if (k && (k.startsWith('coach_note_') || k.startsWith('ajax_report_card_'))) {
             allNotes[k] = localStorage.getItem(k);
           }
         }
       } catch (e) {}
+      if (typeof REPORT_DRAFTS === 'object' && REPORT_DRAFTS) {
+        for (const [k, v] of Object.entries(REPORT_DRAFTS)) {
+          if (v && typeof v === 'object') allNotes[k] = JSON.stringify(v);
+        }
+      }
 
       const clone = document.documentElement.cloneNode(true);
       clone.querySelector('#authGate')?.classList.remove('hidden');
@@ -8541,6 +8548,111 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
     let currentReportPlayerKey = '';
     const REPORT_HUB_CACHE = {};
     const REPORT_HUB_LOADING = {};
+    const REPORT_DRAFTS = {};
+
+    function safeSaveStorage(key, val) {
+      try {
+        localStorage.setItem(key, val);
+        return true;
+      } catch (e) {
+        // Free up large expendable cache keys if localStorage hits QuotaExceededError
+        try {
+          localStorage.removeItem('matchhub_custom_data');
+          localStorage.removeItem('matchhub_takeaways_ga');
+          localStorage.removeItem('matchhub_takeaways_aspire');
+          localStorage.setItem(key, val);
+          return true;
+        } catch (e2) {
+          return false;
+        }
+      }
+    }
+
+    function getReportDraftKey(player) {
+      if (!player) return '';
+      const cleanSlug = String(player.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_').toLowerCase();
+      return `ajax_report_card_${player.squadKey || 'aspire'}_${cleanSlug}`;
+    }
+
+    function getLegacyReportDraftKey(player) {
+      if (!player) return '';
+      return `ajax_report_card_${player.squadKey || 'aspire'}_${String(player.name || '').replace(/\s+/g, '_').toLowerCase()}`;
+    }
+
+    function getSavedReportDraft(player) {
+      if (!player) return null;
+      const k1 = getReportDraftKey(player);
+      const k2 = getLegacyReportDraftKey(player);
+      if (REPORT_DRAFTS[k1]) return REPORT_DRAFTS[k1];
+      if (REPORT_DRAFTS[k2]) return REPORT_DRAFTS[k2];
+      const rawCandidates = [];
+      try {
+        rawCandidates.push(localStorage.getItem(k1));
+        if (k2 !== k1) rawCandidates.push(localStorage.getItem(k2));
+      } catch (e) {}
+      rawCandidates.push(NOTES[k1], NOTES[k2]);
+      for (const raw of rawCandidates) {
+        if (!raw) continue;
+        try {
+          const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          if (parsed && typeof parsed === 'object') {
+            REPORT_DRAFTS[k1] = parsed;
+            return parsed;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+
+    async function syncNoteToCloudHub(noteKeyStr, noteValStr) {
+      try {
+        const pin = window.CURRENT_COACH_PIN || '4111';
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveMatchHubNote',
+            pin,
+            noteKey: noteKeyStr,
+            noteText: String(noteValStr ?? '')
+          })
+        });
+      } catch (e) {}
+    }
+
+    async function loadCloudMatchHubNotes() {
+      try {
+        const pin = window.CURRENT_COACH_PIN || '4111';
+        const res = await fetch(`${API_URL}?action=matchHub&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null);
+        if (res && res.success && res.notes && typeof res.notes === 'object') {
+          let updatedReport = false;
+          for (const [k, v] of Object.entries(res.notes)) {
+            if (!k) continue;
+            if (v === '' || v === null) continue;
+            NOTES[k] = v;
+            try {
+              if (!localStorage.getItem(k)) safeSaveStorage(k, typeof v === 'string' ? v : JSON.stringify(v));
+            } catch (e) {}
+            if (k.startsWith('ajax_report_card_')) {
+              try {
+                const parsed = typeof v === 'string' ? JSON.parse(v) : v;
+                if (parsed && typeof parsed === 'object' && !REPORT_DRAFTS[k]) {
+                  REPORT_DRAFTS[k] = parsed;
+                  updatedReport = true;
+                }
+              } catch (e) {}
+            }
+          }
+          if (updatedReport && activeTab === 'tab-reports') {
+            const activeEl = document.activeElement;
+            const isEditingReport = activeEl && activeEl.closest && activeEl.closest('#printableReportCard');
+            if (!isEditingReport) renderReportCard();
+          }
+          renderRoster();
+        }
+      } catch (e) {}
+    }
 
     const SKILL_DISPLAY_NAMES = {
       t_dribbling: '1v1 Dribbling & Escapes',
@@ -8556,7 +8668,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
     };
 
     function normName(s) {
-      return String(s || '').replace(/,/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+      return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/,/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
     }
 
     function getAllSquadPlayers() {
@@ -8568,8 +8680,23 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
 
     function syncReportCardTeam(targetTeamId) {
       const activeId = targetTeamId || team?.id || 'aspire';
+      if (!currentReportPlayerKey) {
+        try {
+          const savedKey = localStorage.getItem('matchhub_report_player') || '';
+          if (savedKey && getPlayerByKey(savedKey)) {
+            currentReportPlayerKey = savedKey;
+          }
+        } catch (e) {}
+      }
       const curSquad = currentReportPlayerKey ? currentReportPlayerKey.split(':')[0] : '';
-      if (curSquad !== activeId) {
+      if (curSquad !== activeId || !getPlayerByKey(currentReportPlayerKey)) {
+        try {
+          const savedKey = localStorage.getItem(`matchhub_report_player_${activeId}`) || localStorage.getItem('matchhub_report_player') || '';
+          if (savedKey && savedKey.startsWith(activeId + ':') && getPlayerByKey(savedKey)) {
+            currentReportPlayerKey = savedKey;
+            return;
+          }
+        } catch (e) {}
         const { aspirePlayers, gaPlayers } = getAllSquadPlayers();
         if (activeId === 'ga' && gaPlayers.length) {
           currentReportPlayerKey = `ga:${gaPlayers[0].name}`;
@@ -8618,37 +8745,44 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       if (!force && REPORT_HUB_CACHE[key]) {
         return REPORT_HUB_CACHE[key];
       }
-      REPORT_HUB_LOADING[key] = true;
+      if (!force && REPORT_HUB_LOADING[key]) {
+        return REPORT_HUB_LOADING[key];
+      }
       updateSyncStatusUI(playerName, 'loading');
 
-      try {
-        const [ratingsRes, reflRes] = await Promise.all([
-          fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}`)
-            .then(r => r.json())
-            .catch(() => ({ found: false })),
-          fetch(`${API_URL}?action=reflections&name=${encodeURIComponent(playerName)}`)
-            .then(r => r.json())
-            .catch(() => ({ reflections: [] }))
-        ]);
+      const promise = (async () => {
+        try {
+          const [ratingsRes, reflRes] = await Promise.all([
+            fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}`)
+              .then(r => r.json())
+              .catch(() => ({ found: false })),
+            fetch(`${API_URL}?action=reflections&name=${encodeURIComponent(playerName)}`)
+              .then(r => r.json())
+              .catch(() => ({ reflections: [] }))
+          ]);
 
-        REPORT_HUB_CACHE[key] = {
-          ratingsData: ratingsRes || { found: false },
-          reflectionsData: reflRes || { reflections: [] },
-          syncedAt: new Date(),
-          error: null
-        };
-      } catch (err) {
-        REPORT_HUB_CACHE[key] = {
-          ratingsData: { found: false },
-          reflectionsData: { reflections: [] },
-          syncedAt: new Date(),
-          error: err.message
-        };
-      } finally {
-        delete REPORT_HUB_LOADING[key];
-        updateSyncStatusUI(playerName, 'done');
-      }
-      return REPORT_HUB_CACHE[key];
+          REPORT_HUB_CACHE[key] = {
+            ratingsData: ratingsRes || { found: false },
+            reflectionsData: reflRes || { reflections: [] },
+            syncedAt: new Date(),
+            error: null
+          };
+        } catch (err) {
+          REPORT_HUB_CACHE[key] = {
+            ratingsData: { found: false },
+            reflectionsData: { reflections: [] },
+            syncedAt: new Date(),
+            error: err.message
+          };
+        } finally {
+          delete REPORT_HUB_LOADING[key];
+          updateSyncStatusUI(playerName, 'done');
+        }
+        return REPORT_HUB_CACHE[key];
+      })();
+
+      REPORT_HUB_LOADING[key] = promise;
+      return promise;
     }
 
     function updateSyncStatusUI(playerName, state) {
@@ -8671,21 +8805,24 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
 
     async function onSelectReportPlayer(val) {
       currentReportPlayerKey = val;
-      const player = getPlayerByKey(val);
-      if (!player) return;
-      const key = normName(player.name);
-      if (!REPORT_HUB_CACHE[key] && !REPORT_HUB_LOADING[key]) {
-        renderReportCard();
-        await fetchPlayerHubData(player.name);
-      }
+      try {
+        localStorage.setItem('matchhub_report_player', val);
+        const sq = val.split(':')[0];
+        if (sq) localStorage.setItem(`matchhub_report_player_${sq}`, val);
+      } catch (e) {}
       renderReportCard();
     }
 
     async function refreshReportFromHub() {
+      const activeKey = $('reportPlayerSelect')?.value || currentReportPlayerKey;
+      if (activeKey) currentReportPlayerKey = activeKey;
       const player = getPlayerByKey(currentReportPlayerKey);
       if (!player) return;
       showToast(`Syncing Master Data Hub for ${player.name}...`);
-      await fetchPlayerHubData(player.name, true);
+      await Promise.all([
+        fetchPlayerHubData(player.name, true),
+        loadCloudMatchHubNotes()
+      ]);
       renderReportCard();
       showToast(`Master Hub updated for ${player.name}`);
     }
@@ -8722,13 +8859,14 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       const aspireKey = (aspireScope === 'league' && DATA['AJAX ASPIRE U15 (LEAGUE)']) ? 'AJAX ASPIRE U15 (LEAGUE)' : 'AJAX ASPIRE U15';
       const teamName = teamId === 'ga' ? 'AJAX GA U15' : aspireKey;
       const squad = teamId === 'ga' ? 'GA U15' : 'Aspire U15';
-      const p = (DATA[teamName]?.players || []).find(pl => pl.name.toLowerCase() === name.toLowerCase());
+      const targetNorm = normName(name);
+      const p = (DATA[teamName]?.players || []).find(pl => normName(pl.name) === targetNorm);
       if (!p) return null;
-      const pAll = teamId === 'aspire' ? (DATA['AJAX ASPIRE U15']?.players || []).find(pl => pl.name.toLowerCase() === name.toLowerCase()) : null;
-      const pLg  = teamId === 'aspire' ? (DATA['AJAX ASPIRE U15 (LEAGUE)']?.players || []).find(pl => pl.name.toLowerCase() === name.toLowerCase()) : null;
+      const pAll = teamId === 'aspire' ? (DATA['AJAX ASPIRE U15']?.players || []).find(pl => normName(pl.name) === targetNorm) : null;
+      const pLg  = teamId === 'aspire' ? (DATA['AJAX ASPIRE U15 (LEAGUE)']?.players || []).find(pl => normName(pl.name) === targetNorm) : null;
       let jersey = p.jersey;
       if (!jersey) {
-        const jKey = Object.keys(ASPIRE_JERSEY_MAP).find(k => ASPIRE_JERSEY_MAP[k]?.name?.toLowerCase() === p.name.toLowerCase());
+        const jKey = Object.keys(ASPIRE_JERSEY_MAP).find(k => normName(ASPIRE_JERSEY_MAP[k]?.name) === normName(p.name));
         if (jKey) jersey = jKey;
       }
       return {
@@ -8757,19 +8895,32 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       const hubData = REPORT_HUB_CACHE[pKey];
       const isLoadingHub = REPORT_HUB_LOADING[pKey];
 
-      // If not yet fetched, trigger fetch in background
+      // If not yet fetched, trigger fetch in background safely without clobbering active typing
       if (!hubData && !isLoadingHub) {
         fetchPlayerHubData(player.name).then(() => {
-          if (currentReportPlayerKey && getPlayerByKey(currentReportPlayerKey)?.name.toLowerCase() === player.name.toLowerCase()) {
+          if (currentReportPlayerKey && normName(getPlayerByKey(currentReportPlayerKey)?.name) === pKey) {
+            const activeEl = document.activeElement;
+            const isFocusedInReport = activeEl && activeEl.closest && activeEl.closest('#printableReportCard');
+            const focusedField = isFocusedInReport ? activeEl.getAttribute('data-field') : null;
+            const selStart = isFocusedInReport && typeof activeEl.selectionStart === 'number' ? activeEl.selectionStart : null;
+            const selEnd = isFocusedInReport && typeof activeEl.selectionEnd === 'number' ? activeEl.selectionEnd : null;
             renderReportCard();
+            if (focusedField) {
+              const restored = document.querySelector(`#printableReportCard [data-field="${focusedField}"]`);
+              if (restored) {
+                restored.focus();
+                if (selStart !== null && typeof restored.setSelectionRange === 'function') {
+                  try { restored.setSelectionRange(selStart, selEnd); } catch (e) {}
+                }
+              }
+            }
           }
         });
       }
 
-      // Check saved local draft
-      const draftKey = `ajax_report_card_${player.squadKey}_${player.name.replace(/\s+/g, '_').toLowerCase()}`;
-      let draft = null;
-      try { draft = JSON.parse(localStorage.getItem(draftKey) || 'null'); } catch(e) {}
+      // Check saved draft (in-memory, localStorage, or embedded/cloud NOTES)
+      const draftKey = getReportDraftKey(player);
+      const draft = getSavedReportDraft(player);
 
       // Derive active team and coach context dynamically based on selected squad
       const isGA = (player.squadKey === 'ga') || (!player.squadKey && team.id === 'ga');
@@ -8888,7 +9039,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
         ? `1. ${parsedRefl.goals.short}\n2. Master scanning pre-orientation on all build-up touches under pressure.\n3. Win 65%+ of 1v1 ground and transitional duels.`
         : `1. Master scanning pre-orientation on all build-up touches.\n2. Win 65%+ of 1v1 transitional duels.\n3. Take an active vocal leadership role in team organization.`;
 
-      const values = draft || {
+      const defaultValues = {
         tech_ball: liveTechBall,
         tech_decision: liveTechDec,
         tech_scanning: liveTechScan,
@@ -8906,6 +9057,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
         goals_2nd_half: defaultSecondHalfGoals,
         overall_tier: 'Core Impact Contributor'
       };
+      const values = { ...defaultValues, ...(draft || {}) };
 
       const starOpts = (name, currentVal, playerSelfVal) => {
         let playerSelfTag = '';
@@ -8937,14 +9089,14 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
         return `
           <div class="space-y-1.5 mt-1">
             <div class="flex items-center justify-between gap-2">
-              <select data-field="${name}" class="report-rating-input bg-pitch border border-border text-white text-xs font-bold rounded-lg px-2.5 py-1.5 focus:border-brand-500 outline-none w-full">
+              <select data-field="${name}" onchange="onReportFieldInput(this)" class="report-rating-input bg-pitch border border-border text-white text-xs font-bold rounded-lg px-2.5 py-1.5 focus:border-brand-500 outline-none w-full">
                 <option value="1" ${currentVal == 1 ? 'selected' : ''}>1 - Introductory / New</option>
                 <option value="2" ${currentVal == 2 ? 'selected' : ''}>2 - Emerging / Focus Area</option>
                 <option value="3" ${currentVal == 3 ? 'selected' : ''}>3 - Developing / On Track</option>
                 <option value="4" ${currentVal == 4 ? 'selected' : ''}>4 - Strong / Consistent</option>
                 <option value="5" ${currentVal == 5 ? 'selected' : ''}>5 - Benchmark / Elite</option>
               </select>
-              <span class="print-rating-pill hidden print:inline-block">Coach: ${currentVal}/5 â˜…</span>
+              <span class="print-rating-pill hidden print:inline-block" data-rating-pill="${name}">Coach: ${currentVal}/5 â˜…</span>
             </div>
             ${playerSelfTag}
           </div>
@@ -8952,7 +9104,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       };
 
       const noteBox = (field, value, rows, extraCls = '') => `
-        <textarea data-field="${field}" rows="${rows}" oninput="syncReportTextareaMirror(this)" class="print-textarea w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white print:text-black focus:outline-none focus:border-brand-500 leading-relaxed ${extraCls}">${esc(value)}</textarea>
+        <textarea data-field="${field}" rows="${rows}" oninput="onReportFieldInput(this)" class="print-textarea w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white print:text-black focus:outline-none focus:border-brand-500 leading-relaxed ${extraCls}">${esc(value)}</textarea>
         <div class="print-text-mirror" data-mirror-for="${field}">${esc(value)}</div>
       `;
 
@@ -9080,7 +9232,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
             <div>
               <div class="mono text-[10px] uppercase tracking-widest text-brand-400 font-bold flex items-center gap-2">
                 <span>${esc(teamHeader)} Â· ${esc(leagueSubtitle)}</span>
-                ${draft ? '<span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] no-print">Draft Active</span>' : ''}
+                <span id="reportDraftStatusPill" class="px-1.5 py-0.2 rounded ${draft ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'hidden'} text-[9px] no-print">${draft ? 'âœ“ Notes Saved' : ''}</span>
               </div>
               <h1 class="display text-3xl md:text-4xl text-white print:text-black leading-tight">MID-SEASON PLAYER REPORT CARD</h1>
               <p class="text-xs text-slate-400 print:text-slate-600">Season 2026/2027 Â· Mid-Season Evaluation &amp; Conference Plan</p>
@@ -9106,16 +9258,16 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
               <p class="text-xs text-slate-400 print:text-slate-600 mt-1">
                 <strong>Primary Roles:</strong> ${esc(roles)} &nbsp;|&nbsp; 
                 <strong>Overall Evaluation Tier:</strong> 
-                <span class="font-bold text-amber-300 print:text-amber-800">${esc(values.overall_tier)}</span>
+                <span id="reportOverallTierDisplay" class="font-bold text-amber-300 print:text-amber-800">${esc(values.overall_tier)}</span>
               </p>
             </div>
             <div class="text-right no-print">
               <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Tier Assignment</label>
-              <select data-field="overall_tier" class="bg-pitch border border-border text-xs text-amber-300 font-bold rounded-lg px-2.5 py-1.5 outline-none">
-                <option value="Key Starter / High Impact" ${values.overall_tier.includes('Key Starter') ? 'selected' : ''}>Key Starter / High Impact</option>
-                <option value="Core Impact Contributor" ${values.overall_tier.includes('Core Impact') ? 'selected' : ''}>Core Impact Contributor</option>
-                <option value="Emerging Tactical Contributor" ${values.overall_tier.includes('Emerging') ? 'selected' : ''}>Emerging Tactical Contributor</option>
-                <option value="High-Growth Developmental Prospect" ${values.overall_tier.includes('High-Growth') ? 'selected' : ''}>High-Growth Developmental Prospect</option>
+              <select data-field="overall_tier" onchange="onReportFieldInput(this)" class="bg-pitch border border-border text-xs text-amber-300 font-bold rounded-lg px-2.5 py-1.5 outline-none">
+                <option value="Key Starter / High Impact" ${String(values.overall_tier || '').includes('Key Starter') ? 'selected' : ''}>Key Starter / High Impact</option>
+                <option value="Core Impact Contributor" ${String(values.overall_tier || '').includes('Core Impact') ? 'selected' : ''}>Core Impact Contributor</option>
+                <option value="Emerging Tactical Contributor" ${String(values.overall_tier || '').includes('Emerging') ? 'selected' : ''}>Emerging Tactical Contributor</option>
+                <option value="High-Growth Developmental Prospect" ${String(values.overall_tier || '').includes('High-Growth') ? 'selected' : ''}>High-Growth Developmental Prospect</option>
               </select>
             </div>
           </div>
@@ -9375,32 +9527,111 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       });
     }
 
-    function saveReportDraft() {
-      const player = getPlayerByKey(currentReportPlayerKey);
-      if (!player) return;
-      const draftKey = `ajax_report_card_${player.squadKey}_${player.name.replace(/\s+/g, '_').toLowerCase()}`;
+    function collectReportDomPayload() {
       const payload = {};
       document.querySelectorAll('#printableReportCard [data-field]').forEach(el => {
         payload[el.getAttribute('data-field')] = el.value;
       });
-      try {
-        localStorage.setItem(draftKey, JSON.stringify(payload));
-        showToast(`Saved review draft for ${player.name}!`);
-        renderReportCard();
-      } catch (e) {
-        showToast('Could not save draft locally.');
+      return payload;
+    }
+
+    function onReportFieldInput(el) {
+      if (!el) return;
+      if (el.tagName === 'TEXTAREA') {
+        syncReportTextareaMirror(el);
+      } else if (el.tagName === 'SELECT') {
+        const f = el.getAttribute('data-field');
+        if (f === 'overall_tier') {
+          const tierDisp = $('reportOverallTierDisplay');
+          if (tierDisp) tierDisp.textContent = el.value;
+        } else if (f) {
+          const pill = document.querySelector(`#printableReportCard [data-rating-pill="${f}"]`);
+          if (pill) pill.textContent = `Coach: ${el.value}/5 â˜…`;
+        }
+      }
+      // Auto-save live to memory and localStorage so background syncs or tab switches never lose edits
+      const activeKey = $('reportPlayerSelect')?.value || currentReportPlayerKey;
+      if (activeKey) currentReportPlayerKey = activeKey;
+      const player = getPlayerByKey(currentReportPlayerKey);
+      if (!player) return;
+      const draftKey = getReportDraftKey(player);
+      const legacyKey = getLegacyReportDraftKey(player);
+      const payload = collectReportDomPayload();
+      REPORT_DRAFTS[draftKey] = payload;
+      const jsonStr = JSON.stringify(payload);
+      NOTES[draftKey] = jsonStr;
+      safeSaveStorage(draftKey, jsonStr);
+      if (legacyKey && legacyKey !== draftKey) safeSaveStorage(legacyKey, jsonStr);
+
+      const statusPill = $('reportDraftStatusPill');
+      if (statusPill) {
+        statusPill.className = 'px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] no-print';
+        statusPill.textContent = 'Auto-Saved Draft';
       }
     }
 
-    function resetReportDraft() {
+    function saveReportDraft() {
+      const activeKey = $('reportPlayerSelect')?.value || currentReportPlayerKey;
+      if (activeKey) currentReportPlayerKey = activeKey;
       const player = getPlayerByKey(currentReportPlayerKey);
       if (!player) return;
-      const draftKey = `ajax_report_card_${player.squadKey}_${player.name.replace(/\s+/g, '_').toLowerCase()}`;
+      const draftKey = getReportDraftKey(player);
+      const legacyKey = getLegacyReportDraftKey(player);
+      const payload = collectReportDomPayload();
+      const jsonStr = JSON.stringify(payload);
+
+      REPORT_DRAFTS[draftKey] = payload;
+      NOTES[draftKey] = jsonStr;
+      const savedLocal = safeSaveStorage(draftKey, jsonStr);
+      if (legacyKey && legacyKey !== draftKey) safeSaveStorage(legacyKey, jsonStr);
+
+      try {
+        localStorage.setItem('matchhub_report_player', currentReportPlayerKey);
+        if (player.squadKey) localStorage.setItem(`matchhub_report_player_${player.squadKey}`, currentReportPlayerKey);
+      } catch (e) {}
+
+      // Sync to Google Sheets Master Data Hub (match_hub tab)
+      syncNoteToCloudHub(draftKey, jsonStr);
+
+      const statusPill = $('reportDraftStatusPill');
+      if (statusPill) {
+        statusPill.className = 'px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] no-print';
+        statusPill.textContent = 'âœ“ Notes Saved';
+      }
+
+      const btn = $('saveReportNotesBtn');
+      const btnTxt = $('saveReportNotesBtnText');
+      if (btn && btnTxt) {
+        btnTxt.textContent = 'âœ“ Saved!';
+        btn.classList.add('border-emerald-500/60', 'text-emerald-300');
+        clearTimeout(saveReportDraft._t);
+        saveReportDraft._t = setTimeout(() => {
+          btnTxt.textContent = 'Save Notes';
+          btn.classList.remove('border-emerald-500/60', 'text-emerald-300');
+        }, 2200);
+      }
+
+      showToast(savedLocal ? `âœ“ Saved Report Card notes for ${player.name} (Local + Hub)!` : `âœ“ Saved Report Card notes for ${player.name} (Hub Synced)!`);
+    }
+
+    function resetReportDraft() {
+      const activeKey = $('reportPlayerSelect')?.value || currentReportPlayerKey;
+      if (activeKey) currentReportPlayerKey = activeKey;
+      const player = getPlayerByKey(currentReportPlayerKey);
+      if (!player) return;
+      const draftKey = getReportDraftKey(player);
+      const legacyKey = getLegacyReportDraftKey(player);
+      delete REPORT_DRAFTS[draftKey];
+      delete REPORT_DRAFTS[legacyKey];
+      delete NOTES[draftKey];
+      delete NOTES[legacyKey];
       try {
         localStorage.removeItem(draftKey);
-        renderReportCard();
-        showToast(`Reset review to Sheet defaults for ${player.name}`);
+        if (legacyKey) localStorage.removeItem(legacyKey);
       } catch(e) {}
+      syncNoteToCloudHub(draftKey, '');
+      renderReportCard();
+      showToast(`Reset review to Sheet defaults for ${player.name}`);
     }
 
     function printReportCard() {
@@ -9421,7 +9652,6 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       renderTakeaways();
       renderReportCardSelect();
       if (activeTab === 'tab-film') renderFilmTab();
-      if (activeTab === 'tab-reports') renderReportCard();
       switchTab(activeTab);
     }
 
@@ -9436,6 +9666,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       } catch (e) { start = start || 'aspire'; }
       selectTeam(start);
       if (typeof loadTrackerState === 'function') loadTrackerState();
+      loadCloudMatchHubNotes();
     });
   </script>
 </body>
