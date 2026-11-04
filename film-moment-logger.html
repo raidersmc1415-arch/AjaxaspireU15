@@ -410,12 +410,30 @@
       </div>
 
       <!-- Action Buttons & Exporter Bar -->
+      <!-- Auto-notification banner for wrong match assignment -->
+      <div id="laMorindaFixBanner" class="hidden bg-amber-500/20 border-2 border-amber-400/80 rounded-2xl p-3.5 text-xs text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">⚠️</span>
+          <div>
+            <span class="font-bold text-white text-sm">Match Assignment Notice:</span>
+            <p class="text-amber-200 text-xs mt-0.5"><span id="laMorindaCountNotice" class="font-mono font-bold text-white">0</span> moments currently assigned to <strong class="text-white">La Morinda</strong>. Did you log these during your Rocklin film session?</p>
+          </div>
+        </div>
+        <button type="button" onclick="batchReassignLaMorindaToRocklin()" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl text-xs shadow-md transition active:scale-95 shrink-0 flex items-center gap-1.5">
+          <span>⚡ Reassign All to "Rocklin (Nov 1)"</span>
+        </button>
+      </div>
+
+      <!-- Action Buttons & Exporter Bar -->
       <div class="bg-card rounded-2xl border border-border p-4 flex flex-wrap items-center justify-between gap-2.5">
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-white">Moments Table</span>
           <span class="text-[10px] bg-pitch text-teal-400 border border-border px-2 py-0.5 rounded mono" id="tableHeaderCount">0 clips</span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" onclick="batchReassignLaMorindaToRocklin()" id="btnBatchReassignRocklin" class="text-xs bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 border-2 border-amber-400 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 active:scale-95 shadow">
+            <span>🔄 Move All "La Morinda" → "Rocklin (Nov 1)"</span>
+          </button>
           <button onclick="syncMomentsToMatchHub()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 active:scale-95">
             <span>⚡ Push to Match Hub</span>
           </button>
@@ -1216,6 +1234,18 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     }
 
     function updateRunningSummary() {
+      // Check for stray La Morinda moments
+      const lmCount = LOGGED_MOMENTS.filter(m => m.match === 'La Morinda' || /la morinda/i.test(m.match || '')).length;
+      const lmBanner = document.getElementById('laMorindaFixBanner');
+      const lmBadge = document.getElementById('laMorindaCountNotice');
+      if (lmBanner) {
+        if (lmCount > 0) {
+          lmBanner.classList.remove('hidden');
+          if (lmBadge) lmBadge.textContent = lmCount;
+        } else {
+          lmBanner.classList.add('hidden');
+        }
+      }
       const tot = LOGGED_MOMENTS.length;
       let glow = 0, grow = 0, toD = 0, toM = 0, toA = 0;
 
@@ -1395,16 +1425,147 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       }
     }
 
+    const RAPID_TAG_METADATA = {
+      // Turnovers & Dispossessions
+      'Forced Pass': { category: 'Turnover', quality: 'Poor / Negative' },
+      'Turned into Pressure': { category: 'Turnover', quality: 'Poor / Negative' },
+      'Heavy Touch': { category: 'Turnover', quality: 'Poor / Negative' },
+      'Forced Pass into Def': { category: 'Turnover', quality: 'Poor / Negative' },
+      'Pass off target / Poor Quality': { category: 'Turnover', quality: 'Poor / Negative' },
+      'Lost Mark / Bad Recovery': { category: 'Turnover', quality: 'Poor / Negative' },
+      'Stabbed at the Ball': { category: 'Turnover', quality: 'Poor / Negative' },
+      'Defensive Duel Lost': { category: 'Defensive Moment', quality: 'Poor / Negative' },
+      'Poor Clearance': { category: 'Defensive Moment', quality: 'Poor / Negative' },
+      'Poor Shot Selection': { category: 'Offensive Moment', quality: 'Poor / Negative' },
+      'No Challenge on 50/50': { category: 'Turnover', quality: 'Poor / Negative' },
+      'No Off Ball Movement': { category: 'Turnover', quality: 'Poor / Negative' },
+
+      // Passing & Progression
+      'Key Pass / Line Breaker': { category: 'Pass String', quality: 'Good / Positive' },
+      'Combination Play': { category: 'Pass String', quality: 'Good / Positive' },
+      'Switch Point of Attack': { category: 'Pass String', quality: 'Good / Positive' },
+      'Through Ball into Space': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      'Direct Entry to 9': { category: 'Pass String', quality: 'Good / Positive' },
+      'Composed Build-Out Escape': { category: 'Pass String', quality: 'Good / Positive' },
+      'Crossing': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      'Positive Action': { category: 'Pass String', quality: 'Good / Positive' },
+      'Support Angle Offered': { category: 'Pass String', quality: 'Good / Positive' },
+
+      // Defending & Pressing
+      'Good Press / Duel Won': { category: 'Defensive Moment', quality: 'Good / Positive' },
+      'Tackle & Secure Possession': { category: 'Defensive Moment', quality: 'Good / Positive' },
+      'Defensive Shape': { category: 'Defensive Moment', quality: 'Good / Positive' },
+      'Recovery Run': { category: 'Defensive Moment', quality: 'Good / Positive' },
+      'Clearance': { category: 'Defensive Moment', quality: 'Good / Positive' },
+      'Blocked Shot': { category: 'Defensive Moment', quality: 'Good / Positive' },
+      'Foul Committed': { category: 'Defensive Moment', quality: 'Poor / Negative' },
+
+      // Finishing & Attacking
+      'Goal Scored': { category: 'Offensive Moment', quality: 'Goal Scored' },
+      'Assist': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      'Shot on Target': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      'Quality Shot': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      '1v1 Dribble Won': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      'Shot Off Target': { category: 'Offensive Moment', quality: 'Poor / Negative' },
+
+      // Movement & Decisions
+      'Decision on the Ball': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      'Decision off the Ball': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      'Scanning & Pre-Orientation': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      'Made Run': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      'Offensive Shape': { category: 'Offensive Moment', quality: 'Good / Positive' },
+
+      // Goalkeeping
+      'Save': { category: 'Defensive Moment', quality: 'Good / Positive' },
+      'Save (Parried)': { category: 'Defensive Moment', quality: 'Good / Positive' },
+      'Box Aerial Claim': { category: 'Defensive Moment', quality: 'Good / Positive' },
+      'Build-out Distribution': { category: 'Pass String', quality: 'Good / Positive' },
+      'Goal Conceded': { category: 'Defensive Moment', quality: 'Goal Conceded' }
+    };
+
+    function setEditMatchToRocklin() {
+      const mSel = document.getElementById('editMomentMatchSelect');
+      const mCust = document.getElementById('editMomentMatchCustom');
+      if (mSel) mSel.value = 'Rocklin (Nov 1)';
+      if (mCust) mCust.classList.add('hidden');
+      showToast('Match set to Rocklin (Nov 1) ⚽');
+    }
+
+    function onEditMomentMatchSelectChange(val) {
+      const mCust = document.getElementById('editMomentMatchCustom');
+      if (val === 'CUSTOM') {
+        if (mCust) {
+          mCust.classList.remove('hidden');
+          mCust.focus();
+        }
+      } else {
+        if (mCust) mCust.classList.add('hidden');
+      }
+    }
+
+    function onEditTagSelectChange(val) {
+      const tCust = document.getElementById('editMomentTagCustom');
+      if (val === 'CUSTOM') {
+        if (tCust) {
+          tCust.classList.remove('hidden');
+          tCust.focus();
+        }
+        return;
+      } else {
+        if (tCust) tCust.classList.add('hidden');
+      }
+
+      // Auto-set Category and Quality based on rapid tag defaults
+      const meta = RAPID_TAG_METADATA[val];
+      if (meta) {
+        if (meta.category && document.getElementById('editMomentCategory')) {
+          document.getElementById('editMomentCategory').value = meta.category;
+        }
+        if (meta.quality && document.getElementById('editMomentQuality')) {
+          document.getElementById('editMomentQuality').value = meta.quality;
+        }
+      }
+    }
+
     function openEditMomentModal(idx) {
       const m = LOGGED_MOMENTS[idx];
       if (!m) return;
       document.getElementById('editMomentIdx').value = idx;
+
+      // 1. Populate Match field
+      const mMatch = m.match || 'Rocklin (Nov 1)';
+      const mSel = document.getElementById('editMomentMatchSelect');
+      const mCust = document.getElementById('editMomentMatchCustom');
+      const isKnown = Array.from(mSel.options).some(o => o.value === mMatch);
+      if (isKnown) {
+        mSel.value = mMatch;
+        mCust.classList.add('hidden');
+      } else {
+        mSel.value = 'CUSTOM';
+        mCust.value = mMatch;
+        mCust.classList.remove('hidden');
+      }
+
+      // 2. Populate Time, Half, Zone, Jerseys
       document.getElementById('editMomentTime').value = m.time || '00:00';
       document.getElementById('editMomentHalf').value = m.half || 'H1';
       document.getElementById('editMomentZone').value = m.zone || 'M3';
       document.getElementById('editMomentJerseys').value = m.playersRaw || '';
       document.getElementById('editMomentCategory').value = m.category || 'Turnover';
-      document.getElementById('editMomentTag').value = m.tag || 'Action';
+
+      // 3. Populate Action Tag dropdown
+      const tSel = document.getElementById('editMomentTagSelect');
+      const tCust = document.getElementById('editMomentTagCustom');
+      const hasTag = Array.from(tSel.options).some(o => o.value === m.tag);
+      if (hasTag) {
+        tSel.value = m.tag;
+        tCust.classList.add('hidden');
+      } else {
+        tSel.value = 'CUSTOM';
+        tCust.value = m.tag || '';
+        tCust.classList.remove('hidden');
+      }
+
       document.getElementById('editMomentQuality').value = m.quality || 'Good / Positive';
       document.getElementById('editMomentNotes').value = m.notes || '';
       document.getElementById('momentEditModal').classList.remove('hidden');
@@ -1425,12 +1586,25 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       if (isNaN(idx) || !LOGGED_MOMENTS[idx]) return;
 
       const m = LOGGED_MOMENTS[idx];
+
+      // Save Match
+      const mSel = document.getElementById('editMomentMatchSelect').value;
+      const mCust = document.getElementById('editMomentMatchCustom').value.trim();
+      let matchName = mSel === 'CUSTOM' ? (mCust || 'League Match') : mSel;
+      if (/rocklin.*(11|nov|26)/i.test(matchName)) matchName = 'Rocklin (Nov 1)';
+      m.match = matchName;
+
       m.time = document.getElementById('editMomentTime').value.trim() || '00:00';
       m.half = document.getElementById('editMomentHalf').value;
       m.zone = document.getElementById('editMomentZone').value;
       m.playersRaw = document.getElementById('editMomentJerseys').value.trim() || 'Team';
       m.category = document.getElementById('editMomentCategory').value;
-      m.tag = document.getElementById('editMomentTag').value.trim() || 'Action';
+
+      // Save Action Tag
+      const tSel = document.getElementById('editMomentTagSelect').value;
+      const tCust = document.getElementById('editMomentTagCustom').value.trim();
+      m.tag = tSel === 'CUSTOM' ? (tCust || 'Action') : tSel;
+
       m.quality = document.getElementById('editMomentQuality').value;
       m.notes = document.getElementById('editMomentNotes').value.trim();
 
@@ -1445,6 +1619,24 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       if (isNaN(idx) || !LOGGED_MOMENTS[idx]) return;
       closeMomentEditModal();
       deleteMoment(idx);
+    }
+
+    function batchReassignLaMorindaToRocklin() {
+      let count = 0;
+      LOGGED_MOMENTS.forEach(m => {
+        if (m.match === 'La Morinda' || /la morinda/i.test(m.match || '')) {
+          m.match = 'Rocklin (Nov 1)';
+          count++;
+        }
+      });
+      if (count === 0) {
+        showToast('No moments found tagged "La Morinda".');
+        return;
+      }
+      saveToLocalStorage();
+      renderMomentsTable();
+      updateCountBadges();
+      showToast(`Successfully updated ${count} moments to "Rocklin (Nov 1)"! ⚽`);
     }
 
     function loadFromLocalStorage() {
@@ -1483,22 +1675,45 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       </div>
       <input type="hidden" id="editMomentIdx">
       
-      <!-- Match & Time & Half & Zone -->
+      <!-- Match Row: Select or Custom + Quick Shortcut -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-pitch/50 p-3 rounded-xl border border-teal-500/30">
+        <div class="sm:col-span-2">
+          <label class="block text-[10px] mono uppercase text-teal-400 font-bold mb-1">Match Assignment</label>
+          <select id="editMomentMatchSelect" onchange="onEditMomentMatchSelectChange(this.value)" class="w-full bg-pitch text-xs p-2 rounded-xl border border-teal-500/50 text-white font-semibold focus:outline-none focus:border-brand-500">
+            <option value="Rocklin (Nov 1)">Rocklin (Nov 1)</option>
+            <option value="La Morinda">La Morinda</option>
+            <option value="Woodland 10/11">Woodland 10/11</option>
+            <option value="Crossfire">Crossfire</option>
+            <option value="Woodland">Woodland</option>
+            <option value="Rocklin (Sept 16)">Rocklin (Sept 16)</option>
+            <option value="CUSTOM">+ Other / Custom Match...</option>
+          </select>
+          <input type="text" id="editMomentMatchCustom" placeholder="Enter custom match name" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white mt-1.5 hidden font-semibold focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Quick Shortcut</label>
+          <button type="button" onclick="setEditMatchToRocklin()" class="w-full text-xs bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-bold py-2 px-2 rounded-xl transition flex items-center justify-center gap-1 active:scale-95 shadow">
+            <span>⚽ Set to Rocklin</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Time, Half, Zone, Player -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div>
           <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Time (MM:SS)</label>
-          <input type="text" id="editMomentTime" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-mono">
+          <input type="text" id="editMomentTime" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-mono focus:border-brand-500">
         </div>
         <div>
           <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Half</label>
-          <select id="editMomentHalf" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white">
+          <select id="editMomentHalf" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-semibold focus:border-brand-500">
             <option value="H1">H1</option>
             <option value="H2">H2</option>
           </select>
         </div>
         <div>
           <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Zone</label>
-          <select id="editMomentZone" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white">
+          <select id="editMomentZone" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-bold focus:border-brand-500">
             <option value="D3">D3 (Defending)</option>
             <option value="M3">M3 (Middle)</option>
             <option value="A3">A3 (Attacking)</option>
@@ -1506,28 +1721,92 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         </div>
         <div>
           <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Player(s) Jersey</label>
-          <input type="text" id="editMomentJerseys" placeholder="e.g. 23 or 5, 2" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-mono">
+          <input type="text" id="editMomentJerseys" placeholder="e.g. 23 or 5, 2" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-mono focus:border-brand-500">
         </div>
       </div>
 
-      <!-- Category, Tag & Quality -->
+      <!-- Category, Action Tag & Quality -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <div>
           <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Category</label>
-          <select id="editMomentCategory" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white">
+          <select id="editMomentCategory" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-semibold focus:border-brand-500">
             <option value="Turnover">Turnover</option>
             <option value="Offensive Moment">Offensive Moment</option>
             <option value="Defensive Moment">Defensive Moment</option>
             <option value="Pass String">Pass String</option>
+            <option value="Goal">Goal</option>
+            <option value="Assist">Assist</option>
+            <option value="Foul">Foul</option>
           </select>
         </div>
         <div>
-          <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Action Tag</label>
-          <input type="text" id="editMomentTag" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-semibold">
+          <label class="block text-[10px] mono uppercase text-teal-400 font-bold mb-1">Action Tag (Quick-Tap List)</label>
+          <select id="editMomentTagSelect" onchange="onEditTagSelectChange(this.value)" class="w-full bg-pitch text-xs p-2 rounded-xl border border-teal-500/50 text-white font-semibold focus:outline-none focus:border-brand-500">
+            <optgroup label="🔻 Turnovers & Dispossessions">
+              <option value="Forced Pass">Forced Pass</option>
+              <option value="Turned into Pressure">Turned into Pressure</option>
+              <option value="Heavy Touch">Heavy Touch</option>
+              <option value="Forced Pass into Def">Forced Pass into Def</option>
+              <option value="Pass off target / Poor Quality">Pass off target / Poor Quality</option>
+              <option value="Lost Mark / Bad Recovery">Lost Mark / Bad Recovery</option>
+              <option value="Stabbed at the Ball">Stabbed at the Ball</option>
+              <option value="Defensive Duel Lost">Defensive Duel Lost</option>
+              <option value="Poor Clearance">Poor Clearance</option>
+              <option value="Poor Shot Selection">Poor Shot Selection</option>
+              <option value="No Challenge on 50/50">No Challenge on 50/50</option>
+              <option value="No Off Ball Movement">No Off Ball Movement</option>
+            </optgroup>
+            <optgroup label="✨ Passing & Progression">
+              <option value="Key Pass / Line Breaker">Key Pass / Line Breaker</option>
+              <option value="Combination Play">Combination Play</option>
+              <option value="Switch Point of Attack">Switch Point of Attack</option>
+              <option value="Through Ball into Space">Through Ball into Space</option>
+              <option value="Direct Entry to 9">Direct Entry to 9</option>
+              <option value="Composed Build-Out Escape">Composed Build-Out Escape</option>
+              <option value="Crossing">Crossing</option>
+              <option value="Positive Action">Positive Action</option>
+              <option value="Support Angle Offered">Support Angle Offered</option>
+            </optgroup>
+            <optgroup label="🛡️ Defending & Pressing">
+              <option value="Good Press / Duel Won">Good Press / Duel Won</option>
+              <option value="Tackle & Secure Possession">Tackle & Secure Possession</option>
+              <option value="Defensive Shape">Defensive Shape</option>
+              <option value="Recovery Run">Recovery Run</option>
+              <option value="Clearance">Clearance</option>
+              <option value="Blocked Shot">Blocked Shot</option>
+              <option value="Foul Committed">Foul Committed</option>
+            </optgroup>
+            <optgroup label="⚡ Finishing & Attacking">
+              <option value="Goal Scored">⚽ Goal Scored</option>
+              <option value="Assist">Assist / Chance Created</option>
+              <option value="Shot on Target">Shot on Target</option>
+              <option value="Quality Shot">Quality Shot</option>
+              <option value="1v1 Dribble Won">1v1 Dribble Won</option>
+              <option value="Shot Off Target">Shot Off Target</option>
+            </optgroup>
+            <optgroup label="🧠 Movement & Decisions">
+              <option value="Decision on the Ball">Decision on the Ball</option>
+              <option value="Decision off the Ball">Decision off the Ball</option>
+              <option value="Scanning & Pre-Orientation">Scanning & Pre-Orientation</option>
+              <option value="Made Run">Made Run</option>
+              <option value="Offensive Shape">Offensive Shape</option>
+            </optgroup>
+            <optgroup label="🧤 Goalkeeping">
+              <option value="Save">Save (Clean / Held)</option>
+              <option value="Save (Parried)">Save (Parried)</option>
+              <option value="Box Aerial Claim">Box Aerial Claim</option>
+              <option value="Build-out Distribution">Build-out Distribution</option>
+              <option value="Goal Conceded">🥅 Goal Conceded (-2.5)</option>
+            </optgroup>
+            <optgroup label="Custom Tag">
+              <option value="CUSTOM">+ Custom Action Tag...</option>
+            </optgroup>
+          </select>
+          <input type="text" id="editMomentTagCustom" placeholder="Enter custom action" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-semibold mt-1.5 hidden focus:outline-none focus:border-brand-500">
         </div>
         <div>
           <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Quality / Outcome</label>
-          <select id="editMomentQuality" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white">
+          <select id="editMomentQuality" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-semibold focus:border-brand-500">
             <option value="Good / Positive">Glow (Good / Positive)</option>
             <option value="Poor / Negative">Grow (Poor / Negative)</option>
             <option value="Glow and Grow (Good actions and Not so Good action)">Glow &amp; Grow</option>
