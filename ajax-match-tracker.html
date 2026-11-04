@@ -3463,26 +3463,26 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
 
       const BASELINE_PLAYERS = {
         'AJAX ASPIRE U15': [
-          { name: 'Alessandra Fernandez', jersey: 15, gp: 3, mins: 123, goals: 1, assists: 0, sot: 3, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Alex Marigorda', jersey: 36, gp: 5, mins: 169, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 1 },
-          { name: 'Alexa Chipres', jersey: 50, gp: 6, mins: 317, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Amy Godínez Vargas', jersey: 19, gp: 6, mins: 393, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Arianna Zamora', jersey: 4, gp: 6, mins: 268, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 1, keyPasses: 0 },
-          { name: 'Brooklyn Brewer', jersey: 37, gp: 6, mins: 220, goals: 0, assists: 0, sot: 0, soff: 2, fouls: 1, keyPasses: 1 },
-          { name: 'Camila Deleon', jersey: 9, gp: 6, mins: 378, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Carlee Gowan', jersey: 89, gp: 6, mins: 241, goals: 0, assists: 0, sot: 1, soff: 1, fouls: 0, keyPasses: 0 },
-          { name: 'Ella Simmons', jersey: 25, gp: 6, mins: 184, goals: 1, assists: 1, sot: 1, soff: 1, fouls: 1, keyPasses: 0 },
-          { name: 'Evelyn Lopez', jersey: 24, gp: 6, mins: 185, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Giselle Rosales', jersey: 2, gp: 6, mins: 341, goals: 2, assists: 1, sot: 9, soff: 5, fouls: 3, keyPasses: 2 },
-          { name: 'Grace Krimmel', jersey: 5, gp: 6, mins: 341, goals: 0, assists: 1, sot: 0, soff: 2, fouls: 1, keyPasses: 2 },
-          { name: 'Kendall Blair', jersey: 14, gp: 6, mins: 385, goals: 0, assists: 0, sot: 3, soff: 0, fouls: 5, keyPasses: 0 },
-          { name: 'MacKenzie Castro', jersey: 7, gp: 6, mins: 347, goals: 1, assists: 0, sot: 4, soff: 2, fouls: 2, keyPasses: 0 },
-          { name: 'Madisyn Craig', jersey: null, gp: 1, mins: 66, goals: 0, assists: 0, sot: 0, soff: 1, fouls: 0, keyPasses: 0 },
-          { name: 'Nairobi Mcgadney', jersey: 34, gp: 3, mins: 97, goals: 0, assists: 0, sot: 1, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Scarlett Freitas', jersey: 8, gp: 6, mins: 362, goals: 1, assists: 2, sot: 3, soff: 1, fouls: 2, keyPasses: 1 },
-          { name: 'Sola Alberto', jersey: 1, gp: 4, mins: 220, goals: 0, assists: 0, sot: 1, soff: 1, fouls: 0, keyPasses: 0 },
-          { name: 'Sonia Vera', jersey: 88, gp: 6, mins: 496, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Sophia Culver', jersey: 23, gp: 5, mins: 320, goals: 3, assists: 1, sot: 7, soff: 2, fouls: 5, keyPasses: 0 }
+          { name: 'Alessandra Fernandez', jersey: 15, roles: ['DM','LM','CM'], posBreakdown: [{pos:'DM',gp:2,mins:74,pct:60},{pos:'LM',gp:2,mins:28,pct:23},{pos:'CM',gp:1,mins:20,pct:16},{pos:'CF',gp:1,mins:1,pct:1}], gp: 3, mins: 123, goals: 1, assists: 0, sot: 3, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Alex Marigorda', jersey: 36, roles: ['CB','DM','LB','RB'], posBreakdown: [{pos:'CB',gp:3,mins:84,pct:50},{pos:'DM',gp:1,mins:46,pct:27},{pos:'LB',gp:1,mins:30,pct:18},{pos:'RB',gp:1,mins:9,pct:5}], gp: 5, mins: 169, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 1 },
+          { name: 'Alexa Chipres', jersey: 50, roles: ['DM','CB','CM'], posBreakdown: [{pos:'DM',gp:5,mins:149,pct:47},{pos:'CB',gp:3,mins:143,pct:45},{pos:'CM',gp:1,mins:25,pct:8}], gp: 6, mins: 317, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Amy Godínez Vargas', jersey: 19, roles: ['RB','LB','CB'], posBreakdown: [{pos:'RB',gp:5,mins:234,pct:60},{pos:'LB',gp:2,mins:87,pct:22},{pos:'CB',gp:1,mins:72,pct:18}], gp: 6, mins: 393, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Arianna Zamora', jersey: 4, roles: ['RB','LB'], posBreakdown: [{pos:'RB',gp:4,mins:161,pct:60},{pos:'LB',gp:4,mins:107,pct:40}], gp: 6, mins: 268, goals: 0, assists: 1, sot: 0, soff: 0, fouls: 1, keyPasses: 0 },
+          { name: 'Brooklyn Brewer', jersey: 37, roles: ['RM','RW','LM'], posBreakdown: [{pos:'RM',gp:5,mins:171,pct:78},{pos:'RW',gp:1,mins:41,pct:19},{pos:'LM',gp:1,mins:8,pct:4}], gp: 6, mins: 220, goals: 0, assists: 0, sot: 0, soff: 2, fouls: 1, keyPasses: 1 },
+          { name: 'Camila Deleon', jersey: 9, roles: ['CB'], posBreakdown: [{pos:'CB',gp:6,mins:378,pct:100}], gp: 6, mins: 378, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Carlee Gowan', jersey: 89, roles: ['CB','CF'], posBreakdown: [{pos:'CB',gp:4,mins:228,pct:95},{pos:'CF',gp:1,mins:13,pct:5}], gp: 6, mins: 241, goals: 0, assists: 0, sot: 1, soff: 1, fouls: 0, keyPasses: 0 },
+          { name: 'Ella Simmons', jersey: 25, roles: ['AM','CF','LW','LM','DM','CM'], posBreakdown: [{pos:'AM',gp:3,mins:52,pct:28},{pos:'CF',gp:2,mins:51,pct:28},{pos:'LW',gp:1,mins:27,pct:15},{pos:'LM',gp:1,mins:20,pct:11},{pos:'DM',gp:1,mins:18,pct:10},{pos:'CM',gp:1,mins:16,pct:9}], gp: 6, mins: 184, goals: 1, assists: 1, sot: 1, soff: 1, fouls: 1, keyPasses: 0 },
+          { name: 'Evelyn Lopez', jersey: 24, roles: ['CM','DM'], posBreakdown: [{pos:'CM',gp:5,mins:124,pct:67},{pos:'DM',gp:2,mins:61,pct:33}], gp: 6, mins: 185, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Giselle Rosales', jersey: 2, roles: ['RM','CF','RW','LM'], posBreakdown: [{pos:'RM',gp:4,mins:168,pct:49},{pos:'CF',gp:2,mins:84,pct:25},{pos:'RW',gp:2,mins:56,pct:16},{pos:'LM',gp:1,mins:30,pct:9},{pos:'RB',gp:1,mins:3,pct:1}], gp: 6, mins: 341, goals: 2, assists: 2, sot: 9, soff: 5, fouls: 3, keyPasses: 2 },
+          { name: 'Grace Krimmel', jersey: 5, roles: ['CB','CF','LM','RM'], posBreakdown: [{pos:'CB',gp:2,mins:145,pct:43},{pos:'CF',gp:3,mins:91,pct:27},{pos:'LM',gp:2,mins:63,pct:18},{pos:'RM',gp:2,mins:41,pct:12}], gp: 6, mins: 341, goals: 1, assists: 1, sot: 0, soff: 2, fouls: 1, keyPasses: 2 },
+          { name: 'Kendall Blair', jersey: 14, roles: ['CM','LM','LB','LW'], posBreakdown: [{pos:'CM',gp:5,mins:183,pct:48},{pos:'LM',gp:2,mins:99,pct:26},{pos:'LB',gp:3,mins:54,pct:14},{pos:'LW',gp:1,mins:39,pct:10},{pos:'CF',gp:1,mins:8,pct:2}], gp: 6, mins: 385, goals: 0, assists: 0, sot: 3, soff: 0, fouls: 5, keyPasses: 0 },
+          { name: 'MacKenzie Castro', jersey: 7, roles: ['CF','LB','RB'], posBreakdown: [{pos:'CF',gp:5,mins:175,pct:50},{pos:'LB',gp:4,mins:130,pct:37},{pos:'RB',gp:1,mins:42,pct:12}], gp: 6, mins: 347, goals: 1, assists: 0, sot: 4, soff: 2, fouls: 2, keyPasses: 0 },
+          { name: 'Madisyn Craig', jersey: 33, roles: ['CB'], posBreakdown: [{pos:'CB',gp:1,mins:66,pct:100}], gp: 1, mins: 66, goals: 0, assists: 0, sot: 0, soff: 1, fouls: 0, keyPasses: 0 },
+          { name: 'Nairobi Mcgadney', jersey: 34, roles: ['LM','LW','RM'], posBreakdown: [{pos:'LM',gp:2,mins:54,pct:56},{pos:'LW',gp:1,mins:35,pct:36},{pos:'RM',gp:1,mins:8,pct:8}], gp: 3, mins: 97, goals: 0, assists: 0, sot: 1, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Scarlett Freitas', jersey: 8, roles: ['CM','DM','AM','RW'], posBreakdown: [{pos:'CM',gp:5,mins:207,pct:57},{pos:'DM',gp:2,mins:77,pct:21},{pos:'AM',gp:2,mins:39,pct:11},{pos:'RW',gp:2,mins:39,pct:11}], gp: 6, mins: 362, goals: 1, assists: 2, sot: 3, soff: 1, fouls: 2, keyPasses: 1 },
+          { name: 'Sola Alberto', jersey: 1, roles: ['LM','CF','RM','AM','CM'], posBreakdown: [{pos:'LM',gp:3,mins:88,pct:40},{pos:'CF',gp:3,mins:66,pct:30},{pos:'RM',gp:1,mins:23,pct:10},{pos:'AM',gp:1,mins:23,pct:10},{pos:'CM',gp:1,mins:20,pct:9}], gp: 4, mins: 220, goals: 0, assists: 0, sot: 1, soff: 1, fouls: 0, keyPasses: 0 },
+          { name: 'Sonia Vera', jersey: 88, roles: ['GK'], posBreakdown: [{pos:'GK',gp:6,mins:496,pct:100}], gp: 6, mins: 496, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
+          { name: 'Sophia Culver', jersey: 23, roles: ['CF','AM'], posBreakdown: [{pos:'CF',gp:5,mins:263,pct:82},{pos:'AM',gp:2,mins:54,pct:17},{pos:'LB',gp:1,mins:3,pct:1}], gp: 5, mins: 320, goals: 3, assists: 1, sot: 7, soff: 2, fouls: 5, keyPasses: 0 }
         ]
       };
       BASELINE_PLAYERS['AJAX ASPIRE U15 (LEAGUE)'] = BASELINE_PLAYERS['AJAX ASPIRE U15'];
@@ -3498,8 +3498,8 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
               return {
                 name: r.name,
                 jersey: r.jersey,
-                roles: r.roles || [r.defaultPos],
-                posBreakdown: [],
+                roles: bp.roles || r.roles || [r.defaultPos],
+                posBreakdown: bp.posBreakdown ? JSON.parse(JSON.stringify(bp.posBreakdown)) : [],
                 gp: bp.gp || 0,
                 mins: bp.mins || 0,
                 goals: bp.goals || 0,
@@ -3590,6 +3590,28 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
             p.keyPasses = (p.keyPasses || 0) + (ps.keyPasses || 0);
             p.duelsWon = (p.duelsWon || 0) + (ps.duelsWon || 0);
             p.benchMins = (p.benchMins || 0) + ps.benchMins;
+
+            // Accumulate per-position minutes into p.posBreakdown instead of wiping
+            if (!Array.isArray(p.posBreakdown)) p.posBreakdown = [];
+            const matchPosMap = (ps.posMins && Object.keys(ps.posMins).length)
+              ? ps.posMins
+              : { [ps.currentPos || (p.roles && p.roles[0]) || 'CM']: ps.mins };
+            for (const [posKey, mVal] of Object.entries(matchPosMap)) {
+              const mNum = Math.round(Number(mVal) || 0);
+              if (mNum <= 0 || posKey === 'BENCH') continue;
+              let entry = p.posBreakdown.find(b => b.pos === posKey);
+              if (!entry) {
+                entry = { pos: posKey, gp: 0, mins: 0, pct: 0 };
+                p.posBreakdown.push(entry);
+              }
+              entry.gp = (entry.gp || 0) + 1;
+              entry.mins = (entry.mins || 0) + mNum;
+            }
+            const totPosMins = p.posBreakdown.reduce((s, b) => s + (Number(b.mins) || 0), 0);
+            if (totPosMins > 0) {
+              p.posBreakdown.forEach(b => { b.pct = Math.round((b.mins / totPosMins) * 100); });
+              p.posBreakdown.sort((a, b) => b.mins - a.mins);
+            }
           }
         });
 
