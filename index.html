@@ -2582,9 +2582,27 @@
           }
         }
 
-        // 1. If Coach Shawn saved a Report Card in Match Hub
-        if (data.hasReportCard && data.reportCard) {
-          const rc = data.reportCard;
+        // 1. If Coach Shawn saved a Report Card in Match Hub (from Cloud API or local storage fallback)
+        let rc = (data.hasReportCard && data.reportCard) ? data.reportCard : null;
+        if (!rc) {
+          const norm = typeof normNameJS === 'function' ? normNameJS(playerName) : playerName.toLowerCase().trim();
+          const cleanSlug = norm.replace(/\s+/g, '_');
+          const pFirst = norm.split(' ')[0];
+          const localCandidates = [
+            'ajax_report_card_aspire_' + cleanSlug,
+            'ajax_report_card_ga_' + cleanSlug,
+            'ajax_report_card_aspire_' + pFirst,
+            'ajax_report_card_ga_' + pFirst
+          ];
+          for (const k of localCandidates) {
+            const raw = localStorage.getItem(k);
+            if (raw) {
+              try { rc = JSON.parse(raw); break; } catch(e) {}
+            }
+          }
+        }
+
+        if (rc) {
           if (liveRC) liveRC.style.display = 'block';
           if (fallbackRC) fallbackRC.style.display = 'none';
 
