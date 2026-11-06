@@ -2846,12 +2846,12 @@
       }
 
       feed.innerHTML = filtered.map(m => {
-        const isGlow = /glow/i.test(m.outcome);
-        const isGrow = /grow/i.test(m.outcome);
+        const isMixed = /glow.*grow/i.test(m.outcome) || /mixed/i.test(m.outcome) || m.outcome === 'Neutral';
+        const isGlow = !isMixed && /glow/i.test(m.outcome);
         const z = (m.zone || 'M3').toUpperCase();
         const zClass = z.includes('D') ? 'zone-d3' : (z.includes('A') ? 'zone-a3' : 'zone-m3');
-        const badgeClass = isGlow ? 'badge-green' : (isGrow ? 'badge-rose' : 'badge-amber');
-        const badgeLabel = isGlow ? '🟢 Glow' : (isGrow ? '🔴 Grow' : '⚪ Focus');
+        const badgeClass = isGlow ? 'badge-green' : (isMixed ? 'badge-amber' : 'badge-rose');
+        const badgeLabel = isGlow ? '🟢 Glow' : (isMixed ? '🟡 Glow & Grow' : '🔴 Grow');
         return `
           <div class="moment-card">
             <div class="moment-header">
