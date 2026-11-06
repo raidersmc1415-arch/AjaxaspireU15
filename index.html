@@ -2127,23 +2127,23 @@
           </div>
         </div>
 
-        <!-- MY COMPLETE MATCH FILM LOG -->
+        <!-- RECENT MATCH FILM (LAST 2 GAMES) -->
         <div class="film-log-container" id="complete-film-log-section" style="display:none;">
           <div class="film-log-header" onclick="toggleFilmLogAccordion()">
             <div>
-              <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">Player Film Feed</div>
+              <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">Recent Film Breakdown · Last 2 Matches</div>
               <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <span>My Complete Match Film Log</span>
+                <span>Recent Match Film (Rocklin &amp; La Morinda)</span>
                 <span class="badge badge-teal" id="player-film-count-badge">0 Moments</span>
                 <span class="badge badge-green" id="player-glow-rate-badge">0% Glows</span>
               </div>
             </div>
-            <button type="button" class="btn btn-outline" style="padding:6px 14px; font-size:12px; height:auto;" id="film-log-toggle-btn">▼ Hide Film Log</button>
+            <button type="button" class="btn btn-outline" style="padding:6px 14px; font-size:12px; height:auto;" id="film-log-toggle-btn">▼ Hide Film</button>
           </div>
           <div class="film-log-body" id="film-log-body-panel">
             <div class="film-filter-bar">
               <select class="film-filter-select" id="film-log-match-filter" onchange="onMomentFilterChanged()">
-                <option value="ALL">All Matches</option>
+                <option value="ALL">Both Matches (Rocklin &amp; La Morinda)</option>
               </select>
               <select class="film-filter-select" id="film-log-cat-filter" onchange="onMomentFilterChanged()">
                 <option value="ALL">All Categories</option>
@@ -2701,7 +2701,9 @@
       }
     }
 
-    // Complete Match Film Log logic
+    // Recent Match Film Log logic (Scoped to Last 2 Matches · Option B)
+    const RECENT_FILM_MATCHES = ['Rocklin (Nov 1)', 'La Morinda'];
+
     async function loadPlayerFilmMoments(playerName, jerseyNum) {
       let moments = [];
       try {
@@ -2725,6 +2727,12 @@
         }
       }
 
+      // Strictly scope feed to the last 2 matches only (Option B)
+      moments = moments.filter(m => {
+        const matchName = String(m.match || m.m || '');
+        return RECENT_FILM_MATCHES.some(rm => matchName.toLowerCase().includes(rm.toLowerCase().split(' ')[0]));
+      });
+
       CURRENT_PLAYER_MOMENTS = moments;
       const sec = document.getElementById('complete-film-log-section');
       if (sec) {
@@ -2740,6 +2748,11 @@
 
       const list = window.CANONICAL_ASPIRE_MOMENTS || [];
       return list.filter(m => {
+        const mMatch = m.m || m.match || '';
+        // Restrict canonical moments to the last 2 matches
+        if (!RECENT_FILM_MATCHES.some(rm => mMatch.toLowerCase().includes(rm.toLowerCase().split(' ')[0]))) {
+          return false;
+        }
         const jList = Array.isArray(m.j) ? m.j : (Array.isArray(m.jerseys) ? m.jerseys : []);
         if (jNum && jList.includes(jNum)) return true;
         const raw = String(m.playersRaw || m.players || '').toLowerCase();
@@ -2755,8 +2768,7 @@
         zone: m.z || m.zone || 'M3',
         outcome: m.o || m.outcome || 'Glow',
         tag: m.tag || 'Action',
-        category: m.cat || m.category || 'General',
-        note: m.n || m.note || ''
+        category: m.cat || m.category || 'General'
       }));
     }
 
@@ -2835,8 +2847,11 @@
 
       feed.innerHTML = filtered.map(m => {
         const isGlow = /glow/i.test(m.outcome);
+        const isGrow = /grow/i.test(m.outcome);
         const z = (m.zone || 'M3').toUpperCase();
         const zClass = z.includes('D') ? 'zone-d3' : (z.includes('A') ? 'zone-a3' : 'zone-m3');
+        const badgeClass = isGlow ? 'badge-green' : (isGrow ? 'badge-rose' : 'badge-amber');
+        const badgeLabel = isGlow ? '🟢 Glow' : (isGrow ? '🔴 Grow' : '⚪ Focus');
         return `
           <div class="moment-card">
             <div class="moment-header">
@@ -2846,11 +2861,10 @@
                 <span class="moment-zone-pill ${zClass}">${escapeHtml(z)}</span>
                 <span class="moment-tag-badge">${escapeHtml(m.tag || 'Action')}</span>
               </div>
-              <span class="badge ${isGlow ? 'badge-green' : 'badge-rose'}">
-                ${isGlow ? '🟢 Glow' : '🔴 Grow'}
+              <span class="badge ${badgeClass}">
+                ${badgeLabel}
               </span>
             </div>
-            ${m.note ? `<div class="moment-note-text">${escapeHtml(m.note)}</div>` : ''}
           </div>`;
       }).join('');
     }
