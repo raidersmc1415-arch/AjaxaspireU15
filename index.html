@@ -277,6 +277,181 @@
  .loop-checklist-box { background:var(--navy); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; flex-direction:column; gap:8px; }
  .loop-check-row { display:flex; align-items:center; gap:8px; }
 
+ /* PORTAL SUB-TABS & EVALUATION CARDS (MOBILE-FIRST) */
+ .portal-tab-bar {
+   display: flex;
+   background: var(--navy-mid);
+   padding: 5px;
+   border-radius: 9999px;
+   border: 1px solid var(--border);
+   margin: 22px 0 26px;
+   gap: 4px;
+ }
+ .portal-tab-btn {
+   flex: 1;
+   background: none;
+   border: none;
+   padding: 11px 18px;
+   border-radius: 9999px;
+   font-family: 'DM Sans', sans-serif;
+   font-size: 13px;
+   font-weight: 700;
+   color: var(--muted);
+   cursor: pointer;
+   transition: all 0.2s;
+   white-space: nowrap;
+   text-align: center;
+ }
+ .portal-tab-btn:hover { color: var(--white); }
+ .portal-tab-btn.active {
+   background: var(--forest);
+   color: #ffffff;
+   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+ }
+ @media (max-width: 480px) {
+   .portal-tab-btn {
+     font-size: 11px;
+     padding: 9px 8px;
+   }
+ }
+
+ /* REPORT CARD & EVALUATION CARDS */
+ .eval-header-card {
+   background: var(--card);
+   border: 1px solid var(--border);
+   border-radius: 14px;
+   padding: 22px 24px;
+   margin-bottom: 20px;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   flex-wrap: wrap;
+   gap: 14px;
+ }
+ .eval-tier-badge {
+   display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   font-family: 'DM Mono', monospace;
+   font-size: 11px;
+   font-weight: 700;
+   letter-spacing: 1.5px;
+   text-transform: uppercase;
+   padding: 6px 14px;
+   border-radius: 9999px;
+   background: rgba(200, 169, 81, 0.15);
+   color: #b45309;
+   border: 1px solid rgba(200, 169, 81, 0.35);
+ }
+ .eval-glow-grow-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+   gap: 16px;
+   margin-bottom: 22px;
+ }
+ .eval-card-glow {
+   background: rgba(22, 163, 74, 0.04);
+   border: 1px solid rgba(22, 163, 74, 0.28);
+   border-radius: 14px;
+   padding: 20px 22px;
+ }
+ .eval-card-grow {
+   background: rgba(225, 29, 72, 0.04);
+   border: 1px solid rgba(225, 29, 72, 0.28);
+   border-radius: 14px;
+   padding: 20px 22px;
+ }
+ .eval-pillar-box {
+   background: var(--card);
+   border: 1px solid var(--border);
+   border-radius: 14px;
+   padding: 20px 22px;
+   margin-bottom: 18px;
+ }
+ .eval-pillar-title {
+   font-family: 'Bebas Neue', cursive;
+   font-size: 20px;
+   color: var(--white);
+   letter-spacing: 0.5px;
+   margin-bottom: 14px;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+ }
+ .eval-rating-row {
+   display: flex;
+   flex-direction: column;
+   gap: 8px;
+   padding: 12px 0;
+   border-bottom: 1px solid var(--border);
+ }
+ .eval-rating-row:last-child { border-bottom: none; }
+ .eval-rating-header {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 8px;
+   font-size: 13px;
+   font-weight: 700;
+   color: var(--white);
+ }
+ .eval-bar-wrapper {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+ }
+ .eval-bar-track {
+   flex: 1;
+   height: 9px;
+   background: var(--navy);
+   border-radius: 9999px;
+   overflow: hidden;
+   border: 1px solid var(--border);
+   position: relative;
+ }
+ .eval-bar-fill-coach {
+   height: 100%;
+   background: linear-gradient(90deg, #15803D 0%, #16A34A 100%);
+   border-radius: 9999px;
+   transition: width 0.4s ease;
+ }
+ .eval-bar-fill-player {
+   position: absolute;
+   top: 0;
+   left: 0;
+   height: 100%;
+   background: rgba(0, 194, 214, 0.4);
+   border-radius: 9999px;
+ }
+ .align-chip {
+   font-family: 'DM Mono', monospace;
+   font-size: 10px;
+   font-weight: 700;
+   padding: 3px 8px;
+   border-radius: 6px;
+   white-space: nowrap;
+ }
+ .chip-aligned { background: rgba(58, 191, 184, 0.12); color: var(--teal); border: 1px solid rgba(58, 191, 184, 0.3); }
+ .chip-coach-high { background: rgba(200, 169, 81, 0.15); color: #b45309; border: 1px solid rgba(200, 169, 81, 0.35); }
+ .chip-player-high { background: rgba(225, 29, 72, 0.12); color: #e11d48; border: 1px solid rgba(225, 29, 72, 0.3); }
+ 
+ .goals-2nd-half-box {
+   background: var(--card);
+   border: 1px solid var(--border);
+   border-left: 4px solid var(--green);
+   border-radius: 12px;
+   padding: 20px 22px;
+   margin-bottom: 20px;
+ }
+ .in-progress-card {
+   background: var(--card);
+   border: 2px dashed var(--border);
+   border-radius: 14px;
+   padding: 32px 24px;
+   text-align: center;
+   margin-bottom: 22px;
+ }
+
  .phrase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px,1fr)); gap: 14px; }
  .phrase-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: all 0.2s; cursor: pointer; }
  .phrase-card:hover { border-color: var(--forest); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(17,22,19,0.06); }
@@ -1861,31 +2036,8 @@
           <button class="btn btn-outline" onclick="logoutPortal()" style="margin-left: auto;">Log Out</button>
         </div>
 
-        <!-- NEW REPLY BANNER (shown only when an unread coach reply exists) -->
-        <div id="new-reply-banner" style="display:none; background:var(--card); border:2px solid var(--gold); border-radius:12px; padding:14px 18px; margin-top:16px; cursor:pointer;" onclick="scrollToReplies()">
-          <span style="font-family:'DM Mono',monospace; font-size:12px; font-weight:500; letter-spacing:1px; color:var(--gold);">NEW REPLY FROM COACH SHAWN</span>
-          <span style="font-size:13px; color:var(--text); margin-left:8px;">Tap to read →</span>
-        </div>
-
-        <!-- THIS WEEK STRIP -->
-        <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin-top:16px;">
-          <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:10px;">This Week</div>
-          <div style="display:flex; flex-wrap:wrap; gap:10px 24px; font-size:14px; font-weight:500; color:var(--text);">
-            <span>1 · Submit your reflection</span>
-            <span>2 · Watch your assigned clip</span>
-            <span>3 · Log the daily challenge</span>
-          </div>
-        </div>
-
-        <!-- PRIVACY LINE -->
-        <p style="font-size:12px; color:var(--muted); margin-top:12px; font-style:italic;">Your reflections and self-ratings are seen by you and Coach Shawn only.</p>
-
-        <!-- COACH FEEDBACK -->
-        <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white); margin-top:24px;">Coach Shawn's Notes</h3>
-        <div class="coach-notes" id="display-notes">Loading notes...</div>
-
-        <!-- SEASON STATS -->
-        <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white); margin-top:30px;">Season Statistics</h3>
+        <!-- SEASON STATS (PERSISTENT SUMMARY) -->
+        <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white); margin-top:20px;">Season Statistics</h3>
         <div class="stats-grid">
           <div class="stat-box"><div class="stat-label">Games</div><div class="stat-val" id="stat-gp">0</div></div>
           <div class="stat-box"><div class="stat-label">Total Mins</div><div class="stat-val" id="stat-mins">0</div></div>
@@ -1895,14 +2047,205 @@
           <div class="stat-box"><div class="stat-label">Def Duels</div><div class="stat-val" id="stat-duels">0</div></div>
         </div>
 
-        <!-- GA SHESCORES RESOURCE LINK INSIDE EACH PLAYER'S IDP PORTAL -->
-        <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin-top:24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:220px;">
-            <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">GA SheScores · Own Your Wellness</div>
-            <div style="font-size:13px; color:var(--text); line-height:1.6;">Understanding your body is a performance advantage. Track your cycle, manage growth spurts, and prioritize mental health.</div>
-          </div>
-          <a href="https://www.ussoccer.com/herlens/puberty/what-is-puberty" target="_blank" rel="noopener noreferrer" class="btn" style="width:auto; background:var(--forest); color:#FFFFFF; text-decoration:none; font-family:'Bebas Neue',cursive; font-size:15px; letter-spacing:1.5px; padding:10px 20px; white-space:nowrap;">herLENS Guide ↗</a>
+        <!-- PORTAL SUB-TABS (MOBILE-FIRST TWO-PANE NAVIGATION) -->
+        <div class="portal-tab-bar">
+          <button type="button" id="tab-btn-improvement" class="portal-tab-btn active" onclick="switchPortalTab('improvement')">
+            ⚡ Player Improvement Center
+          </button>
+          <button type="button" id="tab-btn-goals" class="portal-tab-btn" onclick="switchPortalTab('goals')">
+            🎯 Goals &amp; Evaluations
+          </button>
         </div>
+
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- TAB 1: PLAYER IMPROVEMENT CENTER (DEFAULT)     -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <div id="portal-tab-improvement" class="portal-tab-pane">
+
+          <!-- NEW REPLY BANNER (shown only when an unread coach reply exists) -->
+          <div id="new-reply-banner" style="display:none; background:var(--card); border:2px solid var(--gold); border-radius:12px; padding:14px 18px; margin-bottom:16px; cursor:pointer;" onclick="scrollToReplies()">
+            <span style="font-family:'DM Mono',monospace; font-size:12px; font-weight:700; letter-spacing:1px; color:var(--gold);">NEW REPLY FROM COACH SHAWN</span>
+            <span style="font-size:13px; color:var(--text); margin-left:8px;">Tap to read →</span>
+          </div>
+
+          <!-- THIS WEEK STRIP -->
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 20px; margin-bottom:18px;">
+            <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:8px;">Weekly Progression</div>
+            <div style="display:flex; flex-wrap:wrap; gap:10px 24px; font-size:13px; font-weight:600; color:var(--text);">
+              <span>1 · Watch your assigned spotlight clip</span>
+              <span>2 · Review your last 2 match actions</span>
+              <span>3 · Submit your 2-for-1 practice takeaway</span>
+            </div>
+          </div>
+
+          <!-- INDIVIDUAL FILM ROOM -->
+          <div id="individual-film" style="margin-bottom:24px; display:none;">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <div>
+                <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:3px;">From Coach Shawn</div>
+                <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white);">Coach Shawn's Spotlight Film Study</div>
+              </div>
+              <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:rgba(58,191,184,0.1); color:var(--teal); border:1px solid rgba(58,191,184,0.25); padding:4px 10px; border-radius:2px;" id="film-count-badge">0 Videos</span>
+            </div>
+
+            <div id="individual-film-list"></div>
+
+            <!-- Empty state -->
+            <div id="individual-film-empty" style="display:none; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:32px; text-align:center;">
+              <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:8px;">No Videos Assigned Yet</div>
+              <div style="color:var(--muted); font-size:13px;">Check back after our next session. You can review your complete match film log below!</div>
+            </div>
+          </div>
+
+          <!-- RECENT MATCH FILM (LAST 2 GAMES) -->
+          <div class="film-log-container" id="complete-film-log-section" style="display:none; margin-bottom:24px;">
+            <div class="film-log-header" onclick="toggleFilmLogAccordion()">
+              <div>
+                <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">Recent Film Breakdown · Last 2 Matches</div>
+                <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                  <span>Recent Match Film (Rocklin &amp; La Morinda)</span>
+                  <span class="badge badge-teal" id="player-film-count-badge">0 Moments</span>
+                  <span class="badge badge-green" id="player-glow-rate-badge">0% Glows</span>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline" style="padding:6px 14px; font-size:12px; height:auto;" id="film-log-toggle-btn">▼ Hide Film</button>
+            </div>
+            <div class="film-log-body" id="film-log-body-panel">
+              <div class="film-filter-bar">
+                <select class="film-filter-select" id="film-log-match-filter" onchange="onMomentFilterChanged()">
+                  <option value="ALL">Both Matches (Rocklin &amp; La Morinda)</option>
+                </select>
+                <select class="film-filter-select" id="film-log-cat-filter" onchange="onMomentFilterChanged()">
+                  <option value="ALL">All Categories</option>
+                  <option value="Turnover">Turnovers</option>
+                  <option value="Key Pass">Passing / Key Passes</option>
+                  <option value="Defensive Moment">Defending</option>
+                  <option value="Offensive Moment">Offensive Moments</option>
+                </select>
+                <div class="film-chip-group">
+                  <button type="button" class="film-chip-btn active" id="chip-out-all" onclick="setMomentOutcomeFilter('ALL')">All</button>
+                  <button type="button" class="film-chip-btn" id="chip-out-glow" onclick="setMomentOutcomeFilter('Glow')">🟢 Glows</button>
+                  <button type="button" class="film-chip-btn" id="chip-out-grow" onclick="setMomentOutcomeFilter('Grow')">🔴 Grows</button>
+                </div>
+              </div>
+              <div id="player-film-moments-feed"></div>
+            </div>
+          </div>
+
+          <!-- 2-FOR-1 CLOSED LOOP: MATCH FILM TAKEAWAY -->
+          <div style="background:var(--card); border:1px solid var(--border); padding:24px; border-radius:14px; margin-bottom:24px;">
+            <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">2-for-1 Learning Loop</div>
+            <h3 style="font-family:'Bebas Neue',cursive; font-size:26px; color:var(--white); margin-bottom:6px;">Match Film Takeaway &amp; Learning Reflection</h3>
+            <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:16px;">
+              Watch your assigned moments above, then synthesize your #1 takeaway and how you will execute it at practice this week. Coach Shawn replies directly below.
+            </p>
+
+            <div class="loop-checklist-box">
+              <div class="loop-check-row" id="req-watch-status">
+                <span style="color:var(--muted);">○</span> <span>Watch all assigned spotlight clips</span>
+              </div>
+              <div class="loop-check-row" id="req-text-status">
+                <span style="color:var(--muted);">○</span> <span>Write your takeaway reflection (min 15 characters)</span>
+              </div>
+            </div>
+
+            <div class="input-group" style="margin-bottom:12px;">
+              <label style="font-weight:700;">My Takeaway &amp; Training Focus</label>
+              <textarea id="film-takeaway-textarea" oninput="updateTakeawayRequirements()" style="font-size:14px; min-height:95px;" placeholder="What was your biggest takeaway from watching these moments? What will you do differently or repeat at training this week?"></textarea>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div id="film-takeaway-status" style="font-size:12px; color:var(--muted);">
+                Write at least 15 characters to activate submission.
+              </div>
+              <button class="btn" id="btn-submit-takeaway" onclick="submitFilmTakeawayReflection()" disabled style="opacity:0.55; cursor:not-allowed;">Submit Match Film Takeaway →</button>
+            </div>
+          </div>
+
+          <!-- MY REFLECTIONS + COACH REPLIES -->
+          <div id="reflections-history-section" style="display:none; margin-bottom:24px;">
+            <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--gold); margin-bottom:6px;">My Reflections &amp; Coach Replies</h3>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">Your submissions, newest first. Coach Shawn replies right here. Check back after you submit.</p>
+            <div id="reflections-history"></div>
+          </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- TAB 2: GOALS & EVALUATIONS                     -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <div id="portal-tab-goals" class="portal-tab-pane" style="display:none;">
+
+          <!-- LIVE REPORT CARD (shown when coach has saved a report card) -->
+          <div id="report-card-live" style="display:none;">
+            <!-- Header Card: Player Name, Evaluation Title, Overall Performance Tier -->
+            <div class="eval-header-card">
+              <div>
+                <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">Official Evaluation · Coach Shawn</div>
+                <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); letter-spacing:0.5px;">Mid-Season Performance Review</div>
+              </div>
+              <div class="eval-tier-badge" id="eval-tier-badge">
+                <span>★</span> <span id="eval-tier-text">TIER 1 · FOUNDATIONAL</span>
+              </div>
+            </div>
+
+            <!-- Side-by-Side Glow & Grow Cards -->
+            <div class="eval-glow-grow-grid">
+              <div class="eval-card-glow">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                  <span style="font-size:16px;">🟢</span>
+                  <span style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--green-lt); letter-spacing:0.5px;">What's Glowing · Key Strengths</span>
+                </div>
+                <div id="eval-glow-text" style="font-size:14px; color:var(--text); line-height:1.65; white-space:pre-wrap;">No comments provided yet.</div>
+              </div>
+
+              <div class="eval-card-grow">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                  <span style="font-size:16px;">🔴</span>
+                  <span style="font-family:'Bebas Neue',cursive; font-size:22px; color:#f43f5e; letter-spacing:0.5px;">Where We Grow · Priority Focus</span>
+                </div>
+                <div id="eval-grow-text" style="font-size:14px; color:var(--text); line-height:1.65; white-space:pre-wrap;">No comments provided yet.</div>
+              </div>
+            </div>
+
+            <!-- 4-Pillar Evaluation Ratings Comparison Grid -->
+            <div style="margin-bottom:20px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                <div>
+                  <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:2px;">Core Development Pillars</div>
+                  <div style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white);">Coach Shawn vs. Player Ratings</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:14px; font-size:11px; font-family:'DM Mono',monospace;">
+                  <span style="display:inline-flex; align-items:center; gap:5px; color:#22c55e;"><span style="width:10px; height:10px; background:#16a34a; border-radius:2px;"></span> Coach Shawn</span>
+                  <span style="display:inline-flex; align-items:center; gap:5px; color:var(--teal);"><span style="width:10px; height:10px; background:rgba(0,194,214,0.5); border-radius:2px;"></span> Player Rating</span>
+                </div>
+              </div>
+              <div id="eval-pillars-container"></div>
+            </div>
+
+            <!-- 2nd Half Season Action Goals -->
+            <div class="goals-2nd-half-box">
+              <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:6px;">Forward Focus</div>
+              <div style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white); margin-bottom:10px;">2nd-Half Season Action Goals</div>
+              <div id="eval-goals-text" style="font-size:14px; color:var(--text); line-height:1.65; white-space:pre-wrap;">Maintain high work rate and execute 1v1 challenges with confidence.</div>
+            </div>
+          </div>
+
+          <!-- FALLBACK: REVIEW IN PROGRESS & INITIAL IDP -->
+          <div id="report-card-fallback">
+            <div class="in-progress-card">
+              <div style="font-size:32px; margin-bottom:10px;">⏳</div>
+              <div style="font-family:'Bebas Neue',cursive; font-size:26px; color:var(--white); letter-spacing:0.5px; margin-bottom:6px;">Mid-Season Review in Progress</div>
+              <div style="font-size:13px; color:var(--muted); max-width:540px; margin:0 auto 16px; line-height:1.6;">
+                Coach Shawn is currently evaluating match film, updated performance metrics, and individual goals. Your complete Mid-Season Report Card will appear here once finalized.
+              </div>
+            </div>
+
+            <!-- COACH FEEDBACK (INITIAL) -->
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:20px;">
+              <h3 style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:8px;">Coach Shawn's Notes</h3>
+              <div class="coach-notes" id="display-notes">Loading notes...</div>
+            </div>
 
         <!-- ═══════════════════════════════════════════════ -->
         <!-- IDP FORM (shown when not yet submitted)         -->
@@ -2103,102 +2446,20 @@
       <div style="margin-top:16px; font-size:12px; color:var(--muted); text-align:center; font-style:italic;">Need a revision? Speak with Coach Shawn directly.</div>
         </div>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- INDIVIDUAL FILM ROOM                            -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- HYBRID FILM ROOM: SPOTLIGHT + COMPLETE FEED     -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <div id="individual-film" style="margin-top:30px; display:none;">
-          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border);">
-            <div>
-              <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:4px;">From Coach Shawn</div>
-              <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white);">Coach Shawn's Spotlight Film Study</div>
+          </div><!-- END #report-card-fallback -->
+
+          <!-- GA SHESCORES RESOURCE LINK -->
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin-top:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:220px;">
+              <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">GA SheScores · Own Your Wellness</div>
+              <div style="font-size:13px; color:var(--text); line-height:1.6;">Understanding your body is a performance advantage. Track your cycle, manage growth spurts, and prioritize mental health.</div>
             </div>
-            <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:rgba(58,191,184,0.1); color:var(--teal); border:1px solid rgba(58,191,184,0.25); padding:4px 10px; border-radius:2px;" id="film-count-badge">0 Videos</span>
+            <a href="https://www.ussoccer.com/herlens/puberty/what-is-puberty" target="_blank" rel="noopener noreferrer" class="btn" style="width:auto; background:var(--forest); color:#FFFFFF; text-decoration:none; font-family:'Bebas Neue',cursive; font-size:15px; letter-spacing:1.5px; padding:10px 20px; white-space:nowrap;">herLENS Guide ↗</a>
           </div>
 
-          <div id="individual-film-list"></div>
-
-          <!-- Empty state -->
-          <div id="individual-film-empty" style="display:none; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:32px; text-align:center;">
-            <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:8px;">No Videos Assigned Yet</div>
-            <div style="color:var(--muted); font-size:13px;">Check back after our next session. You can review your complete match film log below!</div>
-          </div>
-        </div>
-
-        <!-- RECENT MATCH FILM (LAST 2 GAMES) -->
-        <div class="film-log-container" id="complete-film-log-section" style="display:none;">
-          <div class="film-log-header" onclick="toggleFilmLogAccordion()">
-            <div>
-              <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">Recent Film Breakdown · Last 2 Matches</div>
-              <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <span>Recent Match Film (Rocklin &amp; La Morinda)</span>
-                <span class="badge badge-teal" id="player-film-count-badge">0 Moments</span>
-                <span class="badge badge-green" id="player-glow-rate-badge">0% Glows</span>
-              </div>
-            </div>
-            <button type="button" class="btn btn-outline" style="padding:6px 14px; font-size:12px; height:auto;" id="film-log-toggle-btn">▼ Hide Film</button>
-          </div>
-          <div class="film-log-body" id="film-log-body-panel">
-            <div class="film-filter-bar">
-              <select class="film-filter-select" id="film-log-match-filter" onchange="onMomentFilterChanged()">
-                <option value="ALL">Both Matches (Rocklin &amp; La Morinda)</option>
-              </select>
-              <select class="film-filter-select" id="film-log-cat-filter" onchange="onMomentFilterChanged()">
-                <option value="ALL">All Categories</option>
-                <option value="Turnover">Turnovers</option>
-                <option value="Key Pass">Passing / Key Passes</option>
-                <option value="Defensive Moment">Defending</option>
-                <option value="Offensive Moment">Offensive Moments</option>
-              </select>
-              <div class="film-chip-group">
-                <button type="button" class="film-chip-btn active" id="chip-out-all" onclick="setMomentOutcomeFilter('ALL')">All</button>
-                <button type="button" class="film-chip-btn" id="chip-out-glow" onclick="setMomentOutcomeFilter('Glow')">🟢 Glows</button>
-                <button type="button" class="film-chip-btn" id="chip-out-grow" onclick="setMomentOutcomeFilter('Grow')">🔴 Grows</button>
-              </div>
-            </div>
-            <div id="player-film-moments-feed"></div>
-          </div>
-        </div>
-
-        <!-- 2-FOR-1 CLOSED LOOP: MATCH FILM TAKEAWAY -->
-        <div style="background:var(--card); border:1px solid var(--border); padding:25px; border-radius:12px; margin-top:30px;">
-          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">2-for-1 Learning Loop</div>
-          <h3 style="font-family:'Bebas Neue',cursive; font-size:26px; color:var(--white); margin-bottom:6px;">Match Film Takeaway &amp; Learning Reflection</h3>
-          <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:16px;">
-            Watch your assigned moments above, then synthesize your #1 takeaway and how you will execute it at practice this week. Coach Shawn replies directly below.
-          </p>
-
-          <div class="loop-checklist-box">
-            <div class="loop-check-row" id="req-watch-status">
-              <span style="color:var(--muted);">○</span> <span>Watch all assigned spotlight clips</span>
-            </div>
-            <div class="loop-check-row" id="req-text-status">
-              <span style="color:var(--muted);">○</span> <span>Write your takeaway reflection (min 15 characters)</span>
-            </div>
-          </div>
-
-          <div class="input-group" style="margin-bottom:12px;">
-            <label style="font-weight:700;">My Takeaway &amp; Training Focus</label>
-            <textarea id="film-takeaway-textarea" oninput="updateTakeawayRequirements()" style="font-size:14px; min-height:95px;" placeholder="What was your biggest takeaway from watching these moments? What will you do differently or repeat at training this week?"></textarea>
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:10px;">
-            <div id="film-takeaway-status" style="font-size:12px; color:var(--muted);">
-              Write at least 15 characters to activate submission.
-            </div>
-            <button class="btn" id="btn-submit-takeaway" onclick="submitFilmTakeawayReflection()" disabled style="opacity:0.55; cursor:not-allowed;">Submit Match Film Takeaway →</button>
-          </div>
-        </div>
-
-        <!-- MY REFLECTIONS + COACH REPLIES -->
-        <div id="reflections-history-section" style="display:none; margin-top:30px;">
-          <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--gold); margin-bottom:6px;">My Reflections &amp; Coach Replies</h3>
-          <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">Your submissions, newest first. Coach Shawn replies right here. Check back after you submit.</p>
-          <div id="reflections-history"></div>
-        </div>
-      </div>
+          <p style="font-size:12px; color:var(--muted); margin-top:16px; text-align:center; font-style:italic;">Your reflections and evaluations are seen by you and Coach Shawn only.</p>
+        </div><!-- END #portal-tab-goals -->
+      </div><!-- END #portal-content -->
     </div>
   </main>
 
@@ -2269,18 +2530,44 @@
     const TECH_KEYS = ['t_dribbling','t_passing','t_movement','t_duels','t_touch'];
     const TAC_KEYS  = ['tac_support','tac_restdef','tac_press','tac_attack','tac_defend'];
 
+    function switchPortalTab(tabName) {
+      const btnImprovement = document.getElementById('tab-btn-improvement');
+      const btnGoals = document.getElementById('tab-btn-goals');
+      const paneImprovement = document.getElementById('portal-tab-improvement');
+      const paneGoals = document.getElementById('portal-tab-goals');
+
+      if (tabName === 'goals') {
+        if (btnImprovement) btnImprovement.classList.remove('active');
+        if (btnGoals) btnGoals.classList.add('active');
+        if (paneImprovement) paneImprovement.style.display = 'none';
+        if (paneGoals) paneGoals.style.display = 'block';
+      } else {
+        if (btnImprovement) btnImprovement.classList.add('active');
+        if (btnGoals) btnGoals.classList.remove('active');
+        if (paneImprovement) paneImprovement.style.display = 'block';
+        if (paneGoals) paneGoals.style.display = 'none';
+      }
+    }
+
     async function loadCoachRatings(playerName, loginData) {
       // ALWAYS reset first — prevents a previous login's ratings from
       // showing for a player who has none (stale DOM bug)
       const section = document.getElementById('coach-ratings-section');
-      section.style.display = 'none';
-      document.getElementById('coach-technical-ratings').innerHTML = '';
-      document.getElementById('coach-tactical-ratings').innerHTML = '';
+      if (section) section.style.display = 'none';
+      const techRatings = document.getElementById('coach-technical-ratings');
+      const tacRatings = document.getElementById('coach-tactical-ratings');
+      if (techRatings) techRatings.innerHTML = '';
+      if (tacRatings) tacRatings.innerHTML = '';
+
+      const liveRC = document.getElementById('report-card-live');
+      const fallbackRC = document.getElementById('report-card-fallback');
+      if (liveRC) liveRC.style.display = 'none';
+      if (fallbackRC) fallbackRC.style.display = 'block';
 
       try {
         const res  = await fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}`);
         const data = await res.json();
-        if (!data.found) return;
+        if (!data || !data.found) return;
 
         // Player's own ratings — prefer login response (Sheet), then coachRatings response,
         // then localStorage as last resort
@@ -2290,19 +2577,200 @@
 
         if (!playerData) {
           const saved = localStorage.getItem('idp_' + playerName.toLowerCase().trim());
-          if (!saved) return;
-          playerData = JSON.parse(saved);
+          if (saved) {
+            try { playerData = JSON.parse(saved); } catch(e) {}
+          }
         }
 
-        // Show the section
-        section.style.display = 'block';
+        // 1. If Coach Shawn saved a Report Card in Match Hub
+        if (data.hasReportCard && data.reportCard) {
+          const rc = data.reportCard;
+          if (liveRC) liveRC.style.display = 'block';
+          if (fallbackRC) fallbackRC.style.display = 'none';
 
-        document.getElementById('coach-technical-ratings').innerHTML =
-          TECH_KEYS.map(k => renderRatingRow(k, playerData, data.ratings, data.comments)).join('');
-        document.getElementById('coach-tactical-ratings').innerHTML =
-          TAC_KEYS.map(k => renderRatingRow(k, playerData, data.ratings, data.comments)).join('');
+          const tierEl = document.getElementById('eval-tier-text');
+          if (tierEl) tierEl.textContent = rc.overall_tier || 'TIER 1 · FOUNDATIONAL';
+
+          const glowEl = document.getElementById('eval-glow-text');
+          if (glowEl) glowEl.textContent = rc.glow || 'Consistent effort and positive presence in training.';
+
+          const growEl = document.getElementById('eval-grow-text');
+          if (growEl) growEl.textContent = rc.grow || 'Focus on sharper decision-making and aggressive transition play.';
+
+          const goalsEl = document.getElementById('eval-goals-text');
+          if (goalsEl) goalsEl.textContent = rc.goals_2nd_half || 'Maintain high work rate and execute 1v1 challenges with confidence.';
+
+          renderFourPillarsEvaluation(rc, playerData);
+          return;
+        }
+
+        // 2. Fallback: Show initial IDP ratings comparison if available
+        if (data.ratings && Object.keys(data.ratings).length > 0 && playerData && section) {
+          section.style.display = 'block';
+          if (techRatings) techRatings.innerHTML = TECH_KEYS.map(k => renderRatingRow(k, playerData, data.ratings, data.comments)).join('');
+          if (tacRatings) tacRatings.innerHTML = TAC_KEYS.map(k => renderRatingRow(k, playerData, data.ratings, data.comments)).join('');
+        }
 
       } catch(err) { /* silent fail */ }
+    }
+
+    function renderFourPillarsEvaluation(rc, playerData) {
+      const container = document.getElementById('eval-pillars-container');
+      if (!container) return;
+
+      const pillars = [
+        {
+          title: 'Pillar 1 · Technical & Tactical Mastery',
+          tag: 'Technique & Reads',
+          skills: [
+            {
+              key: 'tech_ball',
+              label: 'Ball Mastery & 1st Touch',
+              desc: 'Composure under pressure & clean first touch',
+              playerKey: 't_touch',
+              altPlayerKey: 't_dribbling'
+            },
+            {
+              key: 'tech_decision',
+              label: 'Decision Making & Tempo',
+              desc: 'Speed of play & forward passing vision',
+              playerKey: 't_passing',
+              altPlayerKey: 'tac_support'
+            },
+            {
+              key: 'tech_scanning',
+              label: 'Scanning & Spatial Awareness',
+              desc: 'Pre-orientation & shoulder checks',
+              playerKey: 'tac_restdef',
+              altPlayerKey: 'tac_press'
+            }
+          ],
+          notes: rc.tech_notes || ''
+        },
+        {
+          title: 'Pillar 2 · Physical Engine & Athletic Impact',
+          tag: 'Workload & Athleticism',
+          skills: [
+            {
+              key: 'phys_workrate',
+              label: 'Work Rate & Continuous Engine',
+              desc: 'Box-to-box stamina & consistent effort',
+              playerKey: 't_movement'
+            },
+            {
+              key: 'phys_recovery',
+              label: 'Sprint Recovery & Transition',
+              desc: 'Counter-press speed & recovery runs',
+              playerKey: 't_movement'
+            },
+            {
+              key: 'phys_duels',
+              label: '1v1 Ground Duels & Shielding',
+              desc: '50/50 competitiveness & strength on the ball',
+              playerKey: 't_duels',
+              altPlayerKey: 'tac_defend'
+            }
+          ],
+          notes: rc.phys_notes || ''
+        },
+        {
+          title: 'Pillar 3 · Mindset & Leadership',
+          tag: 'Mentality & Communication',
+          skills: [
+            {
+              key: 'psych_coach',
+              label: 'Coachability & Growth Mindset',
+              desc: 'Applying guidance & owning development',
+              defaultPlayer: 4
+            },
+            {
+              key: 'psych_resilience',
+              label: 'Match Composure & Resilience',
+              desc: 'Next-play mentality after mistakes',
+              defaultPlayer: 4
+            },
+            {
+              key: 'psych_comm',
+              label: 'Communication & Leadership',
+              desc: 'Vocal organization & positive body language',
+              defaultPlayer: 4
+            }
+          ],
+          notes: rc.psych_notes || ''
+        }
+      ];
+
+      let html = '';
+      pillars.forEach(p => {
+        html += `
+          <div class="eval-pillar-box">
+            <div class="eval-pillar-title">
+              <span>${escapeHtml(p.title)}</span>
+              <span style="font-family:'DM Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1.5px; color:var(--teal); text-transform:uppercase;">${escapeHtml(p.tag)}</span>
+            </div>
+            <div style="display:flex; flex-direction:column;">
+        `;
+
+        p.skills.forEach(s => {
+          const coachVal = parseInt(rc[s.key] || 0, 10);
+          let playerVal = 0;
+          if (playerData) {
+            if (s.playerKey && playerData[s.playerKey]) playerVal = parseInt(playerData[s.playerKey], 10);
+            else if (s.altPlayerKey && playerData[s.altPlayerKey]) playerVal = parseInt(playerData[s.altPlayerKey], 10);
+          }
+          if (!playerVal) playerVal = s.defaultPlayer || 3;
+          const cVal = coachVal > 0 ? coachVal : 3;
+
+          const diff = cVal - playerVal;
+          let chipHtml = '';
+          if (diff === 0) {
+            chipHtml = `<span class="align-chip chip-aligned">✓ Aligned (${cVal}/5)</span>`;
+          } else if (diff > 0) {
+            chipHtml = `<span class="align-chip chip-coach-high">Coach +${diff} (C:${cVal} / You:${playerVal})</span>`;
+          } else {
+            chipHtml = `<span class="align-chip chip-player-high">Player +${Math.abs(diff)} (C:${cVal} / You:${playerVal})</span>`;
+          }
+
+          const coachPct = Math.round((cVal / 5) * 100);
+          const playerPct = Math.round((playerVal / 5) * 100);
+
+          html += `
+            <div class="eval-rating-row">
+              <div class="eval-skill-header">
+                <div>
+                  <div class="eval-skill-name">${escapeHtml(s.label)}</div>
+                  <div class="eval-skill-desc">${escapeHtml(s.desc)}</div>
+                </div>
+                ${chipHtml}
+              </div>
+              <div class="eval-scores-wrap">
+                <span style="font-family:'DM Mono',monospace; font-size:11px; font-weight:700; color:#22c55e; min-width:65px;">Coach ${cVal}/5 ★</span>
+                <div class="eval-bar-track">
+                  <div class="eval-bar-fill-player" style="width:${playerPct}%;"></div>
+                  <div class="eval-bar-fill-coach" style="width:${coachPct}%;"></div>
+                </div>
+                <span style="font-family:'DM Mono',monospace; font-size:11px; font-weight:700; color:var(--teal); min-width:55px; text-align:right;">You ${playerVal}/5</span>
+              </div>
+            </div>
+          `;
+        });
+
+        if (p.notes && p.notes.trim()) {
+          html += `
+            <div style="margin-top:12px; padding:10px 14px; background:var(--navy); border-radius:8px; border:1px solid var(--border); font-size:12px; color:var(--text); line-height:1.5;">
+              <strong style="color:var(--forest); font-family:'DM Mono',monospace; text-transform:uppercase; font-size:10px; display:block; margin-bottom:2px;">Coach Shawn's Observation:</strong>
+              ${escapeHtml(p.notes)}
+            </div>
+          `;
+        }
+
+        html += `
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
     }
 
     function renderRatingRow(key, playerData, coachRatings, comments) {
@@ -2475,13 +2943,17 @@
     let CURRENT_MOMENT_FILTER_CAT = 'ALL';
 
     function scrollToReplies() {
+      switchPortalTab('improvement');
       const banner = document.getElementById('new-reply-banner');
       if (banner && banner.dataset.seenKey) {
         try { localStorage.setItem(banner.dataset.seenKey, banner.dataset.latest); } catch(e) {}
         banner.style.display = 'none';
       }
       const section = document.getElementById('reflections-history-section');
-      if (section) section.scrollIntoView({ behavior:'smooth', block:'start' });
+      if (section) {
+        section.style.display = 'block';
+        section.scrollIntoView({ behavior:'smooth', block:'start' });
+      }
     }
 
     function escapeHtml(str) {
@@ -2846,8 +3318,9 @@
       }
 
       feed.innerHTML = filtered.map(m => {
-        const isMixed = /glow.*grow/i.test(m.outcome) || /mixed/i.test(m.outcome) || m.outcome === 'Neutral';
-        const isGlow = !isMixed && /glow/i.test(m.outcome);
+        const outcomeRaw = String(m.outcome || '').toLowerCase();
+        const isMixed = outcomeRaw.includes('glow') && outcomeRaw.includes('grow');
+        const isGlow = !isMixed && outcomeRaw.includes('glow');
         const z = (m.zone || 'M3').toUpperCase();
         const zClass = z.includes('D') ? 'zone-d3' : (z.includes('A') ? 'zone-a3' : 'zone-m3');
         const badgeClass = isGlow ? 'badge-green' : (isMixed ? 'badge-amber' : 'badge-rose');
@@ -3273,6 +3746,9 @@
           document.getElementById('stat-ast').innerText = data.stats.assists || 0;
           document.getElementById('stat-kp').innerText = data.stats.keyPasses || 0;
           document.getElementById('stat-duels').innerText = data.stats.duels || 0;
+
+          // Default to Player Improvement Center tab on every login
+          switchPortalTab('improvement');
 
           // Check if player already has an IDP submitted — use Sheet data (works on any device)
           checkIDPSubmitted(data);

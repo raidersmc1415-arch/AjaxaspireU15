@@ -333,6 +333,30 @@ function getCoachRatings(playerName) {
     const commentCols = {};
     Object.keys(cols).forEach(k => { commentCols[k] = cols[k] + '_Comment'; });
 
+    // 1. Check for saved Report Card in match_hub KV store
+    let reportCard = null;
+    let hasReportCard = false;
+    try {
+      const kv = getMatchHubKVMap();
+      const notes = kv['notes'] || {};
+      const cleanSlug = search.replace(/\s+/g, '_');
+      const candidates = [
+        'ajax_report_card_aspire_' + cleanSlug,
+        'ajax_report_card_ga_' + cleanSlug,
+        'ajax_report_card_aspire_' + search.split(' ')[0],
+        'ajax_report_card_ga_' + search.split(' ')[0]
+      ];
+      for (let c = 0; c < candidates.length; c++) {
+        if (notes[candidates[c]]) {
+          try {
+            reportCard = JSON.parse(notes[candidates[c]]);
+            hasReportCard = true;
+            break;
+          } catch(e) {}
+        }
+      }
+    } catch(e) {}
+
     for (let i = 1; i < data.length; i++) {
       if (normName(data[i][iName]) !== search) continue;
       const row = data[i];
@@ -349,11 +373,6 @@ function getCoachRatings(playerName) {
         comments[key] = cci !== -1 ? String(row[cci] || '').trim() : '';
       });
 
-      if (!hasRatings) {
-        return ContentService.createTextOutput(JSON.stringify({ found: false }))
-          .setMimeType(ContentService.MimeType.JSON);
-      }
-
       // Player's own ratings, parsed from IDP_Submitted JSON blob
       let playerRatings = null;
       const rawIDP = iIDP !== -1 ? row[iIDP] : null;
@@ -365,11 +384,50 @@ function getCoachRatings(playerName) {
         } catch(err) { /* ignore */ }
       }
 
+      // If report card exists, merge/override ratings
+      if (hasReportCard && reportCard) {
+        if (reportCard.tech_ball) {
+          ratings.t_touch = Number(reportCard.tech_ball) || ratings.t_touch;
+          ratings.t_dribbling = Number(reportCard.tech_ball) || ratings.t_dribbling;
+        }
+        if (reportCard.tech_decision) {
+          ratings.t_passing = Number(reportCard.tech_decision) || ratings.t_passing;
+          ratings.tac_support = Number(reportCard.tech_decision) || ratings.tac_support;
+          ratings.tac_attack = Number(reportCard.tech_decision) || ratings.tac_attack;
+        }
+        if (reportCard.tech_scanning) {
+          ratings.tac_restdef = Number(reportCard.tech_scanning) || ratings.tac_restdef;
+          ratings.tac_press = Number(reportCard.tech_scanning) || ratings.tac_press;
+        }
+        if (reportCard.phys_workrate) {
+          ratings.t_movement = Number(reportCard.phys_workrate) || ratings.t_movement;
+        }
+        if (reportCard.phys_duels) {
+          ratings.t_duels = Number(reportCard.phys_duels) || ratings.t_duels;
+          ratings.tac_defend = Number(reportCard.phys_duels) || ratings.tac_defend;
+        }
+        hasRatings = true;
+      }
+
       return ContentService.createTextOutput(JSON.stringify({
         found: true,
+        hasReportCard: hasReportCard,
+        reportCard: reportCard,
         ratings: ratings,
         comments: comments,
         playerRatings: playerRatings
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // If player not found in Player_IDP but report card exists
+    if (hasReportCard && reportCard) {
+      return ContentService.createTextOutput(JSON.stringify({
+        found: true,
+        hasReportCard: true,
+        reportCard: reportCard,
+        ratings: {},
+        comments: {},
+        playerRatings: null
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -1100,8 +1158,57 @@ function handleSaveMatchHubNote(payload) {
   if (payload.noteKey) {
     notes[payload.noteKey] = String(payload.noteText || '');
     setMatchHubKV('notes', notes);
+
+    // Auto-sync report card ratings back to Player_IDP sheet if this is a report card
+    if (payload.noteKey.indexOf('ajax_report_card_') === 0 && payload.noteText) {
+      try {
+        var rc = JSON.parse(payload.noteText);
+        syncReportCardToIDPSheet(payload.noteKey, rc);
+      } catch(e) {}
+    }
   }
   return jsonOut({ success: true });
+}
+
+function syncReportCardToIDPSheet(noteKey, rc) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Player_IDP');
+    if (!sheet) return;
+    var data = sheet.getDataRange().getValues();
+    var headers = data[0].map(function(h){ return h.toString().trim(); });
+    var iName = headers.indexOf('Player Name');
+    if (iName === -1) return;
+
+    // Extract slug from noteKey e.g. ajax_report_card_aspire_giselle_rosales
+    var parts = noteKey.split('_');
+    var slug = parts.slice(4).join(' '); // giselle rosales
+
+    for (var r = 1; r < data.length; r++) {
+      var pName = normName(data[r][iName]);
+      if (pName === slug || pName.indexOf(slug) !== -1 || slug.indexOf(pName) !== -1) {
+        // Map ratings to columns
+        var colMap = {
+          'Coach_T_Touch': rc.tech_ball,
+          'Coach_T_Dribbling': rc.tech_ball,
+          'Coach_T_Passing': rc.tech_decision,
+          'Coach_Tac_Support': rc.tech_decision,
+          'Coach_Tac_RestDef': rc.tech_scanning,
+          'Coach_Tac_Press': rc.tech_scanning,
+          'Coach_T_Movement': rc.phys_workrate,
+          'Coach_T_Duels': rc.phys_duels,
+          'Coach_Tac_Defend': rc.phys_duels
+        };
+        for (var colName in colMap) {
+          var ci = headers.indexOf(colName);
+          if (ci !== -1 && colMap[colName]) {
+            sheet.getRange(r + 1, ci + 1).setValue(Number(colMap[colName]) || 0);
+          }
+        }
+        break;
+      }
+    }
+  } catch(e) {}
 }
 
 function handleSaveMatchHubTakeaways(payload) {
