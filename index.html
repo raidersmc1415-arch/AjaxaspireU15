@@ -240,6 +240,43 @@
  .film-card-feedback { padding:18px 20px; }
  .film-card-feedback-title { font-size:13px; font-weight:700; color:var(--white); margin-bottom:10px; }
 
+ /* HYBRID FILM FEED & 2-FOR-1 LOOP */
+ .film-watch-check-box { padding:14px 20px; background:var(--navy); border-top:1px solid var(--border); display:flex; align-items:center; gap:12px; transition:background 0.15s; }
+ .film-watch-check-box:hover { background:var(--navy-mid); }
+ .film-watch-input { width:20px; height:20px; accent-color:var(--green); cursor:pointer; }
+ .film-watch-label { font-size:13px; font-weight:600; color:var(--text); cursor:pointer; user-select:none; }
+ .badge-green { background:rgba(21,128,61,0.12); color:var(--green); border:1px solid rgba(21,128,61,0.3); }
+ .badge-amber { background:rgba(217,119,6,0.12); color:#b45309; border:1px solid rgba(217,119,6,0.3); }
+ .badge-rose { background:rgba(225,29,72,0.12); color:#e11d48; border:1px solid rgba(225,29,72,0.3); }
+ .badge-teal { background:rgba(0,132,150,0.12); color:var(--teal); border:1px solid rgba(0,132,150,0.3); }
+
+ .film-log-container { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-top:24px; box-shadow:0 4px 18px rgba(0,0,0,0.04); }
+ .film-log-header { padding:18px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; cursor:pointer; }
+ .film-log-header:hover { background:rgba(0,0,0,0.015); }
+ .film-log-body { padding:20px 24px; }
+ .film-filter-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+ .film-filter-select { background:var(--navy); border:1px solid var(--border); color:var(--text); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; padding:7px 12px; border-radius:8px; outline:none; }
+ .film-chip-group { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+ .film-chip-btn { background:var(--navy); border:1px solid var(--border); color:var(--muted); font-size:12px; font-weight:600; padding:6px 12px; border-radius:9999px; cursor:pointer; transition:all 0.15s; }
+ .film-chip-btn:hover { color:var(--white); }
+ .film-chip-btn.active { background:var(--forest); color:#ffffff; border-color:var(--forest); font-weight:700; }
+ 
+ .moment-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 18px; margin-bottom:10px; transition:border-color 0.15s, transform 0.15s; }
+ .moment-card:hover { border-color:var(--teal); transform:translateY(-1px); }
+ .moment-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+ .moment-meta-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+ .moment-match-title { font-size:13px; font-weight:700; color:var(--white); }
+ .moment-time-pill { font-family:'DM Mono',monospace; font-size:11px; font-weight:600; color:var(--muted); background:var(--navy); padding:2px 7px; border-radius:4px; border:1px solid var(--border); }
+ .moment-zone-pill { font-family:'DM Mono',monospace; font-size:11px; font-weight:700; padding:2px 7px; border-radius:4px; }
+ .zone-d3 { background:rgba(225,29,72,0.12); color:#e11d48; border:1px solid rgba(225,29,72,0.25); }
+ .zone-m3 { background:rgba(14,165,233,0.12); color:#0284c7; border:1px solid rgba(14,165,233,0.25); }
+ .zone-a3 { background:rgba(245,158,11,0.12); color:#b45309; border:1px solid rgba(245,158,11,0.25); }
+ .moment-tag-badge { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; color:var(--white); background:var(--navy-mid); padding:2px 8px; border-radius:6px; border:1px solid var(--border); }
+ .moment-note-text { font-size:13px; color:var(--text); line-height:1.5; margin-top:6px; }
+
+ .loop-checklist-box { background:var(--navy); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; flex-direction:column; gap:8px; }
+ .loop-check-row { display:flex; align-items:center; gap:8px; }
+
  .phrase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px,1fr)); gap: 14px; }
  .phrase-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: all 0.2s; cursor: pointer; }
  .phrase-card:hover { border-color: var(--forest); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(17,22,19,0.06); }
@@ -2069,11 +2106,14 @@
         <!-- ═══════════════════════════════════════════════ -->
         <!-- INDIVIDUAL FILM ROOM                            -->
         <!-- ═══════════════════════════════════════════════ -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- HYBRID FILM ROOM: SPOTLIGHT + COMPLETE FEED     -->
+        <!-- ═══════════════════════════════════════════════ -->
         <div id="individual-film" style="margin-top:30px; display:none;">
           <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border);">
             <div>
               <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:4px;">From Coach Shawn</div>
-              <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white);">Your Coaching Playlist</div>
+              <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white);">Coach Shawn's Spotlight Film Study</div>
             </div>
             <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:rgba(58,191,184,0.1); color:var(--teal); border:1px solid rgba(58,191,184,0.25); padding:4px 10px; border-radius:2px;" id="film-count-badge">0 Videos</span>
           </div>
@@ -2081,17 +2121,75 @@
           <div id="individual-film-list"></div>
 
           <!-- Empty state -->
-          <div id="individual-film-empty" style="display:none; background:var(--card); border:1px solid var(--border); border-radius:4px; padding:32px; text-align:center;">
+          <div id="individual-film-empty" style="display:none; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:32px; text-align:center;">
             <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white); margin-bottom:8px;">No Videos Assigned Yet</div>
-            <div style="color:var(--muted); font-size:13px;">Check back after your next session. Coach Shawn will assign clips based on your IDP goals.</div>
+            <div style="color:var(--muted); font-size:13px;">Check back after our next session. You can review your complete match film log below!</div>
           </div>
         </div>
 
-        <!-- POST-MATCH REFLECTION -->
-        <div style="background:var(--card); border:1px solid var(--border); padding:25px; border-radius:8px; margin-top:30px;">
-          <h3 style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white); margin-bottom:15px;">Post-Match Reflection</h3>
-          <div class="input-group"><label>Submit your thoughts</label><textarea id="reflection-text" style="font-size:14px;" placeholder="What went well? What is your focus area for next practice?"></textarea></div>
-          <button class="btn" onclick="submitNetlifyReflection()">Submit Reflection</button>
+        <!-- MY COMPLETE MATCH FILM LOG -->
+        <div class="film-log-container" id="complete-film-log-section" style="display:none;">
+          <div class="film-log-header" onclick="toggleFilmLogAccordion()">
+            <div>
+              <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">Player Film Feed</div>
+              <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span>My Complete Match Film Log</span>
+                <span class="badge badge-teal" id="player-film-count-badge">0 Moments</span>
+                <span class="badge badge-green" id="player-glow-rate-badge">0% Glows</span>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline" style="padding:6px 14px; font-size:12px; height:auto;" id="film-log-toggle-btn">▼ Hide Film Log</button>
+          </div>
+          <div class="film-log-body" id="film-log-body-panel">
+            <div class="film-filter-bar">
+              <select class="film-filter-select" id="film-log-match-filter" onchange="onMomentFilterChanged()">
+                <option value="ALL">All Matches</option>
+              </select>
+              <select class="film-filter-select" id="film-log-cat-filter" onchange="onMomentFilterChanged()">
+                <option value="ALL">All Categories</option>
+                <option value="Turnover">Turnovers</option>
+                <option value="Key Pass">Passing / Key Passes</option>
+                <option value="Defensive Moment">Defending</option>
+                <option value="Offensive Moment">Offensive Moments</option>
+              </select>
+              <div class="film-chip-group">
+                <button type="button" class="film-chip-btn active" id="chip-out-all" onclick="setMomentOutcomeFilter('ALL')">All</button>
+                <button type="button" class="film-chip-btn" id="chip-out-glow" onclick="setMomentOutcomeFilter('Glow')">🟢 Glows</button>
+                <button type="button" class="film-chip-btn" id="chip-out-grow" onclick="setMomentOutcomeFilter('Grow')">🔴 Grows</button>
+              </div>
+            </div>
+            <div id="player-film-moments-feed"></div>
+          </div>
+        </div>
+
+        <!-- 2-FOR-1 CLOSED LOOP: MATCH FILM TAKEAWAY -->
+        <div style="background:var(--card); border:1px solid var(--border); padding:25px; border-radius:12px; margin-top:30px;">
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">2-for-1 Learning Loop</div>
+          <h3 style="font-family:'Bebas Neue',cursive; font-size:26px; color:var(--white); margin-bottom:6px;">Match Film Takeaway &amp; Learning Reflection</h3>
+          <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:16px;">
+            Watch your assigned moments above, then synthesize your #1 takeaway and how you will execute it at practice this week. Coach Shawn replies directly below.
+          </p>
+
+          <div class="loop-checklist-box">
+            <div class="loop-check-row" id="req-watch-status">
+              <span style="color:var(--muted);">○</span> <span>Watch all assigned spotlight clips</span>
+            </div>
+            <div class="loop-check-row" id="req-text-status">
+              <span style="color:var(--muted);">○</span> <span>Write your takeaway reflection (min 15 characters)</span>
+            </div>
+          </div>
+
+          <div class="input-group" style="margin-bottom:12px;">
+            <label style="font-weight:700;">My Takeaway &amp; Training Focus</label>
+            <textarea id="film-takeaway-textarea" oninput="updateTakeawayRequirements()" style="font-size:14px; min-height:95px;" placeholder="What was your biggest takeaway from watching these moments? What will you do differently or repeat at training this week?"></textarea>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div id="film-takeaway-status" style="font-size:12px; color:var(--muted);">
+              Write at least 15 characters to activate submission.
+            </div>
+            <button class="btn" id="btn-submit-takeaway" onclick="submitFilmTakeawayReflection()" disabled style="opacity:0.55; cursor:not-allowed;">Submit Match Film Takeaway →</button>
+          </div>
         </div>
 
         <!-- MY REFLECTIONS + COACH REPLIES -->
@@ -2330,8 +2428,51 @@
     }
 
     function normNameJS(s) {
-      return String(s||'').replace(/,/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
+      return String(s || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/,/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
     }
+
+    const ASPIRE_ROSTER = [
+      { jersey: 1, name: "Sola Alberto" },
+      { jersey: 2, name: "Giselle Rosales" },
+      { jersey: 4, name: "Arianna Zamora" },
+      { jersey: 5, name: "Grace Krimmel" },
+      { jersey: 7, name: "MacKenzie Castro" },
+      { jersey: 8, name: "Scarlett Freitas" },
+      { jersey: 9, name: "Camila Deleon" },
+      { jersey: 14, name: "Kendall Blair" },
+      { jersey: 15, name: "Alessandra Fernandez" },
+      { jersey: 19, name: "Amy Godínez Vargas" },
+      { jersey: 23, name: "Sophia Culver" },
+      { jersey: 24, name: "Evelyn Lopez" },
+      { jersey: 25, name: "Ella Simmons" },
+      { jersey: 34, name: "Nairobi Mcgadney" },
+      { jersey: 36, name: "Alex Marigorda" },
+      { jersey: 37, name: "Brooklyn Brewer" },
+      { jersey: 50, name: "Alexa Chipres" },
+      { jersey: 88, name: "Sonia Vera" },
+      { jersey: 89, name: "Carlee Gowan" }
+    ];
+
+    function getPlayerJersey(playerName) {
+      const norm = normNameJS(playerName);
+      const pFirst = norm.split(' ')[0];
+      const found = ASPIRE_ROSTER.find(p => {
+        const pNorm = normNameJS(p.name);
+        return pNorm === norm || pNorm.startsWith(norm) || norm.startsWith(pNorm) || (pNorm.split(' ')[0] === pFirst && pFirst.length >= 3);
+      });
+      return found ? found.jersey : null;
+    }
+
+    let CURRENT_PLAYER_MOMENTS = [];
+    let CURRENT_MOMENT_FILTER_MATCH = 'ALL';
+    let CURRENT_MOMENT_FILTER_OUTCOME = 'ALL';
+    let CURRENT_MOMENT_FILTER_CAT = 'ALL';
 
     function scrollToReplies() {
       const banner = document.getElementById('new-reply-banner');
@@ -2358,7 +2499,7 @@
       "When we lost the ball, how fast did you react? Did we hunt it back within 5 seconds?"
     ];
     function setRotatingPrompt() {
-      const ta = document.getElementById('reflection-text');
+      const ta = document.getElementById('reflection-text') || document.getElementById('film-takeaway-textarea');
       if (!ta) return;
       const idx = Math.floor(Math.random() * REFLECTION_PROMPTS.length);
       ta.placeholder = REFLECTION_PROMPTS[idx];
@@ -2378,27 +2519,31 @@
         const data = await res.json();
         const videos = data.videos || [];
 
-        badge.textContent = `${videos.length} Video${videos.length !== 1 ? 's' : ''}`;
+        badge.textContent = `${videos.length} Spotlight Video${videos.length !== 1 ? 's' : ''}`;
 
         if (!videos.length) {
           list.innerHTML = '';
           empty.style.display = 'block';
-          return;
+        } else {
+          empty.style.display = 'none';
+          list.innerHTML = videos.map((v, i) => buildFilmCard(v, i, playerName)).join('');
         }
-
-        empty.style.display = 'none';
-        list.innerHTML = videos.map((v, i) => buildFilmCard(v, i, playerName)).join('');
 
       } catch(err) {
         list.innerHTML = '';
         empty.style.display = 'block';
       }
+
+      // Load Complete Match Film Log for player
+      const jerseyNum = getPlayerJersey(playerName);
+      await loadPlayerFilmMoments(playerName, jerseyNum);
+
+      // Initialize 2-for-1 Loop requirement statuses
+      updateTakeawayRequirements();
     }
 
     function buildFilmCard(video, index, playerName) {
       const info = classifyVideo(video.url);
-      // Embeddable providers get the inline iframe; the rest get a
-      // "Watch Clip" card that opens the source in a new tab.
       const playerHTML = info.embeddable
         ? `<div class="film-card-video">
              <div class="yt-embed" role="button" tabindex="0" aria-label="Play clip" data-embed="${info.embedUrl}">
@@ -2414,33 +2559,300 @@
              </div>
              <a class="film-card-watch-btn" href="${video.url}" target="_blank" rel="noopener">▶ Watch Clip</a>
            </div>`;
+
+      const clipId = `clip_${index}_${(video.title || '').replace(/[^a-zA-Z0-9]/g, '_')}`;
+      const isWatched = localStorage.getItem(`ajax_watched_${normNameJS(playerName)}_${clipId}`) === '1';
+
       return `
-        <div class="film-card">
-          <div class="film-card-header">
-            <div class="film-card-num">Video ${index + 1}</div>
-            <div class="film-card-title">${video.title}</div>
+        <div class="film-card" id="card-${clipId}">
+          <div class="film-card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div>
+              <div class="film-card-num">Assigned Clip ${index + 1}</div>
+              <div class="film-card-title">${escapeHtml(video.title || 'Spotlight Clip')}</div>
+            </div>
+            <span class="badge ${isWatched ? 'badge-green' : 'badge-amber'}" id="badge-${clipId}">
+              ${isWatched ? '✓ Watched' : '● Needs Review'}
+            </span>
           </div>
           ${video.coach_note ? `
           <div class="film-card-note">
-            <div class="film-card-note-label">Coach Shawn</div>
-            <div class="film-card-note-text">${video.coach_note}</div>
+            <div class="film-card-note-label">Coach Note</div>
+            <div class="film-card-note-text">${escapeHtml(video.coach_note)}</div>
           </div>` : ''}
           ${playerHTML}
-          <div class="film-card-feedback">
-            <div class="film-card-feedback-title">Your Response</div>
-            <div class="input-group" style="margin-bottom:10px;">
-              <textarea id="ifb-${index}" placeholder="What did you take from this? What questions do you have for Coach Shawn?" style="min-height:80px;"></textarea>
-            </div>
-            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-              <button class="btn" style="padding:10px 20px; font-size:13px;"
-                data-index="${index}"
-                data-player="${playerName}"
-                data-title="${video.title}"
-                onclick="submitIndividualFilmFeedback(this)">Submit Response →</button>
-              <span id="ifb-msg-${index}" style="display:none; color:var(--teal); font-size:13px;">✓ Sent to Coach Shawn</span>
-            </div>
+          <div class="film-watch-check-box">
+            <input type="checkbox" id="chk-${clipId}" class="film-watch-input" ${isWatched ? 'checked' : ''} onchange="onClipWatchToggled('${escapeHtml(playerName)}', '${clipId}', this.checked)">
+            <label for="chk-${clipId}" class="film-watch-label">
+              ☑ I watched this clip &amp; reviewed Coach Shawn's note
+            </label>
           </div>
         </div>`;
+    }
+
+    function onClipWatchToggled(playerName, clipId, isChecked) {
+      try {
+        localStorage.setItem(`ajax_watched_${normNameJS(playerName)}_${clipId}`, isChecked ? '1' : '0');
+      } catch(e) {}
+      const badge = document.getElementById(`badge-${clipId}`);
+      if (badge) {
+        badge.className = `badge ${isChecked ? 'badge-green' : 'badge-amber'}`;
+        badge.textContent = isChecked ? '✓ Watched' : '● Needs Review';
+      }
+      updateTakeawayRequirements();
+    }
+
+    function updateTakeawayRequirements() {
+      const text = (document.getElementById('film-takeaway-textarea')?.value || document.getElementById('reflection-text')?.value || '').trim();
+      const checkboxes = document.querySelectorAll('.film-watch-input');
+      let totalWatched = 0;
+      checkboxes.forEach(cb => { if (cb.checked) totalWatched++; });
+      const totalClips = checkboxes.length;
+
+      const allWatched = (totalClips === 0 || totalWatched >= totalClips);
+      const textValid = text.length >= 15;
+
+      const reqWatchEl = document.getElementById('req-watch-status');
+      const reqTextEl = document.getElementById('req-text-status');
+      const submitBtn = document.getElementById('btn-submit-takeaway');
+      const statusMsg = document.getElementById('film-takeaway-status');
+
+      if (reqWatchEl) {
+        if (totalClips === 0) {
+          reqWatchEl.innerHTML = '<span style="color:var(--green-lt); font-weight:bold;">✓</span> <span style="color:var(--text);">No spotlight clips assigned — complete film feed reviewed</span>';
+        } else if (allWatched) {
+          reqWatchEl.innerHTML = `<span style="color:var(--green-lt); font-weight:bold;">✓</span> <span style="color:var(--text);">All spotlight clips marked watched (${totalWatched}/${totalClips})</span>`;
+        } else {
+          reqWatchEl.innerHTML = `<span style="color:var(--gold-bright); font-weight:bold;">○</span> <span style="color:var(--muted);">Watch and check off all clips (${totalWatched}/${totalClips} watched)</span>`;
+        }
+      }
+
+      if (reqTextEl) {
+        if (textValid) {
+          reqTextEl.innerHTML = `<span style="color:var(--green-lt); font-weight:bold;">✓</span> <span style="color:var(--text);">Takeaway synthesized (${text.length} characters)</span>`;
+        } else {
+          reqTextEl.innerHTML = `<span style="color:var(--gold-bright); font-weight:bold;">○</span> <span style="color:var(--muted);">Write your #1 takeaway (min 15 characters, currently ${text.length})</span>`;
+        }
+      }
+
+      const ready = allWatched && textValid;
+      if (submitBtn) {
+        submitBtn.disabled = !ready;
+        submitBtn.style.opacity = ready ? '1' : '0.55';
+        submitBtn.style.cursor = ready ? 'pointer' : 'not-allowed';
+        submitBtn.style.background = ready ? 'linear-gradient(135deg, #15803D 0%, #16A34A 100%)' : 'var(--forest)';
+        submitBtn.style.color = ready ? '#ffffff' : 'rgba(255,255,255,0.7)';
+      }
+
+      if (statusMsg) {
+        if (ready) {
+          statusMsg.innerHTML = '<span style="color:var(--green-lt); font-weight:700;">✓ Ready to submit! Tap below to send your takeaway to Coach Shawn.</span>';
+        } else if (!allWatched) {
+          statusMsg.innerHTML = '<span style="color:#e05555; font-weight:600;">⚠️ Please check off each assigned clip above after watching.</span>';
+        } else {
+          statusMsg.innerHTML = `<span style="color:var(--muted);">Write at least 15 characters describing what you learned (${text.length}/15).</span>`;
+        }
+      }
+    }
+
+    async function submitFilmTakeawayReflection() {
+      const welcomeText = document.getElementById('portal-welcome')?.innerText || '';
+      const name = CURRENT_PLAYER_NAME || welcomeText.replace("Welcome, ", "").replace("!", "").replace(/,/g, " ").trim();
+      const ta = document.getElementById('film-takeaway-textarea') || document.getElementById('reflection-text');
+      const text = (ta?.value || '').trim();
+      if (!text || text.length < 15) {
+        alert("Please write at least 15 characters for your takeaway before submitting.");
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-takeaway');
+      const originalText = btn ? btn.innerHTML : 'Submit Takeaway';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Sending to Coach Shawn...";
+      }
+
+      try {
+        const payload = {
+          name: name,
+          reflection: `[MATCH FILM TAKEAWAY]\n${text}`
+        };
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        
+        if (ta) ta.value = '';
+        updateTakeawayRequirements();
+
+        const statusMsg = document.getElementById('film-takeaway-status');
+        if (statusMsg) {
+          statusMsg.innerHTML = '<span style="color:var(--green-lt); font-weight:700; font-size:14px;">🎉 Takeaway submitted to Coach Shawn! You will see his reply right here in your portal.</span>';
+        }
+
+        loadReflections(name);
+
+      } catch(err) {
+        alert("Error submitting takeaway. Please check your internet connection and try again.");
+      } finally {
+        if (btn) {
+          btn.innerHTML = originalText;
+          updateTakeawayRequirements();
+        }
+      }
+    }
+
+    // Complete Match Film Log logic
+    async function loadPlayerFilmMoments(playerName, jerseyNum) {
+      let moments = [];
+      try {
+        const res = await fetch(`${API_URL}?action=playerFilmMoments&name=${encodeURIComponent(playerName)}`);
+        const data = await res.json();
+        if (data && Array.isArray(data.moments) && data.moments.length > 0) {
+          moments = data.moments;
+        }
+      } catch(e) {}
+
+      // Fallback: load static canonical moments if network or KV empty
+      if (!moments.length) {
+        if (!window.CANONICAL_ASPIRE_MOMENTS && typeof fetch !== 'undefined') {
+          try {
+            const localRes = await fetch('aspire-canonical-moments.json');
+            window.CANONICAL_ASPIRE_MOMENTS = await localRes.json();
+          } catch(e) {}
+        }
+        if (window.CANONICAL_ASPIRE_MOMENTS) {
+          moments = filterCanonicalMomentsForPlayer(playerName, jerseyNum);
+        }
+      }
+
+      CURRENT_PLAYER_MOMENTS = moments;
+      const sec = document.getElementById('complete-film-log-section');
+      if (sec) {
+        sec.style.display = moments.length > 0 ? 'block' : 'none';
+      }
+      renderPlayerFilmLog();
+    }
+
+    function filterCanonicalMomentsForPlayer(playerName, jerseyNum) {
+      const norm = normNameJS(playerName);
+      const pFirst = norm.split(' ')[0];
+      const jNum = jerseyNum !== null && jerseyNum !== undefined ? parseInt(jerseyNum, 10) : getPlayerJersey(playerName);
+
+      const list = window.CANONICAL_ASPIRE_MOMENTS || [];
+      return list.filter(m => {
+        const jList = Array.isArray(m.j) ? m.j : (Array.isArray(m.jerseys) ? m.jerseys : []);
+        if (jNum && jList.includes(jNum)) return true;
+        const raw = String(m.playersRaw || m.players || '').toLowerCase();
+        if (jNum && raw.includes('#' + jNum)) return true;
+        if (raw.includes(norm)) return true;
+        const note = String(m.n || m.note || '').toLowerCase();
+        if (pFirst.length >= 4 && note.includes(pFirst)) return true;
+        return false;
+      }).map(m => ({
+        match: m.m || m.match || 'Match',
+        half: m.h || m.half || 'H1',
+        time: m.t || m.time || '00:00',
+        zone: m.z || m.zone || 'M3',
+        outcome: m.o || m.outcome || 'Glow',
+        tag: m.tag || 'Action',
+        category: m.cat || m.category || 'General',
+        note: m.n || m.note || ''
+      }));
+    }
+
+    function toggleFilmLogAccordion() {
+      const panel = document.getElementById('film-log-body-panel');
+      const btn = document.getElementById('film-log-toggle-btn');
+      if (!panel) return;
+      const isHidden = panel.style.display === 'none';
+      panel.style.display = isHidden ? 'block' : 'none';
+      if (btn) btn.textContent = isHidden ? '▼ Hide Film Log' : '▶ Show Film Log';
+    }
+
+    function setMomentOutcomeFilter(outcome) {
+      CURRENT_MOMENT_FILTER_OUTCOME = outcome;
+      ['all', 'glow', 'grow'].forEach(k => {
+        const btn = document.getElementById(`chip-out-${k}`);
+        if (!btn) return;
+        const active = (k === outcome.toLowerCase());
+        btn.classList.toggle('active', active);
+      });
+      renderPlayerFilmLog();
+    }
+
+    function onMomentFilterChanged() {
+      CURRENT_MOMENT_FILTER_MATCH = document.getElementById('film-log-match-filter')?.value || 'ALL';
+      CURRENT_MOMENT_FILTER_CAT = document.getElementById('film-log-cat-filter')?.value || 'ALL';
+      renderPlayerFilmLog();
+    }
+
+    function renderPlayerFilmLog() {
+      const feed = document.getElementById('player-film-moments-feed');
+      const countBadge = document.getElementById('player-film-count-badge');
+      const glowRateBadge = document.getElementById('player-glow-rate-badge');
+      const matchSelect = document.getElementById('film-log-match-filter');
+      if (!feed) return;
+
+      const totalAll = CURRENT_PLAYER_MOMENTS.length;
+      const glowsAll = CURRENT_PLAYER_MOMENTS.filter(m => /glow/i.test(m.outcome)).length;
+      const growsAll = CURRENT_PLAYER_MOMENTS.filter(m => /grow/i.test(m.outcome)).length;
+      const glowPct = totalAll > 0 ? Math.round((glowsAll / (glowsAll + growsAll || 1)) * 100) : 0;
+
+      if (countBadge) countBadge.textContent = `${totalAll} Moment${totalAll !== 1 ? 's' : ''}`;
+      if (glowRateBadge) glowRateBadge.textContent = `${glowPct}% Glows (+${glowsAll} / -${growsAll})`;
+
+      // Populate match select options if needed
+      if (matchSelect && matchSelect.options.length <= 1) {
+        const matches = Array.from(new Set(CURRENT_PLAYER_MOMENTS.map(m => m.match))).filter(Boolean);
+        matches.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = m;
+          matchSelect.appendChild(opt);
+        });
+      }
+
+      // Filter moments
+      const filtered = CURRENT_PLAYER_MOMENTS.filter(m => {
+        if (CURRENT_MOMENT_FILTER_MATCH !== 'ALL' && m.match !== CURRENT_MOMENT_FILTER_MATCH) return false;
+        if (CURRENT_MOMENT_FILTER_OUTCOME !== 'ALL') {
+          const isGlow = /glow/i.test(m.outcome);
+          if (CURRENT_MOMENT_FILTER_OUTCOME === 'Glow' && !isGlow) return false;
+          if (CURRENT_MOMENT_FILTER_OUTCOME === 'Grow' && isGlow) return false;
+        }
+        if (CURRENT_MOMENT_FILTER_CAT !== 'ALL') {
+          const cat = String(m.category || '').toLowerCase();
+          const target = CURRENT_MOMENT_FILTER_CAT.toLowerCase();
+          if (!cat.includes(target) && !String(m.tag || '').toLowerCase().includes(target)) return false;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        feed.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center; padding:24px 0;">No film moments match the selected filter.</div>';
+        return;
+      }
+
+      feed.innerHTML = filtered.map(m => {
+        const isGlow = /glow/i.test(m.outcome);
+        const z = (m.zone || 'M3').toUpperCase();
+        const zClass = z.includes('D') ? 'zone-d3' : (z.includes('A') ? 'zone-a3' : 'zone-m3');
+        return `
+          <div class="moment-card">
+            <div class="moment-header">
+              <div class="moment-meta-left">
+                <span class="moment-match-title">${escapeHtml(m.match)}</span>
+                <span class="moment-time-pill">${escapeHtml(m.half)} ${escapeHtml(m.time)}</span>
+                <span class="moment-zone-pill ${zClass}">${escapeHtml(z)}</span>
+                <span class="moment-tag-badge">${escapeHtml(m.tag || 'Action')}</span>
+              </div>
+              <span class="badge ${isGlow ? 'badge-green' : 'badge-rose'}">
+                ${isGlow ? '🟢 Glow' : '🔴 Grow'}
+              </span>
+            </div>
+            ${m.note ? `<div class="moment-note-text">${escapeHtml(m.note)}</div>` : ''}
+          </div>`;
+      }).join('');
     }
 
     // Detect the video source and return either an embed URL (for
@@ -3132,15 +3544,20 @@
     }
 
     async function submitNetlifyReflection() {
-      const text = document.getElementById('reflection-text').value.trim();
-      const welcomeText = document.getElementById('portal-welcome').innerText;
-      const name = CURRENT_PLAYER_NAME || welcomeText.replace("Welcome, ", "").replace("!", "").replace(/,/g, " ");
+      if (document.getElementById('film-takeaway-textarea')) {
+        return submitFilmTakeawayReflection();
+      }
+      const ta = document.getElementById('reflection-text');
+      const text = (ta ? ta.value : '').trim();
+      const welcomeText = document.getElementById('portal-welcome')?.innerText || '';
+      const name = CURRENT_PLAYER_NAME || welcomeText.replace("Welcome, ", "").replace("!", "").replace(/,/g, " ").trim();
       if(!text) { alert("Please type a reflection first."); return; }
 
       try {
         await fetch(API_URL, { method: 'POST', body: JSON.stringify({ name: name, reflection: text }) });
         alert("Reflection Submitted Successfully! Coach Shawn will review it.");
-        document.getElementById('reflection-text').value = "";
+        if (ta) ta.value = "";
+        loadReflections(name);
       } catch(err) { alert("There was an error submitting your reflection."); }
     }
 

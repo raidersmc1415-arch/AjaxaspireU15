@@ -192,6 +192,7 @@ function doGet(e) {
   if (e.parameter.action === 'matchHub')             return getMatchHubData(e.parameter.pin);
   if (e.parameter.action === 'syncMatchData')        return handleSyncMatchData(e.parameter.pin);
   if (e.parameter.action === 'healTeamAggregate')    return jsonOut(healTeamAggregate());
+  if (e.parameter.action === 'playerFilmMoments')   return getPlayerFilmMoments(e.parameter.name);
   return handlePlayerLogin(e);
 }
 
@@ -204,6 +205,7 @@ function doPost(e) {
     if (payload.action === 'saveMatchHubNote')      return handleSaveMatchHubNote(payload);
     if (payload.action === 'saveMatchHubTakeaways') return handleSaveMatchHubTakeaways(payload);
     if (payload.action === 'saveMatchHubData')      return handleSaveMatchHubData(payload);
+    if (payload.action === 'saveFilmMoments')       return handleSaveFilmMoments(payload);
     if (payload.action === 'updateSeasonStats')     return handleUpdateSeasonStats(payload);
 
     // IDP submission — write JSON blob into Player_IDP column M (IDP_Submitted)
@@ -257,6 +259,7 @@ function handlePlayerLogin(e) {
   const headers = data[0].map(h => h.toString().trim());
 
   const iName=headers.indexOf('Player Name'), iPIN=headers.indexOf('PIN'),
+        iNum=(headers.indexOf('Jersey #') !== -1 ? headers.indexOf('Jersey #') : headers.indexOf('Number')),
         iNotes=headers.indexOf('Coach Notes'), iGames=headers.indexOf('Games Played'),
         iMins=headers.indexOf('Minutes Played'), iAvg=headers.indexOf('Average Minutes'),
         iShots=headers.indexOf('Shots On Target'), iGoals=headers.indexOf('Goals'),
@@ -286,6 +289,7 @@ function handlePlayerLogin(e) {
       return ContentService.createTextOutput(JSON.stringify({
         success: true,
         name: rowName,
+        jersey: (iNum !== -1 ? data[i][iNum] : null),
         notes: data[i][iNotes] || '',
         idpSubmitted: idpSubmitted,
         idpData: idpData,
@@ -1296,7 +1300,90 @@ function handleUpdateSeasonStats(payload) {
   }
 }
 
-// Update the team aggregate summary row in Raw_Match_Stats when a match is committed
+// --- PART 16: DIRECT FILM MOMENTS CLOUD SYNC & PLAYER PORTAL FEED ---
+
+function handleSaveFilmMoments(payload) {
+  try {
+    if (!isValidCoachPin(payload.pin)) {
+      return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
+    }
+    var moments = Array.isArray(payload.moments) ? payload.moments : [];
+    if (!moments.length) {
+      return jsonOut({ success: false, message: 'No moments provided' });
+    }
+    var kv = getMatchHubKVMap();
+    var existing = kv['all_film_moments'] || [];
+    
+    // Merge or replace by match or match+time
+    var targetMatch = payload.match || (moments[0] && moments[0].match);
+    var filtered = existing.filter(function(m) {
+      return targetMatch ? m.match !== targetMatch : true;
+    });
+    var merged = filtered.concat(moments);
+    setMatchHubKV('all_film_moments', merged);
+    
+    return jsonOut({ success: true, count: merged.length, match: targetMatch });
+  } catch(err) {
+    return jsonOut({ success: false, message: err.toString() });
+  }
+}
+
+function getPlayerFilmMoments(playerName) {
+  try {
+    var search = normName(playerName);
+    var jerseyNum = null;
+    
+    // Look up jersey in Player_IDP
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var idpSheet = ss.getSheetByName('Player_IDP');
+    if (idpSheet) {
+      var idpData = idpSheet.getDataRange().getValues();
+      var headers = idpData[0].map(function(h){ return h.toString().trim(); });
+      var iName = headers.indexOf('Player Name');
+      var iNum = headers.indexOf('Jersey #') !== -1 ? headers.indexOf('Jersey #') : headers.indexOf('Number');
+      if (iName !== -1 && iNum !== -1) {
+        for (var i = 1; i < idpData.length; i++) {
+          if (normName(idpData[i][iName]) === search) {
+            var val = parseInt(idpData[i][iNum], 10);
+            if (!isNaN(val)) jerseyNum = val;
+            break;
+          }
+        }
+      }
+    }
+
+    var kv = getMatchHubKVMap();
+    var allMoments = kv['all_film_moments'] || [];
+    var playerMoments = [];
+
+    for (var m = 0; m < allMoments.length; m++) {
+      var item = allMoments[m];
+      var rawP = String(item.playersRaw || item.players || '').toLowerCase();
+      var jList = Array.isArray(item.jerseys) ? item.jerseys : [];
+      var matches = false;
+
+      if (rawP.indexOf(search) !== -1) matches = true;
+      if (!matches && jerseyNum !== null) {
+        if (jList.indexOf(jerseyNum) !== -1 || rawP.indexOf('#' + jerseyNum) !== -1) {
+          matches = true;
+        }
+      }
+      if (matches) {
+        playerMoments.push(item);
+      }
+    }
+
+    return jsonOut({
+      success: true,
+      playerName: playerName,
+      jersey: jerseyNum,
+      moments: playerMoments
+    });
+  } catch(err) {
+    return jsonOut({ success: false, moments: [], error: err.toString() });
+  }
+}
+
 function updateTeamAggregateInRawMatchStats(matchSummary, matchTotals) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var rawSheet = ss.getSheetByName('Raw_Match_Stats');
