@@ -3002,10 +3002,11 @@
 
     function getPlayerJersey(playerName) {
       const norm = normNameJS(playerName);
+      if (!norm) return null;
       const pFirst = norm.split(' ')[0];
       const found = ASPIRE_ROSTER.find(p => {
         const pNorm = normNameJS(p.name);
-        return pNorm === norm || pNorm.startsWith(norm) || norm.startsWith(pNorm) || (pNorm.split(' ')[0] === pFirst && pFirst.length >= 3);
+        return pNorm === norm || (pNorm.split(' ')[0] === pFirst && pFirst.length >= 3);
       });
       return found ? found.jersey : null;
     }
@@ -3297,15 +3298,22 @@
       if (pFirst === 'carlee') aliases.push('carly');
       if (pFirst === 'mackenzie') aliases.push('mack');
       if (pFirst === 'sophia') aliases.push('sophie');
-      if (pFirst === 'alessandra') aliases.push('ale');
+      if (pFirst === 'alessandra') aliases.push('ally', 'allie');
+      if (pFirst === 'arianna') aliases.push('ari');
+      if (pFirst === 'grace') aliases.push('ellie');
 
       const jList = Array.isArray(m.j) ? m.j : (Array.isArray(m.jerseys) ? m.jerseys : []);
       if (jNum && jList.includes(jNum)) return true;
       const raw = normNameJS(Array.isArray(m.players) ? m.players.join(' ') : (m.playersRaw || m.players || ''));
       const rawOrig = String(m.playersRaw || (Array.isArray(m.players) ? m.players.join(' ') : '')).toLowerCase();
-      if (jNum && rawOrig.includes('#' + jNum)) return true;
+      if (jNum && new RegExp(`#\\s*${jNum}(?!\\d)`).test(rawOrig)) return true;
       const note = normNameJS(m.note !== undefined ? m.note : (m.notes !== undefined ? m.notes : (m.n || '')));
-      if (aliases.some(a => a.length >= 3 && (raw.includes(a) || note.includes(a)))) return true;
+      for (const a of aliases) {
+        if (!a || a.length < 3) continue;
+        const escaped = a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const wordRegex = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, 'i');
+        if (wordRegex.test(raw) || wordRegex.test(note)) return true;
+      }
       return false;
     }
 

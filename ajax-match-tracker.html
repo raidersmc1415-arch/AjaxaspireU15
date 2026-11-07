@@ -3792,12 +3792,15 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         showToast('⚠️ Coach Token required to sync to Google Sheets.');
         return;
       }
+      const matchDateKey = (typeof matchDate !== 'undefined' && matchDate) ? matchDate : new Date().toISOString().slice(0, 10);
+      const matchId = `${targetTeam}_${opponentName.replace(/[^a-zA-Z0-9]/g, '_')}_${matchDateKey}`;
       const matchTotals = {
         shots: matchEvents.filter(e => e.type === 'shot' || e.type === 'sot' || e.type === 'shot_outside_18' || e.type === 'goal').length,
         sot: matchEvents.filter(e => e.type === 'sot' || e.type === 'goal' || (e.type === 'shot_outside_18' && e.onTarget)).length,
         soff: matchEvents.filter(e => (e.type === 'shot' || (e.type === 'shot_outside_18' && !e.onTarget))).length
       };
       const matchSummary = {
+        matchId: matchId,
         date: new Date().toISOString(),
         team: targetTeam,
         opponent: opponentName,
@@ -3876,6 +3879,7 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         body: JSON.stringify({
           action: 'updateSeasonStats',
           pin: coachPin,
+          matchId: matchId,
           isIncremental: true,
           playerStats: statsPayload,
           matchSummary: matchSummary,
@@ -3883,9 +3887,18 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         })
       }).then(r => r.json()).then(res => {
         if (res && res.success) {
-          showToast(`☁️ Google Sheets (Player_IDP) synced: ${res.updated || 0} players updated!`);
+          if (res.alreadyCommitted) {
+            showToast(`ℹ️ Match (${matchId}) was already committed to Google Sheets.`);
+          } else {
+            showToast(`☁️ Google Sheets (Player_IDP) synced: ${res.updated || 0} players updated!`);
+          }
+          if (Array.isArray(res.unmatchedPlayers) && res.unmatchedPlayers.length > 0) {
+            showToast(`⚠️ Unmatched player names skipped (verify in Player_IDP): ${res.unmatchedPlayers.join(', ')}`);
+          }
           if (document.getElementById('commitSheetStatus')) {
-            document.getElementById('commitSheetStatus').textContent = `Synced (${res.updated || 0} rows) ☁️`;
+            document.getElementById('commitSheetStatus').textContent = res.alreadyCommitted
+              ? `Already Committed ☁️`
+              : `Synced (${res.updated || 0} rows) ☁️`;
           }
         }
       }).catch(err => {

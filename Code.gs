@@ -460,31 +460,6 @@ function getCoachRatings(playerName, playerPin) {
         } catch(err) { /* ignore */ }
       }
 
-      // If report card exists, merge/override ratings
-      if (hasReportCard && reportCard) {
-        if (reportCard.tech_ball) {
-          ratings.t_touch = Number(reportCard.tech_ball) || ratings.t_touch;
-          ratings.t_dribbling = Number(reportCard.tech_ball) || ratings.t_dribbling;
-        }
-        if (reportCard.tech_decision) {
-          ratings.t_passing = Number(reportCard.tech_decision) || ratings.t_passing;
-          ratings.tac_support = Number(reportCard.tech_decision) || ratings.tac_support;
-          ratings.tac_attack = Number(reportCard.tech_decision) || ratings.tac_attack;
-        }
-        if (reportCard.tech_scanning) {
-          ratings.tac_restdef = Number(reportCard.tech_scanning) || ratings.tac_restdef;
-          ratings.tac_press = Number(reportCard.tech_scanning) || ratings.tac_press;
-        }
-        if (reportCard.phys_workrate) {
-          ratings.t_movement = Number(reportCard.phys_workrate) || ratings.t_movement;
-        }
-        if (reportCard.phys_duels) {
-          ratings.t_duels = Number(reportCard.phys_duels) || ratings.t_duels;
-          ratings.tac_defend = Number(reportCard.phys_duels) || ratings.tac_defend;
-        }
-        hasRatings = true;
-      }
-
       return ContentService.createTextOutput(JSON.stringify({
         found: true,
         hasReportCard: hasReportCard,
@@ -1236,57 +1211,8 @@ function handleSaveMatchHubNote(payload) {
   if (payload.noteKey) {
     notes[payload.noteKey] = String(payload.noteText || '');
     setMatchHubKV('notes', notes);
-
-    // Auto-sync report card ratings back to Player_IDP sheet if this is a report card
-    if (payload.noteKey.indexOf('ajax_report_card_') === 0 && payload.noteText) {
-      try {
-        var rc = JSON.parse(payload.noteText);
-        syncReportCardToIDPSheet(payload.noteKey, rc);
-      } catch(e) {}
-    }
   }
   return jsonOut({ success: true });
-}
-
-function syncReportCardToIDPSheet(noteKey, rc) {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName('Player_IDP');
-    if (!sheet) return;
-    var data = sheet.getDataRange().getValues();
-    var headers = data[0].map(function(h){ return h.toString().trim(); });
-    var iName = headers.indexOf('Player Name');
-    if (iName === -1) return;
-
-    // Extract slug from noteKey e.g. ajax_report_card_aspire_giselle_rosales
-    var parts = noteKey.split('_');
-    var slug = parts.slice(4).join(' '); // giselle rosales
-
-    for (var r = 1; r < data.length; r++) {
-      var pName = normName(data[r][iName]);
-      if (pName === slug || pName.indexOf(slug) !== -1 || slug.indexOf(pName) !== -1) {
-        // Map ratings to columns
-        var colMap = {
-          'Coach_T_Touch': rc.tech_ball,
-          'Coach_T_Dribbling': rc.tech_ball,
-          'Coach_T_Passing': rc.tech_decision,
-          'Coach_Tac_Support': rc.tech_decision,
-          'Coach_Tac_RestDef': rc.tech_scanning,
-          'Coach_Tac_Press': rc.tech_scanning,
-          'Coach_T_Movement': rc.phys_workrate,
-          'Coach_T_Duels': rc.phys_duels,
-          'Coach_Tac_Defend': rc.phys_duels
-        };
-        for (var colName in colMap) {
-          var ci = headers.indexOf(colName);
-          if (ci !== -1 && colMap[colName]) {
-            sheet.getRange(r + 1, ci + 1).setValue(Number(colMap[colName]) || 0);
-          }
-        }
-        break;
-      }
-    }
-  } catch(e) {}
 }
 
 function handleSaveMatchHubTakeaways(payload) {
@@ -1331,9 +1257,26 @@ function handleSyncMatchData(pin) {
 // cumulative minutes, goals, assists, shots, duels, key passes directly in
 // the Player_IDP sheet so Team Hub & Player IDP portals reflect real-time stats.
 function handleUpdateSeasonStats(payload) {
+  var lock = LockService.getScriptLock();
   try {
+    lock.waitLock(10000);
     if (!isValidCoachPin(payload.pin)) {
       return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
+    }
+
+    var matchId = String(payload.matchId || (payload.matchSummary && (payload.matchSummary.matchId || (String(payload.matchSummary.team || 'ASPIRE') + '_' + String(payload.matchSummary.opponent || 'Match') + '_' + String(payload.matchSummary.date || '').slice(0, 10)))) || '').trim();
+    if (matchId) {
+      var kvCheck = getMatchHubKVMap();
+      var committedIds = kvCheck['committed_match_ids'] || {};
+      if (committedIds[matchId]) {
+        return jsonOut({
+          success: true,
+          alreadyCommitted: true,
+          matchId: matchId,
+          updated: 0,
+          unmatchedPlayers: []
+        });
+      }
     }
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1438,33 +1381,30 @@ function handleUpdateSeasonStats(payload) {
       updateCount++;
     }
 
-    // Auto-create row in Player_IDP for guest players who logged minutes and are not yet on the sheet
+    // Never auto-create roster rows; return unknown names to the coach for confirmation (Rule 2.9)
     var existingNames = {};
     for (var j = 1; j < data.length; j++) {
       existingNames[normName(data[j][iName])] = true;
     }
+    var unmatchedPlayers = [];
     for (var k in statsMap) {
       var gpObj = statsMap[k];
-      if (gpObj && gpObj.name && gpObj.mins > 0 && !existingNames[normName(gpObj.name)]) {
-        var newRow = new Array(headers.length).fill('');
-        if (iName !== -1) newRow[iName] = gpObj.name;
-        if (iGames !== -1) newRow[iGames] = gpObj.gp || 1;
-        if (iMins !== -1) newRow[iMins] = gpObj.mins || 0;
-        if (iAvg !== -1) newRow[iAvg] = gpObj.mins || 0;
-        if (iGoals !== -1) newRow[iGoals] = gpObj.goals || 0;
-        if (iAssists !== -1) newRow[iAssists] = gpObj.assists || 0;
-        if (iShots !== -1) newRow[iShots] = gpObj.sot || 0;
-        if (iShotsOff !== -1) newRow[iShotsOff] = gpObj.soff || 0;
-        if (iTO !== -1) newRow[iTO] = gpObj.toD || 0;
-        if (iKP !== -1) newRow[iKP] = gpObj.keyPasses || 0;
-        if (iDuels !== -1) newRow[iDuels] = gpObj.duelsWon || 0;
-        sheet.appendRow(newRow);
-        existingNames[normName(gpObj.name)] = true;
-        updateCount++;
+      var candidateName = gpObj && gpObj.name ? String(gpObj.name).trim() : String(k).trim();
+      if (gpObj && (gpObj.mins > 0 || gpObj.gp > 0) && candidateName && !existingNames[normName(candidateName)]) {
+        unmatchedPlayers.push(candidateName);
       }
     }
 
-    // Save match summary snapshot into match_hub KV store for full match history audit
+    // Record idempotency key and save match summary snapshot into match_hub KV store
+    if (matchId) {
+      try {
+        var kvIdemp = getMatchHubKVMap();
+        var committedMap = kvIdemp['committed_match_ids'] || {};
+        committedMap[matchId] = new Date().toISOString();
+        setMatchHubKV('committed_match_ids', committedMap);
+      } catch(e) {}
+    }
+
     if (payload.matchSummary) {
       try {
         var kv = getMatchHubKVMap();
@@ -1479,9 +1419,17 @@ function handleUpdateSeasonStats(payload) {
       } catch(e) {}
     }
 
-    return jsonOut({ success: true, updated: updateCount });
+    return jsonOut({
+      success: true,
+      matchId: matchId || null,
+      alreadyCommitted: false,
+      updated: updateCount,
+      unmatchedPlayers: unmatchedPlayers
+    });
   } catch (err) {
     return jsonOut({ success: false, message: err.toString() });
+  } finally {
+    try { lock.releaseLock(); } catch(e) {}
   }
 }
 
@@ -1523,7 +1471,7 @@ function resolvePlayerJerseyFromRoster(playerName) {
   for (var i = 0; i < ASPIRE_CANONICAL_ROSTER.length; i++) {
     var r = ASPIRE_CANONICAL_ROSTER[i];
     var rNorm = normName(r.name);
-    if (rNorm === search || rNorm.indexOf(search) === 0 || search.indexOf(rNorm) === 0 || (pFirst.length >= 3 && rNorm.split(' ')[0] === pFirst)) {
+    if (rNorm === search || (pFirst.length >= 3 && rNorm.split(' ')[0] === pFirst)) {
       return r.jersey;
     }
   }
@@ -1587,7 +1535,10 @@ function buildActionRowFromMoment(m, nowStr) {
   var half = String(m.half || m.h || 'H1').trim();
   var clock = String(m.time || m.t || m.matchClock || '00:00').trim();
   var zone = String(m.zone || m.z || 'M3').trim();
+  var rawQ = String(m.qualityRaw || m.quality || '').trim();
   var outcome = String(m.outcome || m.o || 'Glow').trim();
+  if (rawQ === 'Goal Conceded' || m.tag === 'Goal Conceded' || m.isCritical === true) outcome = 'Goal Conceded';
+  else if (rawQ === 'Goal Scored' || m.tag === 'Goal Scored') outcome = 'Goal Scored';
   var category = String(m.category || m.cat || 'General').trim();
   var tag = String(m.tag || 'Action').trim();
   var note = String(m.note !== undefined ? m.note : (m.notes !== undefined ? m.notes : (m.n || ''))).trim();
@@ -1666,6 +1617,9 @@ function readAllMatchActionLogRows() {
     var isReview = (revRaw === 'true' || revRaw === 'yes' || revRaw === '1' || row[iRev] === true);
     var playerRawStr = iPlayer !== -1 ? String(row[iPlayer] || '').trim() : '';
 
+    var rawOut = iOut !== -1 ? String(row[iOut] || 'Glow').trim() : 'Glow';
+    var collapsedOut = rawOut === 'Goal Conceded' ? 'Grow' : (rawOut === 'Goal Scored' ? 'Glow' : rawOut);
+
     results.push({
       id: isNaN(Number(evId)) ? evId : Number(evId),
       eventId: evId,
@@ -1679,8 +1633,10 @@ function readAllMatchActionLogRows() {
       t: clockStr,
       zone: iZone !== -1 ? String(row[iZone] || 'M3').trim() : 'M3',
       z: iZone !== -1 ? String(row[iZone] || 'M3').trim() : 'M3',
-      outcome: iOut !== -1 ? String(row[iOut] || 'Glow').trim() : 'Glow',
-      o: iOut !== -1 ? String(row[iOut] || 'Glow').trim() : 'Glow',
+      outcome: collapsedOut,
+      o: collapsedOut,
+      qualityRaw: rawOut,
+      isCritical: (rawOut === 'Goal Conceded'),
       category: iCat !== -1 ? String(row[iCat] || 'General').trim() : 'General',
       cat: iCat !== -1 ? String(row[iCat] || 'General').trim() : 'General',
       tag: iTag !== -1 ? String(row[iTag] || 'Action').trim() : 'Action',
@@ -2035,7 +1991,9 @@ function getPlayerFilmMoments(playerName, playerPin) {
     if (pFirst === 'carlee') aliases.push('carly');
     if (pFirst === 'mackenzie') aliases.push('mack');
     if (pFirst === 'sophia') aliases.push('sophie');
-    if (pFirst === 'alessandra') aliases.push('ale');
+    if (pFirst === 'alessandra') aliases.push('ally', 'allie');
+    if (pFirst === 'arianna') aliases.push('ari');
+    if (pFirst === 'grace') aliases.push('ellie');
 
     // Combine Match_Action_Log sheet rows + KV moments
     var sheetMoments = readAllMatchActionLogRows();
@@ -2072,7 +2030,7 @@ function getPlayerFilmMoments(playerName, playerPin) {
       var jList = Array.isArray(item.jerseys) ? item.jerseys : (Array.isArray(item.j) ? item.j : []);
       var matches = false;
 
-      if (jerseyNum !== null && (jList.indexOf(jerseyNum) !== -1 || String(item.playersRaw || '').indexOf('#' + jerseyNum) !== -1)) {
+      if (jerseyNum !== null && (jList.indexOf(jerseyNum) !== -1 || new RegExp('#\\s*' + jerseyNum + '(?!\\d)').test(String(item.playersRaw || '')))) {
         matches = true;
       }
       var note = normName(item.note || item.notes || item.n || '');
