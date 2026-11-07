@@ -1,90 +1,148 @@
-# Ajax Aspire U15 · Team Hub & Match Hub Development Guidelines
+# Ajax Aspire · Coaching Platform · Agent Guidelines
 
-This document outlines the architectural principles, development conventions, and operational rules for AI agents and developers working on the **Ajax Aspire U15 Team Hub and Match Hub** (Girls Academy Aspire).
-
----
-
-## 1. Project Mission & Overview
-
-We are building a player development platform and digital hub for the **Ajax Aspire U15** competitive youth soccer team. The platform connects players, parents, and coaches into a cohesive feedback loop and learning environment.
-
-### The Three-Layer Architecture
-1. **Front-End (The Site):** Clean, static HTML/CSS/JavaScript hosted on Netlify (`index.html`, `match-hub.html`, etc.). Fast, accessible, and lightweight.
-2. **Bridge (The API):** Google Apps Script web app endpoint serving as a secure JSON API to read and write team and player data.
-3. **Data Hub (The Sheet):** Google Sheets Master Data Hub with dedicated tabs per system (`Player_IDP`, `coaching_videos`, `moments`, `Raw_Match_Stats`, `challenges`, etc.). Coaches work directly in the sheet.
+Read this whole file before every task. It describes the platform as it is now, the rules that keep player data accurate and private, and how to prove your work. If a request conflicts with a rule here, stop and say so instead of working around it.
 
 ---
 
-## 2. Core Guidelines & Non-Negotiables
+## 1. What we are building
 
-### 📱 Always Keep the Site Mobile-Responsive
-- Most players and parents will access the Team Hub and Match Hub from smartphones at the pitch, on the bus, or at home.
-- Layouts must be fluid and responsive, using CSS Grid, Flexbox, and media queries (e.g., standard breakpoints at `820px` and `480px`).
-- Ensure touch-friendly tap targets (minimum 44x44px for buttons, links, and form inputs).
-- Avoid fixed widths that cause horizontal scrolling.
-- Optimize typography with fluid scaling (`clamp()`) or responsive units.
+One platform where the coach plans sessions, tracks matches live, reviews film, sends clips and moments to players, and runs a private development portal for each player. Two teams in our U15 age group: **U15 Aspire (`AJAX Aspire U15`)** and **U15 Girls Academy (`AJAX GA U15`)**. Users are teenage players, their parents, and the coaching staff.
 
-### 🧹 Clean HTML / CSS / JavaScript
-- Write clean, modern, semantic HTML5, CSS3, and vanilla ES6+ JavaScript.
-- Avoid unnecessary external frameworks or heavy dependencies; prioritize performance, fast initial load times, and simple maintainability.
-- Maintain consistent visual theming:
-  - Deep Navy background (`--navy: #0D1B2A`, `--card: #14273D`)
-  - Accent colors: Teal (`--teal: #3ABFB8`), Gold (`--gold: #C8A951`), Green (`--greenLt: #3E9E63`)
-  - Clean typography: Bebas Neue for bold athletic headers, DM Sans for body text, DM Mono for tags/metadata.
-- Keep CSS organized with clear class naming and CSS custom properties (variables).
+### The loop every feature serves
 
-### 🔒 Protect Player Privacy
-- **Strict Role-Based Separation:**
-  - **Open to Everyone (No Login):** Team Hub, Compete Leaderboard, Moments that Matter, Public Team Stats, Positions, Tactics Board, Team Film Room, Soccer Glossary, Parent Hub.
-  - **Player Portal (Protected):** Gated by player selection and PIN. Only individual development plans (IDPs), player self-ratings, coach ratings, private reflections, coach replies, and assigned personal film clips belong here.
-- **Privacy Safeguards:**
-  - Never publicly expose player PINs, private contact details, or sensitive evaluations.
-  - API responses for public endpoints must never leak private individual IDP notes or credentials.
-  - Ensure local browser storage of session state handles player credentials safely and provides an easy sign-out.
+```
+Plan session  →  Track match  →  Review film  →  Send clip / moment  →  Player reflects  →  Coach replies  →  Plan next session
+```
 
-### 🎥 16:9 Aspect Ratio for Match Video Embeds
-- All match film embeds (YouTube, Vimeo, Veo, Hudl, or HTML5 video) must preserve a strict **16:9 widescreen ratio**.
-- Use modern CSS `aspect-ratio: 16 / 9;` on responsive iframe containers with `width: 100%; height: auto;`, or traditional 16:9 intrinsic padding wrappers (`position: relative; width: 100%; padding-top: 56.25%;` with an absolute positioned iframe).
-- Always provide a fallback direct link ("Watch on external site") in case third-party video hosts restrict iframe embedding or permission policies block inline playback on mobile devices.
+> "A player who writes something and hears nothing back stops writing."
+
+A feature that does not move this loop forward, or that breaks a link in it, is the wrong feature.
+
+### Three layers
+
+1. **Sheet (source of truth).** Google Sheets "Ajax Aspire U15 - Master Data Hub". All player, match, film and feedback data lives here and nowhere else.
+2. **API (the only door to the Sheet).** Google Apps Script web app, `Code.gs`. Enforces every permission check.
+3. **Site (display only).** Static HTML/CSS/JS on Netlify, deployed from GitHub. Holds no player data of its own.
 
 ---
 
-## 3. The Feedback Loop Philosophy
+## 2. Data truth rules
 
-> **"A player who writes something and hears nothing back stops writing."**
+These exist because each one has already caused a real error in this project.
 
-Every system on the hub feeds one continuous cycle:
-1. **Player Submits:** A match reflection, film study response, or individual development plan (IDP).
-2. **Data Lands:** Stored as a new row in the Google Sheets log with timestamp and submission type.
-3. **Coach Replies:** Coach reviews the submission and adds feedback/guidance in the adjacent column.
-4. **Player Reads:** The site detects unread replies and displays a notification banner upon next login.
+1. **The Sheet is the only source of truth.** Do not bake player data, film events, stats or notes into HTML or JS files, and do not create new JSON/JS copies of Sheet data. If the site needs data, it fetches it from the API. Browser storage may hold drafts and preferences only, never the record.
+   *Why:* film moments currently exist in about eight places (CSV, two canonical files, 578 KB inside match-hub.html, three Sheet tabs, browser storage), and they disagree.
 
-All features, UI tweaks, and workflow changes should support making this interaction loop fast, seamless, and reliable.
+2. **Structured fields drive every number. Never parse coaching notes to score anything.** Goal scored, goal conceded, assist, zone, outcome and players come from their own columns. Free-text notes are for humans.
+   *Why:* note-keyword scoring gave a +2.50 goal reward to two plays that conceded goals, because the note described the opponent scoring.
 
----
+3. **Preserve the raw outcome.** Any transformed copy of a film event must keep the original `Quality / Outcome` value (e.g. `Goal Conceded`), not only the collapsed Glow/Grow.
+   *Why:* the canonical file dropped it, so the Film Index recognised 2 of 19 conceded goals.
 
-## 4. Stability Rules & Data Integrity
+4. **No hardcoded record IDs in logic.** Never write `if (e.id === 567)`. IDs change when data is re-imported. Mark special records with a field in the Sheet.
 
-1. **The Roster Spells the Names:** The player roster tab in the spreadsheet is the single source of truth. When external stats or exports disagree on spelling, fix the export, never change the canonical roster name.
-2. **Update the Script, Keep the URL:** When updating Google Apps Script code, always deploy as a *new version* of the existing deployment. Creating a brand new deployment changes the endpoint URL and breaks the live front-end.
-3. **Spreadsheet First, Code Last:** Content items (challenges, video clips, recognitions, announcements) are spreadsheet rows. Only structural and design updates require site code deploys.
-4. **Column Names Are Exact:** Front-end and Google Apps Script functions find data by column header name, not hardcoded column index. Columns can be rearranged, but never renamed without updating the code.
-5. **Diacritic-Insensitive Name Matching & Roster Verification:**
-   - All player name comparison, indexing, and normalization routines (`normName`, `cleanNorm`, lookup dictionaries in both JavaScript and Google Apps Script) MUST decompose and strip diacritical marks using `.normalize('NFD').replace(/[\u0300-\u036f]/g, '')` before matching. This prevents silent drops, duplicated rows, or mismatched stats between accented and unaccented variations (e.g., `"Amy Godínez Vargas"` vs. `"Amy Godinez Vargas"`).
-   - Never assume a player did not participate in a match based solely on an unchanged spreadsheet cell or un-updated metric without first checking match export files (`Statistics_*.csv`), raw substitution logs, or active lineups.
-6. **Cumulative Multi-Game Baseline Integrity & Cross-Device State Consistency:**
-   - **Never Initialize Cumulative Player Stats to Zero on Single-Match Commits:** Single-match tracking tools (`ajax-match-tracker.html`, sideline loggers) must NEVER wipe player historical baselines or initialize players with `gp: 0, mins: 0`. Player minutes, appearances, and counting stats must strictly accumulate on top of verified multi-game baselines. Sample-size gating (`minMinutes: 120`, `minEvents: 15`) relies on cumulative minutes across the entire season; wiping baselines causes all players to drop into unindexed "Low Sample" states.
-   - **Promote Confirmed Match Commits to Canonical Default Data in Code:** Static multi-device dashboards hosted on Netlify cannot rely exclusively on browser-scoped `localStorage` to synchronize states across devices (e.g., pitch iPad vs. office Mac). Once a match is confirmed and committed, the updated season totals, player stats, and film events must be integrated into canonical `DEFAULT_DATA` in repository code and backed up to cloud storage (Google Sheets / API), ensuring seamless parity across all devices regardless of local browser cache.
-   - **Defensive Self-Healing on Load:** Dashboard sanitizers (`sanitizeAndHealData`) must check whether incoming player minutes or appearances are lower than the verified multi-game baseline. If partial single-match stats are detected in local storage, the sanitizer must automatically restore and merge baseline minutes so sample reliability and Film Impact indices remain intact.
+5. **One charge per event.** A single film event contributes exactly once to any score. No separate bonuses for something the event already counts.
+
+6. **The roster spells the names.** `Player_IDP` is canonical. Fix exports to match it; never rename a roster entry to match an export. All name comparisons use `normName` (strip diacritics with `.normalize('NFD').replace(/[\u0300-\u036f]/g, '')`, replace commas with spaces, collapse whitespace, lowercase). Name matching in free text uses word boundaries and ignores nicknames under three characters.
+
+7. **Column names are exact.** Code finds columns by header text. Never rename a header without updating every reader.
+
+8. **Writes are idempotent.** Any action that adds to totals (committing a match, logging a check-in) carries a stable ID and is rejected if already applied. Wrap Sheet writes in `LockService`.
+
+9. **Never auto-create roster rows.** Unknown names are returned to the coach for confirmation.
 
 ---
 
-## 5. Repository Structure Reference
+## 3. Privacy and security rules
 
-- `index.html`: Main Team Hub dashboard (squad stats, announcements, moments, roster).
-- `match-hub.html`: Match preparation, lineup, video breakdown, and opponent scouting hub.
-- `ajax-session-planner.html`: Training session builder and exercise library.
-- `team_hub_workflow.html`: Visual overview of how the multi-layer hub works.
-- `netlify.toml`: Netlify headers, edge caching rules, and serverless proxy routes.
-- `netlify/functions/`: Edge functions and serverless proxies (e.g., `session-planner.mjs`).
-- `Code.gs`: Google Apps Script backend code handling sheet reads, writes, and authentication.
+1. **No secrets in client code, ever.** No PINs, tokens or passwords in HTML/JS, including as fallback or default values. The coach token lives in Apps Script Script Properties and is compared server side. A missing credential means the request fails, never that a default is used.
+2. **Every per-player read requires that player's name and PIN, checked server side**, and returns only that player's own data. This includes coach ratings, report cards, reflections, coaching videos, film moments and IDP data.
+3. **Every per-player write requires that player's PIN.** IDP submissions and reflections cannot be written under another player's name.
+4. **Coach-only routes require the coach token**, including reads such as match actions and film overrides.
+5. **Public files contain no coaching notes, ratings or evaluations.** Anything served from Netlify is readable by anyone. Filtering in the browser is not privacy.
+6. **Throttle PIN checks** with `CacheService`: at most 10 attempts per name per 15 minutes.
+7. **Only our age-group teams (`AJAX Aspire U15` & `AJAX GA U15`).** Do not publish data for unrelated teams.
+
+### Open to everyone (no login)
+Team Hub, game model, positions, tactics boards, glossary, team film room (clips and prompts, no notes about individuals), Moments that Matter, competition leaderboard, public team stats, parent hub.
+
+### Player portal (name + PIN)
+Her IDP, self-ratings, coach ratings, report card, reflections and coach replies, her assigned clips, her attendance.
+
+### Coach only (coach token)
+Match Hub, sideline tracker, Film Index, raw coaching notes, all-player views.
+
+---
+
+## 4. Design system
+
+Light theme. Token names describe the colour they hold.
+
+| Token | Value | Use |
+|---|---|---|
+| `--bg` | `#F4F6F9` | page background |
+| `--surface` | `#E9EEF4` | secondary panels |
+| `--card` | `#FFFFFF` | cards |
+| `--ink` | `#0B111A` | headings |
+| `--text` | `#182230` | body text |
+| `--muted` | `#2D3748` | secondary text |
+| `--border` | `#CBD5E1` | borders |
+| `--slate` | `#1A2330` | dark contrast blocks |
+| `--green` | `#15803D` | AJAX green, positive |
+| `--teal` | `#008496` | primary accent on light backgrounds |
+| `--cyan` | `#00C2D6` | accent on dark blocks only |
+
+The current `index.html` holds these values under legacy names (`--navy` is light grey, `--white` is near-black, `--gold` is teal). When you touch a file, migrate it to the names above; never add new uses of the legacy names.
+
+Type: Bebas Neue for display, DM Sans for body, DM Mono for labels and metadata.
+
+Every page in the suite (Team Hub, Match Hub, tracker, session planner, film logger) uses this one system.
+
+### Responsive and touch
+- Mobile first. Players and parents use phones; the coach uses an iPad pitchside.
+- Tap targets at least 44×44 px. No horizontal scroll at 390 px wide.
+- Text contrast at least 4.5:1.
+- Video embeds keep a 16:9 ratio and always offer a direct "watch on" link.
+
+### Match-day tools must work on bad signal
+The sideline tracker cannot depend on a runtime CDN to render. Ship its CSS with the page. Autosave state locally, queue commits made while offline, and show plainly whether a commit reached the Sheet.
+
+---
+
+## 5. Engineering conventions
+
+- Plain HTML, CSS and vanilla JS. No framework, bundler, package.json or new CDN dependency without the coach's approval.
+- Do not use the Tailwind Play CDN (`cdn.tailwindcss.com`) in new work; it is not meant for production.
+- Targeted edits. Never rewrite a whole file to make a small change.
+- Apps Script: always deploy as a **new version of the existing deployment** (Manage deployments → pencil → New version). A new deployment changes the URL and breaks the site.
+- Content is Sheet rows (challenges, clips, moments, announcements). Code changes are for structure and design only.
+
+---
+
+## 6. How to prove your work
+
+1. **Show the diff.** For every file you change, show the changed lines. Do not summarise instead.
+2. **Run it before you claim it.** Open the page, perform the action, report what you saw. If you could not test something, say exactly that.
+3. **Run the regression checks** in `tests/` (create them if missing) before finishing:
+   - Every `Goal Conceded` row in the film log is scored as a conceded goal, and no `Goal Conceded` row receives a positive score.
+   - No string matching a PIN or token appears in any `.html` or `.js` file.
+   - A per-player API request without the right PIN returns no data.
+   - Committing the same match twice changes the Sheet once.
+   - "Alexa steps to the ball" tags #50 only; "Alex Marigorda switches play" tags #36 only.
+4. **Update the docs you invalidate.** If your change makes `match_day_user_guide.md` or this file wrong, fix them in the same branch.
+5. Work in a branch. Never deploy. The coach reviews and deploys.
+
+---
+
+## 7. Repository map
+
+| File | Audience | Purpose |
+|---|---|---|
+| `index.html` | public + player portal | Team Hub, game model, player portal |
+| `match-hub.html` | coach | match analysis, Film Index, report cards |
+| `ajax-match-tracker.html` | coach | live sideline tracking |
+| `ajax-session-planner.html` | coach | session design |
+| `film-moment-logger.html` | coach | film tagging |
+| `Code.gs` | server | the API; all permission checks live here |
+| `netlify/functions/` | server | session planner AI proxy |
+| `match_day_user_guide.md` | coach | how to run match day |
