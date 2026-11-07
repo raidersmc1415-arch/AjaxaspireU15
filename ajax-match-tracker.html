@@ -3777,7 +3777,21 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         console.error('LocalStorage write error:', e);
       }
 
-      const coachPin = (typeof CURRENT_COACH_PIN !== 'undefined' && CURRENT_COACH_PIN) || '4111';
+      let coachPin = (typeof CURRENT_COACH_PIN !== 'undefined' && CURRENT_COACH_PIN) || '';
+      if (!coachPin) {
+        try { coachPin = (sessionStorage.getItem('ajax_coach_session_token') || '').trim(); } catch (e) {}
+      }
+      if (!coachPin) {
+        coachPin = (prompt('Enter Coach Token / PIN to commit match to Google Sheets:') || '').trim();
+        if (coachPin) {
+          try { sessionStorage.setItem('ajax_coach_session_token', coachPin); } catch (e) {}
+          window.CURRENT_COACH_PIN = coachPin;
+        }
+      }
+      if (!coachPin) {
+        showToast('⚠️ Coach Token required to sync to Google Sheets.');
+        return;
+      }
       const matchTotals = {
         shots: matchEvents.filter(e => e.type === 'shot' || e.type === 'sot' || e.type === 'shot_outside_18' || e.type === 'goal').length,
         sot: matchEvents.filter(e => e.type === 'sot' || e.type === 'goal' || (e.type === 'shot_outside_18' && e.onTarget)).length,

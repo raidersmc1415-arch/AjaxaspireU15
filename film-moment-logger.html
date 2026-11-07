@@ -1406,7 +1406,18 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
     async function syncMomentsToCloudHub() {
       try {
-        const pin = '4111';
+        let pin = (typeof window.CURRENT_COACH_PIN !== 'undefined' && window.CURRENT_COACH_PIN) || '';
+        if (!pin) {
+          try { pin = (sessionStorage.getItem('ajax_coach_session_token') || '').trim(); } catch (e) {}
+        }
+        if (!pin) {
+          pin = (prompt('Enter Coach Token / PIN to sync film moments to Google Sheets:') || '').trim();
+          if (pin) {
+            try { sessionStorage.setItem('ajax_coach_session_token', pin); } catch (e) {}
+            window.CURRENT_COACH_PIN = pin;
+          }
+        }
+        if (!pin) return;
         const match = getSelectedMatchName();
         await fetch('https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec', {
           method: 'POST',

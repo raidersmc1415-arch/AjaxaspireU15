@@ -180,22 +180,68 @@ function syncMatchData() {
 
 // --- PART 3: API BRIDGE ---
 
+function isPinThrottled_(reqName) {
+  try {
+    var cache = CacheService.getScriptCache();
+    if (!cache) return false;
+    var key = 'pin_throttle_' + normName(reqName || 'unknown').replace(/[^a-z0-9]/g, '_');
+    var count = parseInt(cache.get(key) || '0', 10);
+    return count >= 10;
+  } catch (e) {
+    return false;
+  }
+}
+
+function recordPinAttempt_(reqName) {
+  try {
+    var cache = CacheService.getScriptCache();
+    if (!cache) return;
+    var key = 'pin_throttle_' + normName(reqName || 'unknown').replace(/[^a-z0-9]/g, '_');
+    var count = parseInt(cache.get(key) || '0', 10) + 1;
+    cache.put(key, String(count), 900); // 15 minutes (900 seconds)
+  } catch (e) {}
+}
+
+function verifyPlayerCredentials_(reqName, reqPin) {
+  var pName = normName(reqName);
+  var pPin = String(reqPin || '').trim();
+  if (!pName || !pPin) return { valid: false };
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Player_IDP');
+    if (!sheet) return { valid: false };
+    var data = sheet.getDataRange().getValues();
+    var headers = data[0].map(function(h) { return h.toString().trim(); });
+    var iName = headers.indexOf('Player Name');
+    var iPIN  = headers.indexOf('PIN');
+    if (iName === -1 || iPIN === -1) return { valid: false };
+    for (var i = 1; i < data.length; i++) {
+      var rowName = String(data[i][iName] || '').trim();
+      var rowPIN  = String(data[i][iPIN]  || '').trim();
+      if (normName(rowName) === pName && rowPIN !== '' && rowPIN === pPin) {
+        return { valid: true, canonicalName: rowName, row: data[i], headers: headers };
+      }
+    }
+  } catch (e) {}
+  return { valid: false };
+}
+
 function doGet(e) {
-  if (e.parameter.action === 'coachingVideos')       return getCoachingVideos(e.parameter.name);
-  if (e.parameter.action === 'coachRatings')         return getCoachRatings(e.parameter.name);
+  if (e.parameter.action === 'coachingVideos')       return getCoachingVideos(e.parameter.name, e.parameter.pin);
+  if (e.parameter.action === 'coachRatings')         return getCoachRatings(e.parameter.name, e.parameter.pin);
   if (e.parameter.action === 'challengeLeaderboard') return getChallengeLeaderboard();
   if (e.parameter.action === 'coachMessage')         return getCoachMessage();
   if (e.parameter.action === 'moments')              return getMoments();
-  if (e.parameter.action === 'reflections')          return getPlayerReflections(e.parameter.name);
+  if (e.parameter.action === 'reflections')          return getPlayerReflections(e.parameter.name, e.parameter.pin);
   if (e.parameter.action === 'verifyPin')            return verifyPin(e.parameter.name, e.parameter.pin);
   if (e.parameter.action === 'teamStats')            return getTeamStats();
   if (e.parameter.action === 'filmMoments')          return getFilmMoments();
   if (e.parameter.action === 'matchHub')             return getMatchHubData(e.parameter.pin);
   if (e.parameter.action === 'syncMatchData')        return handleSyncMatchData(e.parameter.pin);
-  if (e.parameter.action === 'healTeamAggregate')    return jsonOut(healTeamAggregate());
-  if (e.parameter.action === 'playerFilmMoments')    return getPlayerFilmMoments(e.parameter.name);
+  if (e.parameter.action === 'healTeamAggregate')    return handleHealTeamAggregate(e.parameter.pin);
+  if (e.parameter.action === 'playerFilmMoments')    return getPlayerFilmMoments(e.parameter.name, e.parameter.pin);
   if (e.parameter.action === 'getMatchActions')      return getMatchActions(e.parameter);
-  if (e.parameter.action === 'filmOverrides')        return getFilmOverrides();
+  if (e.parameter.action === 'filmOverrides')        return getFilmOverrides(e.parameter.pin);
   if (e.parameter.action === 'pitchsideDraft')       return getPitchsideDraft(e.parameter.pin);
   return handlePlayerLogin(e);
 }
@@ -218,14 +264,23 @@ function doPost(e) {
     if (payload.action === 'clearPitchsideDraft')     return handleClearPitchsideDraft(payload);
     if (payload.action === 'updateSeasonStats')       return handleUpdateSeasonStats(payload);
 
+    // Per-player write check: require valid player Name + PIN for IDP submissions and reflections
+    var authCheck = verifyPlayerCredentials_(payload.name, payload.pin);
+    if (!authCheck.valid) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: false, message: 'Unauthorized: Valid player Name and PIN required' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    var verifiedName = authCheck.canonicalName;
+
     // IDP submission — write JSON blob into Player_IDP column M (IDP_Submitted)
     if (payload.reflection && payload.reflection.indexOf('[IDP SUBMISSION]') === 0 && payload.idpData) {
-      saveIDPToPlayerRow(payload.name, payload.idpData);
+      saveIDPToPlayerRow(verifiedName, payload.idpData);
     }
 
     // Always also log to Reflections_Log for history
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Reflections_Log');
-    sheet.appendRow([new Date(), payload.name, payload.reflection]);
+    sheet.appendRow([new Date(), verifiedName, payload.reflection]);
 
     return ContentService
       .createTextOutput(JSON.stringify({ success: true, message: 'Data logged' }))
@@ -263,6 +318,16 @@ function saveIDPToPlayerRow(playerName, idpDataObj) {
 // Returns player profile + their own IDP self-ratings (parsed from col M)
 
 function handlePlayerLogin(e) {
+  const reqName = e.parameter.name;
+  const reqPIN  = String(e.parameter.pin || '').trim();
+
+  if (isPinThrottled_(reqName)) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, throttled: true, message: 'Too many PIN attempts. Please wait 15 minutes.' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  recordPinAttempt_(reqName);
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName('Player_IDP');
   const data = sheet.getDataRange().getValues();
@@ -276,9 +341,6 @@ function handlePlayerLogin(e) {
         iAssist=headers.indexOf('Assists'), iTO=headers.indexOf('Turnovers Def 3rd'),
         iKP=headers.indexOf('Key Passes'), iDuels=headers.indexOf('Duels'),
         iIDP=headers.indexOf('IDP_Submitted');
-
-  const reqName = e.parameter.name;
-  const reqPIN  = String(e.parameter.pin || '').trim();
 
   for (let i = 1; i < data.length; i++) {
     const rowName = String(data[i][iName] || '').trim();
@@ -325,8 +387,12 @@ function handlePlayerLogin(e) {
 // --- PART 5: COACH RATINGS ---
 // Reads Coach_* columns from Player_IDP, plus player's own ratings from col M
 
-function getCoachRatings(playerName) {
+function getCoachRatings(playerName, playerPin) {
   try {
+    if (!verifyPlayerCredentials_(playerName, playerPin).valid && !isValidCoachPin(playerPin)) {
+      return ContentService.createTextOutput(JSON.stringify({ found: false, error: 'Unauthorized' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName('Player_IDP');
     const data = sheet.getDataRange().getValues();
@@ -452,8 +518,11 @@ function getCoachRatings(playerName) {
 
 // --- PART 6: COACHING VIDEOS ---
 
-function getCoachingVideos(playerName) {
+function getCoachingVideos(playerName, playerPin) {
   try {
+    if (!verifyPlayerCredentials_(playerName, playerPin).valid && !isValidCoachPin(playerPin)) {
+      return ContentService.createTextOutput(JSON.stringify({ videos: [], error: 'Unauthorized' })).setMimeType(ContentService.MimeType.JSON);
+    }
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName('coaching_videos');
     if (!sheet) return ContentService.createTextOutput(JSON.stringify({ videos: [] })).setMimeType(ContentService.MimeType.JSON);
@@ -798,8 +867,12 @@ function getMoments() {
 // Coach workflow: type a reply into column D next to any submission — that's it.
 // Returns the player's submissions newest-first with any coach reply attached.
 
-function getPlayerReflections(playerName) {
+function getPlayerReflections(playerName, playerPin) {
   try {
+    if (!verifyPlayerCredentials_(playerName, playerPin).valid && !isValidCoachPin(playerPin)) {
+      return ContentService.createTextOutput(JSON.stringify({ reflections: [], error: 'Unauthorized' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName('Reflections_Log');
     if (!sheet) {
@@ -1055,6 +1128,12 @@ function getFilmMoments() {
 // even if the player typed a comma or different spacing.
 function verifyPin(reqName, reqPin) {
   try {
+    if (isPinThrottled_(reqName)) {
+      return ContentService.createTextOutput(JSON.stringify({ valid: false, throttled: true, error: 'Too many attempts. Please wait 15 minutes.' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    recordPinAttempt_(reqName);
+
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName('Player_IDP');
     var data = sheet.getDataRange().getValues();
@@ -1086,22 +1165,11 @@ function verifyPin(reqName, reqPin) {
 
 function isValidCoachPin(pin) {
   var p = String(pin || '').trim();
-  if (p === '4111' || p === '2627' || p === '1415') return true;
+  if (!p) return false;
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName('Player_IDP');
-    if (sheet) {
-      var data = sheet.getDataRange().getValues();
-      var headers = data[0].map(function(h){ return h.toString().trim(); });
-      var iName = headers.indexOf('Player Name');
-      var iPIN  = headers.indexOf('PIN');
-      for (var i = 1; i < data.length; i++) {
-        var rName = normName(data[i][iName]);
-        var rPin  = String(data[i][iPIN] || '').trim();
-        if (rName.indexOf('coach') !== -1 && rPin && rPin === p) return true;
-      }
-    }
-  } catch(e) {}
+    var expected = String(PropertiesService.getScriptProperties().getProperty('COACH_TOKEN') || '').trim();
+    if (expected && p === expected) return true;
+  } catch (e) {}
   return false;
 }
 
@@ -1880,8 +1948,11 @@ function getPitchsideDraft(pin) {
   }
 }
 
-function getFilmOverrides() {
+function getFilmOverrides(pin) {
   try {
+    if (!isValidCoachPin(pin)) {
+      return jsonOut({ success: false, overrides: {}, error: 'Unauthorized Coach PIN' });
+    }
     var kv = getMatchHubKVMap();
     var overrides = kv['film_moment_overrides'] || {};
     var notes = kv['notes'] || {};
@@ -1903,6 +1974,10 @@ function getFilmOverrides() {
 
 function getMatchActions(params) {
   try {
+    var pin = params ? params.pin : '';
+    if (!isValidCoachPin(pin)) {
+      return jsonOut({ success: false, moments: [], error: 'Unauthorized Coach PIN' });
+    }
     var rows = readAllMatchActionLogRows();
     var kv = getMatchHubKVMap();
     var overrides = kv['film_moment_overrides'] || {};
@@ -1923,8 +1998,13 @@ function getMatchActions(params) {
   }
 }
 
-function getPlayerFilmMoments(playerName) {
+function getPlayerFilmMoments(playerName, playerPin) {
   try {
+    var isCoach = isValidCoachPin(playerPin);
+    var auth = verifyPlayerCredentials_(playerName, playerPin);
+    if (!auth.valid && !isCoach) {
+      return jsonOut({ success: false, moments: [], error: 'Unauthorized' });
+    }
     var search = normName(playerName);
     var jerseyNum = resolvePlayerJerseyFromRoster(playerName);
     
@@ -1976,7 +2056,7 @@ function getPlayerFilmMoments(playerName) {
     var playerMoments = [];
 
     for (var m = 0; m < combined.length; m++) {
-      var item = combined[m];
+      var item = JSON.parse(JSON.stringify(combined[m]));
       var itemId = String(item.eventId || item.id || '');
       if (itemId && overrides[itemId]) {
         if (overrides[itemId].deleted) continue;
@@ -1998,13 +2078,23 @@ function getPlayerFilmMoments(playerName) {
       var note = normName(item.note || item.notes || item.n || '');
       if (!matches) {
         for (var a = 0; a < aliases.length; a++) {
-          if (aliases[a].length >= 3 && (rawP.indexOf(aliases[a]) !== -1 || note.indexOf(aliases[a]) !== -1)) {
-            matches = true;
-            break;
+          if (aliases[a].length >= 3) {
+            var escapedAlias = aliases[a].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            var wordRegex = new RegExp('(?:^|[^a-z0-9])' + escapedAlias + '(?:$|[^a-z0-9])', 'i');
+            if (wordRegex.test(rawP) || wordRegex.test(note)) {
+              matches = true;
+              break;
+            }
           }
         }
       }
       if (matches) {
+        // Redact coaching notes unless filmReview is true (or caller is Coach)
+        if (!isCoach && !item.filmReview) {
+          item.note = '';
+          item.notes = '';
+          item.n = '';
+        }
         playerMoments.push(item);
       }
     }
@@ -2013,8 +2103,7 @@ function getPlayerFilmMoments(playerName) {
       success: true,
       playerName: playerName,
       jersey: jerseyNum,
-      moments: playerMoments,
-      overrides: overrides
+      moments: playerMoments
     });
   } catch(err) {
     return jsonOut({ success: false, moments: [], error: err.toString() });
@@ -2128,6 +2217,13 @@ function updateTeamAggregateInRawMatchStats(matchSummary, matchTotals) {
       break;
     }
   }
+}
+
+function handleHealTeamAggregate(pin) {
+  if (!isValidCoachPin(pin)) {
+    return jsonOut({ success: false, error: 'Unauthorized Coach PIN' });
+  }
+  return jsonOut(healTeamAggregate());
 }
 
 // One-click repair / alignment function to ensure Raw_Match_Stats team aggregate matches current season record

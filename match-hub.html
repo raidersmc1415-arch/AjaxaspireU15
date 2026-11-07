@@ -2767,6 +2767,18 @@
     }
 
     /* ---------- Access Control (Strict Coach PIN Gate) ---------- */
+    function getCoachSessionPin() {
+      if (window.CURRENT_COACH_PIN) return String(window.CURRENT_COACH_PIN).trim();
+      try {
+        const sPin = (sessionStorage.getItem('ajax_coach_session_token') || '').trim();
+        if (sPin) {
+          window.CURRENT_COACH_PIN = sPin;
+          return sPin;
+        }
+      } catch (e) {}
+      return '';
+    }
+
     function checkAuthOnLoad() {
       loadSavedLocalData();
       let savedToken = '';
@@ -2775,7 +2787,8 @@
         // Automatically purge any legacy plaintext PIN from local storage
         localStorage.removeItem('ajax_coach_pin');
       } catch (e) {}
-      if (COACH_AUTH_HASHES.includes(savedToken)) {
+      const activePin = getCoachSessionPin();
+      if (COACH_AUTH_HASHES.includes(savedToken) && activePin) {
         $('authGate').classList.add('hidden');
       } else {
         $('authGate').classList.remove('hidden');
@@ -2790,12 +2803,14 @@
         try {
           localStorage.setItem('ajax_coach_auth_token', hash);
           localStorage.removeItem('ajax_coach_pin');
+          sessionStorage.setItem('ajax_coach_session_token', pin);
         } catch (e) {}
-        window.CURRENT_COACH_PIN = pin; // in-memory only for current session
+        window.CURRENT_COACH_PIN = pin; // in-memory & sessionStorage only for current session
         $('coachPinErr').classList.add('hidden');
         $('authGate').classList.add('hidden');
         showToast('Coach access unlocked');
         renderAll();
+        loadCloudMatchHubNotes();
       } else {
         $('coachPinErr').classList.remove('hidden');
         if ($('coachPinInput')) $('coachPinInput').value = '';
@@ -2806,6 +2821,7 @@
       try {
         localStorage.removeItem('ajax_coach_auth_token');
         localStorage.removeItem('ajax_coach_pin');
+        sessionStorage.removeItem('ajax_coach_session_token');
       } catch (e) {}
       window.CURRENT_COACH_PIN = null;
       if ($('coachPinInput')) $('coachPinInput').value = '';
@@ -8374,7 +8390,8 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'т
         syncNoteToCloudHub('ajax_film_moment_overrides', ovStr);
 
         // 2. Write single row update to Match_Action_Log sheet tab
-        const pin = window.CURRENT_COACH_PIN || '4111';
+        const pin = getCoachSessionPin();
+        if (!pin) return;
         fetch(API_URL, {
           method: 'POST',
           mode: 'no-cors',
@@ -8404,7 +8421,8 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'т
         NOTES['ajax_film_moment_overrides'] = ovStr;
         syncNoteToCloudHub('ajax_film_moment_overrides', ovStr);
 
-        const pin = window.CURRENT_COACH_PIN || '4111';
+        const pin = getCoachSessionPin();
+        if (!pin) return;
         fetch(API_URL, {
           method: 'POST',
           mode: 'no-cors',
@@ -8451,7 +8469,8 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'т
         };
       });
       if (!matchMoments.length) return;
-      const pin = window.CURRENT_COACH_PIN || '4111';
+      const pin = getCoachSessionPin();
+      if (!pin) return;
       await fetch(API_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -8482,7 +8501,11 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'т
         }
 
         // Also push complete rows to Match_Action_Log tab
-        const pin = window.CURRENT_COACH_PIN || '4111';
+        const pin = getCoachSessionPin();
+        if (!pin) {
+          showToast('тЪая╕П Coach PIN required to publish to Sheet.');
+          return;
+        }
         const targetEvents = selectedMatch !== 'ALL'
           ? allEv.filter(e => e.match === selectedMatch)
           : allEv;
@@ -8997,7 +9020,8 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'т
 
     async function syncNoteToCloudHub(noteKeyStr, noteValStr) {
       try {
-        const pin = window.CURRENT_COACH_PIN || '4111';
+        const pin = getCoachSessionPin();
+        if (!pin) return;
         await fetch(API_URL, {
           method: 'POST',
           mode: 'no-cors',
@@ -9027,7 +9051,8 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'т
       } catch (e) {}
 
       try {
-        const pin = window.CURRENT_COACH_PIN || '4111';
+        const pin = getCoachSessionPin();
+        if (!pin) return;
         const res = await fetch(`${API_URL}?action=matchHub&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null);
         if (res && res.success && res.notes && typeof res.notes === 'object') {
           let updatedReport = false;

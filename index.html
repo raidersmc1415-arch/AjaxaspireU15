@@ -631,7 +631,6 @@
    .section-collapse-header { padding: 4px 0; }
  }
 </style>
-<script src="aspire-canonical-moments.js"></script>
 </head>
 <body>
 
@@ -2524,8 +2523,10 @@
 
   <script>
     let CURRENT_PLAYER_NAME = '';
+    let CURRENT_PLAYER_PIN = '';
     // FILM ROOM IDENTITY — verify name + PIN once, reuse for all submissions
     let FILM_VERIFIED_NAME = null;
+    let FILM_VERIFIED_PIN = null;
 
     async function verifyFilmIdentity() {
       const name = (document.getElementById('film-id-name').value || '').trim();
@@ -2543,13 +2544,15 @@
         const data = await res.json();
         if (data.valid) {
           FILM_VERIFIED_NAME = data.name || name;
+          FILM_VERIFIED_PIN = pin;
           status.style.color = 'var(--teal)';
           status.textContent = '✓ Signed in as ' + FILM_VERIFIED_NAME + '. You can send responses now.';
           document.getElementById('film-id-pin').value = '';
         } else {
           FILM_VERIFIED_NAME = null;
+          FILM_VERIFIED_PIN = null;
           status.style.color = '#e05555';
-          status.textContent = "Name and PIN don't match. Check your portal login.";
+          status.textContent = data.throttled ? "Too many attempts. Please wait 15 minutes." : "Name and PIN don't match. Check your portal login.";
         }
       } catch(err) {
         status.style.color = '#e05555';
@@ -2617,7 +2620,7 @@
       if (fallbackRC) fallbackRC.style.display = 'block';
 
       try {
-        const res  = await fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}`);
+        const res  = await fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}&pin=${encodeURIComponent(CURRENT_PLAYER_PIN)}`);
         const data = await res.json();
         if (!data || !data.found) return;
 
@@ -2929,7 +2932,7 @@
       const banner = document.getElementById('new-reply-banner');
       if (banner) banner.style.display = 'none';
       try {
-        const res  = await fetch(`${API_URL}?action=reflections&name=${encodeURIComponent(playerName)}`);
+        const res  = await fetch(`${API_URL}?action=reflections&name=${encodeURIComponent(playerName)}&pin=${encodeURIComponent(CURRENT_PLAYER_PIN)}`);
         const data = await res.json();
         const list = data.reflections || [];
         if (!list.length) return; // nothing to show — section stays hidden
@@ -3057,7 +3060,7 @@
       list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center;">Loading your coaching playlist...</div>';
 
       try {
-        const res  = await fetch(`${API_URL}?action=coachingVideos&name=${encodeURIComponent(playerName)}`);
+        const res  = await fetch(`${API_URL}?action=coachingVideos&name=${encodeURIComponent(playerName)}&pin=${encodeURIComponent(CURRENT_PLAYER_PIN)}`);
         const data = await res.json();
         const videos = data.videos || [];
 
@@ -3216,6 +3219,7 @@
       try {
         const payload = {
           name: name,
+          pin: CURRENT_PLAYER_PIN,
           reflection: `[MATCH FILM TAKEAWAY]\n${text}`
         };
         await fetch(API_URL, {
@@ -3253,19 +3257,7 @@
     }
 
     async function loadPlayerFilmMoments(playerName, jerseyNum) {
-      // 1. Start from static canonical baseline (instant 0ms availability)
-      if (!window.CANONICAL_ASPIRE_MOMENTS && typeof fetch !== 'undefined') {
-        try {
-          const localRes = await fetch('aspire-canonical-moments.json');
-          window.CANONICAL_ASPIRE_MOMENTS = await localRes.json();
-        } catch(e) {}
-      }
-      let moments = filterCanonicalMomentsForPlayer(playerName, jerseyNum);
-
-      // 2. Merge any same-device local edits from Match Hub (matchhub_custom_data & ajax_film_moment_overrides)
-      moments = mergeMomentsWithLocalAndCloudEdits(moments, playerName, jerseyNum, null, null);
-
-      // Render immediately so player sees zero loading delay
+      let moments = mergeMomentsWithLocalAndCloudEdits([], playerName, jerseyNum, null, null);
       CURRENT_PLAYER_MOMENTS = moments.filter(m => isRecentFilmMatch(m.match || m.m || ''));
       const sec = document.getElementById('complete-film-log-section');
       if (sec) {
@@ -3274,13 +3266,13 @@
       renderPlayerFilmLog();
       updateTakeawayRequirements();
 
-      // 3. Fetch live cloud updates & overrides from Master Google Sheet (Match_Action_Log / KV)
+      // Fetch signed-in player's own moments from playerFilmMoments with her PIN
       try {
-        const res = await fetch(`${API_URL}?action=playerFilmMoments&name=${encodeURIComponent(playerName)}`);
+        const res = await fetch(`${API_URL}?action=playerFilmMoments&name=${encodeURIComponent(playerName)}&pin=${encodeURIComponent(CURRENT_PLAYER_PIN)}`);
         const data = await res.json();
         if (data && (Array.isArray(data.moments) || data.overrides)) {
           moments = mergeMomentsWithLocalAndCloudEdits(
-            filterCanonicalMomentsForPlayer(playerName, jerseyNum),
+            [],
             playerName,
             jerseyNum,
             Array.isArray(data.moments) ? data.moments : [],
@@ -3637,6 +3629,7 @@
       if (!text) { alert('Please write a response before submitting.'); return; }
       const payload = {
         name: playerName,
+        pin: CURRENT_PLAYER_PIN,
         reflection: `[INDIVIDUAL FILM FEEDBACK — ${videoTitle}]\n${text}`
       };
       try {
@@ -3964,6 +3957,7 @@
 
         if (data.success) {
           CURRENT_PLAYER_NAME = data.name;
+          CURRENT_PLAYER_PIN = pin;
           document.getElementById('portal-login').style.display = 'none';
           document.getElementById('portal-content').style.display = 'block';
           
@@ -4019,6 +4013,7 @@
 
     function logoutPortal() {
       CURRENT_PLAYER_NAME = '';
+      CURRENT_PLAYER_PIN = '';
       document.getElementById('portal-content').style.display = 'none';
       document.getElementById('portal-login').style.display = 'block';
       document.getElementById('player-name').value = '';
@@ -4167,6 +4162,7 @@
       // Post to Google Sheet — idpData written to Player_IDP!IDP_Submitted (col M)
       const payload = {
         name,
+        pin: CURRENT_PLAYER_PIN,
         reflection: `[IDP SUBMISSION]\nOwnership: ${data.ownership}/5\nShort-Term: ${goalShort}\nLong-Term: ${goalLong}\nOne Thing: ${oneThing}\nTechnical — Dribbling:${data.t_dribbling} Passing:${data.t_passing} Movement:${data.t_movement} Duels:${data.t_duels} Touch:${data.t_touch}\nTactical — Support:${data.tac_support} RestDef:${data.tac_restdef} Press:${data.tac_press} Attack:${data.tac_attack} Defend:${data.tac_defend}`,
         idpData: data
       };
@@ -4246,6 +4242,7 @@
       const info = VEO_MOMENT_INDEX[idx] || {};
       const payload = {
         name: FILM_VERIFIED_NAME,
+        pin: FILM_VERIFIED_PIN,
         reflection: `[VEO MOMENT — ${info.time}${info.phase ? ' · ' + info.phase : ''}]\n\n${text}`
       };
       try {
@@ -4277,6 +4274,7 @@
 
       const payload = {
         name: FILM_VERIFIED_NAME,
+        pin: FILM_VERIFIED_PIN,
         reflection: `[FILM FEEDBACK — ${title}]\n\nShape/positioning: ${q1}\n\nWhat I'd do differently: ${q2}\n\nApply in training: ${q3}`
       };
 
@@ -4301,7 +4299,7 @@
       if(!text) { alert("Please type a reflection first."); return; }
 
       try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ name: name, reflection: text }) });
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ name: name, pin: CURRENT_PLAYER_PIN, reflection: text }) });
         alert("Reflection Submitted Successfully! Coach Shawn will review it.");
         if (ta) ta.value = "";
         loadReflections(name);
