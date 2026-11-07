@@ -3797,7 +3797,8 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
       const matchTotals = {
         shots: matchEvents.filter(e => e.type === 'shot' || e.type === 'sot' || e.type === 'shot_outside_18' || e.type === 'goal').length,
         sot: matchEvents.filter(e => e.type === 'sot' || e.type === 'goal' || (e.type === 'shot_outside_18' && e.onTarget)).length,
-        soff: matchEvents.filter(e => (e.type === 'shot' || (e.type === 'shot_outside_18' && !e.onTarget))).length
+        soff: matchEvents.filter(e => (e.type === 'shot' || (e.type === 'shot_outside_18' && !e.onTarget))).length,
+        corners: matchEvents.filter(e => e.type === 'corner').length
       };
       const matchSummary = {
         matchId: matchId,

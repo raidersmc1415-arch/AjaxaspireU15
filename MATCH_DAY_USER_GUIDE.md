@@ -23,10 +23,10 @@ flowchart TD
 
     subgraph D["3. Master Data Hub (Google Sheets)"]
         IDP["Player_IDP Tab\n(Season Stats & Ratings)"]
-        FilmTab["moments Tab\n(Veo Film Log)"]
-        KVTab["match_hub Tab\n(Match History Snapshot)"]
+        ActionLog["Match_Action_Log Tab\n(All Match Film Actions)"]
+        KVTab["match_hub Tab\n(Match History, Drafts & Notes)"]
         API --> IDP
-        API --> FilmTab
+        API --> ActionLog
         API --> KVTab
     end
 
@@ -34,7 +34,8 @@ flowchart TD
         TeamHub["Team Hub (index.html)\n• Public Squad Table\n• Category Leaders\n• Player Portal IDP Card"]
         MatchHub["Match Hub (match-hub.html)\n• 1v1 Duels & Line Breakers\n• Positional Splits\n• v3 Film Index (Par 80)"]
         IDP --> TeamHub
-        FilmTab --> MatchHub
+        ActionLog --> TeamHub
+        ActionLog --> MatchHub
         KVTab --> MatchHub
     end
 ```
@@ -47,9 +48,10 @@ If you ever need to inspect, verify, or make raw manual edits to your data, here
 
 | Google Sheet Tab | Purpose | Key Columns / Data Tracked | Used By |
 | :--- | :--- | :--- | :--- |
-| **`Player_IDP`** | **Canonical Roster & Season Totals** | `Player Name`, `PIN`, `Coach Notes`, `Games Played`, `Minutes Played`, `Average Minutes`, `Goals`, `Assists`, `Shots On Target`, `Shots Off Target`, `Fouls`, `Clean Sheets`, `Win %`, `Turnovers Def 3rd`, `Key Passes`, `Duels`, `IDP_Submitted` (Col M) | • **Team Hub** Public Squad Table<br>• Category Leaders<br>• Player IDP Login Portal<br>• Player Self-Ratings |
-| **`moments`** | **Film Moments & Bookmarks** | `Timestamp`, `Match Name`, `Time (MM:SS)`, `Half`, `Jersey #`, `Field Zone` (D3/M3/A3), `Event Category`, `Short Form`, `Quality / Outcome` (Glow/Grow/Neutral), `Coach Comment`, `Film Review` (TRUE/FALSE) | • **Match Hub** Film Room<br>• **v3 Film Index** (Par 80)<br>• Individual Film Clips in Player Portal |
-| **`match_hub`** | **Cloud Key-Value Store** | `key` (`notes`, `takeaways`, `datasets`, `match_history`), `value` (JSON String), `updated_at` | • Tactical Whiteboard notes<br>• Coach Game Takeaways<br>• Match Audit Log |
+| **`Player_IDP`** | **Canonical Roster & Season Totals** | `Player Name`, `PIN`, `Coach Notes`, `Games Played`, `Minutes Played`, `Average Minutes`, `Goals`, `Assists`, `Shots On Target`, `Shots Off Target`, `Fouls`, `Clean Sheets`, `Win %`, `Turnovers Def 3rd`, `Key Passes`, `Duels`, `IDP_Submitted` (Col M) | • **Team Hub** Public Squad Table<br>• Category Leaders<br>• Player IDP Login Portal<br>• Player Self-Ratings & 10 Coach Skill Ratings |
+| **`Match_Action_Log`** | **Canonical Match Film & Action Log** | `Event_ID`, `Match_Date`, `Match_Name`, `Opponent`, `Half`, `Match_Clock`, `Zone`, `Outcome` (`Glow`/`Grow`/`Goal Conceded`/`Goal Scored`), `Category`, `Tag`, `Player_Name`, `Jersey_Num`, `Coach_Notes`, `Film_Review` (`TRUE`/`FALSE`), `Status`, `Last_Updated` | • **Match Hub** Film Room & Inline Clip Editor<br>• **v3 Film Index** (Par 80)<br>• Authenticated Player Portal Film Moments (`Coach_Notes` shown only when `Film_Review = TRUE`) |
+| **`moments`** | **Moments That Matter Wall** | `Event Type`, `Player`, `Moment`, `Date` | • **Team Hub** Public "Moments That Matter" Shout-out Wall |
+| **`match_hub`** | **Cloud Key-Value Store** | `key` (`notes`, `takeaways`, `datasets`, `match_history`, `committed_match_ids`, `pitchside_draft_latest`), `value` (JSON String), `updated_at` | • Tactical Whiteboard notes & Report Cards<br>• Coach Game Takeaways<br>• Idempotent Match Commit Tracking & Pitchside Drafts |
 | **`coaching_videos`** | **Video Library** | `Category`, `Title`, `Vimeo/YouTube URL`, `Key Takeaways`, `Assigned Position` | • Film Room Video Library<br>• Tactical Walkthroughs |
 | **`challenges`** | **Competency & Homework** | `Title`, `Description`, `Target Reps`, `Points`, `Leaderboard Log` | • Compete Leaderboard<br>• Weekly Skills Challenges |
 | **`Reflections_Log`** | **Player Reflections History** | `Timestamp`, `Player Name`, `Reflection Text`, `Coach Reply` | • Feedback Loop<br>• Unread Reply Banners |
@@ -61,9 +63,9 @@ If you ever need to inspect, verify, or make raw manual edits to your data, here
 If you ever need to fix a typo, correct minutes, or adjust a score manually:
 
 ### ⚠️ Non-Negotiable Rules for Manual Edits
-1. **The Roster Spells the Names:** Always keep spelling identical to column A of `Player_IDP`. The system matches by name (`normName`), ignoring capitalization and punctuation (e.g. `Sophia Culver`, `Camila Deleon`).
-2. **Column Names Are Exact:** Do not rename the headers in row 1 of `Player_IDP` or `moments`. Front-end scripts and Google Apps Script find data by exact header text.
-3. **Player PINs Belong in Column B of `Player_IDP`:** Never share or expose player PINs publicly.
+1. **The Roster Spells the Names:** Always keep spelling identical to column A of `Player_IDP`. The system matches by name (`normName`), ignoring capitalization and punctuation (e.g. `Sophia Culver`, `Camila Deleon`). Unknown player names are never auto-added as new rows in `Player_IDP`—they are returned to the coach for confirmation.
+2. **Column Names Are Exact:** Do not rename the headers in row 1 of `Player_IDP` or `Match_Action_Log`. Front-end scripts and Google Apps Script find data by exact header text.
+3. **Player PINs & Coach Token Security:** Player PINs belong in Column B of `Player_IDP` and are never placed in client HTML/JS files. The Coach Token lives exclusively in Apps Script **Project Settings → Script Properties** under the property name `COACH_TOKEN`.
 4. **Updating Apps Script:** If you ever edit code inside the Google Sheets Script Editor (`Code.gs`), always deploy as a **New Version of the Existing Deployment** (Deploy > Manage Deployments > Edit > Version: New Version > Deploy). Never create a brand-new deployment, as that changes the URL.
 
 ---
@@ -103,11 +105,11 @@ If you ever need to fix a typo, correct minutes, or adjust a score manually:
 ### At the Final Whistle
 1. Tap **`⏭`** to record Full Time.
 2. Tap the large green **`⚡ COMMIT MATCH TO HUB`** button in the top bar.
-3. Confirm the match score and minutes.
-4. **Everything updates automatically:**
+3. Confirm the match score and minutes (and enter your Coach Token if not already unlocked in the session).
+4. **Everything updates automatically and idempotently:**
    - **Match Hub** updates standings, minutes splits, turnovers by third, duels, and film moments.
-   - **Google Sheets (`Player_IDP`)** receives updated cumulative season stats via background API.
-   - **Team Hub (`index.html`)** immediately reflects the new stats in the public squad table and player IDP portals.
+   - **Google Sheets (`Player_IDP` & `Match_Action_Log`)** receives updated cumulative season stats and in-game film actions via background API using a stable `matchId` (committing the same match twice updates the Sheet once). Any unrecognized guest names are reported back for confirmation rather than auto-creating rows.
+   - **Team Hub (`index.html`)** immediately reflects the new stats in the public squad table and authenticated player IDP portals.
 
 ---
 
@@ -117,14 +119,14 @@ If you are testing the sideline tracker and commit a test match, here is exactly
 
 ### A. Resetting the Match Hub (1 Click)
 - In the top header bar of **Match Hub** ([`match-hub.html`](file:///Users/shawncraig/Desktop/Anti%20Gravity%20SC/match-hub.html)), tap the **`Reset`** button (located next to *Upload CSV* and *Save HTML*).
-- This immediately wipes `matchhub_custom_data` from your browser’s cache and restores your pristine 5-match baseline (569 real film moments, 1W-4L Aspire record).
+- This immediately wipes `matchhub_custom_data` from your browser’s cache and restores your baseline film log and standings.
 
 ### B. Resetting the In-Game Sideline Tracker Board
 - If you tapped around to test buttons on the pitch and want to wipe the board clean before kickoff:
 - Tap the **`🔄 Reset Match`** button right next to *Commit Match to Hub*.
 - This resets the clock to `00:00`, clears the score to `0-0`, clears test opponent events, and resets the Starting XI.
 
-### C. Reverting Google Sheets (`Player_IDP`)
+### C. Reverting Google Sheets (`Player_IDP` & `Match_Action_Log`)
 If a test commit was sent to your Google Sheet:
 - **Option 1 (Instant Macro Re-Sync):** Open your Google Sheet and click **`Ajax Hub > Sync Match Stats`** from the custom menu. This re-reads your master `Raw_Match_Stats` tab and restores the legitimate cumulative stats for every player.
 - **Option 2 (Version History):** Click **`File > Version History > See Version History`** in Google Sheets, pick the timestamp from before your test, and click **Restore this version**.
@@ -135,8 +137,8 @@ If a test commit was sent to your Google Sheet:
 
 When you sit down with your laptop or iPad to watch the Veo match replay:
 1. Open **Match Hub** (`match-hub.html#film`).
-2. Switch to the **Post-Match Film Study** tab.
-3. Review the **Sideline Bookmarks** list from the game—each one has the exact game minute when it occurred.
-4. Jump to that minute on Veo.
-5. Tap **`🎙️ Hold to Speak Moment`** (or type a quick note) and tag the zone (D3/M3/A3) and outcome (`Glow` or `Grow`).
-6. Tap **`Save to Film Room`**—the moment is immediately saved into the `moments` Google Sheet tab and added to the player's personal film review feed in her IDP portal.
+2. Review any **Sideline Bookmarks** staged from your iPad in the Pitchside Draft Banner or Film Room.
+3. Jump to that minute on Veo.
+4. Add or edit moments using the **Film Moment Logger** (`film-moment-logger.html`) or the inline **Edit Clip Modal** (`✏️ Edit` / `➕ Add Moment`) inside Match Hub.
+5. Check **`📌 Assign to Player Film Review`** (`Film_Review = TRUE`) on moments where you want your coaching note shown to the player in her portal.
+6. Every edit or **`☁️ Publish Match Film to Sheet`** syncs directly into the **`Match_Action_Log`** Google Sheet tab and immediately updates the authenticated Player Portal.

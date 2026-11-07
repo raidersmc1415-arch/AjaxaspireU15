@@ -222,7 +222,11 @@ function createCodeGsSandbox() {
     'Player_IDP': makeSheet(idpRows),
     'Reflections_Log': makeSheet(reflectionsRows),
     'Match_Action_Log': makeSheet(actionLogRows),
-    'match_hub': makeSheet(kvRows)
+    'match_hub': makeSheet(kvRows),
+    'Raw_Match_Stats': makeSheet([
+      ['Team', 'Player', 'Position', 'Games Played', 'Games Won', 'Games Tied', 'Games Lost', 'Goals', 'Goals Against', 'Goal Difference', 'Clean Sheets', 'Shots On Target', 'Shots Off Target', 'Shots', 'Corner Kicks', 'Win Percentage', 'Shot Accuracy', 'Goal Conversion'],
+      ['AJAX Aspire U15', '', '', 10, 5, 0, 5, 20, 20, 0, 2, 50, 40, 90, 20, 0.5, 0.5556, 0.2222]
+    ])
   };
 
   const sandbox = {
@@ -412,6 +416,36 @@ check('5. "Alexa steps to the ball" tags #50 only; "Alex Marigorda switches play
   const alexMoment = { note: 'Alex Marigorda switches play', playersRaw: '#36 Alex Marigorda', jerseys: [36] };
   assert.strictEqual(idxSandbox.doesMomentMatchPlayer(alexMoment, 'Alex Marigorda', 36), true);
   assert.strictEqual(idxSandbox.doesMomentMatchPlayer(alexMoment, 'Alexa Chipres', 50), false, '"Alex Marigorda switches play" must NOT match #50 Alexa Chipres');
+});
+
+check('6. healTeamAggregate() and updateTeamAggregateInRawMatchStats() use dynamic calculations with no hardcoded 13 GP or fake shot defaults', () => {
+  const codeGs = fs.readFileSync(path.join(ROOT, 'Code.gs'), 'utf8');
+  assert(!/setValue\(13\)/.test(codeGs), 'Code.gs must not hardcode setValue(13) in healTeamAggregate');
+  assert(!/matchTotals\.sot\s*:\s*6/.test(codeGs), 'Code.gs must not default addSOT to 6');
+  assert(!/matchTotals\.soff\s*:\s*8/.test(codeGs), 'Code.gs must not default addSOFF to 8');
+
+  const { sandbox } = createCodeGsSandbox();
+  // Commit a match with no matchTotals provided -> shots/corners should add 0, not 6/8/4
+  sandbox.handleUpdateSeasonStats({
+    pin: 'TEST_SERVER_COACH_SECRET',
+    matchId: 'AJAX_ASPIRE_U15_DynamicTest_2026-11-08',
+    isIncremental: true,
+    playerStats: { 'camila deleon': { name: 'Camila Deleon', gp: 1, mins: 80, goals: 2 } },
+    matchSummary: {
+      matchId: 'AJAX_ASPIRE_U15_DynamicTest_2026-11-08',
+      team: 'AJAX ASPIRE U15',
+      opponent: 'DynamicTest',
+      date: '2026-11-08T12:00:00Z',
+      ajaxScore: 2,
+      oppScore: 0
+    }
+  });
+
+  const healRes = JSON.parse(sandbox.doGet({
+    parameter: { action: 'healTeamAggregate', pin: 'TEST_SERVER_COACH_SECRET' }
+  }).getContent());
+  assert.strictEqual(healRes.success, true);
+  assert(/11 GP, 6-0-5/.test(healRes.message), `Expected 11 GP, 6-0-5 in healRes.message, got: ${healRes.message}`);
 });
 
 console.log(`\nAll ${passed} regression checks passed.`);
