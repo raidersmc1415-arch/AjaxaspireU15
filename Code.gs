@@ -1475,6 +1475,11 @@ function getPlayerFilmMoments(playerName) {
           matches = true;
         }
       }
+      var note = String(item.notes || item.n || '').toLowerCase();
+      var pFirst = search.split(' ')[0];
+      if (!matches && pFirst.length >= 4 && note.indexOf(pFirst) !== -1) {
+        matches = true;
+      }
       if (matches) {
         playerMoments.push(item);
       }
