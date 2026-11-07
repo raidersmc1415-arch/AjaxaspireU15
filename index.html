@@ -274,6 +274,41 @@
  .moment-tag-badge { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; color:var(--white); background:var(--navy-mid); padding:2px 8px; border-radius:6px; border:1px solid var(--border); }
  .moment-note-text { font-size:13px; color:var(--text); line-height:1.5; margin-top:6px; }
 
+ /* CURATED FILM REVIEW (COACH SHAWN HIGHLIGHTS) */
+ .curated-moment-card {
+   background: var(--card);
+   border: 1px solid var(--border);
+   border-left: 4px solid var(--teal);
+   border-radius: 14px;
+   padding: 18px 20px;
+   margin-bottom: 14px;
+   box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+   transition: all 0.2s;
+ }
+ .curated-moment-card:hover { border-color: var(--teal); }
+ .curated-note-box {
+   margin-top: 12px;
+   background: var(--navy);
+   border: 1px solid var(--border);
+   border-radius: 10px;
+   padding: 14px 16px;
+ }
+ .curated-note-label {
+   font-family: 'DM Mono', monospace;
+   font-size: 10px;
+   font-weight: 700;
+   letter-spacing: 1.5px;
+   text-transform: uppercase;
+   color: var(--gold);
+   margin-bottom: 6px;
+ }
+ .curated-note-text {
+   font-size: 13.5px;
+   color: var(--white);
+   line-height: 1.6;
+   font-style: italic;
+ }
+
  .loop-checklist-box { background:var(--navy); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; flex-direction:column; gap:8px; }
  .loop-check-row { display:flex; align-items:center; gap:8px; }
 
@@ -2097,20 +2132,35 @@
             </div>
           </div>
 
-          <!-- RECENT MATCH FILM (LAST 2 GAMES) -->
+          <!-- ═══════════════════════════════════════════════ -->
+          <!-- COACH SHAWN'S CURATED FILM REVIEW (TOP PRIORITY) -->
+          <!-- ═══════════════════════════════════════════════ -->
+          <div id="curated-film-review-section" style="margin-bottom:24px; display:none;">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <div>
+                <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:3px;">Weekly Review Priority · From Coach Shawn</div>
+                <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white);">Coach Shawn's Curated Film Review</div>
+              </div>
+              <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:rgba(200,169,81,0.12); color:var(--gold); border:1px solid rgba(200,169,81,0.3); padding:4px 10px; border-radius:2px;" id="curated-moments-count-badge">0 Moments</span>
+            </div>
+
+            <div id="curated-moments-feed"></div>
+          </div>
+
+          <!-- RECENT MATCH FILM (LAST 2 GAMES · COLLAPSED BY DEFAULT) -->
           <div class="film-log-container" id="complete-film-log-section" style="display:none; margin-bottom:24px;">
             <div class="film-log-header" onclick="toggleFilmLogAccordion()">
               <div>
-                <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">Recent Film Breakdown · Last 2 Matches</div>
+                <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">Recent Match Action Log · Last 2 Matches</div>
                 <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                  <span>Recent Match Film (Rocklin &amp; La Morinda)</span>
+                  <span>All Match Actions (Rocklin &amp; La Morinda)</span>
                   <span class="badge badge-teal" id="player-film-count-badge">0 Moments</span>
                   <span class="badge badge-green" id="player-glow-rate-badge">0% Glows</span>
                 </div>
               </div>
-              <button type="button" class="btn btn-outline" style="padding:6px 14px; font-size:12px; height:auto;" id="film-log-toggle-btn">▼ Hide Film</button>
+              <button type="button" class="btn btn-outline" style="padding:6px 14px; font-size:12px; height:auto;" id="film-log-toggle-btn">▶ View All Match Actions</button>
             </div>
-            <div class="film-log-body" id="film-log-body-panel">
+            <div class="film-log-body" id="film-log-body-panel" style="display:none;">
               <div class="film-filter-bar">
                 <select class="film-filter-select" id="film-log-match-filter" onchange="onMomentFilterChanged()">
                   <option value="ALL">Both Matches (Rocklin &amp; La Morinda)</option>
@@ -3108,11 +3158,11 @@
 
       if (reqWatchEl) {
         if (totalClips === 0) {
-          reqWatchEl.innerHTML = '<span style="color:var(--green-lt); font-weight:bold;">✓</span> <span style="color:var(--text);">No spotlight clips assigned — complete film feed reviewed</span>';
+          reqWatchEl.innerHTML = '<span style="color:var(--green-lt); font-weight:bold;">✓</span> <span style="color:var(--text);">No spotlight clips or curated moments assigned — complete film feed reviewed</span>';
         } else if (allWatched) {
-          reqWatchEl.innerHTML = `<span style="color:var(--green-lt); font-weight:bold;">✓</span> <span style="color:var(--text);">All spotlight clips marked watched (${totalWatched}/${totalClips})</span>`;
+          reqWatchEl.innerHTML = `<span style="color:var(--green-lt); font-weight:bold;">✓</span> <span style="color:var(--text);">All assigned film clips &amp; curated review moments completed (${totalWatched}/${totalClips})</span>`;
         } else {
-          reqWatchEl.innerHTML = `<span style="color:var(--gold-bright); font-weight:bold;">○</span> <span style="color:var(--muted);">Watch and check off all clips (${totalWatched}/${totalClips} watched)</span>`;
+          reqWatchEl.innerHTML = `<span style="color:var(--gold-bright); font-weight:bold;">○</span> <span style="color:var(--muted);">Review and check off your assigned clips &amp; curated moments (${totalWatched}/${totalClips} complete)</span>`;
         }
       }
 
@@ -3192,7 +3242,13 @@
     }
 
     // Recent Match Film Log logic (Scoped to Last 2 Matches · Option B)
-    const RECENT_FILM_MATCHES = ['Rocklin (Nov 1)', 'La Morinda'];
+    function isRecentFilmMatch(matchName) {
+      const s = String(matchName || '').toLowerCase().trim();
+      if (!s) return false;
+      if (s.includes('la morinda') || s.includes('lamorinda')) return true;
+      if (s.includes('rocklin (nov 1') || s.includes('rocklin nov 1') || (s.includes('rocklin') && s.includes('nov'))) return true;
+      return false;
+    }
 
     async function loadPlayerFilmMoments(playerName, jerseyNum) {
       let moments = [];
@@ -3220,7 +3276,7 @@
       // Strictly scope feed to the last 2 matches only (Option B)
       moments = moments.filter(m => {
         const matchName = String(m.match || m.m || '');
-        return RECENT_FILM_MATCHES.some(rm => matchName.toLowerCase().includes(rm.toLowerCase().split(' ')[0]));
+        return isRecentFilmMatch(matchName);
       });
 
       CURRENT_PLAYER_MOMENTS = moments;
@@ -3229,6 +3285,7 @@
         sec.style.display = moments.length > 0 ? 'block' : 'none';
       }
       renderPlayerFilmLog();
+      updateTakeawayRequirements();
     }
 
     function filterCanonicalMomentsForPlayer(playerName, jerseyNum) {
@@ -3240,7 +3297,7 @@
       return list.filter(m => {
         const mMatch = m.m || m.match || '';
         // Restrict canonical moments to the last 2 matches
-        if (!RECENT_FILM_MATCHES.some(rm => mMatch.toLowerCase().includes(rm.toLowerCase().split(' ')[0]))) {
+        if (!isRecentFilmMatch(mMatch)) {
           return false;
         }
         const jList = Array.isArray(m.j) ? m.j : (Array.isArray(m.jerseys) ? m.jerseys : []);
@@ -3258,7 +3315,9 @@
         zone: m.z || m.zone || 'M3',
         outcome: m.o || m.outcome || 'Glow',
         tag: m.tag || 'Action',
-        category: m.cat || m.category || 'General'
+        category: m.cat || m.category || 'General',
+        note: m.n || m.note || '',
+        filmReview: Boolean(m.filmReview || m.isBookmark || /review|study|assigned/i.test(m.n || m.note || ''))
       }));
     }
 
@@ -3268,7 +3327,14 @@
       if (!panel) return;
       const isHidden = panel.style.display === 'none';
       panel.style.display = isHidden ? 'block' : 'none';
-      if (btn) btn.textContent = isHidden ? '▼ Hide Film Log' : '▶ Show Film Log';
+      if (btn) btn.textContent = isHidden ? '▼ Hide Film Log' : '▶ View All Match Actions';
+    }
+
+    function onCuratedClipToggled(playerName, clipKey, isChecked) {
+      try {
+        localStorage.setItem(`ajax_curated_${normNameJS(playerName)}_${clipKey}`, isChecked ? '1' : '0');
+      } catch(e) {}
+      updateTakeawayRequirements();
     }
 
     function setMomentOutcomeFilter(outcome) {
@@ -3293,7 +3359,11 @@
       const countBadge = document.getElementById('player-film-count-badge');
       const glowRateBadge = document.getElementById('player-glow-rate-badge');
       const matchSelect = document.getElementById('film-log-match-filter');
-      if (!feed) return;
+      const curatedSection = document.getElementById('curated-film-review-section');
+      const curatedFeed = document.getElementById('curated-moments-feed');
+      const curatedCount = document.getElementById('curated-moments-count-badge');
+      const currentPlayerName = CURRENT_LOGGED_IN_PLAYER || (document.getElementById('portal-player-name')?.textContent || '').trim();
+      const normPlayer = normNameJS(currentPlayerName);
 
       const totalAll = CURRENT_PLAYER_MOMENTS.length;
       const glowsAll = CURRENT_PLAYER_MOMENTS.filter(m => /glow/i.test(m.outcome)).length;
@@ -3302,6 +3372,55 @@
 
       if (countBadge) countBadge.textContent = `${totalAll} Moment${totalAll !== 1 ? 's' : ''}`;
       if (glowRateBadge) glowRateBadge.textContent = `${glowPct}% Glows (+${glowsAll} / -${growsAll})`;
+
+      // Separate Curated Moments (filmReview === true)
+      const curatedMoments = CURRENT_PLAYER_MOMENTS.filter(m => Boolean(m.filmReview));
+
+      if (curatedSection && curatedFeed) {
+        if (curatedMoments.length > 0) {
+          curatedSection.style.display = 'block';
+          if (curatedCount) curatedCount.textContent = `${curatedMoments.length} Review Priority${curatedMoments.length !== 1 ? 's' : ''}`;
+          
+          curatedFeed.innerHTML = curatedMoments.map((m, idx) => {
+            const clipKey = `${m.match}_${m.half}_${m.time}_${idx}`.replace(/[^a-zA-Z0-9_]/g, '_');
+            const isChecked = localStorage.getItem(`ajax_curated_${normPlayer}_${clipKey}`) === '1';
+            const outcomeRaw = String(m.outcome || '').toLowerCase();
+            const isMixed = outcomeRaw.includes('glow') && outcomeRaw.includes('grow');
+            const isGlow = !isMixed && outcomeRaw.includes('glow');
+            const z = (m.zone || 'M3').toUpperCase();
+            const zClass = z.includes('D') ? 'zone-d3' : (z.includes('A') ? 'zone-a3' : 'zone-m3');
+            const badgeClass = isGlow ? 'badge-green' : (isMixed ? 'badge-amber' : 'badge-rose');
+            const badgeLabel = isGlow ? '🟢 Glow Priority' : (isMixed ? '🟡 Glow & Grow' : '🔴 Grow Priority');
+
+            return `
+              <div class="curated-moment-card">
+                <div class="moment-header">
+                  <div class="moment-meta-left">
+                    <span class="moment-match-title">${escapeHtml(m.match)}</span>
+                    <span class="moment-time-pill">${escapeHtml(m.half)} ${escapeHtml(m.time)}</span>
+                    <span class="moment-zone-pill ${zClass}">${escapeHtml(z)}</span>
+                    <span class="moment-tag-badge">${escapeHtml(m.tag || 'Action')}</span>
+                  </div>
+                  <span class="badge ${badgeClass}">${badgeLabel}</span>
+                </div>
+                ${m.note ? `
+                  <div class="curated-note-box">
+                    <div class="curated-note-label">Coach Shawn's Observation &amp; Guidance</div>
+                    <div class="curated-note-text">"${escapeHtml(m.note)}"</div>
+                  </div>
+                ` : ''}
+                <div style="margin-top:12px; display:flex; align-items:center; gap:8px;">
+                  <input type="checkbox" id="chk-curated-${clipKey}" class="film-watch-input curated-watch-cb" ${isChecked ? 'checked' : ''} onchange="onCuratedClipToggled('${escapeHtml(currentPlayerName)}', '${clipKey}', this.checked)">
+                  <label for="chk-curated-${clipKey}" style="font-size:12.5px; font-weight:600; color:var(--text); cursor:pointer;">
+                    ☑ I watched this moment &amp; understand Coach Shawn's feedback
+                  </label>
+                </div>
+              </div>`;
+          }).join('');
+        } else {
+          curatedSection.style.display = 'none';
+        }
+      }
 
       // Populate match select options if needed
       if (matchSelect && matchSelect.options.length <= 1) {
@@ -3314,7 +3433,8 @@
         });
       }
 
-      // Filter moments
+      // Filter moments for the general accordion feed
+      if (!feed) return;
       const filtered = CURRENT_PLAYER_MOMENTS.filter(m => {
         if (CURRENT_MOMENT_FILTER_MATCH !== 'ALL' && m.match !== CURRENT_MOMENT_FILTER_MATCH) return false;
         if (CURRENT_MOMENT_FILTER_OUTCOME !== 'ALL') {

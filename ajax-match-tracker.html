@@ -101,45 +101,45 @@
         </div>
       </div>
 
-      <!-- Live Digital Match Clock -->
-      <div class="flex items-center bg-pitch px-3 py-1.5 rounded-xl border border-teal-500/40 shadow-inner space-x-3">
-        <div class="text-center">
-          <div class="text-[8px] mono uppercase text-teal-400 font-bold" id="periodDisplay">1ST HALF</div>
+      <!-- Live Digital Match Clock (iPad Pro High-Contrast HUD) -->
+      <div class="flex items-center bg-pitch px-3.5 py-2 rounded-2xl border-2 border-teal-500/50 shadow-inner space-x-3.5">
+        <div class="text-center min-w-[70px]">
+          <div class="text-[9px] mono uppercase text-teal-400 font-bold tracking-wider" id="periodDisplay">1ST HALF</div>
           <div class="text-2xl sm:text-3xl font-black font-mono tracking-wider text-white" id="clockDisplay">00:00</div>
         </div>
-        <div class="flex items-center gap-1">
-          <button id="timerToggleBtn" onclick="toggleTimer()" class="w-9 h-9 rounded-lg bg-teal-500 hover:bg-teal-600 text-pitch font-black flex items-center justify-center text-sm transition active:scale-95 shadow">
+        <div class="flex items-center gap-1.5">
+          <button id="timerToggleBtn" onclick="toggleTimer()" class="w-12 h-12 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-black flex items-center justify-center text-lg transition active:scale-90 active:translate-y-0.5 shadow-lg border border-teal-200">
             ▶
           </button>
-          <button onclick="advancePeriod()" title="Next Half / Finish" class="w-9 h-9 rounded-lg bg-surface hover:bg-slate-700 text-slate-200 border border-border flex items-center justify-center text-xs font-bold transition">
+          <button onclick="advancePeriod()" title="Next Half / Finish" class="w-12 h-12 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border-2 border-border flex items-center justify-center text-sm font-bold transition active:scale-90">
             ⏭
           </button>
-          <div class="flex flex-col gap-0.5">
-            <button onclick="adjustClock(60)" class="px-1.5 py-0.5 rounded bg-surface border border-border text-[9px] font-mono hover:bg-slate-700 text-slate-300">+1m</button>
-            <button onclick="adjustClock(-60)" class="px-1.5 py-0.5 rounded bg-surface border border-border text-[9px] font-mono hover:bg-slate-700 text-slate-300">-1m</button>
+          <div class="flex flex-col gap-1">
+            <button onclick="adjustClock(60)" class="px-2 py-1 rounded-lg bg-surface border border-border text-[10px] font-mono hover:bg-slate-700 text-slate-300 active:scale-95 font-bold">+1m</button>
+            <button onclick="adjustClock(-60)" class="px-2 py-1 rounded-lg bg-surface border border-border text-[10px] font-mono hover:bg-slate-700 text-slate-300 active:scale-95 font-bold">-1m</button>
           </div>
         </div>
       </div>
 
-      <!-- Action & Export Buttons: Prominent Commit to Match Hub Button -->
-      <div class="flex items-center gap-1.5 flex-wrap">
-        <button id="commitMatchHubBtn" onclick="commitMatchToHub()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3.5 py-2 rounded-xl transition shadow-xl flex items-center gap-1.5 active:scale-95 border-2 border-emerald-400">
+      <!-- Action & Export Buttons: Athletic Command Bar (48px Ergonomic Touch Targets) -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button id="commitMatchHubBtn" onclick="commitMatchToHub()" class="min-h-[46px] text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-black px-4 py-2.5 rounded-xl transition shadow-xl flex items-center gap-2 active:scale-95 active:translate-y-0.5 border-2 border-emerald-400">
           <span>⚡ COMMIT MATCH TO HUB</span>
         </button>
-        <button onclick="flagSidelineBookmark()" class="text-xs bg-amber-500/25 hover:bg-amber-500/35 border-2 border-amber-400/70 text-amber-300 font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center gap-1.5 active:scale-95">
+        <button onclick="flagSidelineBookmark()" class="min-h-[46px] text-xs bg-amber-500/25 hover:bg-amber-500/35 border-2 border-amber-400 text-amber-200 font-extrabold px-3.5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5 active:scale-95 active:translate-y-0.5">
           <span>📌 Flag Film</span>
         </button>
-        <button onclick="openNewGameModal()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 px-2.5 py-1.5 rounded-xl transition flex items-center gap-1">
+        <button onclick="openNewGameModal()" class="min-h-[46px] text-xs bg-pitch hover:bg-surface border-2 border-border text-slate-200 font-bold px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 active:scale-95">
           <span>⚙️ Match Setup</span>
         </button>
-        <button onclick="exportStatisticsCsv()" class="text-xs bg-surface hover:bg-slate-700 text-slate-300 border border-border px-2.5 py-1.5 rounded-xl transition flex items-center gap-1">
+        <button onclick="exportStatisticsCsv()" class="min-h-[46px] text-xs bg-surface hover:bg-slate-700 text-slate-200 border-2 border-border px-3 py-2.5 rounded-xl transition flex items-center gap-1 font-bold active:scale-95">
           <span>💾 CSV</span>
         </button>
-        <button onclick="openHistoryModal()" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 px-2.5 py-1.5 rounded-xl transition">
+        <button onclick="openHistoryModal()" class="min-h-[46px] text-xs bg-pitch hover:bg-surface border-2 border-border text-slate-200 px-3 py-2.5 rounded-xl transition font-bold active:scale-95">
           <span>📁 Games</span>
         </button>
-        <button onclick="resetCurrentMatch()" class="text-xs bg-surface hover:bg-slate-700 text-slate-300 border border-border px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 active:scale-95" title="Clear test match and reset board">
-          <span>🔄 Reset Match</span>
+        <button onclick="resetCurrentMatch()" class="min-h-[46px] text-xs bg-surface hover:bg-slate-700 text-slate-300 border-2 border-border px-3 py-2.5 rounded-xl transition flex items-center gap-1 active:scale-95 font-semibold" title="Clear test match and reset board">
+          <span>🔄 Reset</span>
         </button>
       </div>
     </div>
@@ -381,74 +381,74 @@
           <button id="deselectBtn" onclick="deselectPlayer()" class="hidden text-slate-400 hover:text-white text-sm font-bold w-7 h-7 rounded-full bg-pitch items-center justify-center border border-border">✕</button>
         </div>
 
-        <!-- 1-Tap Stat Event Buttons (16 Quick Actions · Auto-deselects player on tap) -->
-        <div class="grid grid-cols-4 sm:grid-cols-4 gap-1.5 text-[11px] font-semibold">
-          <button onclick="logSelectedEvent('goal')" class="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+        <!-- 1-Tap Stat Event Buttons (16 Quick Actions · iPad Pro Tactile Touch Grid) -->
+        <div class="grid grid-cols-4 sm:grid-cols-4 gap-2 text-xs font-bold">
+          <button onclick="logSelectedEvent('goal')" class="min-h-[50px] p-2 rounded-xl bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-200 border-2 border-emerald-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">⚽</span>
-            <span>Goal</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Goal</span>
           </button>
-          <button onclick="logSelectedEvent('assist')" class="p-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('assist')" class="min-h-[50px] p-2 rounded-xl bg-teal-500/25 hover:bg-teal-500/35 text-teal-200 border-2 border-teal-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">🅰️</span>
-            <span>Assist</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Assist</span>
           </button>
-          <button onclick="logSelectedEvent('keyPass')" class="p-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('keyPass')" class="min-h-[50px] p-2 rounded-xl bg-purple-500/25 hover:bg-purple-500/35 text-purple-200 border-2 border-purple-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">🔑</span>
-            <span>Key Pass</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Key Pass</span>
           </button>
-          <button onclick="logSelectedEvent('sot')" class="p-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('sot')" class="min-h-[50px] p-2 rounded-xl bg-sky-500/25 hover:bg-sky-500/35 text-sky-200 border-2 border-sky-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">🎯</span>
-            <span>Shot On</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Shot On</span>
           </button>
 
-          <button onclick="logSelectedEvent('soff')" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('soff')" class="min-h-[50px] p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border-2 border-slate-600 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">🥅</span>
-            <span>Shot Off</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Shot Off</span>
           </button>
-          <button onclick="openShotOut18Modal()" class="p-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 flex flex-col items-center gap-0.5 transition active:scale-95" title="Shot taken from outside the 18-yard penalty area">
+          <button onclick="openShotOut18Modal()" class="min-h-[50px] p-2 rounded-xl bg-indigo-500/25 hover:bg-indigo-500/35 text-indigo-200 border-2 border-indigo-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm" title="Shot taken from outside the 18-yard penalty area">
             <span class="text-base">🚀</span>
-            <span>Out 18</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Out 18</span>
           </button>
-          <button onclick="logSelectedEvent('duelWon')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('duelWon')" class="min-h-[50px] p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-teal-200 border-2 border-teal-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">💪</span>
-            <span>Duel Won</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Duel Won</span>
           </button>
-          <button onclick="logSelectedEvent('duelLost')" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/35 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('duelLost')" class="min-h-[50px] p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border-2 border-rose-500/70 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">❌</span>
-            <span>Duel Lost</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Duel Lost</span>
           </button>
 
-          <button onclick="promptTurnoverZone()" class="p-2 rounded-xl bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 border border-rose-500/50 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="promptTurnoverZone()" class="min-h-[50px] p-2 rounded-xl bg-rose-600/30 hover:bg-rose-600/40 text-rose-100 border-2 border-rose-400 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">⚠️</span>
-            <span>Turnover</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Turnover</span>
           </button>
-          <button onclick="logSelectedEvent('foul')" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('foul')" class="min-h-[50px] p-2 rounded-xl bg-amber-500/25 hover:bg-amber-500/35 text-amber-200 border-2 border-amber-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">🛑</span>
-            <span>Foul</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Foul</span>
           </button>
-          <button onclick="logSelectedEvent('yellow')" class="p-2 rounded-xl bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('yellow')" class="min-h-[50px] p-2 rounded-xl bg-yellow-500/25 hover:bg-yellow-500/35 text-yellow-200 border-2 border-yellow-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">🟨</span>
-            <span>Yellow</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Yellow</span>
           </button>
-          <button onclick="logSelectedEvent('save')" class="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('save')" class="min-h-[50px] p-2 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/35 text-emerald-200 border-2 border-emerald-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">🧤</span>
-            <span>Save GK</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Save GK</span>
           </button>
 
-          <button onclick="logSelectedEvent('pressWon')" class="p-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('pressWon')" class="min-h-[50px] p-2 rounded-xl bg-teal-600/25 hover:bg-teal-600/35 text-teal-200 border-2 border-teal-400 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">⚡</span>
-            <span>Press Won</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Press Won</span>
           </button>
-          <button onclick="logSelectedEvent('pressLost')" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="logSelectedEvent('pressLost')" class="min-h-[50px] p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border-2 border-rose-500/70 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">💨</span>
-            <span>Press Lost</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Press Lost</span>
           </button>
-          <button onclick="openCrossModal()" class="p-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="openCrossModal()" class="min-h-[50px] p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border-2 border-slate-600 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">👟</span>
-            <span>Cross</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Cross</span>
           </button>
-          <button onclick="flagSidelineBookmark()" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-0.5 transition active:scale-95">
+          <button onclick="flagSidelineBookmark()" class="min-h-[50px] p-2 rounded-xl bg-amber-500/30 hover:bg-amber-500/40 text-amber-200 border-2 border-amber-400 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
             <span class="text-base">📌</span>
-            <span>Flag Film</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Flag Film</span>
           </button>
         </div>
 
@@ -505,10 +505,17 @@
         <h3 class="display text-2xl text-white">Match Setup &amp; Lineup</h3>
       </div>
       <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Opponent Name</label>
-          <input type="text" id="setupOpponent" value="La Morinda" placeholder="e.g. Woodland, Rocklin, Crossfire"
-            class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white focus:outline-none focus:border-brand-500">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[10px] mono uppercase text-teal-400 font-bold mb-1">Opponent Name</label>
+            <input type="text" id="setupOpponent" value="Rocklin" placeholder="e.g. Rocklin, La Morinda"
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white font-bold focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-[10px] mono uppercase text-teal-400 font-bold mb-1">Date of Match</label>
+            <input type="date" id="setupMatchDate"
+              class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white font-mono font-bold focus:outline-none focus:border-brand-500">
+          </div>
         </div>
         <div class="grid grid-cols-3 gap-2">
           <div>
@@ -1218,9 +1225,25 @@
        ========================================================= */
     let activeSquadKey = 'aspire';
     let currentFormation = '4-3-3';
-    let opponentName = 'La Morinda';
+    let opponentName = 'Rocklin';
+    let matchDate = new Date().toISOString().split('T')[0];
+    let canonicalMatch = 'Rocklin (Nov 1)';
     let competitionName = 'GA & ASPIRE 26_27';
     let halfLengthMinutes = 40;
+
+    function formatCanonicalMatchName(opp, dateStr) {
+      if (!dateStr) return opp;
+      try {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+          const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+          const mStr = d.toLocaleDateString('en-US', { month: 'short' });
+          const day = parseInt(parts[2], 10);
+          return `${opp} (${mStr} ${day})`;
+        }
+      } catch(e) {}
+      return `${opp} (${dateStr})`;
+    }
 
     let timerRunning = false;
     let timerInterval = null;
@@ -2276,18 +2299,24 @@
       const p = j ? playerStats[j] : null;
       const who = p ? ` · #${j} ${p.name.split(' ')[0]}` : '';
 
+      // Prompt quick coaching note for film review (can be empty)
+      const note = prompt(`📌 Quick Coaching Note for Film Review (${timeStr}${who}):`, '') || '';
+
       logMatchEvent({
         time: curMins,
+        timeFormatted: timeStr,
         type: 'bookmark',
-        desc: `📌 FILM BOOKMARK (${timeStr})${who}`,
+        desc: `📌 FILM REVIEW (${timeStr})${who}${note ? ': ' + note : ''}`,
         jersey: j || '',
         zone: 'M3',
-        isBookmark: true
+        isBookmark: true,
+        filmReview: true,
+        note: note
       });
 
       deselectPlayer();
       saveState();
-      showToast(`📌 Film Bookmark saved at ${timeStr}${who}!`);
+      showToast(`📌 Film Review bookmark saved at ${timeStr}${who}!`);
     }
 
     /* Shot Outside 18 & Cross Attempt Handlers */
@@ -2445,6 +2474,8 @@
 
     function logMatchEvent(ev) {
       if (!ev.id) ev.id = 'ev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      if (!ev.matchDate) ev.matchDate = matchDate;
+      if (!ev.match) ev.match = canonicalMatch || opponentName;
       matchEvents.unshift(ev);
       renderEventsFeed();
     }
@@ -3808,6 +3839,8 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
        ========================================================= */
     function openNewGameModal() {
       document.getElementById('setupOpponent').value = opponentName;
+      const dateEl = document.getElementById('setupMatchDate');
+      if (dateEl) dateEl.value = matchDate || new Date().toISOString().split('T')[0];
       document.getElementById('setupComp').value = competitionName;
       document.getElementById('setupHalfLength').value = halfLengthMinutes;
       document.getElementById('setupFormation').value = currentFormation;
@@ -4096,6 +4129,9 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
 
     function applyMatchSetup() {
       opponentName = document.getElementById('setupOpponent').value.trim() || 'Opponent';
+      const dateEl = document.getElementById('setupMatchDate');
+      matchDate = (dateEl && dateEl.value) ? dateEl.value : (matchDate || new Date().toISOString().split('T')[0]);
+      canonicalMatch = formatCanonicalMatchName(opponentName, matchDate);
       competitionName = document.getElementById('setupComp').value.trim() || 'GA & ASPIRE 26_27';
       halfLengthMinutes = parseInt(document.getElementById('setupHalfLength').value, 10) || 40;
 
@@ -4238,6 +4274,8 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         activeSquadKey,
         currentFormation,
         opponentName,
+        matchDate,
+        canonicalMatch,
         competitionName,
         halfLengthMinutes,
         matchSeconds,
@@ -4264,7 +4302,9 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         const state = JSON.parse(raw);
         activeSquadKey = state.activeSquadKey || 'aspire';
         currentFormation = state.currentFormation || '4-3-3';
-        opponentName = state.opponentName || 'La Morinda';
+        opponentName = state.opponentName || 'Rocklin';
+        matchDate = state.matchDate || new Date().toISOString().split('T')[0];
+        canonicalMatch = state.canonicalMatch || formatCanonicalMatchName(opponentName, matchDate);
         competitionName = state.competitionName || 'GA & ASPIRE 26_27';
         halfLengthMinutes = state.halfLengthMinutes || 40;
         matchSeconds = state.matchSeconds || 0;

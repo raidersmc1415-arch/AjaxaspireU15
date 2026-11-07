@@ -363,12 +363,20 @@
 
         <!-- Coaching Comment / Voice Input -->
         <div class="space-y-1.5">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between flex-wrap gap-2">
             <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Coaching Note / Observation</label>
-            <button type="button" id="rapidMicBtn" onclick="toggleRapidMic()" class="px-2.5 py-1 rounded-lg bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95 shadow-sm">
-              <span id="rapidMicDot" class="w-2 h-2 rounded-full bg-teal-400"></span>
-              <span id="rapidMicText">🎙️ Dictate Note</span>
-            </button>
+            <div class="flex items-center gap-2">
+              <button type="button" id="rapidReviewBtn" onclick="toggleRapidFilmReview()"
+                class="px-2.5 py-1 rounded-lg bg-pitch hover:bg-surface border border-slate-700 text-slate-400 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95 shadow-sm"
+                title="When enabled, Coach Shawn's note is published directly to the player's portal for film review">
+                <span id="rapidReviewIcon">🔒</span>
+                <span id="rapidReviewText">Private Note</span>
+              </button>
+              <button type="button" id="rapidMicBtn" onclick="toggleRapidMic()" class="px-2.5 py-1 rounded-lg bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95 shadow-sm">
+                <span id="rapidMicDot" class="w-2 h-2 rounded-full bg-teal-400"></span>
+                <span id="rapidMicText">🎙️ Dictate Note</span>
+              </button>
+            </div>
           </div>
           <div class="relative">
             <textarea id="rapidNotes" rows="2" placeholder="Describe the moment, tactical instruction, or what to review on film..."
@@ -594,6 +602,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     let recognition = null;
     let isRapidRecording = false;
     let rapidRecognition = null;
+    let isRapidFilmReview = false;
 
     /* Initialize today date */
     document.addEventListener('DOMContentLoaded', () => {
@@ -804,16 +813,41 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         category,
         tag: currentRapidTag,
         quality: qualityRaw,
-        notes
+        notes,
+        filmReview: Boolean(isRapidFilmReview)
       };
 
       LOGGED_MOMENTS.push(momentObj);
       saveToLocalStorage();
       document.getElementById('rapidNotes').value = '';
+      isRapidFilmReview = false;
+      updateRapidReviewButtonUI();
       adjustRapidTime(1); // Advance time by 1 min
       clearRapidPlayers();
-      showToast(`Logged moment #${LOGGED_MOMENTS.length} at ${time}!`);
+      showToast(`Logged moment #${LOGGED_MOMENTS.length} at ${time}!${momentObj.filmReview ? ' (👁️ Marked for Player Review)' : ''}`);
       updateCountBadges();
+    }
+
+    function toggleRapidFilmReview() {
+      isRapidFilmReview = !isRapidFilmReview;
+      updateRapidReviewButtonUI();
+      showToast(isRapidFilmReview ? '👁️ Marked for Player Review! (Note will be visible in player portal)' : '🔒 Private Coach Note (Hidden from player)');
+    }
+
+    function updateRapidReviewButtonUI() {
+      const btn = document.getElementById('rapidReviewBtn');
+      const icon = document.getElementById('rapidReviewIcon');
+      const text = document.getElementById('rapidReviewText');
+      if (!btn) return;
+      if (isRapidFilmReview) {
+        btn.className = 'px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border-2 border-amber-400 text-amber-300 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95 shadow-[0_0_12px_rgba(245,158,11,0.35)]';
+        if (icon) icon.textContent = '👁️';
+        if (text) text.textContent = '✓ For Player Review';
+      } else {
+        btn.className = 'px-2.5 py-1 rounded-lg bg-pitch hover:bg-surface border border-slate-700 text-slate-400 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95 shadow-sm';
+        if (icon) icon.textContent = '🔒';
+        if (text) text.textContent = 'Private Note';
+      }
     }
 
     /* =========================================================
@@ -1229,14 +1263,26 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
             <td class="py-2.5 px-2 text-amber-300 text-[11px] font-semibold">${esc(m.tag)}</td>
             <td class="py-2.5 px-2 text-center">${qBadge}</td>
             <td class="py-2.5 px-3 text-slate-300 text-[11px] max-w-xs truncate" title="${esc(m.notes)}">${esc(m.notes)}</td>
-            <td class="py-2.5 px-2 text-center">
-              <button onclick="openEditMomentModal(${idx})" class="text-teal-400 hover:text-white text-xs font-bold px-2 py-0.5 rounded hover:bg-teal-600/30 transition mr-1" title="Edit moment notes & details">✏️</button><button onclick="deleteMoment(${idx})" class="text-rose-400 hover:text-white text-xs font-bold px-2 py-0.5 rounded hover:bg-rose-600/30 transition" title="Delete moment">✕</button>
+            <td class="py-2.5 px-2 text-center whitespace-nowrap">
+              <button onclick="toggleMomentFilmReview(${idx})" class="${m.filmReview ? 'text-amber-300 bg-amber-500/20 border border-amber-400/60' : 'text-slate-500 hover:text-slate-300 bg-surface border border-border/80'} text-[11px] font-bold px-2 py-0.5 rounded transition mr-1" title="${m.filmReview ? 'Marked for Player Review (Note is visible to player). Click to make private.' : 'Private Note (Hidden from player). Click to share with player.'}">
+                ${m.filmReview ? '👁️ Review' : '🔒 Private'}
+              </button>
+              <button onclick="openEditMomentModal(${idx})" class="text-teal-400 hover:text-white text-xs font-bold px-1.5 py-0.5 rounded hover:bg-teal-600/30 transition mr-1" title="Edit moment notes & details">✏️</button>
+              <button onclick="deleteMoment(${idx})" class="text-rose-400 hover:text-white text-xs font-bold px-1.5 py-0.5 rounded hover:bg-rose-600/30 transition" title="Delete moment">✕</button>
             </td>
           </tr>
         `;
       }).join('');
 
       updateRunningSummary();
+    }
+
+    function toggleMomentFilmReview(idx) {
+      if (!LOGGED_MOMENTS[idx]) return;
+      LOGGED_MOMENTS[idx].filmReview = !LOGGED_MOMENTS[idx].filmReview;
+      saveToLocalStorage();
+      renderMomentsTable();
+      showToast(LOGGED_MOMENTS[idx].filmReview ? '👁️ Marked for Player Review! (Note will show in player portal)' : '🔒 Set to Private Coach Note (Hidden from player)');
     }
 
     function deleteMoment(idx) {
@@ -1616,6 +1662,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
       document.getElementById('editMomentQuality').value = m.quality || 'Good / Positive';
       document.getElementById('editMomentNotes').value = m.notes || '';
+      const revCb = document.getElementById('editMomentFilmReview');
+      if (revCb) revCb.checked = Boolean(m.filmReview);
       document.getElementById('momentEditModal').classList.remove('hidden');
       document.getElementById('momentEditModal').classList.add('flex');
       document.getElementById('editMomentNotes').focus();
@@ -1658,6 +1706,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
       m.quality = document.getElementById('editMomentQuality').value;
       m.notes = document.getElementById('editMomentNotes').value.trim();
+      const revCb = document.getElementById('editMomentFilmReview');
+      if (revCb) m.filmReview = revCb.checked;
 
       saveToLocalStorage();
       renderMomentsTable();
@@ -1871,6 +1921,17 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       <div>
         <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Coaching Notes &amp; Video Review Observations</label>
         <textarea id="editMomentNotes" rows="4" class="w-full bg-pitch text-xs p-3 rounded-xl border border-teal-500/50 text-white font-sans leading-relaxed focus:outline-none focus:border-brand-500" placeholder="Type or dictate detailed coaching observation..."></textarea>
+      </div>
+
+      <!-- Player Review Priority Toggle -->
+      <div class="bg-pitch/60 border border-amber-500/40 rounded-xl p-3 flex items-center justify-between gap-3">
+        <div>
+          <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+            <span>👁️ Share with Player (Film Review Priority)</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5">When checked, Coach Shawn's note is published to the player's portal. If unchecked, note remains strictly private.</div>
+        </div>
+        <input type="checkbox" id="editMomentFilmReview" class="w-5 h-5 rounded border-border text-amber-500 focus:ring-amber-400 cursor-pointer">
       </div>
 
       <!-- Actions -->
