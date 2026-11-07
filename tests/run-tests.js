@@ -183,9 +183,9 @@ function createCodeGsSandbox() {
     ['2026-11-01', 'Camila Deleon', 'Check my shoulder before receiving', 'Great takeaway Cami!']
   ];
   const actionLogRows = [
-    ['Event_ID', 'Match_Date', 'Match_Name', 'Opponent', 'Half', 'Match_Clock', 'Zone', 'Outcome', 'Category', 'Tag', 'Player_Name', 'Jersey_Num', 'Coach_Notes', 'Film_Review', 'Status', 'Last_Updated'],
-    ['601', '2026-11-01', 'Rocklin (Nov 1)', 'Rocklin', 'H2', '47:00', 'M3', 'Grow', 'Defensive Moment', 'Defensive Shape', '#9 Camila Deleon', '9', 'Assigned clip note visible to player', 'TRUE', 'Published', '2026-11-02'],
-    ['602', '2026-11-01', 'Rocklin (Nov 1)', 'Rocklin', 'H2', '62:00', 'D3', 'Glow', 'Turnover', 'Key Pass / Line Breaker', '#9 Camila Deleon', '9', 'Internal coach-only note redacted for player', 'FALSE', 'Published', '2026-11-02']
+    ['Event_ID', 'Match_Date', 'Match_Name', 'Opponent', 'Half', 'Match_Clock', 'Zone', 'Outcome', 'Category', 'Tag', 'Player_Name', 'Jersey_Num', 'Coach_Notes', 'Note_To_Player', 'Film_Review', 'Status', 'Last_Updated'],
+    ['601', '2026-11-01', 'Rocklin (Nov 1)', 'Rocklin', 'H2', '47:00', 'M3', 'Grow', 'Defensive Moment', 'Defensive Shape', '#9 Camila Deleon', '9', 'Internal coach observation', 'Assigned player note visible in portal', 'TRUE', 'Published', '2026-11-02'],
+    ['602', '2026-11-01', 'Rocklin (Nov 1)', 'Rocklin', 'H2', '62:00', 'D3', 'Glow', 'Turnover', 'Key Pass / Line Breaker', '#9 Camila Deleon', '9', 'Internal coach-only note redacted for player', '', 'FALSE', 'Published', '2026-11-02']
   ];
   const kvRows = [
     ['key', 'value', 'updated_at']
@@ -301,14 +301,23 @@ check('3a. Per-player API reads without valid PIN return no data; valid PIN retu
   assert.strictEqual(fmUnauth.success, false, 'playerFilmMoments without PIN must return success: false');
   assert.strictEqual(fmUnauth.moments.length, 0, 'playerFilmMoments without PIN must return 0 moments');
 
-  // Authenticated playerFilmMoments redacts non-filmReview notes
+  // Authenticated playerFilmMoments redacts coach notes; delivers noteToPlayer
   const fmAuth = JSON.parse(sandbox.doGet({ parameter: { action: 'playerFilmMoments', name: 'Camila Deleon', pin: '9999' } }).getContent());
   assert.strictEqual(fmAuth.success, true);
   assert.strictEqual(fmAuth.moments.length, 2);
   const mReview = fmAuth.moments.find(m => String(m.id) === '601');
   const mRaw = fmAuth.moments.find(m => String(m.id) === '602');
-  assert.strictEqual(mReview.note, 'Assigned clip note visible to player');
-  assert.strictEqual(mRaw.note, '', 'Raw coaching note with filmReview=false must be redacted for player');
+  assert.strictEqual(mReview.noteToPlayer, 'Assigned player note visible in portal');
+  assert.strictEqual(mReview.note, '', 'Internal coach note must be redacted for player');
+  assert.strictEqual(mRaw.noteToPlayer, '', 'Blank Note to Player must return empty string');
+  assert.strictEqual(mRaw.note, '', 'Internal coach note must be redacted for player');
+
+  // Authenticated Coach caller retains both Coach Note and Note to Player
+  const fmCoach = JSON.parse(sandbox.doGet({ parameter: { action: 'playerFilmMoments', name: 'Camila Deleon', pin: 'TEST_SERVER_COACH_SECRET' } }).getContent());
+  assert.strictEqual(fmCoach.success, true);
+  const mCoach601 = fmCoach.moments.find(m => String(m.id) === '601');
+  assert.strictEqual(mCoach601.note, 'Internal coach observation', 'Coach caller retains Coach Note');
+  assert.strictEqual(mCoach601.noteToPlayer, 'Assigned player note visible in portal', 'Coach caller retains Note to Player');
 
   // Unauthenticated POST IDP write
   const postUnauth = JSON.parse(sandbox.doPost({

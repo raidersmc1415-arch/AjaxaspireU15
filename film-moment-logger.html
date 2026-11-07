@@ -516,7 +516,7 @@
           <pre id="geminiPromptBox" class="bg-pitch p-4 rounded-xl border border-border font-mono text-[11px] text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed select-all">You are the official match film breakdown assistant for the AJAX Aspire U15 soccer team.
 I will paste my raw spoken voice memos from watching game film. Break each moment into a clean CSV row matching this exact column schema:
 
-Date,Timestamp (MM:SS),Half,Field Zone,Player(s) Involved,Event Category,Quality / Outcome,Coaching Notes,Match,Short Form Tag
+Date,Timestamp (MM:SS),Half,Field Zone,Player(s) Involved,Event Category,Quality / Outcome,Coaching Notes,Note to Player,Match,Short Form Tag
 
 STRICT RULES:
 1. Anti-Date Formatting: When multiple players are involved, ALWAYS format them as a quoted string with hashtags like "#8, #7" or "#4, #24". NEVER output bare numbers like "8, 7" which Google Sheets or Excel will misinterpret as dates.
@@ -1350,7 +1350,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
        CSV GENERATION & EXPORT
        ========================================================= */
     function generateCleanCsvString() {
-      const headers = ['Date', 'Timestamp (MM:SS)', 'Half', 'Field Zone', 'Player(s) Involved', 'Event Category', 'Quality / Outcome', 'Coaching Notes', 'Match', 'Short Form Tag'];
+      const headers = ['Date', 'Timestamp (MM:SS)', 'Half', 'Field Zone', 'Player(s) Involved', 'Event Category', 'Quality / Outcome', 'Coaching Notes', 'Note to Player', 'Match', 'Short Form Tag'];
       const rows = LOGGED_MOMENTS.map(m => [
         csvEscape(m.date),
         csvEscape(m.time),
@@ -1360,6 +1360,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         csvEscape(m.category),
         csvEscape(m.quality),
         csvEscape(m.notes),
+        csvEscape(m.noteToPlayer || ''),
         csvEscape(m.match),
         csvEscape(m.tag)
       ]);
@@ -1673,6 +1674,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
       document.getElementById('editMomentQuality').value = m.quality || 'Good / Positive';
       document.getElementById('editMomentNotes').value = m.notes || '';
+      const npEl = document.getElementById('editMomentNoteToPlayer');
+      if (npEl) npEl.value = m.noteToPlayer || '';
       const revCb = document.getElementById('editMomentFilmReview');
       if (revCb) revCb.checked = Boolean(m.filmReview);
       document.getElementById('momentEditModal').classList.remove('hidden');
@@ -1724,6 +1727,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       m.outcome = /glow.*grow/i.test(m.quality) ? 'Glow & Grow' : (/good|pos|glow/i.test(m.quality) ? 'Glow' : (/poor|neg|grow|conceded/i.test(m.quality) ? 'Grow' : 'Neutral'));
       m.notes = document.getElementById('editMomentNotes').value.trim();
       m.note = m.notes;
+      const npSaveEl = document.getElementById('editMomentNoteToPlayer');
+      m.noteToPlayer = npSaveEl ? npSaveEl.value.trim() : (m.noteToPlayer || '');
       const revCb = document.getElementById('editMomentFilmReview');
       if (revCb) m.filmReview = revCb.checked;
 
@@ -1936,19 +1941,31 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         </div>
       </div>
 
-      <!-- Coaching Notes Textarea -->
+      <!-- Coaching Notes Textarea (Staff / Private) -->
       <div>
-        <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Coaching Notes &amp; Video Review Observations</label>
-        <textarea id="editMomentNotes" rows="4" class="w-full bg-pitch text-xs p-3 rounded-xl border border-teal-500/50 text-white font-sans leading-relaxed focus:outline-none focus:border-brand-500" placeholder="Type or dictate detailed coaching observation..."></textarea>
+        <div class="flex items-center justify-between mb-1">
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold">Coaching Notes (Staff / Private)</label>
+          <span class="text-[9px] mono text-slate-500">Staff review only · Redacted from player</span>
+        </div>
+        <textarea id="editMomentNotes" rows="3" class="w-full bg-pitch text-xs p-3 rounded-xl border border-border text-white font-sans leading-relaxed focus:outline-none focus:border-brand-500" placeholder="Type or dictate internal tactical observation..."></textarea>
+      </div>
+
+      <!-- Note to Player Textarea (Visible in Portal) -->
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label class="block text-[10px] mono uppercase text-teal-400 font-bold">✉️ Note to Player (Player Portal Guidance)</label>
+          <span class="text-[9px] mono text-teal-400/80">Visible in player portal if text entered</span>
+        </div>
+        <textarea id="editMomentNoteToPlayer" rows="2" class="w-full bg-pitch text-xs p-3 rounded-xl border border-teal-500/50 text-teal-100 font-sans leading-relaxed focus:outline-none focus:border-teal-400" placeholder="Constructive guidance, pressing cue, or reflection prompt for her portal... (Leave blank if none)"></textarea>
       </div>
 
       <!-- Player Review Priority Toggle -->
       <div class="bg-pitch/60 border border-amber-500/40 rounded-xl p-3 flex items-center justify-between gap-3">
         <div>
           <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-            <span>👁️ Share with Player (Film Review Priority)</span>
+            <span>👁️ Flag for Film Review Session</span>
           </div>
-          <div class="text-[10px] text-slate-400 mt-0.5">When checked, Coach Shawn's note is published to the player's portal. If unchecked, note remains strictly private.</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">Flags this clip as a review priority for the player to watch and reflect on.</div>
         </div>
         <input type="checkbox" id="editMomentFilmReview" class="w-5 h-5 rounded border-border text-amber-500 focus:ring-amber-400 cursor-pointer">
       </div>

@@ -1449,7 +1449,7 @@ function handleUpdateSeasonStats(payload) {
 var MATCH_ACTION_LOG_HEADERS = [
   'Event_ID', 'Match_Date', 'Match_Name', 'Opponent', 'Half',
   'Match_Clock', 'Zone', 'Outcome', 'Category', 'Tag',
-  'Player_Name', 'Jersey_Num', 'Coach_Notes', 'Film_Review',
+  'Player_Name', 'Jersey_Num', 'Coach_Notes', 'Note_To_Player', 'Film_Review',
   'Status', 'Last_Updated'
 ];
 
@@ -1516,6 +1516,11 @@ function getOrCreateMatchActionLogSheet() {
       .setBackground('#0D1B2A')
       .setFontColor('#FFFFFF');
     sheet.setFrozenRows(1);
+  } else {
+    var curHeaders = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0].map(function(h) { return String(h || '').trim().toLowerCase(); });
+    if (curHeaders.indexOf('note_to_player') === -1 && curHeaders.indexOf('note to player') === -1) {
+      sheet.getRange(1, 1, 1, MATCH_ACTION_LOG_HEADERS.length).setValues([MATCH_ACTION_LOG_HEADERS]);
+    }
   }
   return sheet;
 }
@@ -1553,6 +1558,7 @@ function buildActionRowFromMoment(m, nowStr) {
   var category = String(m.category || m.cat || 'General').trim();
   var tag = String(m.tag || 'Action').trim();
   var note = String(m.note !== undefined ? m.note : (m.notes !== undefined ? m.notes : (m.n || ''))).trim();
+  var noteToPlayer = String(m.noteToPlayer !== undefined ? m.noteToPlayer : (m.playerNote || '')).trim();
   var filmReview = Boolean(m.filmReview || m.isBookmark);
   var status = String(m.status || 'Published').trim();
   var eventId = String(m.eventId || m.id || (matchName.replace(/[^a-zA-Z0-9]/g, '') + '_' + half + '_' + clock.replace(':', '') + '_' + (primaryJersey || 'T')));
@@ -1571,6 +1577,7 @@ function buildActionRowFromMoment(m, nowStr) {
     playerNames.join(', '),
     jList.join(', '),
     note,
+    noteToPlayer,
     filmReview ? 'TRUE' : 'FALSE',
     status,
     nowStr || new Date().toISOString()
@@ -1598,6 +1605,7 @@ function readAllMatchActionLogRows() {
   var iPlayer = idx('player_name');
   var iJersey = idx('jersey_num');
   var iNotes  = idx('coach_notes');
+  var iNoteToPlayer = idx('note_to_player') !== -1 ? idx('note_to_player') : idx('note to player');
   var iRev    = idx('film_review');
   var iStatus = idx('status');
   var iUpd    = idx('last_updated');
@@ -1657,6 +1665,7 @@ function readAllMatchActionLogRows() {
       j: jerseys,
       note: iNotes !== -1 ? String(row[iNotes] || '').trim() : '',
       n: iNotes !== -1 ? String(row[iNotes] || '').trim() : '',
+      noteToPlayer: iNoteToPlayer !== -1 ? String(row[iNoteToPlayer] || '').trim() : '',
       filmReview: isReview,
       status: iStatus !== -1 ? String(row[iStatus] || 'Published').trim() : 'Published',
       updatedAt: iUpd !== -1 ? String(row[iUpd] || '').trim() : ''
@@ -1798,6 +1807,7 @@ function handleUpdateSingleMatchAction(payload) {
         category: m.category || m.cat || 'General',
         tag: m.tag || 'Action',
         note: m.note !== undefined ? m.note : (m.notes || ''),
+        noteToPlayer: m.noteToPlayer !== undefined ? m.noteToPlayer : (m.playerNote || ''),
         filmReview: Boolean(m.filmReview),
         jerseys: m.jerseys || m.j || [],
         players: m.players || [],
@@ -2045,6 +2055,7 @@ function getPlayerFilmMoments(playerName, playerPin) {
         if (overrides[itemId].deleted) continue;
         var ov = overrides[itemId];
         item.note = ov.note !== undefined ? ov.note : item.note;
+        item.noteToPlayer = ov.noteToPlayer !== undefined ? ov.noteToPlayer : (item.noteToPlayer || '');
         item.filmReview = ov.filmReview !== undefined ? ov.filmReview : item.filmReview;
         item.outcome = ov.outcome || item.outcome;
         item.tag = ov.tag || item.tag;
@@ -2072,11 +2083,14 @@ function getPlayerFilmMoments(playerName, playerPin) {
         }
       }
       if (matches) {
-        // Redact coaching notes unless filmReview is true (or caller is Coach)
-        if (!isCoach && !item.filmReview) {
+        // Redact internal coaching notes from player; players only receive noteToPlayer if provided
+        if (!isCoach) {
           item.note = '';
           item.notes = '';
           item.n = '';
+          item.noteToPlayer = String(item.noteToPlayer || '').trim();
+        } else {
+          item.noteToPlayer = String(item.noteToPlayer || '').trim();
         }
         playerMoments.push(item);
       }
