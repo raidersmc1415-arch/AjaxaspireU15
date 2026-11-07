@@ -1696,7 +1696,12 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       const rawJers = document.getElementById('editMomentJerseys').value.trim();
       const parsedNums = (rawJers.match(/\d+/g) || []).map(Number).filter(n => n > 0 && n < 100);
       m.jerseys = parsedNums;
-      m.playersRaw = parsedNums.length ? parsedNums.map(j => '#' + j).join(', ') : (rawJers || 'Team');
+      m.playersRaw = parsedNums.length
+        ? parsedNums.map(j => {
+            const pObj = (typeof ROSTER !== 'undefined' && Array.isArray(ROSTER)) ? ROSTER.find(r => r.jersey === j) : null;
+            return pObj ? `#${j} ${pObj.name}` : `#${j}`;
+          }).join(', ')
+        : (rawJers || 'Team');
       m.category = document.getElementById('editMomentCategory').value;
 
       // Save Action Tag
@@ -1705,14 +1710,17 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       m.tag = tSel === 'CUSTOM' ? (tCust || 'Action') : tSel;
 
       m.quality = document.getElementById('editMomentQuality').value;
+      m.outcome = /glow.*grow/i.test(m.quality) ? 'Glow & Grow' : (/good|pos|glow/i.test(m.quality) ? 'Glow' : (/poor|neg|grow|conceded/i.test(m.quality) ? 'Grow' : 'Neutral'));
       m.notes = document.getElementById('editMomentNotes').value.trim();
+      m.note = m.notes;
       const revCb = document.getElementById('editMomentFilmReview');
       if (revCb) m.filmReview = revCb.checked;
 
       saveToLocalStorage();
+      syncMomentsToCloudHub();
       renderMomentsTable();
       closeMomentEditModal();
-      showToast('Moment updated successfully! 💾');
+      showToast('Moment updated & synced to Sheet + Player Portal! ☁️');
     }
 
     function deleteCurrentEditedMoment() {

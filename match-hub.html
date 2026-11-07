@@ -854,18 +854,46 @@
           <div id="filmMatchCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
         </div>
 
+        <!-- Pitchside iPad Draft Handoff Banner (Auto-Shown When Staged Draft Found) -->
+        <div id="pitchsideDraftBanner" class="hidden bg-emerald-950/60 border-2 border-emerald-500/60 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-lg">
+          <div class="space-y-0.5">
+            <div class="mono text-[10px] uppercase font-bold text-emerald-400 tracking-wider">📲 Pitchside iPad Draft Ready for Film Study</div>
+            <div class="text-sm font-bold text-white" id="pitchsideDraftBannerTitle">Staged Match Draft Found</div>
+            <div class="text-xs text-slate-300" id="pitchsideDraftBannerSub">Load your in-game logged actions onto the timeline to refine timestamps, expand notes, and flag Film Review clips.</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="loadPitchsideDraftIntoFilmHub()" class="text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3.5 py-2 rounded-xl transition shadow active:scale-95">
+              📥 Load Draft into Film Reviewer
+            </button>
+            <button type="button" onclick="dismissPitchsideDraftBanner()" class="text-xs bg-pitch hover:bg-surface text-slate-300 border border-border px-2.5 py-2 rounded-xl transition">
+              Dismiss
+            </button>
+          </div>
+        </div>
+
         <!-- Interactive Timestamped Film Log Explorer -->
         <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
               <span>Match Film Log</span>
               <span id="filmLogCountLabel" class="text-[10px] bg-pitch px-2.5 py-0.5 rounded text-brand-400 border border-border mono"></span>
+              <span id="filmCloudSyncBadge" class="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded mono font-semibold">☁️ Sheet &amp; Portal Auto-Sync Active</span>
             </h3>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <button type="button" onclick="openNewFilmClipModal()" class="text-[11px] bg-teal-600 hover:bg-teal-500 text-white font-bold px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 shadow active:scale-95" title="Add a new film moment directly"><span>➕ Add Moment</span></button>
+              <button type="button" onclick="publishMatchFilmToSheet()" class="text-[11px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 shadow active:scale-95" title="Publish match film actions &amp; coach notes to Master Google Sheet (Match_Action_Log) and Player Portal">
+                <span>☁️ Publish Film to Sheet</span>
+              </button>
               <button type="button" onclick="exportFilmEventsCsv()" class="text-[11px] bg-pitch hover:bg-surface border border-emerald-500/40 text-emerald-300 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1.5" title="Export verified film moments to CSV">
                 <span>⬇️ Export Film CSV</span>
               </button>
+              <button type="button" onclick="exportFullSeasonBackup()" class="text-[11px] bg-pitch hover:bg-surface border border-amber-500/40 text-amber-300 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1.5" title="Download full season disaster recovery backup (.json &amp; .csv)">
+                <span>💾 Full Season Backup</span>
+              </button>
+              <label class="text-[11px] bg-pitch hover:bg-surface border border-slate-500/40 text-slate-300 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1.5 cursor-pointer" title="Restore season data from a saved .json backup file">
+                <span>📂 Restore Backup</span>
+                <input type="file" accept=".json" class="hidden" onchange="restoreFullSeasonBackupFile(event)">
+              </label>
               <a href="film-moment-logger.html" target="_blank" class="text-[11px] bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1.5">
                 <span>🎙️ Voice &amp; Fast Logger</span> ↗
               </a>
@@ -2108,7 +2136,7 @@
   <!-- ======================================================== -->
   <!-- MODAL: EDIT / CORRECT FILM CLIP (MATCH FILM LOG FIXER) -->
   <!-- ======================================================== -->
-  <div id="filmClipEditModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4" onclick="if(event.target===this) closeFilmClipEditModal()">
+  <div id="filmClipEditModal" style="z-index: 70;" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4" onclick="if(event.target===this) closeFilmClipEditModal()">
     <div class="bg-surface border border-teal-500/50 rounded-2xl max-w-xl w-full p-4 sm:p-6 shadow-2xl relative space-y-4 max-h-[92vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="fceModalTitle">
       
       <!-- Close Button -->
@@ -8174,8 +8202,8 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
       let players = [];
       let playersRaw = '';
       if (jerseys.length) {
-        players = jerseys.map(j => `#${j} ${ASPIRE_JERSEY_MAP[j]?.name || ''}`);
-        playersRaw = jerseys.join(', ');
+        players = jerseys.map(j => `#${j} ${ASPIRE_JERSEY_MAP[j]?.name || ''}`.trim());
+        playersRaw = players.join(', ');
       } else {
         players = ['Team'];
         playersRaw = 'Team';
@@ -8183,6 +8211,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
 
       const matchName = ($('fceMatch').value || 'Rocklin (Nov 1)').trim();
       const isCrit = (tag === 'Goal Conceded' || qualityRaw === 'Goal Conceded');
+      let updatedMomentRef = null;
 
       ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)'].forEach(k => {
         if (!DATA[k] || !Array.isArray(DATA[k].filmEvents)) return;
@@ -8192,6 +8221,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
           DATA[k].filmEvents.push(ev);
         }
         if (ev) {
+          ev.match = matchName;
           ev.outcome = outcome;
           ev.qualityRaw = qualityRaw;
           ev.tag = tag;
@@ -8205,6 +8235,8 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
           ev.playersRaw = playersRaw;
           ev.note = note;
           ev.filmReview = filmReview;
+          ev.isCritical = isCrit;
+          if (!updatedMomentRef) updatedMomentRef = { ...ev };
         }
         applyFilmEventsToTeam(DATA[k], DATA[k].filmEvents);
       });
@@ -8213,10 +8245,15 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
         localStorage.setItem('matchhub_custom_data', JSON.stringify(DATA));
       } catch (e) {}
 
+      if (updatedMomentRef) {
+        syncMomentEditToCloud(updatedMomentRef);
+      }
+
       closeFilmClipEditModal();
       renderFilmLogList();
       renderAll();
-      showToast(`Moment #${id} updated & metrics recalculated 💾`);
+      refreshSecondaryFilmViewsAfterEdit();
+      showToast(`Moment #${id} saved & synced to Master Sheet + Player Portal ☁️`);
     }
 
     function deleteFilmClip() {
@@ -8224,8 +8261,11 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
       if (!id) return;
       if (!confirm(`Are you sure you want to permanently delete film moment #${id}?`)) return;
 
+      let deletedMatchName = 'Rocklin (Nov 1)';
       ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)'].forEach(k => {
         if (!DATA[k] || !Array.isArray(DATA[k].filmEvents)) return;
+        const found = DATA[k].filmEvents.find(e => e.id === id);
+        if (found && found.match) deletedMatchName = found.match;
         DATA[k].filmEvents = DATA[k].filmEvents.filter(e => e.id !== id);
         applyFilmEventsToTeam(DATA[k], DATA[k].filmEvents);
       });
@@ -8234,10 +8274,361 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
         localStorage.setItem('matchhub_custom_data', JSON.stringify(DATA));
       } catch (e) {}
 
+      syncMomentDeleteToCloud(id, deletedMatchName);
+
       closeFilmClipEditModal();
       renderFilmLogList();
       renderAll();
-      showToast(`Moment #${id} deleted & metrics recalculated 🗑️`);
+      refreshSecondaryFilmViewsAfterEdit();
+      showToast(`Moment #${id} deleted & synced to Sheet + Player Portal 🗑️`);
+    }
+
+    function refreshSecondaryFilmViewsAfterEdit() {
+      try {
+        const pModal = $('playerModal');
+        if (pModal && !pModal.classList.contains('hidden') && selectedPlayer) {
+          const idx = players.findIndex(p => p.name === selectedPlayer.name);
+          if (idx !== -1) openPlayerModal(idx);
+        }
+        if (activeTab === 'tab-reports') {
+          renderReportCardPlayerFilmPanel();
+        }
+      } catch (e) {}
+    }
+
+    function getLocalFilmMomentOverrides() {
+      try {
+        const raw = localStorage.getItem('ajax_film_moment_overrides') || NOTES['ajax_film_moment_overrides'];
+        if (raw) return typeof raw === 'string' ? JSON.parse(raw) : raw;
+      } catch (e) {}
+      return {};
+    }
+
+    function applyFilmMomentOverridesToData(overridesObj) {
+      if (!overridesObj || typeof overridesObj !== 'object') return false;
+      const entries = Object.entries(overridesObj);
+      if (!entries.length) return false;
+      let changed = false;
+      ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)'].forEach(k => {
+        if (!DATA[k] || !Array.isArray(DATA[k].filmEvents)) return;
+        entries.forEach(([idKey, ov]) => {
+          const numId = Number(ov.id || idKey);
+          if (ov.deleted) {
+            const before = DATA[k].filmEvents.length;
+            DATA[k].filmEvents = DATA[k].filmEvents.filter(e => Number(e.id) !== numId);
+            if (DATA[k].filmEvents.length !== before) changed = true;
+            return;
+          }
+          let ev = DATA[k].filmEvents.find(e => Number(e.id) === numId);
+          if (!ev && ov.match && ov.time) {
+            ev = { id: numId, match: ov.match };
+            DATA[k].filmEvents.push(ev);
+          }
+          if (ev) {
+            if (ov.match) ev.match = ov.match;
+            if (ov.half) ev.half = ov.half;
+            if (ov.time) ev.time = ov.time;
+            if (ov.zone) { ev.zone = ov.zone; ev.zoneDetail = ov.zone; }
+            if (ov.outcome) ev.outcome = ov.outcome;
+            if (ov.category) ev.category = ov.category;
+            if (ov.tag) ev.tag = ov.tag;
+            if (ov.note !== undefined) ev.note = ov.note;
+            if (ov.filmReview !== undefined) ev.filmReview = Boolean(ov.filmReview);
+            if (Array.isArray(ov.jerseys)) ev.jerseys = ov.jerseys;
+            if (Array.isArray(ov.players)) ev.players = ov.players;
+            if (ov.playersRaw) ev.playersRaw = ov.playersRaw;
+            changed = true;
+          }
+        });
+        if (changed) applyFilmEventsToTeam(DATA[k], DATA[k].filmEvents);
+      });
+      return changed;
+    }
+
+    async function syncMomentEditToCloud(ev) {
+      const badge = $('filmCloudSyncBadge');
+      if (badge) badge.textContent = '☁️ Syncing edit to Sheet & Portal...';
+      try {
+        const overrides = getLocalFilmMomentOverrides();
+        overrides[String(ev.id)] = {
+          id: ev.id,
+          match: ev.match,
+          half: ev.half,
+          time: ev.time,
+          zone: ev.zone,
+          outcome: ev.outcome,
+          category: ev.category,
+          tag: ev.tag,
+          note: ev.note,
+          filmReview: Boolean(ev.filmReview),
+          jerseys: ev.jerseys || [],
+          players: ev.players || [],
+          playersRaw: ev.playersRaw || '',
+          updatedAt: new Date().toISOString()
+        };
+        const ovStr = JSON.stringify(overrides);
+        try { localStorage.setItem('ajax_film_moment_overrides', ovStr); } catch (e) {}
+        NOTES['ajax_film_moment_overrides'] = ovStr;
+
+        // 1. Dual-write override dictionary to kv['notes'] (works immediately on live deployment)
+        syncNoteToCloudHub('ajax_film_moment_overrides', ovStr);
+
+        // 2. Write single row update to Match_Action_Log sheet tab
+        const pin = window.CURRENT_COACH_PIN || '4111';
+        fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'updateSingleMatchAction',
+            pin,
+            moment: overrides[String(ev.id)]
+          })
+        }).catch(() => {});
+
+        // 3. Also sync the edited match's full moment array to saveFilmMoments so playerFilmMoments endpoint is 100% fresh
+        await syncMatchMomentsArrayToCloud(ev.match);
+
+        if (badge) badge.textContent = `☁️ Saved Moment #${ev.id} to Sheet & Portal ✓`;
+      } catch (err) {
+        if (badge) badge.textContent = '⚠️ Local Saved (Cloud Retry Queued)';
+      }
+    }
+
+    async function syncMomentDeleteToCloud(id, matchName) {
+      try {
+        const overrides = getLocalFilmMomentOverrides();
+        overrides[String(id)] = { id, deleted: true, updatedAt: new Date().toISOString() };
+        const ovStr = JSON.stringify(overrides);
+        try { localStorage.setItem('ajax_film_moment_overrides', ovStr); } catch (e) {}
+        NOTES['ajax_film_moment_overrides'] = ovStr;
+        syncNoteToCloudHub('ajax_film_moment_overrides', ovStr);
+
+        const pin = window.CURRENT_COACH_PIN || '4111';
+        fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'deleteSingleMatchAction', pin, id })
+        }).catch(() => {});
+
+        if (matchName) await syncMatchMomentsArrayToCloud(matchName);
+      } catch (e) {}
+    }
+
+    async function syncMatchMomentsArrayToCloud(matchName) {
+      if (!matchName) return;
+      const allEv = DATA['AJAX ASPIRE U15']?.filmEvents || [];
+      const matchMoments = allEv.filter(e => String(e.match || '').toLowerCase() === String(matchName).toLowerCase()).map(e => {
+        const jList = Array.isArray(e.jerseys) ? e.jerseys : [];
+        const fullPlayers = jList.length
+          ? jList.map(j => `#${j} ${ASPIRE_JERSEY_MAP[j]?.name || ''}`.trim())
+          : (Array.isArray(e.players) ? e.players : []);
+        const fullRaw = fullPlayers.length ? fullPlayers.join(', ') : (e.playersRaw || 'Team');
+        return {
+          id: e.id,
+          match: e.match,
+          m: e.match,
+          half: e.half || 'H1',
+          h: e.half || 'H1',
+          time: e.time || '00:00',
+          t: e.time || '00:00',
+          zone: e.zone || 'M3',
+          z: e.zone || 'M3',
+          outcome: e.outcome || 'Glow',
+          o: e.outcome || 'Glow',
+          category: e.category || 'General',
+          cat: e.category || 'General',
+          tag: e.tag || 'Action',
+          jerseys: jList,
+          j: jList,
+          players: fullPlayers,
+          playersRaw: fullRaw,
+          note: e.note || '',
+          notes: e.note || '',
+          n: e.note || '',
+          filmReview: Boolean(e.filmReview)
+        };
+      });
+      if (!matchMoments.length) return;
+      const pin = window.CURRENT_COACH_PIN || '4111';
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'saveFilmMoments',
+          pin,
+          match: matchName,
+          moments: matchMoments
+        })
+      });
+    }
+
+    async function publishMatchFilmToSheet() {
+      const selectedMatch = $('filmMatchFilter')?.value || 'ALL';
+      const badge = $('filmCloudSyncBadge');
+      if (badge) badge.textContent = '☁️ Publishing to Master Sheet...';
+      showToast('☁️ Publishing finalized match actions to Master Google Sheet & Player Portal...');
+
+      try {
+        const allEv = DATA['AJAX ASPIRE U15']?.filmEvents || [];
+        const matchesToPublish = selectedMatch !== 'ALL'
+          ? [selectedMatch]
+          : ['Rocklin (Nov 1)', 'La Morinda'];
+
+        for (const mName of matchesToPublish) {
+          await syncMatchMomentsArrayToCloud(mName);
+        }
+
+        // Also push complete rows to Match_Action_Log tab
+        const pin = window.CURRENT_COACH_PIN || '4111';
+        const targetEvents = selectedMatch !== 'ALL'
+          ? allEv.filter(e => e.match === selectedMatch)
+          : allEv;
+
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveMatchActionRows',
+            pin,
+            match: selectedMatch !== 'ALL' ? selectedMatch : '',
+            replaceMatch: selectedMatch !== 'ALL',
+            moments: targetEvents
+          })
+        });
+
+        if (badge) badge.textContent = `☁️ Published (${targetEvents.length} actions synced) ✓`;
+        showToast(`✅ Published ${targetEvents.length} film actions to Master Google Sheet & Player Portal!`);
+      } catch (err) {
+        if (badge) badge.textContent = '⚠️ Publish Notice — Saved Locally';
+        showToast('Saved locally; cloud sync will retry.');
+      }
+    }
+
+    function exportFullSeasonBackup() {
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      const backupPayload = {
+        backupVersion: '2.0',
+        exportedAt: new Date().toISOString(),
+        team: 'Ajax Aspire U15 & GA U15',
+        data: DATA,
+        notes: NOTES,
+        reportDrafts: REPORT_DRAFTS,
+        filmMomentOverrides: getLocalFilmMomentOverrides()
+      };
+      const jsonBlob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json;charset=utf-8;' });
+      const jsonUrl = URL.createObjectURL(jsonBlob);
+      const a = document.createElement('a');
+      a.href = jsonUrl;
+      a.download = `ajax_aspire_u15_full_season_backup_${dateStamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(jsonUrl);
+
+      // Also trigger CSV export of all film moments
+      exportFilmEventsCsv();
+      showToast(`💾 Full Season Backup (.json + .csv) downloaded (${dateStamp})!`);
+    }
+
+    function restoreFullSeasonBackupFile(event) {
+      const file = event?.target?.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (!parsed || !parsed.data || !parsed.data['AJAX ASPIRE U15']) {
+            alert('Invalid backup file format.');
+            return;
+          }
+          if (!confirm(`Restore full season backup from ${parsed.exportedAt || 'file'}? (${(parsed.data['AJAX ASPIRE U15'].filmEvents || []).length} film moments)`)) {
+            return;
+          }
+          DATA = parsed.data;
+          if (parsed.notes && typeof parsed.notes === 'object') {
+            NOTES = { ...NOTES, ...parsed.notes };
+          }
+          if (parsed.reportDrafts && typeof parsed.reportDrafts === 'object') {
+            Object.assign(REPORT_DRAFTS, parsed.reportDrafts);
+          }
+          if (parsed.filmMomentOverrides && typeof parsed.filmMomentOverrides === 'object') {
+            localStorage.setItem('ajax_film_moment_overrides', JSON.stringify(parsed.filmMomentOverrides));
+          }
+          localStorage.setItem('matchhub_custom_data', JSON.stringify(DATA));
+          renderAll();
+          renderFilmLogList();
+          showToast('✅ Full Season Backup restored successfully!');
+        } catch (err) {
+          alert('Failed to parse backup file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    let PENDING_PITCHSIDE_DRAFT = null;
+    function checkAndRenderPitchsideDraftBanner(draftObj) {
+      if (!draftObj || typeof draftObj !== 'object' || !Array.isArray(draftObj.moments) || !draftObj.moments.length) return;
+      const dismissedSig = localStorage.getItem('ajax_dismissed_pitchside_draft_sig');
+      const sig = `${draftObj.match || draftObj.opponent}_${draftObj.moments.length}_${draftObj.savedAt || ''}`;
+      if (dismissedSig === sig) return;
+
+      PENDING_PITCHSIDE_DRAFT = { ...draftObj, _sig: sig };
+      const banner = $('pitchsideDraftBanner');
+      if (!banner) return;
+      $('pitchsideDraftBannerTitle').textContent = `Pitchside Draft Found: ${draftObj.match || draftObj.opponent || 'New Match'} (${draftObj.score || ''}) · ${draftObj.moments.length} Logged Actions`;
+      $('pitchsideDraftBannerSub').textContent = `Recorded ${draftObj.matchDate || 'on iPad'}. Click to load all ${draftObj.moments.length} in-game moments into the Film Reviewer to refine timestamps and coaching notes.`;
+      banner.classList.remove('hidden');
+    }
+
+    function loadPitchsideDraftIntoFilmHub() {
+      if (!PENDING_PITCHSIDE_DRAFT || !Array.isArray(PENDING_PITCHSIDE_DRAFT.moments)) return;
+      const draft = PENDING_PITCHSIDE_DRAFT;
+      const matchTitle = draft.match || draft.opponent || 'New Match';
+
+      ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)'].forEach(k => {
+        if (!DATA[k]) return;
+        DATA[k].filmEvents = DATA[k].filmEvents || [];
+        let maxId = DATA[k].filmEvents.reduce((m, e) => Math.max(m, Number(e.id) || 0), 0);
+        const existingSigs = new Set(DATA[k].filmEvents.map(e => `${e.match}::${e.time}::${e.tag || ''}::${e.note || ''}`));
+        draft.moments.forEach(dm => {
+          const mSig = `${dm.match || matchTitle}::${dm.time}::${dm.tag || ''}::${dm.note || ''}`;
+          if (!existingSigs.has(mSig)) {
+            maxId++;
+            DATA[k].filmEvents.push({
+              ...dm,
+              id: dm.id || maxId,
+              match: dm.match || matchTitle
+            });
+            existingSigs.add(mSig);
+          }
+        });
+        applyFilmEventsToTeam(DATA[k], DATA[k].filmEvents);
+      });
+
+      try {
+        localStorage.setItem('matchhub_custom_data', JSON.stringify(DATA));
+        if (draft._sig) localStorage.setItem('ajax_dismissed_pitchside_draft_sig', draft._sig);
+      } catch (e) {}
+
+      $('pitchsideDraftBanner')?.classList.add('hidden');
+      renderAll();
+      if ($('filmMatchFilter')) {
+        $('filmMatchFilter').value = matchTitle;
+      }
+      renderFilmLogList();
+      showToast(`📲 Loaded ${draft.moments.length} pitchside actions for ${matchTitle} into Film Reviewer!`);
+    }
+
+    function dismissPitchsideDraftBanner() {
+      if (PENDING_PITCHSIDE_DRAFT && PENDING_PITCHSIDE_DRAFT._sig) {
+        try { localStorage.setItem('ajax_dismissed_pitchside_draft_sig', PENDING_PITCHSIDE_DRAFT._sig); } catch (e) {}
+      }
+      $('pitchsideDraftBanner')?.classList.add('hidden');
     }
 
     function exportFilmEventsCsv() {
@@ -8622,17 +9013,33 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
     }
 
     async function loadCloudMatchHubNotes() {
+      // Apply any local overrides immediately on load
+      try {
+        const localOv = getLocalFilmMomentOverrides();
+        if (applyFilmMomentOverridesToData(localOv)) {
+          renderAll();
+          renderFilmLogList();
+        }
+        const localDraftRaw = localStorage.getItem('ajax_pitchside_draft_latest');
+        if (localDraftRaw) {
+          checkAndRenderPitchsideDraftBanner(JSON.parse(localDraftRaw));
+        }
+      } catch (e) {}
+
       try {
         const pin = window.CURRENT_COACH_PIN || '4111';
         const res = await fetch(`${API_URL}?action=matchHub&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null);
         if (res && res.success && res.notes && typeof res.notes === 'object') {
           let updatedReport = false;
+          let updatedFilmOverrides = false;
           for (const [k, v] of Object.entries(res.notes)) {
             if (!k) continue;
             if (v === '' || v === null) continue;
             NOTES[k] = v;
             try {
-              if (!localStorage.getItem(k)) safeSaveStorage(k, typeof v === 'string' ? v : JSON.stringify(v));
+              if (!localStorage.getItem(k) || k === 'ajax_film_moment_overrides' || k === 'ajax_pitchside_draft_latest') {
+                safeSaveStorage(k, typeof v === 'string' ? v : JSON.stringify(v));
+              }
             } catch (e) {}
             if (k.startsWith('ajax_report_card_')) {
               try {
@@ -8643,6 +9050,26 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
                 }
               } catch (e) {}
             }
+            if (k === 'ajax_film_moment_overrides') {
+              try {
+                const parsedOv = typeof v === 'string' ? JSON.parse(v) : v;
+                const mergedOv = { ...parsedOv, ...getLocalFilmMomentOverrides() };
+                localStorage.setItem('ajax_film_moment_overrides', JSON.stringify(mergedOv));
+                if (applyFilmMomentOverridesToData(mergedOv)) {
+                  updatedFilmOverrides = true;
+                }
+              } catch (e) {}
+            }
+            if (k === 'ajax_pitchside_draft_latest') {
+              try {
+                const parsedDraft = typeof v === 'string' ? JSON.parse(v) : v;
+                checkAndRenderPitchsideDraftBanner(parsedDraft);
+              } catch (e) {}
+            }
+          }
+          if (updatedFilmOverrides) {
+            renderAll();
+            renderFilmLogList();
           }
           if (updatedReport && activeTab === 'tab-reports') {
             const activeEl = document.activeElement;
@@ -9458,6 +9885,21 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
           ${reflectionsHtml}
         </div>
 
+        <!-- CALL UP & EDIT PLAYER FILM MOMENTS DIRECTLY WHILE WRITING REPORT CARD (NO-PRINT) -->
+        <div class="bg-card rounded-2xl p-3.5 border border-teal-500/40 space-y-2.5 no-print" id="reportCardPlayerFilmWrap">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border/80 pb-1.5">
+            <div class="flex items-center gap-2">
+              <h3 class="display text-lg text-teal-400">🎬 PLAYER FILM MOMENTS &amp; COACH NOTES (CALL UP &amp; EDIT)</h3>
+              <span id="reportCardFilmCountBadge" class="text-[10px] mono px-2 py-0.5 rounded bg-pitch border border-border text-teal-300">0 Moments</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="openNewFilmClipModalForReportPlayer()" class="text-[10px] bg-teal-600 hover:bg-teal-500 text-white font-bold px-2.5 py-1 rounded-lg transition">+ Add Moment for ${esc(player.name.split(' ')[0])}</button>
+              <button type="button" onclick="toggleReportCardFilmDrawer()" id="reportCardFilmToggleBtn" class="text-[10px] bg-pitch hover:bg-surface text-slate-200 border border-border px-2.5 py-1 rounded-lg font-semibold transition">▼ Show / Edit Player Moments</button>
+            </div>
+          </div>
+          <div id="reportCardPlayerFilmBody" class="hidden space-y-2 max-h-80 overflow-y-auto pr-1"></div>
+        </div>
+
         <!-- PILLAR 4: GLOW & GROW (2-COLUMN SIDE-BY-SIDE ACTION PLAN) -->
         <div class="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-3.5">
           <!-- GLOW (KEY STRENGTHS) -->
@@ -9508,6 +9950,56 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '�
       `;
 
       syncAllReportTextareas();
+      renderReportCardPlayerFilmPanel();
+    }
+
+    let reportCardFilmDrawerOpen = false;
+    function toggleReportCardFilmDrawer() {
+      reportCardFilmDrawerOpen = !reportCardFilmDrawerOpen;
+      const body = $('reportCardPlayerFilmBody');
+      const btn = $('reportCardFilmToggleBtn');
+      if (body) body.classList.toggle('hidden', !reportCardFilmDrawerOpen);
+      if (btn) btn.textContent = reportCardFilmDrawerOpen ? '▲ Hide Player Moments' : '▼ Show / Edit Player Moments';
+    }
+
+    function openNewFilmClipModalForReportPlayer() {
+      const player = getPlayerByKey($('reportPlayerSelect')?.value || currentReportPlayerKey);
+      openNewFilmClipModal();
+      if (player && player.jersey) {
+        fceSelectedJerseys = new Set([Number(player.jersey)]);
+        renderFceJerseyGrid();
+      }
+    }
+
+    function renderReportCardPlayerFilmPanel() {
+      const player = getPlayerByKey($('reportPlayerSelect')?.value || currentReportPlayerKey);
+      const body = $('reportCardPlayerFilmBody');
+      const badge = $('reportCardFilmCountBadge');
+      const btn = $('reportCardFilmToggleBtn');
+      if (!player || !body) return;
+
+      const d = DATA[activeExportKey(team)] || DATA['AJAX ASPIRE U15'];
+      const allFilm = d?.filmEvents || [];
+      const pClips = allFilm.filter(e =>
+        (player.filmEventIds || []).includes(e.id) ||
+        (player.jersey && (e.jerseys || []).includes(player.jersey)) ||
+        (Array.isArray(e.players) && e.players.some(pl => normName(pl).includes(normName(player.name))))
+      );
+      const curatedCount = pClips.filter(e => e.filmReview).length;
+      if (badge) {
+        badge.textContent = `${pClips.length} Moment${pClips.length !== 1 ? 's' : ''} (${curatedCount} Film Review)`;
+      }
+      if (btn) {
+        btn.textContent = reportCardFilmDrawerOpen ? '▲ Hide Player Moments' : `▼ Show / Edit Player Moments (${pClips.length})`;
+      }
+      body.classList.toggle('hidden', !reportCardFilmDrawerOpen);
+
+      if (!pClips.length) {
+        body.innerHTML = `<p class="text-xs text-slate-400 py-2">No film moments tagged yet for ${esc(player.name)}.</p>`;
+        return;
+      }
+      const sorted = [...pClips].reverse();
+      body.innerHTML = sorted.map(e => formatFilmClipCard(e, false)).join('');
     }
 
     function syncReportTextareaMirror(textareaEl) {

@@ -3253,44 +3253,50 @@
     }
 
     async function loadPlayerFilmMoments(playerName, jerseyNum) {
-      let moments = [];
-      try {
-        const res = await fetch(`${API_URL}?action=playerFilmMoments&name=${encodeURIComponent(playerName)}`);
-        const data = await res.json();
-        if (data && Array.isArray(data.moments) && data.moments.length > 0) {
-          moments = data.moments;
-        }
-      } catch(e) {}
-
-      // Fallback: load static canonical moments if network or KV empty
-      if (!moments.length) {
-        if (window.CANONICAL_ASPIRE_MOMENTS && Array.isArray(window.CANONICAL_ASPIRE_MOMENTS)) {
-          moments = filterCanonicalMomentsForPlayer(playerName, jerseyNum);
-        } else if (typeof fetch !== 'undefined') {
-          try {
-            const localRes = await fetch('aspire-canonical-moments.json');
-            window.CANONICAL_ASPIRE_MOMENTS = await localRes.json();
-            moments = filterCanonicalMomentsForPlayer(playerName, jerseyNum);
-          } catch(e) {}
-        }
+      // 1. Start from static canonical baseline (instant 0ms availability)
+      if (!window.CANONICAL_ASPIRE_MOMENTS && typeof fetch !== 'undefined') {
+        try {
+          const localRes = await fetch('aspire-canonical-moments.json');
+          window.CANONICAL_ASPIRE_MOMENTS = await localRes.json();
+        } catch(e) {}
       }
+      let moments = filterCanonicalMomentsForPlayer(playerName, jerseyNum);
 
-      // Strictly scope feed to the last 2 matches only (Option B)
-      moments = moments.filter(m => {
-        const matchName = String(m.match || m.m || '');
-        return isRecentFilmMatch(matchName);
-      });
+      // 2. Merge any same-device local edits from Match Hub (matchhub_custom_data & ajax_film_moment_overrides)
+      moments = mergeMomentsWithLocalAndCloudEdits(moments, playerName, jerseyNum, null, null);
 
-      CURRENT_PLAYER_MOMENTS = moments;
+      // Render immediately so player sees zero loading delay
+      CURRENT_PLAYER_MOMENTS = moments.filter(m => isRecentFilmMatch(m.match || m.m || ''));
       const sec = document.getElementById('complete-film-log-section');
       if (sec) {
-        sec.style.display = moments.length > 0 ? 'block' : 'none';
+        sec.style.display = CURRENT_PLAYER_MOMENTS.length > 0 ? 'block' : 'none';
       }
       renderPlayerFilmLog();
       updateTakeawayRequirements();
+
+      // 3. Fetch live cloud updates & overrides from Master Google Sheet (Match_Action_Log / KV)
+      try {
+        const res = await fetch(`${API_URL}?action=playerFilmMoments&name=${encodeURIComponent(playerName)}`);
+        const data = await res.json();
+        if (data && (Array.isArray(data.moments) || data.overrides)) {
+          moments = mergeMomentsWithLocalAndCloudEdits(
+            filterCanonicalMomentsForPlayer(playerName, jerseyNum),
+            playerName,
+            jerseyNum,
+            Array.isArray(data.moments) ? data.moments : [],
+            data.overrides || null
+          );
+          CURRENT_PLAYER_MOMENTS = moments.filter(m => isRecentFilmMatch(m.match || m.m || ''));
+          if (sec) {
+            sec.style.display = CURRENT_PLAYER_MOMENTS.length > 0 ? 'block' : 'none';
+          }
+          renderPlayerFilmLog();
+          updateTakeawayRequirements();
+        }
+      } catch(e) {}
     }
 
-    function filterCanonicalMomentsForPlayer(playerName, jerseyNum) {
+    function doesMomentMatchPlayer(m, playerName, jerseyNum) {
       const norm = normNameJS(playerName);
       const pFirst = norm.split(' ')[0];
       const jNum = jerseyNum !== null && jerseyNum !== undefined ? parseInt(jerseyNum, 10) : getPlayerJersey(playerName);
@@ -3301,21 +3307,20 @@
       if (pFirst === 'sophia') aliases.push('sophie');
       if (pFirst === 'alessandra') aliases.push('ale');
 
-      const list = window.CANONICAL_ASPIRE_MOMENTS || [];
-      return list.filter(m => {
-        const mMatch = m.m || m.match || '';
-        // Restrict canonical moments to the last 2 matches
-        if (!isRecentFilmMatch(mMatch)) {
-          return false;
-        }
-        const jList = Array.isArray(m.j) ? m.j : (Array.isArray(m.jerseys) ? m.jerseys : []);
-        if (jNum && jList.includes(jNum)) return true;
-        const raw = String(m.playersRaw || m.players || '').toLowerCase();
-        if (jNum && raw.includes('#' + jNum)) return true;
-        const note = String(m.n || m.note || '').toLowerCase();
-        if (aliases.some(a => a.length >= 3 && (raw.includes(a) || note.includes(a)))) return true;
-        return false;
-      }).map(m => ({
+      const jList = Array.isArray(m.j) ? m.j : (Array.isArray(m.jerseys) ? m.jerseys : []);
+      if (jNum && jList.includes(jNum)) return true;
+      const raw = normNameJS(Array.isArray(m.players) ? m.players.join(' ') : (m.playersRaw || m.players || ''));
+      const rawOrig = String(m.playersRaw || (Array.isArray(m.players) ? m.players.join(' ') : '')).toLowerCase();
+      if (jNum && rawOrig.includes('#' + jNum)) return true;
+      const note = normNameJS(m.note !== undefined ? m.note : (m.notes !== undefined ? m.notes : (m.n || '')));
+      if (aliases.some(a => a.length >= 3 && (raw.includes(a) || note.includes(a)))) return true;
+      return false;
+    }
+
+    function normalizeMomentItem(m, idxFallback) {
+      const noteVal = m.note !== undefined ? m.note : (m.notes !== undefined ? m.notes : (m.n || ''));
+      return {
+        id: m.id || m.eventId || idxFallback || '',
         match: m.m || m.match || 'Match',
         half: m.h || m.half || 'H1',
         time: m.t || m.time || '00:00',
@@ -3323,9 +3328,109 @@
         outcome: m.o || m.outcome || 'Glow',
         tag: m.tag || 'Action',
         category: m.cat || m.category || 'General',
-        note: m.n || m.note || '',
-        filmReview: Boolean(m.filmReview || m.isBookmark || /review|study|assigned/i.test(m.n || m.note || ''))
-      }));
+        note: noteVal,
+        jerseys: Array.isArray(m.j) ? m.j : (Array.isArray(m.jerseys) ? m.jerseys : []),
+        playersRaw: m.playersRaw || (Array.isArray(m.players) ? m.players.join(', ') : ''),
+        filmReview: m.filmReview !== undefined
+          ? Boolean(m.filmReview)
+          : Boolean(m.isBookmark || /review|study|assigned/i.test(noteVal))
+      };
+    }
+
+    function mergeMomentsWithLocalAndCloudEdits(baseMoments, playerName, jerseyNum, cloudMoments, cloudOverrides) {
+      const mapById = new Map();
+      const sigToId = new Map();
+      const getSig = (m) => `${String(m.match || m.m || '').toLowerCase().trim()}::${String(m.half || m.h || 'H1').toUpperCase().trim()}::${String(m.time || m.t || '00:00').trim()}`;
+
+      baseMoments.forEach((m, i) => {
+        const normM = normalizeMomentItem(m, i + 1);
+        const key = String(normM.id || getSig(normM));
+        mapById.set(key, normM);
+        sigToId.set(getSig(normM), key);
+      });
+
+      const applyIncomingItem = (rawItem) => {
+        if (!rawItem) return;
+        const idStr = String(rawItem.id || rawItem.eventId || '');
+        if (rawItem.deleted) {
+          if (idStr && mapById.has(idStr)) mapById.delete(idStr);
+          return;
+        }
+        const mMatch = rawItem.match || rawItem.m || '';
+        if (!isRecentFilmMatch(mMatch)) return;
+        const matchesPlayer = doesMomentMatchPlayer(rawItem, playerName, jerseyNum);
+        const sig = getSig(rawItem);
+        const existingKey = (idStr && mapById.has(idStr)) ? idStr : sigToId.get(sig);
+
+        if (existingKey && mapById.has(existingKey)) {
+          if (!matchesPlayer) {
+            // If coach reassigned jerseys away from this player, remove from this player's feed
+            if (Array.isArray(rawItem.jerseys) && rawItem.jerseys.length > 0) {
+              mapById.delete(existingKey);
+              return;
+            }
+          }
+          const prev = mapById.get(existingKey);
+          const nextNote = rawItem.note !== undefined ? rawItem.note : (rawItem.notes !== undefined ? rawItem.notes : (rawItem.n !== undefined ? rawItem.n : prev.note));
+          mapById.set(existingKey, {
+            ...prev,
+            match: rawItem.match || rawItem.m || prev.match,
+            half: rawItem.half || rawItem.h || prev.half,
+            time: rawItem.time || rawItem.t || prev.time,
+            zone: rawItem.zone || rawItem.z || prev.zone,
+            outcome: rawItem.outcome || rawItem.o || prev.outcome,
+            tag: rawItem.tag || prev.tag,
+            category: rawItem.category || rawItem.cat || prev.category,
+            note: nextNote,
+            filmReview: rawItem.filmReview !== undefined ? Boolean(rawItem.filmReview) : prev.filmReview
+          });
+        } else if (matchesPlayer) {
+          const normNew = normalizeMomentItem(rawItem, idStr || ('new_' + mapById.size));
+          const newKey = String(normNew.id || getSig(normNew));
+          mapById.set(newKey, normNew);
+          sigToId.set(getSig(normNew), newKey);
+        }
+      };
+
+      // A. Apply same-browser Match Hub custom data if present
+      try {
+        const customRaw = localStorage.getItem('matchhub_custom_data');
+        if (customRaw) {
+          const customParsed = JSON.parse(customRaw);
+          const customEvents = customParsed?.['AJAX ASPIRE U15']?.filmEvents || [];
+          customEvents.forEach(ev => applyIncomingItem(ev));
+        }
+      } catch (e) {}
+
+      // B. Apply same-browser film moment overrides if present
+      try {
+        const localOvRaw = localStorage.getItem('ajax_film_moment_overrides');
+        if (localOvRaw) {
+          const localOv = JSON.parse(localOvRaw);
+          Object.values(localOv || {}).forEach(ov => applyIncomingItem(ov));
+        }
+      } catch (e) {}
+
+      // C. Apply Cloud Moments returned from API
+      if (Array.isArray(cloudMoments)) {
+        cloudMoments.forEach(cm => applyIncomingItem(cm));
+      }
+
+      // D. Apply Cloud Overrides returned from API
+      if (cloudOverrides && typeof cloudOverrides === 'object') {
+        Object.values(cloudOverrides).forEach(ov => applyIncomingItem(ov));
+      }
+
+      return Array.from(mapById.values());
+    }
+
+    function filterCanonicalMomentsForPlayer(playerName, jerseyNum) {
+      const list = window.CANONICAL_ASPIRE_MOMENTS || [];
+      return list.filter(m => {
+        const mMatch = m.m || m.match || '';
+        if (!isRecentFilmMatch(mMatch)) return false;
+        return doesMomentMatchPlayer(m, playerName, jerseyNum);
+      }).map((m, idx) => normalizeMomentItem(m, m.id || (idx + 1)));
     }
 
     function toggleFilmLogAccordion() {
@@ -3483,11 +3588,13 @@
                 <span class="moment-time-pill">${escapeHtml(m.half)} ${escapeHtml(m.time)}</span>
                 <span class="moment-zone-pill ${zClass}">${escapeHtml(z)}</span>
                 <span class="moment-tag-badge">${escapeHtml(m.tag || 'Action')}</span>
+                ${m.filmReview ? '<span class="badge badge-teal" style="font-size:9px; padding:2px 6px;">FILM REVIEW</span>' : ''}
               </div>
               <span class="badge ${badgeClass}">
                 ${badgeLabel}
               </span>
             </div>
+            ${m.filmReview && m.note ? `<div style="margin-top:8px; font-size:12.5px; color:var(--text); background:var(--navy); padding:8px 12px; border-left:3px solid var(--teal); border-radius:4px;">"${escapeHtml(m.note)}"</div>` : ''}
           </div>`;
       }).join('');
     }

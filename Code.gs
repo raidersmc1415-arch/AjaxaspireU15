@@ -38,6 +38,7 @@ function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('⚽ Ajax Coach Tools')
     .addItem('Sync Match Stats', 'syncMatchData')
+    .addItem('Initialize Match_Action_Log Tab', 'initMatchActionLogTabUI')
     .addItem('Heal Team Record (6-0-7)', 'healTeamAggregate')
     .addToUi();
 }
@@ -192,7 +193,10 @@ function doGet(e) {
   if (e.parameter.action === 'matchHub')             return getMatchHubData(e.parameter.pin);
   if (e.parameter.action === 'syncMatchData')        return handleSyncMatchData(e.parameter.pin);
   if (e.parameter.action === 'healTeamAggregate')    return jsonOut(healTeamAggregate());
-  if (e.parameter.action === 'playerFilmMoments')   return getPlayerFilmMoments(e.parameter.name);
+  if (e.parameter.action === 'playerFilmMoments')    return getPlayerFilmMoments(e.parameter.name);
+  if (e.parameter.action === 'getMatchActions')      return getMatchActions(e.parameter);
+  if (e.parameter.action === 'filmOverrides')        return getFilmOverrides();
+  if (e.parameter.action === 'pitchsideDraft')       return getPitchsideDraft(e.parameter.pin);
   return handlePlayerLogin(e);
 }
 
@@ -201,12 +205,18 @@ function doPost(e) {
     if (!e.postData || !e.postData.contents) throw new Error('No data received');
     const payload = JSON.parse(e.postData.contents);
 
-    if (payload.action === 'challengeCheckin')      return handleChallengeCheckin(payload);
-    if (payload.action === 'saveMatchHubNote')      return handleSaveMatchHubNote(payload);
-    if (payload.action === 'saveMatchHubTakeaways') return handleSaveMatchHubTakeaways(payload);
-    if (payload.action === 'saveMatchHubData')      return handleSaveMatchHubData(payload);
-    if (payload.action === 'saveFilmMoments')       return handleSaveFilmMoments(payload);
-    if (payload.action === 'updateSeasonStats')     return handleUpdateSeasonStats(payload);
+    if (payload.action === 'challengeCheckin')        return handleChallengeCheckin(payload);
+    if (payload.action === 'saveMatchHubNote')        return handleSaveMatchHubNote(payload);
+    if (payload.action === 'saveMatchHubTakeaways')   return handleSaveMatchHubTakeaways(payload);
+    if (payload.action === 'saveMatchHubData')        return handleSaveMatchHubData(payload);
+    if (payload.action === 'saveFilmMoments')         return handleSaveFilmMoments(payload);
+    if (payload.action === 'saveMatchActionRows')     return handleSaveMatchActionRows(payload);
+    if (payload.action === 'updateSingleMatchAction') return handleUpdateSingleMatchAction(payload);
+    if (payload.action === 'deleteSingleMatchAction') return handleDeleteSingleMatchAction(payload);
+    if (payload.action === 'saveFilmMomentOverride')  return handleUpdateSingleMatchAction(payload);
+    if (payload.action === 'savePitchsideDraft')      return handleSavePitchsideDraft(payload);
+    if (payload.action === 'clearPitchsideDraft')     return handleClearPitchsideDraft(payload);
+    if (payload.action === 'updateSeasonStats')       return handleUpdateSeasonStats(payload);
 
     // IDP submission — write JSON blob into Player_IDP column M (IDP_Submitted)
     if (payload.reflection && payload.reflection.indexOf('[IDP SUBMISSION]') === 0 && payload.idpData) {
@@ -1407,7 +1417,392 @@ function handleUpdateSeasonStats(payload) {
   }
 }
 
-// --- PART 16: DIRECT FILM MOMENTS CLOUD SYNC & PLAYER PORTAL FEED ---
+// --- PART 16: MASTER MATCH_ACTION_LOG SHEET & CLOUD SYNC PIPELINE ---
+
+var MATCH_ACTION_LOG_HEADERS = [
+  'Event_ID', 'Match_Date', 'Match_Name', 'Opponent', 'Half',
+  'Match_Clock', 'Zone', 'Outcome', 'Category', 'Tag',
+  'Player_Name', 'Jersey_Num', 'Coach_Notes', 'Film_Review',
+  'Status', 'Last_Updated'
+];
+
+var ASPIRE_CANONICAL_ROSTER = [
+  { jersey: 1, name: 'Sola Alberto' },
+  { jersey: 2, name: 'Giselle Rosales' },
+  { jersey: 4, name: 'Arianna Zamora' },
+  { jersey: 5, name: 'Grace Krimmel' },
+  { jersey: 7, name: 'MacKenzie Castro' },
+  { jersey: 8, name: 'Scarlett Freitas' },
+  { jersey: 9, name: 'Camila Deleon' },
+  { jersey: 14, name: 'Kendall Blair' },
+  { jersey: 15, name: 'Alessandra Fernandez' },
+  { jersey: 19, name: 'Amy Godínez Vargas' },
+  { jersey: 23, name: 'Sophia Culver' },
+  { jersey: 24, name: 'Evelyn Lopez' },
+  { jersey: 25, name: 'Ella Simmons' },
+  { jersey: 34, name: 'Nairobi Mcgadney' },
+  { jersey: 36, name: 'Alex Marigorda' },
+  { jersey: 37, name: 'Brooklyn Brewer' },
+  { jersey: 50, name: 'Alexa Chipres' },
+  { jersey: 88, name: 'Sonia Vera' },
+  { jersey: 89, name: 'Carlee Gowan' }
+];
+
+function resolvePlayerJerseyFromRoster(playerName) {
+  var search = normName(playerName);
+  if (!search) return null;
+  var pFirst = search.split(' ')[0];
+  for (var i = 0; i < ASPIRE_CANONICAL_ROSTER.length; i++) {
+    var r = ASPIRE_CANONICAL_ROSTER[i];
+    var rNorm = normName(r.name);
+    if (rNorm === search || rNorm.indexOf(search) === 0 || search.indexOf(rNorm) === 0 || (pFirst.length >= 3 && rNorm.split(' ')[0] === pFirst)) {
+      return r.jersey;
+    }
+  }
+  return null;
+}
+
+function resolveRosterNameFromJersey(jerseyNum) {
+  var j = parseInt(jerseyNum, 10);
+  if (isNaN(j)) return '';
+  for (var i = 0; i < ASPIRE_CANONICAL_ROSTER.length; i++) {
+    if (ASPIRE_CANONICAL_ROSTER[i].jersey === j) return ASPIRE_CANONICAL_ROSTER[i].name;
+  }
+  return '';
+}
+
+function getOrCreateMatchActionLogSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Match_Action_Log');
+  if (!sheet) {
+    sheet = ss.insertSheet('Match_Action_Log');
+    sheet.appendRow(MATCH_ACTION_LOG_HEADERS);
+    sheet.getRange(1, 1, 1, MATCH_ACTION_LOG_HEADERS.length)
+      .setFontWeight('bold')
+      .setBackground('#0D1B2A')
+      .setFontColor('#FFFFFF');
+    sheet.setFrozenRows(1);
+  } else if (sheet.getLastRow() === 0) {
+    sheet.appendRow(MATCH_ACTION_LOG_HEADERS);
+    sheet.getRange(1, 1, 1, MATCH_ACTION_LOG_HEADERS.length)
+      .setFontWeight('bold')
+      .setBackground('#0D1B2A')
+      .setFontColor('#FFFFFF');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function initMatchActionLogTabUI() {
+  var sheet = getOrCreateMatchActionLogSheet();
+  SpreadsheetApp.getUi().alert('✅ Match_Action_Log tab is ready (' + Math.max(0, sheet.getLastRow() - 1) + ' action rows currently stored).');
+}
+
+function buildActionRowFromMoment(m, nowStr) {
+  var jList = Array.isArray(m.jerseys) ? m.jerseys : (Array.isArray(m.j) ? m.j : []);
+  if (!jList.length && m.jersey) jList = [parseInt(m.jersey, 10)];
+  var primaryJersey = jList.length ? jList[0] : '';
+  var playerNames = [];
+  if (Array.isArray(m.players) && m.players.length) {
+    playerNames = m.players;
+  } else if (jList.length) {
+    playerNames = jList.map(function(j) {
+      var nm = resolveRosterNameFromJersey(j);
+      return nm ? ('#' + j + ' ' + nm) : ('#' + j);
+    });
+  } else if (m.playerName || m.playersRaw) {
+    playerNames = [String(m.playerName || m.playersRaw)];
+  }
+  var matchName = String(m.match || m.m || 'Match').trim();
+  var matchDate = String(m.matchDate || m.date || '').trim();
+  var opponent = String(m.opponent || matchName.replace(/\s*\(.*?\)\s*/g, '')).trim();
+  var half = String(m.half || m.h || 'H1').trim();
+  var clock = String(m.time || m.t || m.matchClock || '00:00').trim();
+  var zone = String(m.zone || m.z || 'M3').trim();
+  var outcome = String(m.outcome || m.o || 'Glow').trim();
+  var category = String(m.category || m.cat || 'General').trim();
+  var tag = String(m.tag || 'Action').trim();
+  var note = String(m.note !== undefined ? m.note : (m.notes !== undefined ? m.notes : (m.n || ''))).trim();
+  var filmReview = Boolean(m.filmReview || m.isBookmark);
+  var status = String(m.status || 'Published').trim();
+  var eventId = String(m.eventId || m.id || (matchName.replace(/[^a-zA-Z0-9]/g, '') + '_' + half + '_' + clock.replace(':', '') + '_' + (primaryJersey || 'T')));
+
+  return [
+    eventId,
+    matchDate,
+    matchName,
+    opponent,
+    half,
+    clock,
+    zone,
+    outcome,
+    category,
+    tag,
+    playerNames.join(', '),
+    jList.join(', '),
+    note,
+    filmReview ? 'TRUE' : 'FALSE',
+    status,
+    nowStr || new Date().toISOString()
+  ];
+}
+
+function readAllMatchActionLogRows() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Match_Action_Log');
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0].map(function(h) { return String(h || '').trim().toLowerCase(); });
+
+  var idx = function(colName) { return headers.indexOf(colName.toLowerCase()); };
+  var iId     = idx('event_id');
+  var iDate   = idx('match_date');
+  var iMatch  = idx('match_name');
+  var iOpp    = idx('opponent');
+  var iHalf   = idx('half');
+  var iClock  = idx('match_clock');
+  var iZone   = idx('zone');
+  var iOut    = idx('outcome');
+  var iCat    = idx('category');
+  var iTag    = idx('tag');
+  var iPlayer = idx('player_name');
+  var iJersey = idx('jersey_num');
+  var iNotes  = idx('coach_notes');
+  var iRev    = idx('film_review');
+  var iStatus = idx('status');
+  var iUpd    = idx('last_updated');
+
+  var results = [];
+  for (var r = 1; r < data.length; r++) {
+    var row = data[r];
+    var matchName = iMatch !== -1 ? String(row[iMatch] || '').trim() : '';
+    var evId = iId !== -1 ? String(row[iId] || '').trim() : String(r);
+    if (!matchName && !evId) continue;
+
+    var rawJersey = iJersey !== -1 ? String(row[iJersey] || '').trim() : '';
+    var jerseys = rawJersey
+      ? rawJersey.split(/[,\s]+/).map(function(x) { return parseInt(x.replace('#', ''), 10); }).filter(function(n) { return !isNaN(n); })
+      : [];
+
+    var rawClock = iClock !== -1 ? row[iClock] : '00:00';
+    var clockStr = '00:00';
+    if (rawClock instanceof Date) {
+      var mm = rawClock.getHours() * 60 + rawClock.getMinutes();
+      var ss2 = rawClock.getSeconds();
+      clockStr = (mm < 10 ? '0' + mm : mm) + ':' + (ss2 < 10 ? '0' + ss2 : ss2);
+    } else {
+      clockStr = String(rawClock || '00:00').trim().replace(/^(\d+:\d{2}):00$/, '$1');
+    }
+
+    var revRaw = iRev !== -1 ? String(row[iRev] || '').trim().toLowerCase() : '';
+    var isReview = (revRaw === 'true' || revRaw === 'yes' || revRaw === '1' || row[iRev] === true);
+    var playerRawStr = iPlayer !== -1 ? String(row[iPlayer] || '').trim() : '';
+
+    results.push({
+      id: isNaN(Number(evId)) ? evId : Number(evId),
+      eventId: evId,
+      matchDate: iDate !== -1 ? String(row[iDate] || '').trim() : '',
+      match: matchName,
+      m: matchName,
+      opponent: iOpp !== -1 ? String(row[iOpp] || '').trim() : '',
+      half: iHalf !== -1 ? String(row[iHalf] || 'H1').trim() : 'H1',
+      h: iHalf !== -1 ? String(row[iHalf] || 'H1').trim() : 'H1',
+      time: clockStr,
+      t: clockStr,
+      zone: iZone !== -1 ? String(row[iZone] || 'M3').trim() : 'M3',
+      z: iZone !== -1 ? String(row[iZone] || 'M3').trim() : 'M3',
+      outcome: iOut !== -1 ? String(row[iOut] || 'Glow').trim() : 'Glow',
+      o: iOut !== -1 ? String(row[iOut] || 'Glow').trim() : 'Glow',
+      category: iCat !== -1 ? String(row[iCat] || 'General').trim() : 'General',
+      cat: iCat !== -1 ? String(row[iCat] || 'General').trim() : 'General',
+      tag: iTag !== -1 ? String(row[iTag] || 'Action').trim() : 'Action',
+      playersRaw: playerRawStr,
+      players: playerRawStr ? playerRawStr.split(',').map(function(s) { return s.trim(); }) : [],
+      jerseys: jerseys,
+      j: jerseys,
+      note: iNotes !== -1 ? String(row[iNotes] || '').trim() : '',
+      n: iNotes !== -1 ? String(row[iNotes] || '').trim() : '',
+      filmReview: isReview,
+      status: iStatus !== -1 ? String(row[iStatus] || 'Published').trim() : 'Published',
+      updatedAt: iUpd !== -1 ? String(row[iUpd] || '').trim() : ''
+    });
+  }
+  return results;
+}
+
+function handleSaveMatchActionRows(payload) {
+  try {
+    if (!isValidCoachPin(payload.pin)) {
+      return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
+    }
+    var moments = Array.isArray(payload.moments) ? payload.moments : [];
+    if (!moments.length) {
+      return jsonOut({ success: false, message: 'No moments provided' });
+    }
+    var sheet = getOrCreateMatchActionLogSheet();
+    var nowStr = new Date().toISOString();
+    var targetMatch = String(payload.match || (moments[0] && (moments[0].match || moments[0].m)) || '').trim();
+    var replaceMatch = payload.replaceMatch !== false;
+
+    var existingData = sheet.getDataRange().getValues();
+    var headerRow = existingData[0];
+    var keptRows = [];
+    if (existingData.length > 1) {
+      var headers = headerRow.map(function(h) { return String(h || '').trim().toLowerCase(); });
+      var iMatch = headers.indexOf('match_name');
+      var iId = headers.indexOf('event_id');
+      var incomingIds = {};
+      for (var m = 0; m < moments.length; m++) {
+        var cid = String(moments[m].eventId || moments[m].id || '');
+        if (cid) incomingIds[cid] = true;
+      }
+      for (var r = 1; r < existingData.length; r++) {
+        var rowMatch = iMatch !== -1 ? String(existingData[r][iMatch] || '').trim() : '';
+        var rowId = iId !== -1 ? String(existingData[r][iId] || '').trim() : '';
+        if (replaceMatch && targetMatch && rowMatch.toLowerCase() === targetMatch.toLowerCase()) {
+          continue;
+        }
+        if (rowId && incomingIds[rowId]) {
+          continue;
+        }
+        keptRows.push(existingData[r]);
+      }
+    }
+
+    var newRows = moments.map(function(m) {
+      return buildActionRowFromMoment(m, nowStr);
+    });
+    var finalRows = keptRows.concat(newRows);
+
+    if (sheet.getLastRow() > 1) {
+      sheet.getRange(2, 1, sheet.getLastRow() - 1, headerRow.length).clearContent();
+    }
+    if (finalRows.length > 0) {
+      sheet.getRange(2, 1, finalRows.length, headerRow.length).setValues(finalRows);
+    }
+
+    return jsonOut({
+      success: true,
+      match: targetMatch,
+      matchRowsWritten: newRows.length,
+      totalRowsInSheet: finalRows.length
+    });
+  } catch (err) {
+    return jsonOut({ success: false, message: err.toString() });
+  }
+}
+
+function handleUpdateSingleMatchAction(payload) {
+  try {
+    if (!isValidCoachPin(payload.pin)) {
+      return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
+    }
+    var m = payload.moment || payload.override || payload;
+    if (!m || (!m.id && !m.eventId && !m.match)) {
+      return jsonOut({ success: false, message: 'Missing moment data' });
+    }
+    var nowStr = new Date().toISOString();
+    var targetId = String(m.eventId || m.id || '');
+
+    // 1. Update or append row in Match_Action_Log sheet
+    var sheet = getOrCreateMatchActionLogSheet();
+    var data = sheet.getDataRange().getValues();
+    var headers = data[0].map(function(h) { return String(h || '').trim().toLowerCase(); });
+    var iId = headers.indexOf('event_id');
+    var iMatch = headers.indexOf('match_name');
+    var iHalf = headers.indexOf('half');
+    var iClock = headers.indexOf('match_clock');
+
+    var builtRow = buildActionRowFromMoment(m, nowStr);
+    var updatedRowIndex = -1;
+
+    for (var r = 1; r < data.length; r++) {
+      var rId = iId !== -1 ? String(data[r][iId] || '').trim() : '';
+      if (targetId && rId === targetId) {
+        updatedRowIndex = r + 1;
+        break;
+      }
+      if (!targetId && iMatch !== -1 && iClock !== -1) {
+        var rMatch = String(data[r][iMatch] || '').trim().toLowerCase();
+        var rHalf = iHalf !== -1 ? String(data[r][iHalf] || '').trim().toLowerCase() : '';
+        var rClock = String(data[r][iClock] || '').trim();
+        if (rMatch === String(m.match || '').trim().toLowerCase() &&
+            rHalf === String(m.half || '').trim().toLowerCase() &&
+            rClock === String(m.time || '').trim()) {
+          updatedRowIndex = r + 1;
+          break;
+        }
+      }
+    }
+
+    if (updatedRowIndex !== -1) {
+      sheet.getRange(updatedRowIndex, 1, 1, builtRow.length).setValues([builtRow]);
+    } else {
+      sheet.appendRow(builtRow);
+    }
+
+    // 2. Also persist lightweight override in KV for instant cross-device merging
+    var kv = getMatchHubKVMap();
+    var overrides = kv['film_moment_overrides'] || {};
+    if (targetId) {
+      overrides[targetId] = {
+        id: m.id || targetId,
+        match: m.match || m.m || '',
+        half: m.half || m.h || 'H1',
+        time: m.time || m.t || '00:00',
+        zone: m.zone || m.z || 'M3',
+        outcome: m.outcome || m.o || 'Glow',
+        category: m.category || m.cat || 'General',
+        tag: m.tag || 'Action',
+        note: m.note !== undefined ? m.note : (m.notes || ''),
+        filmReview: Boolean(m.filmReview),
+        jerseys: m.jerseys || m.j || [],
+        players: m.players || [],
+        playersRaw: m.playersRaw || '',
+        updatedAt: nowStr
+      };
+      setMatchHubKV('film_moment_overrides', overrides);
+    }
+
+    return jsonOut({
+      success: true,
+      id: targetId,
+      rowUpdated: updatedRowIndex !== -1 ? updatedRowIndex : 'appended'
+    });
+  } catch (err) {
+    return jsonOut({ success: false, message: err.toString() });
+  }
+}
+
+function handleDeleteSingleMatchAction(payload) {
+  try {
+    if (!isValidCoachPin(payload.pin)) {
+      return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
+    }
+    var targetId = String(payload.id || payload.eventId || '');
+    if (!targetId) return jsonOut({ success: false, message: 'Missing Event_ID' });
+
+    var sheet = getOrCreateMatchActionLogSheet();
+    var data = sheet.getDataRange().getValues();
+    var headers = data[0].map(function(h) { return String(h || '').trim().toLowerCase(); });
+    var iId = headers.indexOf('event_id');
+
+    for (var r = data.length - 1; r >= 1; r--) {
+      if (iId !== -1 && String(data[r][iId] || '').trim() === targetId) {
+        sheet.deleteRow(r + 1);
+      }
+    }
+
+    var kv = getMatchHubKVMap();
+    var overrides = kv['film_moment_overrides'] || {};
+    overrides[targetId] = { id: targetId, deleted: true, updatedAt: new Date().toISOString() };
+    setMatchHubKV('film_moment_overrides', overrides);
+
+    return jsonOut({ success: true, deletedId: targetId });
+  } catch (err) {
+    return jsonOut({ success: false, message: err.toString() });
+  }
+}
 
 function handleSaveFilmMoments(payload) {
   try {
@@ -1418,67 +1813,196 @@ function handleSaveFilmMoments(payload) {
     if (!moments.length) {
       return jsonOut({ success: false, message: 'No moments provided' });
     }
+
+    // 1. Write rows to Match_Action_Log sheet tab
+    try {
+      handleSaveMatchActionRows(payload);
+    } catch (sheetErr) {}
+
+    // 2. Keep recent match moments in KV (capped to avoid 50KB cell limit)
     var kv = getMatchHubKVMap();
     var existing = kv['all_film_moments'] || [];
-    
-    // Merge or replace by match or match+time
-    var targetMatch = payload.match || (moments[0] && moments[0].match);
+    var targetMatch = payload.match || (moments[0] && (moments[0].match || moments[0].m));
     var filtered = existing.filter(function(m) {
-      return targetMatch ? m.match !== targetMatch : true;
+      var mName = m.match || m.m || '';
+      return targetMatch ? mName !== targetMatch : true;
     });
     var merged = filtered.concat(moments);
+    if (JSON.stringify(merged).length > 44000) {
+      merged = moments;
+    }
     setMatchHubKV('all_film_moments', merged);
-    
+
     return jsonOut({ success: true, count: merged.length, match: targetMatch });
   } catch(err) {
     return jsonOut({ success: false, message: err.toString() });
   }
 }
 
+function handleSavePitchsideDraft(payload) {
+  try {
+    if (!isValidCoachPin(payload.pin)) {
+      return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
+    }
+    var draft = payload.draft || payload;
+    setMatchHubKV('pitchside_draft_latest', draft);
+    return jsonOut({ success: true, savedAt: new Date().toISOString() });
+  } catch (err) {
+    return jsonOut({ success: false, message: err.toString() });
+  }
+}
+
+function handleClearPitchsideDraft(payload) {
+  try {
+    if (!isValidCoachPin(payload.pin)) {
+      return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
+    }
+    setMatchHubKV('pitchside_draft_latest', null);
+    return jsonOut({ success: true });
+  } catch (err) {
+    return jsonOut({ success: false, message: err.toString() });
+  }
+}
+
+function getPitchsideDraft(pin) {
+  try {
+    if (!isValidCoachPin(pin)) {
+      return jsonOut({ success: false, error: 'Unauthorized Coach PIN' });
+    }
+    var kv = getMatchHubKVMap();
+    var draft = kv['pitchside_draft_latest'] || (kv['notes'] && kv['notes']['ajax_pitchside_draft_latest']) || null;
+    if (typeof draft === 'string' && draft.trim().indexOf('{') === 0) {
+      try { draft = JSON.parse(draft); } catch (e) {}
+    }
+    return jsonOut({ success: true, draft: draft });
+  } catch (err) {
+    return jsonOut({ success: false, error: err.toString() });
+  }
+}
+
+function getFilmOverrides() {
+  try {
+    var kv = getMatchHubKVMap();
+    var overrides = kv['film_moment_overrides'] || {};
+    var notes = kv['notes'] || {};
+    if (notes['ajax_film_moment_overrides']) {
+      try {
+        var parsed = typeof notes['ajax_film_moment_overrides'] === 'string'
+          ? JSON.parse(notes['ajax_film_moment_overrides'])
+          : notes['ajax_film_moment_overrides'];
+        for (var k in parsed) {
+          overrides[k] = parsed[k];
+        }
+      } catch (e) {}
+    }
+    return jsonOut({ success: true, overrides: overrides });
+  } catch (err) {
+    return jsonOut({ success: false, overrides: {}, error: err.toString() });
+  }
+}
+
+function getMatchActions(params) {
+  try {
+    var rows = readAllMatchActionLogRows();
+    var kv = getMatchHubKVMap();
+    var overrides = kv['film_moment_overrides'] || {};
+    var filterMatch = params && params.match ? String(params.match).trim().toLowerCase() : '';
+    if (filterMatch) {
+      rows = rows.filter(function(r) {
+        return String(r.match || '').toLowerCase().indexOf(filterMatch) !== -1;
+      });
+    }
+    return jsonOut({
+      success: true,
+      count: rows.length,
+      moments: rows,
+      overrides: overrides
+    });
+  } catch (err) {
+    return jsonOut({ success: false, moments: [], error: err.toString() });
+  }
+}
+
 function getPlayerFilmMoments(playerName) {
   try {
     var search = normName(playerName);
-    var jerseyNum = null;
+    var jerseyNum = resolvePlayerJerseyFromRoster(playerName);
     
-    // Look up jersey in Player_IDP
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var idpSheet = ss.getSheetByName('Player_IDP');
-    if (idpSheet) {
-      var idpData = idpSheet.getDataRange().getValues();
-      var headers = idpData[0].map(function(h){ return h.toString().trim(); });
-      var iName = headers.indexOf('Player Name');
-      var iNum = headers.indexOf('Jersey #') !== -1 ? headers.indexOf('Jersey #') : headers.indexOf('Number');
-      if (iName !== -1 && iNum !== -1) {
-        for (var i = 1; i < idpData.length; i++) {
-          if (normName(idpData[i][iName]) === search) {
-            var val = parseInt(idpData[i][iNum], 10);
-            if (!isNaN(val)) jerseyNum = val;
-            break;
+    // Look up jersey in Player_IDP if not resolved from canonical roster
+    if (jerseyNum === null) {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var idpSheet = ss.getSheetByName('Player_IDP');
+      if (idpSheet) {
+        var idpData = idpSheet.getDataRange().getValues();
+        var headers = idpData[0].map(function(h){ return h.toString().trim(); });
+        var iName = headers.indexOf('Player Name');
+        var iNum = headers.indexOf('Jersey #') !== -1 ? headers.indexOf('Jersey #') : headers.indexOf('Number');
+        if (iName !== -1 && iNum !== -1) {
+          for (var i = 1; i < idpData.length; i++) {
+            if (normName(idpData[i][iName]) === search) {
+              var val = parseInt(idpData[i][iNum], 10);
+              if (!isNaN(val)) jerseyNum = val;
+              break;
+            }
           }
         }
       }
     }
 
+    var pFirst = search.split(' ')[0];
+    var aliases = [search, pFirst];
+    if (pFirst === 'camila') aliases.push('cami');
+    if (pFirst === 'carlee') aliases.push('carly');
+    if (pFirst === 'mackenzie') aliases.push('mack');
+    if (pFirst === 'sophia') aliases.push('sophie');
+    if (pFirst === 'alessandra') aliases.push('ale');
+
+    // Combine Match_Action_Log sheet rows + KV moments
+    var sheetMoments = readAllMatchActionLogRows();
     var kv = getMatchHubKVMap();
-    var allMoments = kv['all_film_moments'] || [];
+    var kvMoments = kv['all_film_moments'] || [];
+    var overrides = kv['film_moment_overrides'] || {};
+    var notes = kv['notes'] || {};
+    if (notes['ajax_film_moment_overrides']) {
+      try {
+        var noteOv = typeof notes['ajax_film_moment_overrides'] === 'string'
+          ? JSON.parse(notes['ajax_film_moment_overrides'])
+          : notes['ajax_film_moment_overrides'];
+        for (var k in noteOv) overrides[k] = noteOv[k];
+      } catch (e) {}
+    }
+
+    var combined = sheetMoments.length > 0 ? sheetMoments : kvMoments;
     var playerMoments = [];
 
-    for (var m = 0; m < allMoments.length; m++) {
-      var item = allMoments[m];
-      var rawP = String(item.playersRaw || item.players || '').toLowerCase();
-      var jList = Array.isArray(item.jerseys) ? item.jerseys : [];
+    for (var m = 0; m < combined.length; m++) {
+      var item = combined[m];
+      var itemId = String(item.eventId || item.id || '');
+      if (itemId && overrides[itemId]) {
+        if (overrides[itemId].deleted) continue;
+        var ov = overrides[itemId];
+        item.note = ov.note !== undefined ? ov.note : item.note;
+        item.filmReview = ov.filmReview !== undefined ? ov.filmReview : item.filmReview;
+        item.outcome = ov.outcome || item.outcome;
+        item.tag = ov.tag || item.tag;
+        item.category = ov.category || item.category;
+      }
+
+      var rawP = normName(item.playersRaw || item.players || '');
+      var jList = Array.isArray(item.jerseys) ? item.jerseys : (Array.isArray(item.j) ? item.j : []);
       var matches = false;
 
-      if (rawP.indexOf(search) !== -1) matches = true;
-      if (!matches && jerseyNum !== null) {
-        if (jList.indexOf(jerseyNum) !== -1 || rawP.indexOf('#' + jerseyNum) !== -1) {
-          matches = true;
-        }
-      }
-      var note = String(item.notes || item.n || '').toLowerCase();
-      var pFirst = search.split(' ')[0];
-      if (!matches && pFirst.length >= 4 && note.indexOf(pFirst) !== -1) {
+      if (jerseyNum !== null && (jList.indexOf(jerseyNum) !== -1 || String(item.playersRaw || '').indexOf('#' + jerseyNum) !== -1)) {
         matches = true;
+      }
+      var note = normName(item.note || item.notes || item.n || '');
+      if (!matches) {
+        for (var a = 0; a < aliases.length; a++) {
+          if (aliases[a].length >= 3 && (rawP.indexOf(aliases[a]) !== -1 || note.indexOf(aliases[a]) !== -1)) {
+            matches = true;
+            break;
+          }
+        }
       }
       if (matches) {
         playerMoments.push(item);
@@ -1489,7 +2013,8 @@ function getPlayerFilmMoments(playerName) {
       success: true,
       playerName: playerName,
       jersey: jerseyNum,
-      moments: playerMoments
+      moments: playerMoments,
+      overrides: overrides
     });
   } catch(err) {
     return jsonOut({ success: false, moments: [], error: err.toString() });

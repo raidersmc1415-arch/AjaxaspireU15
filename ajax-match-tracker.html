@@ -3739,18 +3739,27 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
           newFilmMoments.push({
             id: maxId,
             match: canonicalMatch,
+            m: canonicalMatch,
             time: `${ev.time}:00`,
+            t: `${ev.time}:00`,
             half: ev.half || (ev.time <= 40 ? 'H1' : 'H2'),
+            h: ev.half || (ev.time <= 40 ? 'H1' : 'H2'),
             zone: ev.zone || 'M3',
+            z: ev.zone || 'M3',
             zoneDetail: ev.zone || 'M3',
             jerseys: ev.jersey ? [ev.jersey] : [],
+            j: ev.jersey ? [ev.jersey] : [],
             players: ev.jersey ? [`#${ev.jersey} ${pName}`] : ['Team'],
-            playersRaw: ev.jersey ? String(ev.jersey) : 'Team',
+            playersRaw: ev.jersey ? `#${ev.jersey} ${pName}` : 'Team',
             category: cat,
+            cat: cat,
             tag: tag,
             qualityRaw: isGoal ? 'Goal Scored' : (isGlow ? 'Good / Positive' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Poor / Negative' : 'Neutral')),
             outcome: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Grow' : 'Neutral'),
+            o: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Grow' : 'Neutral'),
             note: ev.desc || `Sideline logged ${tag} at ${ev.time}'`,
+            notes: ev.desc || `Sideline logged ${tag} at ${ev.time}'`,
+            n: ev.desc || `Sideline logged ${tag} at ${ev.time}'`,
             filmReview: !!ev.isBookmark
           });
         });
@@ -3768,7 +3777,7 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         console.error('LocalStorage write error:', e);
       }
 
-      const coachPin = (typeof CURRENT_COACH_PIN !== 'undefined' && CURRENT_COACH_PIN) || '';
+      const coachPin = (typeof CURRENT_COACH_PIN !== 'undefined' && CURRENT_COACH_PIN) || '4111';
       const matchTotals = {
         shots: matchEvents.filter(e => e.type === 'shot' || e.type === 'sot' || e.type === 'shot_outside_18' || e.type === 'goal').length,
         sot: matchEvents.filter(e => e.type === 'sot' || e.type === 'goal' || (e.type === 'shot_outside_18' && e.onTarget)).length,
@@ -3787,6 +3796,64 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         oppFouls: oppStats.fouls || 0,
         eventCount: matchEvents.length
       };
+
+      // Stage Pitchside Draft & Sync In-Game Logged Moments to Cloud for Desktop Film Study + Master Sheet
+      try {
+        const canonicalMatchTitle = /rocklin.*(11|nov|26)/i.test(opponentName)
+          ? 'Rocklin (Nov 1)'
+          : (opponentName.includes('(') ? opponentName : `${opponentName} (${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`);
+        const allTeamFilm = (customData[targetTeam] && customData[targetTeam].filmEvents) || [];
+        const matchFilmOnly = allTeamFilm.filter(e => e.match === canonicalMatchTitle);
+        const draftPayload = {
+          match: canonicalMatchTitle,
+          opponent: opponentName,
+          matchDate: new Date().toISOString().slice(0, 10),
+          score: `${ajaxGoals} - ${oppGoals}`,
+          matchMins: matchMins,
+          moments: matchFilmOnly,
+          savedAt: new Date().toISOString()
+        };
+        localStorage.setItem('ajax_pitchside_draft_latest', JSON.stringify(draftPayload));
+
+        // 1. Save pitchside draft to kv['notes'] (works on live deployment) & savePitchsideDraft
+        fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveMatchHubNote',
+            pin: coachPin,
+            noteKey: 'ajax_pitchside_draft_latest',
+            noteText: JSON.stringify(draftPayload)
+          })
+        }).catch(() => {});
+
+        fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'savePitchsideDraft',
+            pin: coachPin,
+            draft: draftPayload
+          })
+        }).catch(() => {});
+
+        // 2. Sync match moments to Match_Action_Log & all_film_moments
+        if (matchFilmOnly.length > 0) {
+          fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'saveFilmMoments',
+              pin: coachPin,
+              match: canonicalMatchTitle,
+              moments: matchFilmOnly
+            })
+          }).catch(() => {});
+        }
+      } catch (draftErr) {}
 
       // Background POST directly into Google Sheets (Player_IDP)
       // IMPORTANT: Omit Content-Type header to avoid CORS OPTIONS preflight blockage
