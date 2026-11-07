@@ -631,6 +631,7 @@
    .section-collapse-header { padding: 4px 0; }
  }
 </style>
+<script src="aspire-canonical-moments.js"></script>
 </head>
 <body>
 
@@ -2522,6 +2523,7 @@
   </div>
 
   <script>
+    let CURRENT_PLAYER_NAME = '';
     // FILM ROOM IDENTITY — verify name + PIN once, reuse for all submissions
     let FILM_VERIFIED_NAME = null;
 
@@ -3262,14 +3264,14 @@
 
       // Fallback: load static canonical moments if network or KV empty
       if (!moments.length) {
-        if (!window.CANONICAL_ASPIRE_MOMENTS && typeof fetch !== 'undefined') {
+        if (window.CANONICAL_ASPIRE_MOMENTS && Array.isArray(window.CANONICAL_ASPIRE_MOMENTS)) {
+          moments = filterCanonicalMomentsForPlayer(playerName, jerseyNum);
+        } else if (typeof fetch !== 'undefined') {
           try {
             const localRes = await fetch('aspire-canonical-moments.json');
             window.CANONICAL_ASPIRE_MOMENTS = await localRes.json();
+            moments = filterCanonicalMomentsForPlayer(playerName, jerseyNum);
           } catch(e) {}
-        }
-        if (window.CANONICAL_ASPIRE_MOMENTS) {
-          moments = filterCanonicalMomentsForPlayer(playerName, jerseyNum);
         }
       }
 
@@ -3292,6 +3294,12 @@
       const norm = normNameJS(playerName);
       const pFirst = norm.split(' ')[0];
       const jNum = jerseyNum !== null && jerseyNum !== undefined ? parseInt(jerseyNum, 10) : getPlayerJersey(playerName);
+      const aliases = [norm, pFirst];
+      if (pFirst === 'camila') aliases.push('cami');
+      if (pFirst === 'carlee') aliases.push('carly');
+      if (pFirst === 'mackenzie') aliases.push('mack');
+      if (pFirst === 'sophia') aliases.push('sophie');
+      if (pFirst === 'alessandra') aliases.push('ale');
 
       const list = window.CANONICAL_ASPIRE_MOMENTS || [];
       return list.filter(m => {
@@ -3304,9 +3312,8 @@
         if (jNum && jList.includes(jNum)) return true;
         const raw = String(m.playersRaw || m.players || '').toLowerCase();
         if (jNum && raw.includes('#' + jNum)) return true;
-        if (raw.includes(norm)) return true;
         const note = String(m.n || m.note || '').toLowerCase();
-        if (pFirst.length >= 4 && note.includes(pFirst)) return true;
+        if (aliases.some(a => a.length >= 3 && (raw.includes(a) || note.includes(a)))) return true;
         return false;
       }).map(m => ({
         match: m.m || m.match || 'Match',
@@ -3362,7 +3369,9 @@
       const curatedSection = document.getElementById('curated-film-review-section');
       const curatedFeed = document.getElementById('curated-moments-feed');
       const curatedCount = document.getElementById('curated-moments-count-badge');
-      const currentPlayerName = CURRENT_LOGGED_IN_PLAYER || (document.getElementById('portal-player-name')?.textContent || '').trim();
+      const currentPlayerName = (typeof CURRENT_PLAYER_NAME !== 'undefined' && CURRENT_PLAYER_NAME)
+        ? CURRENT_PLAYER_NAME
+        : (document.getElementById('portal-welcome')?.textContent || '').replace('Welcome, ', '').replace('!', '').replace(/,/g, ' ').trim();
       const normPlayer = normNameJS(currentPlayerName);
 
       const totalAll = CURRENT_PLAYER_MOMENTS.length;
@@ -3379,7 +3388,10 @@
       if (curatedSection && curatedFeed) {
         if (curatedMoments.length > 0) {
           curatedSection.style.display = 'block';
-          if (curatedCount) curatedCount.textContent = `${curatedMoments.length} Review Priority${curatedMoments.length !== 1 ? 's' : ''}`;
+          if (curatedCount) {
+            const curWord = curatedMoments.length === 1 ? 'Review Priority' : 'Review Priorities';
+            curatedCount.textContent = `${curatedMoments.length} ${curWord}`;
+          }
           
           curatedFeed.innerHTML = curatedMoments.map((m, idx) => {
             const clipKey = `${m.match}_${m.half}_${m.time}_${idx}`.replace(/[^a-zA-Z0-9_]/g, '_');
@@ -3410,7 +3422,7 @@
                   </div>
                 ` : ''}
                 <div style="margin-top:12px; display:flex; align-items:center; gap:8px;">
-                  <input type="checkbox" id="chk-curated-${clipKey}" class="film-watch-input curated-watch-cb" ${isChecked ? 'checked' : ''} onchange="onCuratedClipToggled('${escapeHtml(currentPlayerName)}', '${clipKey}', this.checked)">
+                  <input type="checkbox" id="chk-curated-${clipKey}" class="film-watch-input curated-watch-cb" ${isChecked ? 'checked' : ''} data-player="${escapeHtml(currentPlayerName)}" data-clip="${clipKey}" onchange="onCuratedClipToggled(this.dataset.player, this.dataset.clip, this.checked)">
                   <label for="chk-curated-${clipKey}" style="font-size:12.5px; font-weight:600; color:var(--text); cursor:pointer;">
                     ☑ I watched this moment &amp; understand Coach Shawn's feedback
                   </label>
@@ -3828,7 +3840,7 @@
 
     // GOOGLE API LOGIC
     const API_URL = "https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec";
-    let CURRENT_PLAYER_NAME = '';
+    // CURRENT_PLAYER_NAME initialized at script top
 
     async function loginPortal() {
       const name = document.getElementById('player-name').value.trim();
