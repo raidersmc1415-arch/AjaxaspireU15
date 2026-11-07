@@ -227,19 +227,19 @@ function verifyPlayerCredentials_(reqName, reqPin) {
 }
 
 function doGet(e) {
-  if (e.parameter.action === 'coachingVideos')       return getCoachingVideos(e.parameter.name, e.parameter.pin);
-  if (e.parameter.action === 'coachRatings')         return getCoachRatings(e.parameter.name, e.parameter.pin);
+  if (e.parameter.action === 'coachingVideos')       return getCoachingVideos(e.parameter.name || e.parameter.player, e.parameter.pin);
+  if (e.parameter.action === 'coachRatings')         return getCoachRatings(e.parameter.name || e.parameter.player, e.parameter.pin);
   if (e.parameter.action === 'challengeLeaderboard') return getChallengeLeaderboard();
   if (e.parameter.action === 'coachMessage')         return getCoachMessage();
   if (e.parameter.action === 'moments')              return getMoments();
-  if (e.parameter.action === 'reflections')          return getPlayerReflections(e.parameter.name, e.parameter.pin);
-  if (e.parameter.action === 'verifyPin')            return verifyPin(e.parameter.name, e.parameter.pin);
+  if (e.parameter.action === 'reflections')          return getPlayerReflections(e.parameter.name || e.parameter.player, e.parameter.pin);
+  if (e.parameter.action === 'verifyPin')            return verifyPin(e.parameter.name || e.parameter.player, e.parameter.pin);
   if (e.parameter.action === 'teamStats')            return getTeamStats();
   if (e.parameter.action === 'filmMoments')          return getFilmMoments();
   if (e.parameter.action === 'matchHub')             return getMatchHubData(e.parameter.pin);
   if (e.parameter.action === 'syncMatchData')        return handleSyncMatchData(e.parameter.pin);
   if (e.parameter.action === 'healTeamAggregate')    return handleHealTeamAggregate(e.parameter.pin);
-  if (e.parameter.action === 'playerFilmMoments')    return getPlayerFilmMoments(e.parameter.name, e.parameter.pin);
+  if (e.parameter.action === 'playerFilmMoments')    return getPlayerFilmMoments(e.parameter.name || e.parameter.player, e.parameter.pin);
   if (e.parameter.action === 'getMatchActions')      return getMatchActions(e.parameter);
   if (e.parameter.action === 'filmOverrides')        return getFilmOverrides(e.parameter.pin);
   if (e.parameter.action === 'pitchsideDraft')       return getPitchsideDraft(e.parameter.pin);
@@ -875,7 +875,8 @@ function getPlayerReflections(playerName, playerPin) {
       if (ts instanceof Date) {
         dateStr = (ts.getMonth()+1) + '/' + ts.getDate() + '/' + ts.getFullYear();
       } else {
-        dateStr = String(ts || '').split('T')[0];
+        var str = String(ts || '').trim();
+        dateStr = str.indexOf('T') !== -1 ? str.split('T')[0] : str.split(' ')[0];
       }
       out.push({
         date:       dateStr,

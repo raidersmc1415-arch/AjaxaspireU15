@@ -9220,11 +9220,20 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
 
       const promise = (async () => {
         try {
+          let coachPin = getCoachSessionPin();
+          if (!coachPin) {
+            coachPin = (prompt('Enter Coach PIN to sync player reflections & IDP ratings:') || '').trim();
+            if (coachPin) {
+              window.CURRENT_COACH_PIN = coachPin;
+              try { sessionStorage.setItem('ajax_coach_session_token', coachPin); } catch(e) {}
+            }
+          }
+          const pinParam = coachPin ? `&pin=${encodeURIComponent(coachPin)}` : '';
           const [ratingsRes, reflRes] = await Promise.all([
-            fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}`)
+            fetch(`${API_URL}?action=coachRatings&name=${encodeURIComponent(playerName)}${pinParam}`)
               .then(r => r.json())
               .catch(() => ({ found: false })),
-            fetch(`${API_URL}?action=reflections&name=${encodeURIComponent(playerName)}`)
+            fetch(`${API_URL}?action=reflections&name=${encodeURIComponent(playerName)}${pinParam}`)
               .then(r => r.json())
               .catch(() => ({ reflections: [] }))
           ]);
@@ -9299,6 +9308,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       const goals = { short: '', long: '', oneThing: '' };
       const general = [];
       const film = [];
+      const allRecent = [];
 
       (reflectionsList || []).forEach(r => {
         const raw = r.reflection || '';
@@ -9309,14 +9319,16 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
             if (/Long-Term(?:\s*Goal)?:/i.test(l)) goals.long = l.replace(/Long-Term(?:\s*Goal)?:\s*/i, '').trim();
             if (/(?:The\s*)?One\s*Thing(?:\s*Goal)?:/i.test(l)) goals.oneThing = l.replace(/(?:The\s*)?One\s*Thing(?:\s*Goal)?:\s*/i, '').trim();
           });
-        } else if (raw.includes('[INDIVIDUAL FILM FEEDBACK') || raw.includes('[FILM FEEDBACK]')) {
-          film.push(r);
         } else {
-          general.push(r);
+          const isFilm = /\[(?:INDIVIDUAL\s*)?FILM\s*FEEDBACK/i.test(raw);
+          const item = { ...r, isFilm };
+          if (isFilm) film.push(item);
+          else general.push(item);
+          allRecent.push(item);
         }
       });
 
-      return { goals, general, film };
+      return { goals, general, film, allRecent };
     }
 
     function getPlayerByKey(key) {
@@ -9466,8 +9478,8 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
       if (to80 && to80 < 5 && mins > 100) {
         starterGlow += `Reliable ball security averaging only ${to80} turnovers per 80 minutes. `;
       }
-      if (parsedRefl.general.length > 0) {
-        starterGlow += `Reflections demonstrate consistent self-assessment and hunger to grow.`;
+      if ((parsedRefl.allRecent && parsedRefl.allRecent.length > 0) || parsedRefl.general.length > 0) {
+        starterGlow += `Reflections demonstrate consistent self-assessment and hunger to grow. `;
       }
 
       // Auto-synthesize baseline Grow (priority development focus) from Sheet IDP + film TOs + player goals + attendance
@@ -9578,17 +9590,21 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
 
       // Format recent reflections for the Player Voice section (3-column horizontal grid)
       let reflectionsHtml = '';
-      if (parsedRefl.general.length > 0) {
+      const displayReflections = (parsedRefl.allRecent && parsedRefl.allRecent.length > 0)
+        ? parsedRefl.allRecent
+        : (parsedRefl.general.length > 0 ? parsedRefl.general : parsedRefl.film);
+
+      if (displayReflections && displayReflections.length > 0) {
         reflectionsHtml = `
           <div class="grid grid-cols-1 md:grid-cols-3 print:grid-cols-3 gap-2.5">
-            ${parsedRefl.general.slice(0, 3).map(r => `
+            ${displayReflections.slice(0, 3).map(r => `
               <div class="p-2.5 rounded-xl bg-pitch/60 print-refl-card border border-border/70 flex flex-col justify-between space-y-1.5">
                 <div class="space-y-1">
                   <div class="flex items-center justify-between gap-2">
                     <span class="mono text-[10px] text-teal-400 font-bold">${esc(r.date || 'Recent')}</span>
-                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-surface border border-border text-slate-400">Post-Match</span>
+                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-surface border border-border text-slate-400">${r.isFilm ? 'Film Study' : 'Post-Match'}</span>
                   </div>
-                  <p class="text-[11px] italic text-slate-200 print:text-black leading-snug">"${esc(r.reflection)}"</p>
+                  <p class="text-[11px] italic text-slate-200 print:text-black leading-snug whitespace-pre-line">"${esc(r.reflection)}"</p>
                 </div>
                 ${r.coachReply ? `
                   <div class="pt-1.5 border-t border-border/50 text-[10px] text-amber-300 print:text-amber-900 leading-snug">
