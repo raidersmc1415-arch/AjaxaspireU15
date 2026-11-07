@@ -39,6 +39,7 @@ function onOpen() {
   ui.createMenu('⚽ Ajax Coach Tools')
     .addItem('Sync Match Stats', 'syncMatchData')
     .addItem('Initialize Match_Action_Log Tab', 'initMatchActionLogTabUI')
+    .addItem('Verify / Migrate Match_Action_Log Columns', 'migrateMatchActionLogHeadersUI')
     .addItem('Heal Team Record (6-0-7)', 'healTeamAggregate')
     .addToUi();
 }
@@ -1519,7 +1520,17 @@ function getOrCreateMatchActionLogSheet() {
   } else {
     var curHeaders = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0].map(function(h) { return String(h || '').trim().toLowerCase(); });
     if (curHeaders.indexOf('note_to_player') === -1 && curHeaders.indexOf('note to player') === -1) {
-      sheet.getRange(1, 1, 1, MATCH_ACTION_LOG_HEADERS.length).setValues([MATCH_ACTION_LOG_HEADERS]);
+      var iNotes = curHeaders.indexOf('coach_notes');
+      if (iNotes !== -1 && typeof sheet.insertColumnAfter === 'function') {
+        sheet.insertColumnAfter(iNotes + 1);
+        var newCol = iNotes + 2;
+        sheet.getRange(1, newCol).setValue('Note_To_Player')
+          .setFontWeight('bold')
+          .setBackground('#0D1B2A')
+          .setFontColor('#FFFFFF');
+      } else {
+        sheet.getRange(1, 1, 1, MATCH_ACTION_LOG_HEADERS.length).setValues([MATCH_ACTION_LOG_HEADERS]);
+      }
     }
   }
   return sheet;
@@ -1528,6 +1539,11 @@ function getOrCreateMatchActionLogSheet() {
 function initMatchActionLogTabUI() {
   var sheet = getOrCreateMatchActionLogSheet();
   SpreadsheetApp.getUi().alert('✅ Match_Action_Log tab is ready (' + Math.max(0, sheet.getLastRow() - 1) + ' action rows currently stored).');
+}
+
+function migrateMatchActionLogHeadersUI() {
+  var sheet = getOrCreateMatchActionLogSheet();
+  SpreadsheetApp.getUi().alert('✅ Match_Action_Log schema verified. Column N (Note_To_Player) is active (' + Math.max(0, sheet.getLastRow() - 1) + ' action rows).');
 }
 
 function buildActionRowFromMoment(m, nowStr) {

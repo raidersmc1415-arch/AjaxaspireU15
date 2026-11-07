@@ -209,12 +209,28 @@ function createCodeGsSandbox() {
           }
         },
         clearContent: () => {},
+        getValues: () => {
+          const out = [];
+          for (let i = 0; i < (numR || 1); i++) {
+            const rowIdx = r - 1 + i;
+            const rData = rows[rowIdx] || [];
+            out.push(rData.slice(c - 1, c - 1 + (numC || 1)));
+          }
+          return out;
+        },
+        getValue: () => (rows[r - 1] ? rows[r - 1][c - 1] : ''),
         setFontWeight: function() { return this; },
         setBackground: function() { return this; },
         setFontColor: function() { return this; }
       }),
       appendRow: (row) => { rows.push(row); },
-      setFrozenRows: () => {}
+      setFrozenRows: () => {},
+      getLastColumn: () => (rows[0] ? rows[0].length : 0),
+      insertColumnAfter: (afterCol) => {
+        for (let r = 0; r < rows.length; r++) {
+          rows[r].splice(afterCol, 0, '');
+        }
+      }
     };
   }
 
@@ -282,11 +298,11 @@ function createCodeGsSandbox() {
 
   vm.createContext(sandbox);
   vm.runInContext(codeGs, sandbox);
-  return { sandbox, idpRows, kvStore };
+  return { sandbox, idpRows, kvStore, actionLogRows };
 }
 
 check('3a. Per-player API reads without valid PIN return no data; valid PIN returns data with non-filmReview notes redacted', () => {
-  const { sandbox } = createCodeGsSandbox();
+  const { sandbox, actionLogRows } = createCodeGsSandbox();
 
   // Unauthenticated coachRatings
   const rUnauth = JSON.parse(sandbox.doGet({ parameter: { action: 'coachRatings', name: 'Camila Deleon' } }).getContent());
@@ -318,6 +334,32 @@ check('3a. Per-player API reads without valid PIN return no data; valid PIN retu
   const mCoach601 = fmCoach.moments.find(m => String(m.id) === '601');
   assert.strictEqual(mCoach601.note, 'Internal coach observation', 'Coach caller retains Coach Note');
   assert.strictEqual(mCoach601.noteToPlayer, 'Assigned player note visible in portal', 'Coach caller retains Note to Player');
+
+  // Verify saveFilmMoments writes Note_To_Player to Column N of Match_Action_Log
+  const saveMomentsRes = JSON.parse(sandbox.handleSaveFilmMoments({
+    pin: 'TEST_SERVER_COACH_SECRET',
+    match: 'Rocklin (Nov 1)',
+    moments: [{
+      id: '603',
+      match: 'Rocklin (Nov 1)',
+      half: 'H2',
+      time: '07:00',
+      zone: 'D3',
+      outcome: 'Grow',
+      category: 'Defensive Moment',
+      tag: 'Good Press / Duel Won',
+      note: 'Mack forces keeper... internal staff note',
+      noteToPlayer: 'Watch pressing trigger when Mack turns keeper',
+      jerseys: [2],
+      players: ['#2 Giselle Rosales'],
+      filmReview: true
+    }]
+  }).getContent());
+  assert.strictEqual(saveMomentsRes.success, true);
+  const row603 = actionLogRows.find(r => r[0] === '603');
+  assert(row603, 'Row 603 must exist in Match_Action_Log');
+  assert.strictEqual(row603[12], 'Mack forces keeper... internal staff note', 'Col 13 Coach_Notes must match');
+  assert.strictEqual(row603[13], 'Watch pressing trigger when Mack turns keeper', 'Col 14 Note_To_Player must be written');
 
   // Unauthenticated POST IDP write
   const postUnauth = JSON.parse(sandbox.doPost({

@@ -8503,6 +8503,7 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'т
           note: e.note || '',
           notes: e.note || '',
           n: e.note || '',
+          noteToPlayer: e.noteToPlayer || '',
           filmReview: Boolean(e.filmReview)
         };
       });
@@ -8544,9 +8545,13 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'т
           showToast('тЪая╕П Coach PIN required to publish to Sheet.');
           return;
         }
-        const targetEvents = selectedMatch !== 'ALL'
+        const rawTargetEvents = selectedMatch !== 'ALL'
           ? allEv.filter(e => e.match === selectedMatch)
           : allEv;
+        const targetEvents = rawTargetEvents.map(e => ({
+          ...e,
+          noteToPlayer: e.noteToPlayer || ''
+        }));
 
         await fetch(API_URL, {
           method: 'POST',
