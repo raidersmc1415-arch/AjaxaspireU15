@@ -8803,26 +8803,6 @@ ${(cachedTrackerHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => 'â
         }
         applyFilmEventsToTeam(DATA[k], DATA[k].filmEvents);
       });
-          ev.qualityRaw = qualityRaw;
-          ev.tag = tag;
-          ev.category = category;
-          ev.zone = zone;
-          ev.zoneDetail = zone;
-          ev.half = half;
-          ev.time = time;
-          ev.jerseys = jerseys;
-          ev.primaryJersey = primaryJersey;
-          ev.secondaryJerseys = secondaryJerseys;
-          ev.players = players;
-          ev.playersRaw = playersRaw;
-          ev.note = note;
-          ev.noteToPlayer = noteToPlayer;
-          ev.filmReview = filmReview;
-          ev.isCritical = isCrit;
-          if (!updatedMomentRef) updatedMomentRef = { ...ev };
-        }
-        applyFilmEventsToTeam(DATA[k], DATA[k].filmEvents);
-      });
 
       try {
         localStorage.setItem('matchhub_custom_data', JSON.stringify(DATA));

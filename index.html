@@ -5360,6 +5360,7 @@
         try {
           localStorage.setItem('ajax_coach_auth_token', hash);
           localStorage.removeItem('ajax_coach_pin');
+          sessionStorage.setItem('ajax_coach_session_token', pin);
         } catch(e) {}
         if (err) err.style.display = 'none';
         window.location.href = 'match-hub.html';
