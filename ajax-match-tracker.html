@@ -4454,16 +4454,16 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
       // Verified historical baseline defaults if local customData is absent or partial
       const BASELINE_TOTALS = {
         'AJAX ASPIRE U15': {
-          games: 9, mins: 736, won: 2, tied: 0, lost: 7, gf: 9, ga: 19, gd: -10,
+          games: 10, mins: 817, won: 3, tied: 0, lost: 7, gf: 15, ga: 20, gd: -5,
           shots: 68, sot: 42, soff: 26, shotsAgainst: 38, saves: 18, cleanSheets: 1,
-          corners: 24, crosses: 11, fouls: 32, offsides: 8, turnovers: 382,
-          toA: 88, toM: 165, toD: 129, keyPasses: 15, passes: 45, shotAcc: 62, conv: 13, winPct: 22
+          corners: 24, crosses: 11, fouls: 32, offsides: 8, turnovers: 273,
+          toA: 74, toM: 118, toD: 81, keyPasses: 15, passes: 45, shotAcc: 62, conv: 13, winPct: 30
         },
         'AJAX ASPIRE U15 (LEAGUE)': {
-          games: 6, mins: 496, won: 2, tied: 0, lost: 4, gf: 9, ga: 13, gd: -4,
+          games: 7, mins: 577, won: 3, tied: 0, lost: 4, gf: 15, ga: 14, gd: 1,
           shots: 51, sot: 33, soff: 18, shotsAgainst: 26, saves: 13, cleanSheets: 1,
-          corners: 19, crosses: 7, fouls: 21, offsides: 6, turnovers: 280,
-          toA: 65, toM: 122, toD: 93, keyPasses: 11, passes: 31, shotAcc: 65, conv: 18, winPct: 33
+          corners: 19, crosses: 7, fouls: 21, offsides: 6, turnovers: 195,
+          toA: 59, toM: 83, toD: 53, keyPasses: 11, passes: 31, shotAcc: 65, conv: 18, winPct: 43
         },
         'AJAX GA U15': {
           games: 4, mins: 321, won: 3, tied: 1, lost: 0, gf: 14, ga: 1, gd: 13,
@@ -4475,27 +4475,771 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
 
       const BASELINE_PLAYERS = {
         'AJAX ASPIRE U15': [
-          { name: 'Alessandra Fernandez', jersey: 15, roles: ['DM','LM','CM'], posBreakdown: [{pos:'DM',gp:2,mins:74,pct:60},{pos:'LM',gp:2,mins:28,pct:23},{pos:'CM',gp:1,mins:20,pct:16},{pos:'CF',gp:1,mins:1,pct:1}], gp: 3, mins: 123, goals: 1, assists: 0, sot: 3, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Alex Marigorda', jersey: 36, roles: ['CB','DM','LB','RB'], posBreakdown: [{pos:'CB',gp:3,mins:84,pct:50},{pos:'DM',gp:1,mins:46,pct:27},{pos:'LB',gp:1,mins:30,pct:18},{pos:'RB',gp:1,mins:9,pct:5}], gp: 5, mins: 169, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 1 },
-          { name: 'Alexa Chipres', jersey: 50, roles: ['DM','CB','CM'], posBreakdown: [{pos:'DM',gp:5,mins:149,pct:47},{pos:'CB',gp:3,mins:143,pct:45},{pos:'CM',gp:1,mins:25,pct:8}], gp: 6, mins: 317, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Amy Godínez Vargas', jersey: 19, roles: ['RB','LB','CB'], posBreakdown: [{pos:'RB',gp:5,mins:234,pct:60},{pos:'LB',gp:2,mins:87,pct:22},{pos:'CB',gp:1,mins:72,pct:18}], gp: 6, mins: 393, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Arianna Zamora', jersey: 4, roles: ['RB','LB'], posBreakdown: [{pos:'RB',gp:4,mins:161,pct:60},{pos:'LB',gp:4,mins:107,pct:40}], gp: 6, mins: 268, goals: 0, assists: 1, sot: 0, soff: 0, fouls: 1, keyPasses: 0 },
-          { name: 'Brooklyn Brewer', jersey: 37, roles: ['RM','RW','LM'], posBreakdown: [{pos:'RM',gp:5,mins:171,pct:78},{pos:'RW',gp:1,mins:41,pct:19},{pos:'LM',gp:1,mins:8,pct:4}], gp: 6, mins: 220, goals: 0, assists: 0, sot: 0, soff: 2, fouls: 1, keyPasses: 1 },
-          { name: 'Camila Deleon', jersey: 9, roles: ['CB'], posBreakdown: [{pos:'CB',gp:6,mins:378,pct:100}], gp: 6, mins: 378, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Carlee Gowan', jersey: 89, roles: ['CB','CF'], posBreakdown: [{pos:'CB',gp:4,mins:228,pct:95},{pos:'CF',gp:1,mins:13,pct:5}], gp: 6, mins: 241, goals: 0, assists: 0, sot: 1, soff: 1, fouls: 0, keyPasses: 0 },
-          { name: 'Ella Simmons', jersey: 25, roles: ['AM','CF','LW','LM','DM','CM'], posBreakdown: [{pos:'AM',gp:3,mins:52,pct:28},{pos:'CF',gp:2,mins:51,pct:28},{pos:'LW',gp:1,mins:27,pct:15},{pos:'LM',gp:1,mins:20,pct:11},{pos:'DM',gp:1,mins:18,pct:10},{pos:'CM',gp:1,mins:16,pct:9}], gp: 6, mins: 184, goals: 1, assists: 1, sot: 1, soff: 1, fouls: 1, keyPasses: 0 },
-          { name: 'Evelyn Lopez', jersey: 24, roles: ['CM','DM'], posBreakdown: [{pos:'CM',gp:5,mins:124,pct:67},{pos:'DM',gp:2,mins:61,pct:33}], gp: 6, mins: 185, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Giselle Rosales', jersey: 2, roles: ['RM','CF','RW','LM'], posBreakdown: [{pos:'RM',gp:4,mins:168,pct:49},{pos:'CF',gp:2,mins:84,pct:25},{pos:'RW',gp:2,mins:56,pct:16},{pos:'LM',gp:1,mins:30,pct:9},{pos:'RB',gp:1,mins:3,pct:1}], gp: 6, mins: 341, goals: 2, assists: 2, sot: 9, soff: 5, fouls: 3, keyPasses: 2 },
-          { name: 'Grace Krimmel', jersey: 5, roles: ['CB','CF','LM','RM'], posBreakdown: [{pos:'CB',gp:2,mins:145,pct:43},{pos:'CF',gp:3,mins:91,pct:27},{pos:'LM',gp:2,mins:63,pct:18},{pos:'RM',gp:2,mins:41,pct:12}], gp: 6, mins: 341, goals: 1, assists: 1, sot: 0, soff: 2, fouls: 1, keyPasses: 2 },
-          { name: 'Kendall Blair', jersey: 14, roles: ['CM','LM','LB','LW'], posBreakdown: [{pos:'CM',gp:5,mins:183,pct:48},{pos:'LM',gp:2,mins:99,pct:26},{pos:'LB',gp:3,mins:54,pct:14},{pos:'LW',gp:1,mins:39,pct:10},{pos:'CF',gp:1,mins:8,pct:2}], gp: 6, mins: 385, goals: 0, assists: 0, sot: 3, soff: 0, fouls: 5, keyPasses: 0 },
-          { name: 'MacKenzie Castro', jersey: 7, roles: ['CF','LB','RB'], posBreakdown: [{pos:'CF',gp:5,mins:175,pct:50},{pos:'LB',gp:4,mins:130,pct:37},{pos:'RB',gp:1,mins:42,pct:12}], gp: 6, mins: 347, goals: 1, assists: 0, sot: 4, soff: 2, fouls: 2, keyPasses: 0 },
-          { name: 'Madisyn Craig', jersey: 33, roles: ['CB'], posBreakdown: [{pos:'CB',gp:1,mins:66,pct:100}], gp: 1, mins: 66, goals: 0, assists: 0, sot: 0, soff: 1, fouls: 0, keyPasses: 0 },
-          { name: 'Nairobi Mcgadney', jersey: 34, roles: ['LM','LW','RM'], posBreakdown: [{pos:'LM',gp:2,mins:54,pct:56},{pos:'LW',gp:1,mins:35,pct:36},{pos:'RM',gp:1,mins:8,pct:8}], gp: 3, mins: 97, goals: 0, assists: 0, sot: 1, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Scarlett Freitas', jersey: 8, roles: ['CM','DM','AM','RW'], posBreakdown: [{pos:'CM',gp:5,mins:207,pct:57},{pos:'DM',gp:2,mins:77,pct:21},{pos:'AM',gp:2,mins:39,pct:11},{pos:'RW',gp:2,mins:39,pct:11}], gp: 6, mins: 362, goals: 1, assists: 2, sot: 3, soff: 1, fouls: 2, keyPasses: 1 },
-          { name: 'Sola Alberto', jersey: 1, roles: ['LM','CF','RM','AM','CM'], posBreakdown: [{pos:'LM',gp:3,mins:88,pct:40},{pos:'CF',gp:3,mins:66,pct:30},{pos:'RM',gp:1,mins:23,pct:10},{pos:'AM',gp:1,mins:23,pct:10},{pos:'CM',gp:1,mins:20,pct:9}], gp: 4, mins: 220, goals: 0, assists: 0, sot: 1, soff: 1, fouls: 0, keyPasses: 0 },
-          { name: 'Sonia Vera', jersey: 88, roles: ['GK'], posBreakdown: [{pos:'GK',gp:6,mins:496,pct:100}], gp: 6, mins: 496, goals: 0, assists: 0, sot: 0, soff: 0, fouls: 0, keyPasses: 0 },
-          { name: 'Sophia Culver', jersey: 23, roles: ['CF','AM'], posBreakdown: [{pos:'CF',gp:5,mins:263,pct:82},{pos:'AM',gp:2,mins:54,pct:17},{pos:'LB',gp:1,mins:3,pct:1}], gp: 5, mins: 320, goals: 3, assists: 1, sot: 7, soff: 2, fouls: 5, keyPasses: 0 }
-        ]
+          {
+                    "name": "Alessandra Fernandez",
+                    "jersey": 15,
+                    "roles": [
+                              "DM",
+                              "LM",
+                              "CM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "DM",
+                                        "gp": 2,
+                                        "mins": 74,
+                                        "pct": 60
+                              },
+                              {
+                                        "pos": "LM",
+                                        "gp": 2,
+                                        "mins": 28,
+                                        "pct": 23
+                              },
+                              {
+                                        "pos": "CM",
+                                        "gp": 1,
+                                        "mins": 20,
+                                        "pct": 16
+                              },
+                              {
+                                        "pos": "CF",
+                                        "gp": 1,
+                                        "mins": 1,
+                                        "pct": 1
+                              }
+                    ],
+                    "gp": 3,
+                    "mins": 123,
+                    "goals": 1,
+                    "assists": 0,
+                    "sot": 3,
+                    "soff": 0,
+                    "fouls": 0,
+                    "keyPasses": 0
+          },
+          {
+                    "name": "Alex Marigorda",
+                    "jersey": 36,
+                    "roles": [
+                              "CB",
+                              "DM",
+                              "LB",
+                              "RB"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CB",
+                                        "gp": 3,
+                                        "mins": 84,
+                                        "pct": 50
+                              },
+                              {
+                                        "pos": "DM",
+                                        "gp": 1,
+                                        "mins": 46,
+                                        "pct": 27
+                              },
+                              {
+                                        "pos": "LB",
+                                        "gp": 1,
+                                        "mins": 30,
+                                        "pct": 18
+                              },
+                              {
+                                        "pos": "RB",
+                                        "gp": 1,
+                                        "mins": 9,
+                                        "pct": 5
+                              }
+                    ],
+                    "gp": 5,
+                    "mins": 169,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 0,
+                    "soff": 0,
+                    "fouls": 0,
+                    "keyPasses": 1
+          },
+          {
+                    "name": "Alexa Chipres",
+                    "jersey": 50,
+                    "roles": [
+                              "DM",
+                              "CB",
+                              "CM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "DM",
+                                        "gp": 6,
+                                        "mins": 190,
+                                        "pct": 48
+                              },
+                              {
+                                        "pos": "CB",
+                                        "gp": 4,
+                                        "mins": 183,
+                                        "pct": 46
+                              },
+                              {
+                                        "pos": "CM",
+                                        "gp": 1,
+                                        "mins": 25,
+                                        "pct": 6
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 398,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 0,
+                    "soff": 0,
+                    "fouls": 1,
+                    "keyPasses": 2
+          },
+          {
+                    "name": "Amy Godínez Vargas",
+                    "jersey": 19,
+                    "roles": [
+                              "RB",
+                              "LB",
+                              "CB"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "RB",
+                                        "gp": 6,
+                                        "mins": 247,
+                                        "pct": 59
+                              },
+                              {
+                                        "pos": "LB",
+                                        "gp": 3,
+                                        "mins": 100,
+                                        "pct": 24
+                              },
+                              {
+                                        "pos": "CB",
+                                        "gp": 1,
+                                        "mins": 72,
+                                        "pct": 17
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 419,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 0,
+                    "soff": 0,
+                    "fouls": 0,
+                    "keyPasses": 0
+          },
+          {
+                    "name": "Arianna Zamora",
+                    "jersey": 4,
+                    "roles": [
+                              "RB",
+                              "LB"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "RB",
+                                        "gp": 5,
+                                        "mins": 182,
+                                        "pct": 59
+                              },
+                              {
+                                        "pos": "LB",
+                                        "gp": 5,
+                                        "mins": 128,
+                                        "pct": 41
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 310,
+                    "goals": 0,
+                    "assists": 1,
+                    "sot": 2,
+                    "soff": 1,
+                    "fouls": 1,
+                    "keyPasses": 1
+          },
+          {
+                    "name": "Brooklyn Brewer",
+                    "jersey": 37,
+                    "roles": [
+                              "RM",
+                              "RW",
+                              "LM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "RM",
+                                        "gp": 6,
+                                        "mins": 203,
+                                        "pct": 76
+                              },
+                              {
+                                        "pos": "RW",
+                                        "gp": 2,
+                                        "mins": 56,
+                                        "pct": 21
+                              },
+                              {
+                                        "pos": "LM",
+                                        "gp": 1,
+                                        "mins": 8,
+                                        "pct": 3
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 267,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 0,
+                    "soff": 4,
+                    "fouls": 2,
+                    "keyPasses": 1
+          },
+          {
+                    "name": "Camila Deleon",
+                    "jersey": 9,
+                    "roles": [
+                              "CB"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CB",
+                                        "gp": 7,
+                                        "mins": 459,
+                                        "pct": 100
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 459,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 0,
+                    "soff": 0,
+                    "fouls": 0,
+                    "keyPasses": 0
+          },
+          {
+                    "name": "Carlee Gowan",
+                    "jersey": 89,
+                    "roles": [
+                              "CB",
+                              "CF"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CB",
+                                        "gp": 5,
+                                        "mins": 258,
+                                        "pct": 95
+                              },
+                              {
+                                        "pos": "CF",
+                                        "gp": 1,
+                                        "mins": 13,
+                                        "pct": 5
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 271,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 1,
+                    "soff": 1,
+                    "fouls": 0,
+                    "keyPasses": 1
+          },
+          {
+                    "name": "Ella Simmons",
+                    "jersey": 25,
+                    "roles": [
+                              "AM",
+                              "CF",
+                              "LW",
+                              "LM",
+                              "DM",
+                              "CM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "AM",
+                                        "gp": 4,
+                                        "mins": 72,
+                                        "pct": 33
+                              },
+                              {
+                                        "pos": "CF",
+                                        "gp": 2,
+                                        "mins": 51,
+                                        "pct": 23
+                              },
+                              {
+                                        "pos": "LW",
+                                        "gp": 2,
+                                        "mins": 42,
+                                        "pct": 19
+                              },
+                              {
+                                        "pos": "LM",
+                                        "gp": 1,
+                                        "mins": 20,
+                                        "pct": 9
+                              },
+                              {
+                                        "pos": "DM",
+                                        "gp": 1,
+                                        "mins": 18,
+                                        "pct": 8
+                              },
+                              {
+                                        "pos": "CM",
+                                        "gp": 1,
+                                        "mins": 16,
+                                        "pct": 7
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 219,
+                    "goals": 1,
+                    "assists": 1,
+                    "sot": 1,
+                    "soff": 3,
+                    "fouls": 1,
+                    "keyPasses": 0
+          },
+          {
+                    "name": "Evelyn Lopez",
+                    "jersey": 24,
+                    "roles": [
+                              "CM",
+                              "DM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CM",
+                                        "gp": 6,
+                                        "mins": 183,
+                                        "pct": 75
+                              },
+                              {
+                                        "pos": "DM",
+                                        "gp": 2,
+                                        "mins": 61,
+                                        "pct": 25
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 244,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 0,
+                    "soff": 0,
+                    "fouls": 0,
+                    "keyPasses": 0
+          },
+          {
+                    "name": "Giselle Rosales",
+                    "jersey": 2,
+                    "roles": [
+                              "RM",
+                              "CF",
+                              "RW",
+                              "LM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "RM",
+                                        "gp": 5,
+                                        "mins": 199,
+                                        "pct": 51
+                              },
+                              {
+                                        "pos": "CF",
+                                        "gp": 2,
+                                        "mins": 84,
+                                        "pct": 22
+                              },
+                              {
+                                        "pos": "RW",
+                                        "gp": 3,
+                                        "mins": 71,
+                                        "pct": 18
+                              },
+                              {
+                                        "pos": "LM",
+                                        "gp": 1,
+                                        "mins": 30,
+                                        "pct": 8
+                              },
+                              {
+                                        "pos": "RB",
+                                        "gp": 1,
+                                        "mins": 3,
+                                        "pct": 1
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 387,
+                    "goals": 2,
+                    "assists": 3,
+                    "sot": 11,
+                    "soff": 9,
+                    "fouls": 3,
+                    "keyPasses": 6
+          },
+          {
+                    "name": "Grace Krimmel",
+                    "jersey": 5,
+                    "roles": [
+                              "CB",
+                              "CF",
+                              "LM",
+                              "RM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CB",
+                                        "gp": 3,
+                                        "mins": 171,
+                                        "pct": 44
+                              },
+                              {
+                                        "pos": "CF",
+                                        "gp": 4,
+                                        "mins": 116,
+                                        "pct": 30
+                              },
+                              {
+                                        "pos": "LM",
+                                        "gp": 2,
+                                        "mins": 63,
+                                        "pct": 16
+                              },
+                              {
+                                        "pos": "RM",
+                                        "gp": 2,
+                                        "mins": 41,
+                                        "pct": 10
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 392,
+                    "goals": 1,
+                    "assists": 1,
+                    "sot": 0,
+                    "soff": 2,
+                    "fouls": 1,
+                    "keyPasses": 2
+          },
+          {
+                    "name": "Kendall Blair",
+                    "jersey": 14,
+                    "roles": [
+                              "CM",
+                              "LM",
+                              "LB",
+                              "LW"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CM",
+                                        "gp": 6,
+                                        "mins": 222,
+                                        "pct": 53
+                              },
+                              {
+                                        "pos": "LM",
+                                        "gp": 2,
+                                        "mins": 99,
+                                        "pct": 23
+                              },
+                              {
+                                        "pos": "LB",
+                                        "gp": 3,
+                                        "mins": 54,
+                                        "pct": 13
+                              },
+                              {
+                                        "pos": "LW",
+                                        "gp": 1,
+                                        "mins": 39,
+                                        "pct": 9
+                              },
+                              {
+                                        "pos": "CF",
+                                        "gp": 1,
+                                        "mins": 8,
+                                        "pct": 2
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 424,
+                    "goals": 3,
+                    "assists": 0,
+                    "sot": 3,
+                    "soff": 0,
+                    "fouls": 6,
+                    "keyPasses": 0
+          },
+          {
+                    "name": "MacKenzie Castro",
+                    "jersey": 7,
+                    "roles": [
+                              "CF",
+                              "LB",
+                              "RB"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CF",
+                                        "gp": 6,
+                                        "mins": 234,
+                                        "pct": 58
+                              },
+                              {
+                                        "pos": "LB",
+                                        "gp": 4,
+                                        "mins": 130,
+                                        "pct": 32
+                              },
+                              {
+                                        "pos": "RB",
+                                        "gp": 1,
+                                        "mins": 42,
+                                        "pct": 10
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 406,
+                    "goals": 1,
+                    "assists": 0,
+                    "sot": 4,
+                    "soff": 5,
+                    "fouls": 2,
+                    "keyPasses": 1
+          },
+          {
+                    "name": "Madisyn Craig",
+                    "jersey": 33,
+                    "roles": [
+                              "CB"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CB",
+                                        "gp": 2,
+                                        "mins": 139,
+                                        "pct": 100
+                              }
+                    ],
+                    "gp": 2,
+                    "mins": 139,
+                    "goals": 1,
+                    "assists": 0,
+                    "sot": 0,
+                    "soff": 2,
+                    "fouls": 0,
+                    "keyPasses": 1
+          },
+          {
+                    "name": "Nairobi Mcgadney",
+                    "jersey": 34,
+                    "roles": [
+                              "LM",
+                              "LW",
+                              "RM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "LM",
+                                        "gp": 3,
+                                        "mins": 74,
+                                        "pct": 58
+                              },
+                              {
+                                        "pos": "LW",
+                                        "gp": 2,
+                                        "mins": 45,
+                                        "pct": 35
+                              },
+                              {
+                                        "pos": "RM",
+                                        "gp": 1,
+                                        "mins": 8,
+                                        "pct": 6
+                              }
+                    ],
+                    "gp": 4,
+                    "mins": 127,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 2,
+                    "soff": 0,
+                    "fouls": 0,
+                    "keyPasses": 1
+          },
+          {
+                    "name": "Scarlett Freitas",
+                    "jersey": 8,
+                    "roles": [
+                              "CM",
+                              "DM",
+                              "AM",
+                              "RW"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CM",
+                                        "gp": 6,
+                                        "mins": 253,
+                                        "pct": 62
+                              },
+                              {
+                                        "pos": "DM",
+                                        "gp": 2,
+                                        "mins": 77,
+                                        "pct": 19
+                              },
+                              {
+                                        "pos": "AM",
+                                        "gp": 2,
+                                        "mins": 39,
+                                        "pct": 10
+                              },
+                              {
+                                        "pos": "RW",
+                                        "gp": 2,
+                                        "mins": 39,
+                                        "pct": 10
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 408,
+                    "goals": 2,
+                    "assists": 3,
+                    "sot": 4,
+                    "soff": 1,
+                    "fouls": 2,
+                    "keyPasses": 3
+          },
+          {
+                    "name": "Sola Alberto",
+                    "jersey": 1,
+                    "roles": [
+                              "LM",
+                              "CF",
+                              "RM",
+                              "AM",
+                              "CM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "LM",
+                                        "gp": 3,
+                                        "mins": 88,
+                                        "pct": 40
+                              },
+                              {
+                                        "pos": "CF",
+                                        "gp": 3,
+                                        "mins": 66,
+                                        "pct": 30
+                              },
+                              {
+                                        "pos": "RM",
+                                        "gp": 1,
+                                        "mins": 23,
+                                        "pct": 10
+                              },
+                              {
+                                        "pos": "AM",
+                                        "gp": 1,
+                                        "mins": 23,
+                                        "pct": 10
+                              },
+                              {
+                                        "pos": "CM",
+                                        "gp": 1,
+                                        "mins": 20,
+                                        "pct": 9
+                              }
+                    ],
+                    "gp": 4,
+                    "mins": 220,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 1,
+                    "soff": 1,
+                    "fouls": 0,
+                    "keyPasses": 0
+          },
+          {
+                    "name": "Sonia Vera",
+                    "jersey": 88,
+                    "roles": [
+                              "GK"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "GK",
+                                        "gp": 7,
+                                        "mins": 577,
+                                        "pct": 100
+                              }
+                    ],
+                    "gp": 7,
+                    "mins": 577,
+                    "goals": 0,
+                    "assists": 0,
+                    "sot": 0,
+                    "soff": 0,
+                    "fouls": 0,
+                    "keyPasses": 0
+          },
+          {
+                    "name": "Sophia Culver",
+                    "jersey": 23,
+                    "roles": [
+                              "CF",
+                              "AM"
+                    ],
+                    "posBreakdown": [
+                              {
+                                        "pos": "CF",
+                                        "gp": 6,
+                                        "mins": 326,
+                                        "pct": 85
+                              },
+                              {
+                                        "pos": "AM",
+                                        "gp": 2,
+                                        "mins": 54,
+                                        "pct": 14
+                              },
+                              {
+                                        "pos": "LB",
+                                        "gp": 1,
+                                        "mins": 3,
+                                        "pct": 1
+                              }
+                    ],
+                    "gp": 6,
+                    "mins": 383,
+                    "goals": 4,
+                    "assists": 1,
+                    "sot": 8,
+                    "soff": 3,
+                    "fouls": 5,
+                    "keyPasses": 1
+          }
+]
       };
       BASELINE_PLAYERS['AJAX ASPIRE U15 (LEAGUE)'] = BASELINE_PLAYERS['AJAX ASPIRE U15'];
 
