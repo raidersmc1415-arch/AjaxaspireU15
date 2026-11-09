@@ -1917,117 +1917,298 @@
   </div>
 
   <!-- MODAL / BOTTOM SHEET: INSTANT CONTEXTUAL PLAYER ACTION & SUB MODAL -->
+    <!-- ======================================================== -->
+  <!-- MODAL / BOTTOM SHEET: INSTANT CONTEXTUAL PLAYER ACTION & SUB MODAL -->
+  <!-- ======================================================== -->
   <div id="trackerPlayerActionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-surface border-t sm:border border-teal-500/50 rounded-t-3xl sm:rounded-2xl max-w-lg w-full p-4 sm:p-5 shadow-2xl relative space-y-3.5 max-h-[92vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
+    <div class="bg-surface border-t sm:border border-teal-500/50 rounded-t-3xl sm:rounded-2xl max-w-xl w-full p-4 sm:p-5 shadow-2xl relative space-y-3.5 max-h-[94vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
       
       <!-- Close Button -->
-      <button onclick="closeTrackerPlayerActionModal()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold text-sm">✕</button>
+      <button onclick="closeTrackerPlayerActionModal()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold text-sm z-10">✕</button>
 
-      <!-- Player Header Card -->
-      <div class="flex items-center gap-3 pr-8">
-        <div id="pamJersey" class="w-12 h-12 rounded-xl bg-teal-500/20 text-teal-300 border-2 border-teal-500/50 font-mono font-black text-lg flex items-center justify-center shrink-0">#–</div>
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 flex-wrap">
-            <h3 id="pamName" class="font-bold text-white text-base leading-tight truncate">Select Player</h3>
-            <span id="pamRole" class="mono text-xs font-black px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/40">POS</span>
-            <div id="pamBadges" class="flex items-center gap-1"></div>
+      <!-- LARGE PLAYER HEADER CARD -->
+      <div class="p-3 sm:p-4 rounded-2xl bg-pitch/95 border border-teal-500/40 shadow-xl relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5 min-w-0 pr-6 sm:pr-0">
+          <div id="pamJersey" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-teal-500/20 text-teal-300 border-2 border-teal-400 font-mono font-black text-2xl sm:text-3xl flex items-center justify-center shrink-0 shadow-inner">#–</div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 id="pamName" class="font-black text-white text-lg sm:text-2xl leading-tight truncate">Select Player</h3>
+              <span id="pamRole" class="mono text-xs font-black px-2 py-0.5 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/40">POS</span>
+              <div id="pamBadges" class="flex items-center gap-1"></div>
+            </div>
+            <div class="text-xs text-slate-300 font-mono mt-1 flex items-center gap-2 flex-wrap">
+              <span id="pamMins" class="text-amber-300 font-bold">0' in / 0' bench</span>
+              <span>·</span>
+              <span id="pamStats" class="text-teal-200">0G · 0A · 0S · 0TO</span>
+            </div>
           </div>
-          <div class="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-2 flex-wrap">
-            <span id="pamMins" class="text-amber-300 font-bold">0' in / 0' bench</span>
-            <span>·</span>
-            <span id="pamStats" class="text-slate-300">0G · 0A · 0TO</span>
-          </div>
+        </div>
+
+        <!-- Zone Selector (D3, M3, A3) -->
+        <div class="flex items-center gap-1 bg-surface/80 p-1 rounded-xl border border-border shrink-0 self-stretch sm:self-auto justify-center">
+          <span class="text-[10px] mono uppercase text-slate-400 font-bold px-1 hidden sm:inline">Zone:</span>
+          <button type="button" onclick="setPamZone('D3')" id="pamZoneD3" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">🛡️ D3</button>
+          <button type="button" onclick="setPamZone('M3')" id="pamZoneM3" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">⚙️ M3</button>
+          <button type="button" onclick="setPamZone('A3')" id="pamZoneA3" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">🎯 A3</button>
         </div>
       </div>
 
-      <!-- Segment Selector: 3 Instant Action Tabs -->
+      <!-- Segment Selector: 3 Action Tabs -->
       <div class="grid grid-cols-3 gap-1 p-1 bg-pitch rounded-xl border border-border text-xs font-bold">
-        <button id="pamTabStatsBtn" type="button" onclick="switchPamTab('stats')" class="py-2 rounded-lg bg-teal-500 text-slate-950 shadow font-black transition">
-          ⚡ Quick Stats
+        <button id="pamTabStatsBtn" type="button" onclick="switchPamTab('stats')" class="py-2.5 rounded-lg bg-teal-500 text-slate-950 shadow font-black transition">
+          ⚡ Log Action
         </button>
-        <button id="pamTabSubBtn" type="button" onclick="switchPamTab('sub')" class="py-2 rounded-lg text-slate-400 hover:text-white transition">
+        <button id="pamTabSubBtn" type="button" onclick="switchPamTab('sub')" class="py-2.5 rounded-lg text-slate-400 hover:text-white transition">
           🔄 Sub Bench (<span id="pamBenchCount">0</span>)
         </button>
-        <button id="pamTabSwapBtn" type="button" onclick="switchPamTab('swap')" class="py-2 rounded-lg text-slate-400 hover:text-white transition">
+        <button id="pamTabSwapBtn" type="button" onclick="switchPamTab('swap')" class="py-2.5 rounded-lg text-slate-400 hover:text-white transition">
           🔀 Swap Pos
         </button>
       </div>
 
-      <!-- TAB 1: QUICK STATS GRID -->
+      <!-- TAB 1: CATEGORIZED ACTIONS (MATCHES FILM LOG TAXONOMY) -->
       <div id="pamViewStats" class="space-y-3">
-        <div class="grid grid-cols-4 gap-1.5 text-[11px] font-semibold">
-          <button type="button" onclick="logTrackerEventFromModal('goal')" class="p-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">⚽</span>
-            <span>Goal</span>
+        <!-- Action Category Selector Bar Up Top -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-400">
+            <span>Action Family:</span>
+            <span id="pamCatCountLabel" class="text-teal-300 font-mono text-[10px]">Select category to view actions</span>
+          </div>
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold scrollbar-none" id="pamCategoryChips">
+            <button type="button" onclick="filterPamActionCategory('all')" id="pamCat-all" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-teal-500/50 bg-teal-500/25 text-teal-200 whitespace-nowrap active:scale-95 transition">All (43)</button>
+            <button type="button" onclick="filterPamActionCategory('passing')" id="pamCat-passing" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🟢 Passing (8)</button>
+            <button type="button" onclick="filterPamActionCategory('carrying')" id="pamCat-carrying" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🏃 Carrying (5)</button>
+            <button type="button" onclick="filterPamActionCategory('defending')" id="pamCat-defending" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🛡️ Defending (9)</button>
+            <button type="button" onclick="filterPamActionCategory('duel')" id="pamCat-duel" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">⚔️ Duel (6)</button>
+            <button type="button" onclick="filterPamActionCategory('finishing')" id="pamCat-finishing" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">⚡ Finishing (6)</button>
+            <button type="button" onclick="filterPamActionCategory('gk')" id="pamCat-gk" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🧤 Goalkeeping (5)</button>
+            <button type="button" onclick="filterPamActionCategory('tactical')" id="pamCat-tactical" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🧠 Tactical (7)</button>
+            <button type="button" onclick="filterPamActionCategory('admin')" id="pamCat-admin" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">📋 Admin (2)</button>
+          </div>
+        </div>
+
+        <!-- Action Tag Buttons Grid (Filtered by Category) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[340px] sm:max-h-[380px] overflow-y-auto pr-1" id="pamActionTagGrid">
+          <!-- 🟢 Passing (8) -->
+          <button type="button" data-pam-cat="passing" onclick="logPamAction('Key Pass (Shot Assist)', 'Glow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🔑 Key Pass (Shot Assist)</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
           </button>
-          <button type="button" onclick="logTrackerEventFromModal('assist')" class="p-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🅰️</span>
-            <span>Assist</span>
+          <button type="button" data-pam-cat="passing" onclick="logPamAction('Goal Assist', 'Glow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-500/50 bg-emerald-950/40 text-emerald-200 hover:bg-emerald-900/60 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🅰️ Goal Assist</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">+Glow</span>
           </button>
-          <button type="button" onclick="logTrackerEventFromModal('keyPass')" class="p-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🔑</span>
-            <span>Key Pass</span>
+          <button type="button" data-pam-cat="passing" onclick="logPamAction('Line-Breaking Pass', 'Glow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 hover:bg-emerald-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">⚡ Line-Breaking Pass</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">+Glow</span>
           </button>
-          <button type="button" onclick="logTrackerEventFromModal('sot')" class="p-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🎯</span>
-            <span>Shot On</span>
+          <button type="button" data-pam-cat="passing" onclick="logPamAction('Progressive Pass', 'Glow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 hover:bg-emerald-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">↗️ Progressive Pass</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="passing" onclick="logPamAction('Switch Point of Attack', 'Glow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 hover:bg-emerald-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🔄 Switch Point of Attack</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="passing" onclick="logPamAction('Combination Play', 'Glow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 hover:bg-emerald-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🤝 Combination Play (1-2s)</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="passing" onclick="logPamAction('Forced Turnover Pass', 'Grow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">⚠️ Forced Turnover Pass</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+          <button type="button" data-pam-cat="passing" onclick="logPamAction('Unforced Turnover Pass', 'Grow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/50 bg-rose-950/40 text-rose-200 hover:bg-rose-900/60 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🛑 Unforced Turnover Pass</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
           </button>
 
-          <button type="button" onclick="logTrackerEventFromModal('soff')" class="p-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🥅</span>
-            <span>Shot Off</span>
+          <!-- 🏃 Carrying (5) -->
+          <button type="button" data-pam-cat="carrying" onclick="logPamAction('Progressive Carry', 'Glow', 'Carrying')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🏃 Progressive Carry</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
           </button>
-          <button type="button" onclick="openTrackerShotOut18FromModal()" class="p-2.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🚀</span>
-            <span>Out 18</span>
+          <button type="button" data-pam-cat="carrying" onclick="logPamAction('1v1 Dribble Won', 'Glow', 'Carrying')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 hover:bg-emerald-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">✨ 1v1 Dribble Won</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">+Glow</span>
           </button>
-          <button type="button" onclick="logTrackerEventFromModal('duelWon')" class="p-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">💪</span>
-            <span>Duel Won</span>
+          <button type="button" data-pam-cat="carrying" onclick="logPamAction('Turned into Pressure', 'Grow', 'Carrying')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">⚠️ Turned into Pressure</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
           </button>
-          <button type="button" onclick="logTrackerEventFromModal('duelLost')" class="p-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">❌</span>
-            <span>Duel Lost</span>
+          <button type="button" data-pam-cat="carrying" onclick="logPamAction('Miscontrol', 'Grow', 'Carrying')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">💨 Miscontrol (Heavy Touch)</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
           </button>
-
-          <button type="button" onclick="promptTrackerTurnoverFromModal()" class="p-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">⚠️</span>
-            <span>Turnover</span>
-          </button>
-          <button type="button" onclick="logTrackerEventFromModal('foul')" class="p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🛑</span>
-            <span>Foul</span>
-          </button>
-          <button type="button" onclick="logTrackerEventFromModal('yellow')" class="p-2.5 rounded-xl bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🟨</span>
-            <span>Yellow</span>
-          </button>
-          <button type="button" onclick="logTrackerEventFromModal('save')" class="p-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🧤</span>
-            <span>Save GK</span>
+          <button type="button" data-pam-cat="carrying" onclick="logPamAction('Dispossessed', 'Grow', 'Carrying')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">❌ Dispossessed (Tackled)</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
           </button>
 
-          <button type="button" onclick="logTrackerEventFromModal('pressWon')" class="p-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">⚡</span>
-            <span>Press Won</span>
+          <!-- 🛡️ Defending (9) -->
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Direct Pressure', 'Glow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">⚡ Direct Pressure</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
           </button>
-          <button type="button" onclick="logTrackerEventFromModal('pressLost')" class="p-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">💨</span>
-            <span>Press Lost</span>
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Tackle', 'Glow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🛡️ Tackle</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
           </button>
-          <button type="button" onclick="openTrackerCrossFromModal()" class="p-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">👟</span>
-            <span>Cross</span>
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Interception', 'Glow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">✂️ Interception</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
           </button>
-          <button type="button" onclick="flagTrackerBookmarkFromModal()" class="p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">📌</span>
-            <span>Film Flag</span>
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Clearance', 'Glow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🚀 Clearance</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Blocked Shot', 'Glow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🧱 Blocked Shot</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Recovery Run', 'Glow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">💨 Recovery Run</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Poor Clearance', 'Grow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">⚠️ Poor Clearance</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Stabbed at the Ball', 'Grow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🛑 Stabbed at Ball</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Lost Mark / Recovery', 'Grow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">❌ Lost Mark / Recovery</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+
+          <!-- ⚔️ Duel (6) -->
+          <button type="button" data-pam-cat="duel" onclick="logPamAction('Ground Duel Won', 'Glow', 'Duel')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">💪 Ground Duel Won</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="duel" onclick="logPamAction('Aerial Duel Won', 'Glow', 'Duel')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">✈️ Aerial Duel Won</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="duel" onclick="logPamAction('Foul Won', 'Glow', 'Duel')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 hover:bg-emerald-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🎯 Foul Won (Free Kick)</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="duel" onclick="logPamAction('Ground Duel Lost', 'Grow', 'Duel')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">❌ Ground Duel Lost</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+          <button type="button" data-pam-cat="duel" onclick="logPamAction('Foul Conceded', 'Grow', 'Duel')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🛑 Foul Conceded</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+          <button type="button" data-pam-cat="duel" onclick="logPamAction('No Challenge on 50/50', 'Grow', 'Duel')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">⚠️ No Challenge on 50/50</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+
+          <!-- ⚡ Finishing (6) -->
+          <button type="button" data-pam-cat="finishing" onclick="logPamAction('Goal Scored', 'Goal Scored', 'Finishing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border-2 border-emerald-400 bg-emerald-500/30 text-emerald-100 hover:bg-emerald-500/40 flex items-center justify-between gap-1.5 text-xs font-black shadow-lg active:scale-95 transition">
+            <span class="truncate">⚽ GOAL SCORED!</span>
+            <span class="text-[9px] mono px-1.5 py-0.5 rounded bg-emerald-500 text-slate-950 font-black shrink-0">+2.5</span>
+          </button>
+          <button type="button" data-pam-cat="finishing" onclick="logPamAction('Shot on Target', 'Glow', 'Finishing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-sky-500/40 bg-sky-950/30 text-sky-300 hover:bg-sky-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🎯 Shot on Target</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-sky-500/20 text-sky-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="finishing" onclick="logPamAction('Quality Shot', 'Glow', 'Finishing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">✨ Quality Shot</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="finishing" onclick="logPamAction('Shot Off Target', 'Grow', 'Finishing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-slate-600 bg-surface text-slate-300 hover:text-white flex items-center justify-between gap-1.5 text-xs font-semibold active:scale-95 transition">
+            <span class="truncate">🥅 Shot Off Target</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-slate-700 text-slate-300 shrink-0">-Grow</span>
+          </button>
+          <button type="button" data-pam-cat="finishing" onclick="logPamAction('Poor Shot Selection', 'Grow', 'Finishing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">⚠️ Poor Shot Selection</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+          <button type="button" data-pam-cat="finishing" onclick="logPamAction('Cross Out of Bounds', 'Grow', 'Finishing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">👟 Cross Out of Bounds</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+
+          <!-- 🧤 Goalkeeping (5) -->
+          <button type="button" data-pam-cat="gk" onclick="logPamAction('Save (Clean / Held)', 'Glow', 'Goalkeeping')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-indigo-500/40 bg-indigo-950/30 text-indigo-300 hover:bg-indigo-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🧤 Save (Clean / Held)</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-indigo-500/20 text-indigo-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="gk" onclick="logPamAction('Save (Parried)', 'Glow', 'Goalkeeping')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-indigo-500/40 bg-indigo-950/30 text-indigo-300 hover:bg-indigo-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🧤 Save (Parried Wide)</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-indigo-500/20 text-indigo-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="gk" onclick="logPamAction('Box Aerial Claim', 'Glow', 'Goalkeeping')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-indigo-500/40 bg-indigo-950/30 text-indigo-300 hover:bg-indigo-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">📦 Box Aerial Claim</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-indigo-500/20 text-indigo-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="gk" onclick="logPamAction('Build-Out Distribution', 'Glow', 'Goalkeeping')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-indigo-500/40 bg-indigo-950/30 text-indigo-300 hover:bg-indigo-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🧱 Build-Out Distribution</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-indigo-500/20 text-indigo-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="gk" onclick="logPamAction('Goal Conceded', 'Goal Conceded', 'Goalkeeping')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border-2 border-rose-500 bg-rose-950/50 text-rose-200 hover:bg-rose-900/70 flex items-center justify-between gap-1.5 text-xs font-black active:scale-95 transition">
+            <span class="truncate">🥅 Goal Conceded</span>
+            <span class="text-[9px] mono px-1.5 py-0.5 rounded bg-rose-600 text-white font-black shrink-0">-2.5</span>
+          </button>
+
+          <!-- 🧠 Tactical_Shape (7) -->
+          <button type="button" data-pam-cat="tactical" onclick="logPamAction('Scanning & Pre-Orientation', 'Glow', 'Tactical_Shape')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-purple-500/40 bg-purple-950/30 text-purple-300 hover:bg-purple-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">👀 Scanning &amp; Pre-Orient</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="tactical" onclick="logPamAction('Support Angle Offered', 'Glow', 'Tactical_Shape')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-purple-500/40 bg-purple-950/30 text-purple-300 hover:bg-purple-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">📐 Support Angle Offered</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="tactical" onclick="logPamAction('Tactical Communication', 'Glow', 'Tactical_Shape')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-purple-500/40 bg-purple-950/30 text-purple-300 hover:bg-purple-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🗣️ Tactical Communication</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="tactical" onclick="logPamAction('Team Shape Shift', 'Glow', 'Tactical_Shape')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-purple-500/40 bg-purple-950/30 text-purple-300 hover:bg-purple-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🗺️ Team Shape Shift</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="tactical" onclick="logPamAction('Off-Ball Spacing Fault', 'Grow', 'Tactical_Shape')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">⚠️ Off-Ball Spacing Fault</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
+          </button>
+          <button type="button" data-pam-cat="tactical" onclick="logPamAction('Decision on the Ball', 'Glow', 'Tactical_Shape')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-purple-500/40 bg-purple-950/30 text-purple-300 hover:bg-purple-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🧠 Decision on Ball</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 shrink-0">+Glow</span>
+          </button>
+          <button type="button" data-pam-cat="tactical" onclick="logPamAction('Decision off the Ball', 'Glow', 'Tactical_Shape')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-purple-500/40 bg-purple-950/30 text-purple-300 hover:bg-purple-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🧠 Decision off Ball</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 shrink-0">+Glow</span>
+          </button>
+
+          <!-- 📋 Admin / Discipline / Review (2+) -->
+          <button type="button" data-pam-cat="admin" onclick="logPamAction('Yellow Card', 'Neutral', 'Administrative')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-yellow-500/50 bg-yellow-950/30 text-yellow-300 hover:bg-yellow-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🟨 Yellow Card</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-yellow-500/20 text-yellow-300 shrink-0">Card</span>
+          </button>
+          <button type="button" data-pam-cat="admin" onclick="logPamAction('Red Card', 'Neutral', 'Administrative')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-red-500/50 bg-red-950/30 text-red-300 hover:bg-red-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🟥 Red Card</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-red-500/20 text-red-300 shrink-0">Card</span>
+          </button>
+          <button type="button" data-pam-cat="admin" onclick="logPamAction('Bookmark', 'Neutral', 'Administrative')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-amber-500/40 bg-amber-950/30 text-amber-300 hover:bg-amber-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">📌 Flag for Film Review</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-amber-500/20 text-amber-300 shrink-0">Review</span>
+          </button>
+          <button type="button" data-pam-cat="admin" onclick="logPamAction('Substitution', 'Neutral', 'Administrative')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🔄 Sub Off to Bench</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">Sub</span>
           </button>
         </div>
 
         <div class="flex items-center justify-between pt-2 border-t border-border/70 text-xs">
           <button type="button" onclick="subCurrentPamPlayerOff()" class="text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 active:scale-95">
-            <span>⬇️ Sub Off to Bench</span>
+            <span>⬇️ Quick Sub Off to Bench</span>
           </button>
           <button type="button" onclick="closeTrackerPlayerActionModal()" class="text-slate-400 hover:text-white font-medium">
             Done
@@ -5783,6 +5964,174 @@
        INSTANT CONTEXTUAL PLAYER ACTION MODAL CONTROLLER
        ========================================================= */
     let pamCurrentSlot = null;
+
+    let pamCurrentZone = 'M3';
+    let pamCurrentCategory = 'all';
+
+    function setPamZone(zone) {
+      pamCurrentZone = zone;
+      ['D3', 'M3', 'A3'].forEach(z => {
+        const btn = document.getElementById(`pamZone${z}`);
+        if (!btn) return;
+        const active = z === zone;
+        btn.className = active
+          ? (z === 'D3' ? 'px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/60 bg-rose-500/25 text-rose-300'
+            : z === 'A3' ? 'px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-500/60 bg-amber-500/25 text-amber-300'
+            : 'px-3 py-1.5 rounded-lg text-xs font-bold border border-teal-500/60 bg-teal-500/25 text-teal-300')
+          : 'px-3 py-1.5 rounded-lg text-xs font-bold border border-border bg-pitch text-slate-400 hover:text-white';
+      });
+    }
+
+    function filterPamActionCategory(cat) {
+      pamCurrentCategory = cat;
+      const cats = ['all', 'passing', 'carrying', 'defending', 'duel', 'finishing', 'gk', 'tactical', 'admin'];
+      cats.forEach(c => {
+        const btn = document.getElementById(`pamCat-${c}`);
+        if (!btn) return;
+        const active = c === cat;
+        btn.className = active
+          ? 'pam-cat-btn px-2.5 py-1.5 rounded-xl border border-teal-500/60 bg-teal-500/25 text-teal-200 font-bold whitespace-nowrap active:scale-95 transition'
+          : 'pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition';
+      });
+
+      const buttons = document.querySelectorAll('#pamActionTagGrid .pam-tag-btn');
+      let visibleCount = 0;
+      buttons.forEach(btn => {
+        const bCat = btn.getAttribute('data-pam-cat');
+        const show = cat === 'all' || bCat === cat;
+        btn.classList.toggle('hidden', !show);
+        if (show) visibleCount++;
+      });
+
+      const lbl = document.getElementById('pamCatCountLabel');
+      if (lbl) {
+        lbl.textContent = cat === 'all' ? `Showing all ${visibleCount} actions` : `Showing ${visibleCount} actions in ${cat.toUpperCase()}`;
+      }
+    }
+
+    function logPamAction(tag, defaultOutcome, defaultCategory) {
+      if (!pamCurrentSlot) return;
+      const jersey = onPitchPlayers[pamCurrentSlot];
+      if (!jersey || !playerStats[jersey]) {
+        showToast('Please sub a player into this position first.');
+        return;
+      }
+
+      // Handle Admin actions
+      if (tag === 'Substitution') {
+        switchPamTab('sub');
+        return;
+      }
+      if (tag === 'Bookmark') {
+        flagTrackerBookmarkFromModal();
+        return;
+      }
+
+      selectedPlayerJersey = jersey;
+      selectedSlot = pamCurrentSlot;
+      const j = jersey;
+      const p = playerStats[j];
+      const curMins = Math.floor(matchSeconds / 60);
+      const zone = pamCurrentZone || 'M3';
+      const outcome = defaultOutcome || 'Glow';
+      const category = defaultCategory || 'Tactical_Shape';
+
+      // 1. In-game player stat increments according to tag
+      let mappedType = 'other';
+      if (tag === 'Goal Scored') {
+        mappedType = 'goal';
+        p.goals = (p.goals || 0) + 1;
+        p.shots = (p.shots || 0) + 1;
+        p.sot = (p.sot || 0) + 1;
+        updateTrackerScoreboard();
+      } else if (tag === 'Shot on Target') {
+        mappedType = 'sot';
+        p.shots = (p.shots || 0) + 1;
+        p.sot = (p.sot || 0) + 1;
+      } else if (tag === 'Quality Shot' || tag === 'Shot Off Target') {
+        mappedType = 'soff';
+        p.shots = (p.shots || 0) + 1;
+        p.soff = (p.soff || 0) + 1;
+      } else if (tag === 'Poor Shot Selection') {
+        mappedType = 'soff';
+        p.shots = (p.shots || 0) + 1;
+        p.soff = (p.soff || 0) + 1;
+        p.turnovers = (p.turnovers || 0) + 1;
+        if (zone === 'D3') p.toD = (p.toD || 0) + 1;
+        else if (zone === 'A3') p.toA = (p.toA || 0) + 1;
+        else p.toM = (p.toM || 0) + 1;
+      } else if (tag === 'Goal Assist') {
+        mappedType = 'assist';
+        p.assists = (p.assists || 0) + 1;
+        p.keyPasses = (p.keyPasses || 0) + 1;
+      } else if (tag === 'Key Pass (Shot Assist)' || tag === 'Line-Breaking Pass') {
+        mappedType = 'keyPass';
+        p.keyPasses = (p.keyPasses || 0) + 1;
+      } else if (tag === 'Forced Turnover Pass' || tag === 'Unforced Turnover Pass' || tag === 'Turned into Pressure' || tag === 'Miscontrol' || tag === 'Dispossessed' || tag === 'Poor Clearance') {
+        mappedType = 'turnover';
+        p.turnovers = (p.turnovers || 0) + 1;
+        if (zone === 'D3') p.toD = (p.toD || 0) + 1;
+        else if (zone === 'A3') p.toA = (p.toA || 0) + 1;
+        else p.toM = (p.toM || 0) + 1;
+      } else if (tag === 'Ground Duel Won' || tag === 'Aerial Duel Won') {
+        mappedType = 'duelWon';
+        p.duelsWon = (p.duelsWon || 0) + 1;
+      } else if (tag === 'Ground Duel Lost' || tag === 'No Challenge on 50/50') {
+        mappedType = 'duelLost';
+        p.duelsLost = (p.duelsLost || 0) + 1;
+      } else if (tag === 'Foul Won') {
+        mappedType = 'setPiece';
+        p.setPieces = (p.setPieces || 0) + 1;
+      } else if (tag === 'Foul Conceded') {
+        mappedType = 'foul';
+        p.fouls = (p.fouls || 0) + 1;
+      } else if (tag === 'Direct Pressure') {
+        mappedType = 'pressWon';
+        p.pressWon = (p.pressWon || 0) + 1;
+      } else if (tag === 'Save (Clean / Held)' || tag === 'Save (Parried)') {
+        mappedType = 'save';
+        p.saves = (p.saves || 0) + 1;
+      } else if (tag === 'Cross Out of Bounds') {
+        mappedType = 'cross';
+        p.crosses = (p.crosses || 0) + 1;
+      } else if (tag === 'Yellow Card') {
+        mappedType = 'yellowCard';
+        p.yellowCards = (p.yellowCards || 0) + 1;
+        p.hasYellow = true;
+        if (p.yellowCards >= 2) p.hasRed = true;
+      } else if (tag === 'Red Card') {
+        mappedType = 'redCard';
+        p.hasRed = true;
+      } else if (tag === 'Goal Conceded') {
+        mappedType = 'oppGoal';
+        oppStats.goals = (oppStats.goals || 0) + 1;
+        oppStats.shots = (oppStats.shots || 0) + 1;
+        updateTrackerScoreboard();
+      }
+
+      // 2. Log structured match event with full V3.1 metadata
+      const desc = `${tag.toUpperCase()} (${outcome}): #${j} ${p.name.split(' ')[0]} in ${zone} (${curMins}')`;
+      logMatchEvent({
+        time: curMins,
+        half: curMins <= 40 ? 'H1' : 'H2',
+        type: mappedType,
+        desc: desc,
+        jersey: j,
+        category: category,
+        tag: tag,
+        outcome: outcome,
+        zone: zone
+      });
+
+      showToast(`Logged ${tag} for #${j} ${p.name.split(' ')[0]} in ${zone}`);
+      closeTrackerPlayerActionModal();
+      deselectPlayer();
+      renderPitch();
+      renderBench();
+      updateTrackerScoreboard();
+      updateTrackerSummaryHud();
+      saveTrackerState();
+    }
 
     function openTrackerPlayerActionModal(slot, initialTab = 'stats') {
       pamCurrentSlot = slot;

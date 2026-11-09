@@ -656,9 +656,11 @@ check('8. Sideline Tracker substitution retroactive minutes reconciliation & set
   const domState = {
     elements: {},
     addEventListener: () => {},
+    querySelectorAll: () => [],
+    querySelector: () => null,
     getElementById: function(id) {
       if (!this.elements[id]) {
-        this.elements[id] = { textContent: '', className: '', style: {}, classList: { remove: () => {}, add: () => {}, replace: () => {} } };
+        this.elements[id] = { textContent: '', className: '', style: {}, classList: { remove: () => {}, add: () => {}, replace: () => {}, toggle: () => {} } };
       }
       return this.elements[id];
     }
@@ -790,6 +792,125 @@ check('8. Sideline Tracker substitution retroactive minutes reconciliation & set
   assert(cornerEv && cornerEv.category === 'Passing', 'Expected corner kick to map to Passing');
   const setPieceEv = filmEvents.find(e => (e.note || '').includes('SET PIECE'));
   assert(setPieceEv && setPieceEv.category === 'Duel', 'Expected set piece to map to Duel');
+});
+
+// ---------------------------------------------------------------------------
+// CHECK 9: Sideline Match Tracker Harmonization with Film Log (Categorized Action Grid)
+// ---------------------------------------------------------------------------
+check('9. Sideline Match Tracker Harmonization with Film Log (Category Bar & One-Tap Actions)', () => {
+  const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+
+  // Verify enlarged player card and category filter elements exist in tracker
+  assert(trackerHtml.includes('id="pamZoneD3"'), 'pamZoneD3 missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamZoneM3"'), 'pamZoneM3 missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamZoneA3"'), 'pamZoneA3 missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamCategoryChips"'), 'pamCategoryChips container missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamCat-passing"'), 'pamCat-passing chip missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamCat-carrying"'), 'pamCat-carrying chip missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamCat-defending"'), 'pamCat-defending chip missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamCat-duel"'), 'pamCat-duel chip missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamCat-finishing"'), 'pamCat-finishing chip missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamCat-gk"'), 'pamCat-gk chip missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamCat-tactical"'), 'pamCat-tactical chip missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamCat-admin"'), 'pamCat-admin chip missing in tracker HTML');
+  assert(trackerHtml.includes('id="pamActionTagGrid"'), 'pamActionTagGrid container missing in tracker HTML');
+  assert(trackerHtml.includes('logPamAction('), 'logPamAction handler missing in tracker HTML');
+
+  // Execute in sandbox to test one-tap action logging and stat updates
+  const scriptMatches = trackerHtml.match(/<script[\s\S]*?<\/script>/gi);
+  const scriptContent = scriptMatches[2].replace(/<\/?script[^>]*>/gi, '');
+
+  const domState = {
+    elements: {},
+    addEventListener: () => {},
+    querySelectorAll: () => [],
+    querySelector: () => null,
+    getElementById: function(id) {
+      if (!this.elements[id]) {
+        this.elements[id] = { textContent: '', className: '', style: {}, classList: { remove: () => {}, add: () => {}, replace: () => {}, toggle: () => {} } };
+      }
+      return this.elements[id];
+    }
+  };
+
+  const sandbox = {
+    document: domState,
+    window: { addEventListener: () => {} },
+    localStorage: (() => {
+      let store = {};
+      return { getItem: k => store[k] || null, setItem: (k, v) => { store[k] = String(v); }, clear: () => { store = {}; } };
+    })(),
+    sessionStorage: { getItem: () => '4111', setItem: () => {} },
+    showToast: () => {},
+    alert: () => {},
+    confirm: () => true,
+    prompt: () => '60',
+    fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) }),
+    Promise: Promise,
+    clearInterval: () => {},
+    setInterval: () => {},
+    setTimeout: () => {},
+    clearTimeout: () => {},
+    console: console,
+    Math: Math,
+    Date: Date,
+    parseInt: parseInt,
+    Object: Object,
+    Array: Array,
+    Set: Set
+  };
+
+  vm.createContext(sandbox);
+  vm.runInContext(scriptContent, sandbox);
+
+  const run = expr => vm.runInContext(expr, sandbox);
+
+  run(`
+    activeSquadKey = 'aspire';
+    initSquadMatch();
+    matchSeconds = 30 * 60; // 30 mins
+    onPitchPlayers['CAM'] = 8;
+    pamCurrentSlot = 'CAM';
+    pamCurrentZone = 'A3';
+
+    // 1. Log Key Pass (Shot Assist)
+    logPamAction('Key Pass (Shot Assist)', 'Glow', 'Passing');
+
+    // 2. Log Goal Scored
+    pamCurrentSlot = 'CAM';
+    logPamAction('Goal Scored', 'Goal Scored', 'Finishing');
+
+    // 3. Log Ground Duel Won
+    pamCurrentSlot = 'CAM';
+    pamCurrentZone = 'M3';
+    logPamAction('Ground Duel Won', 'Glow', 'Duel');
+
+    // 4. Log Forced Turnover Pass
+    pamCurrentSlot = 'CAM';
+    pamCurrentZone = 'A3';
+    logPamAction('Forced Turnover Pass', 'Grow', 'Passing');
+  `);
+
+  const p8 = run('playerStats[8]');
+  assert.strictEqual(p8.keyPasses, 1, 'Expected p8 keyPasses to be 1');
+  assert.strictEqual(p8.goals, 1, 'Expected p8 goals to be 1');
+  assert.strictEqual(p8.duelsWon, 1, 'Expected p8 duelsWon to be 1');
+  assert.strictEqual(p8.turnovers, 1, 'Expected p8 turnovers to be 1');
+  assert.strictEqual(p8.toA, 1, 'Expected p8 toA (turnovers in A3) to be 1');
+
+  // Verify matchEvents contains exact V3.1 structured fields (unshifted, newest first)
+  const evs = run('matchEvents');
+  assert.strictEqual(evs.length, 4, 'Expected 4 logged events');
+  assert.strictEqual(evs[0].tag, 'Forced Turnover Pass');
+  assert.strictEqual(evs[0].category, 'Passing');
+  assert.strictEqual(evs[0].outcome, 'Grow');
+  assert.strictEqual(evs[1].tag, 'Ground Duel Won');
+  assert.strictEqual(evs[1].category, 'Duel');
+  assert.strictEqual(evs[2].tag, 'Goal Scored');
+  assert.strictEqual(evs[2].category, 'Finishing');
+  assert.strictEqual(evs[3].tag, 'Key Pass (Shot Assist)');
+  assert.strictEqual(evs[3].category, 'Passing');
+  assert.strictEqual(evs[3].outcome, 'Glow');
 });
 
 console.log(`\nAll ${passed} regression checks passed.`);
