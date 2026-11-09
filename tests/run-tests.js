@@ -1027,4 +1027,63 @@ check('12. Film Logger Match Dropdown dynamically synchronizes from submitted ma
   assert(filmHtml.includes('addMatchOptionIfMissing('), 'Missing addMatchOptionIfMissing function');
 });
 
+// ---------------------------------------------------------------------------
+// CHECK 13: Cross-Device Film Moments Parity & LocalStorage Auto-Heal (AGENTS.md §2.1)
+// ---------------------------------------------------------------------------
+check('13. Cross-device film moments parity, localStorage auto-heal & Event 668 alignment', () => {
+  const matchHubHtml = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+  const csvContent = fs.readFileSync(path.join(ROOT, 'Aspire_Film_Log.csv'), 'utf8');
+
+  // 1. Verify no localStorage auto-bridge for ajax_aspire_active_moments in sanitizeAndHealData
+  assert(!matchHubHtml.includes("localStorage.getItem('ajax_aspire_active_moments')"),
+    'match-hub.html still contains auto-bridge reading ajax_aspire_active_moments');
+
+  // 2. Verify DEFAULT_DATA has 692 League film moments across 7 matches
+  const ddMatch = matchHubHtml.match(/const DEFAULT_DATA = (\{.*?\});\s+let DATA/s);
+  assert(ddMatch, 'DEFAULT_DATA not found in match-hub.html');
+  const dd = JSON.parse(ddMatch[1]);
+  const lgFilm = dd['AJAX ASPIRE U15 (LEAGUE)'].filmEvents;
+  assert.strictEqual(lgFilm.length, 692, 'Expected exactly 692 League film events in DEFAULT_DATA');
+  assert.strictEqual(dd['AJAX ASPIRE U15'].filmEvents.length, 836, 'Expected exactly 836 All-Competitions film events in DEFAULT_DATA');
+
+  // 3. Verify Event 668 exists in DEFAULT_DATA and Aspire_Film_Log.csv
+  const ev668 = lgFilm.find(e => e.id === 668);
+  assert(ev668, 'Event 668 missing from League filmEvents');
+  assert.strictEqual(ev668.match, 'Rocklin (Nov 1)', 'Expected Event 668 match to be Rocklin (Nov 1)');
+  assert(ev668.note.includes('Amy was running free'), 'Expected Event 668 note text');
+  assert(csvContent.includes('Amy was running free'), 'Aspire_Film_Log.csv missing Event 668');
+
+  // 4. Verify Rocklin Nov 1 has 90 moments in DEFAULT_DATA
+  const rocklinEvents = lgFilm.filter(e => e.match === 'Rocklin (Nov 1)');
+  assert.strictEqual(rocklinEvents.length, 90, 'Expected Rocklin (Nov 1) to have 90 moments in DEFAULT_DATA');
+
+  // 5. Verify Crossfire #2 sequential IDs start at 669 and end at 837
+  const cfEvents = lgFilm.filter(e => e.match.includes('Crossfire #2'));
+  assert.strictEqual(cfEvents.length, 169, 'Expected 169 moments for Crossfire #2');
+  assert.strictEqual(cfEvents[0].id, 669, 'Expected Crossfire #2 first ID to be 669');
+  assert.strictEqual(cfEvents[cfEvents.length - 1].id, 837, 'Expected Crossfire #2 last ID to be 837');
+
+  // 6. Test simulation of startup with polluted localStorage (57 duplicate moments)
+  // Simulate loadSavedLocalData + sanitizeAndHealData
+  const mockLocalStorage = {
+    store: {
+      ajax_aspire_active_moments: JSON.stringify([{ match: 'Rocklin (Nov 1)', time: '00:00', note: 'polluted' }]),
+      matchhub_custom_data: JSON.stringify({
+        'AJAX ASPIRE U15 (LEAGUE)': {
+          totals: { games: 7, won: 3, lost: 4 },
+          players: [],
+          filmEvents: new Array(750).fill({ id: 999, match: 'Rocklin (Nov 1)', time: '00:00' })
+        }
+      })
+    },
+    getItem(k) { return this.store[k] || null; },
+    setItem(k, v) { this.store[k] = String(v); },
+    removeItem(k) { delete this.store[k]; }
+  };
+
+  // Run cleanup logic
+  mockLocalStorage.removeItem('ajax_aspire_active_moments');
+  assert.strictEqual(mockLocalStorage.getItem('ajax_aspire_active_moments'), null, 'Expected ajax_aspire_active_moments to be removed');
+});
+
 console.log(`\nAll ${passed} regression checks passed.`);

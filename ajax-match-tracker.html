@@ -4756,6 +4756,10 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
             ? 'Rocklin (Nov 1)'
             : (opponentName.includes('(') ? opponentName : `${opponentName} (${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`);
 
+          let noteText = ev.desc || `Sideline logged ${tag} at ${ev.time}'`;
+          if (isCorner) noteText = `CORNER KICK: #${ev.jersey || ''} ${pName} at ${ev.time}'`;
+          else if (isSetPiece) noteText = `SET PIECE: #${ev.jersey || ''} ${pName} at ${ev.time}'`;
+
           newFilmMoments.push({
             id: maxId,
             match: canonicalMatch,
@@ -4779,9 +4783,9 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
             qualityRaw: isGoal ? 'Goal Scored' : (isGlow ? 'Good / Positive' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Poor / Negative' : 'Neutral')),
             outcome: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Grow' : 'Neutral'),
             o: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Grow' : 'Neutral'),
-            note: ev.desc || `Sideline logged ${tag} at ${ev.time}'`,
-            notes: ev.desc || `Sideline logged ${tag} at ${ev.time}'`,
-            n: ev.desc || `Sideline logged ${tag} at ${ev.time}'`,
+            note: noteText,
+            notes: noteText,
+            n: noteText,
             filmReview: !!ev.isBookmark
           });
         });
