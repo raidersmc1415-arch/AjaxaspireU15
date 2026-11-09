@@ -81,12 +81,14 @@
 </head>
 <body class="min-h-screen p-2 sm:p-4 flex flex-col justify-between selection:bg-brand-500 selection:text-white">
 
-  <!-- TOP STATUS BAR & SCOREBOARD (IPAD OPTIMIZED) -->
-  <header class="bg-card rounded-2xl border border-border p-3 sm:p-4 shadow-2xl mb-3 space-y-3">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <!-- Team / Squad Brand -->
-      <div class="flex items-center space-x-2.5">
-        <div class="w-10 h-10 rounded-xl bg-pitch border border-teal-500/40 text-teal-300 flex items-center justify-center font-black display text-xl shrink-0">
+  <!-- TOP STATUS BAR & SCOREBOARD (IPAD PRO OPTIMIZED · RECLAIMED SCREEN REAL ESTATE) -->
+  <header class="bg-card rounded-2xl border border-border p-3 sm:p-3.5 shadow-2xl mb-2.5 space-y-2">
+    <!-- Row 1: Squad, Enlarged Match Clock + Integrated Scoreboard, Athletic Command Buttons -->
+    <div class="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
+      
+      <!-- Squad Brand & Selector -->
+      <div class="flex items-center space-x-2 shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-pitch border border-teal-500/40 text-teal-300 flex items-center justify-center font-black display text-lg shrink-0">
           AX
         </div>
         <div>
@@ -95,186 +97,137 @@
               <option value="aspire">AJAX ASPIRE U15</option>
               <option value="ga">AJAX GA U15</option>
             </select>
-            <span class="mono text-[10px] text-teal-400 px-1.5 py-0.2 rounded bg-pitch border border-border" id="compLabel">GA &amp; ASPIRE 26_27</span>
+            <span class="mono text-[10px] text-teal-400 px-1.5 py-0.5 rounded bg-pitch border border-border" id="compLabel">GA &amp; ASPIRE 26_27</span>
           </div>
-          <p class="text-[10px] text-slate-400 mt-0.5">Sideline Match &amp; Position Manager · iPad Touch Optimized</p>
         </div>
       </div>
 
-      <!-- Live Digital Match Clock (iPad Pro High-Contrast HUD) -->
-      <div class="flex items-center bg-pitch px-3.5 py-2 rounded-2xl border-2 border-teal-500/50 shadow-inner space-x-3.5">
-        <div class="text-center min-w-[70px]">
-          <div class="text-[9px] mono uppercase text-teal-400 font-bold tracking-wider" id="periodDisplay">1ST HALF</div>
-          <div class="text-2xl sm:text-3xl font-black font-mono tracking-wider text-white" id="clockDisplay">00:00</div>
+      <!-- CENTERPIECE: ENLARGED MATCH CLOCK & INTEGRATED SCOREBOARD (IPAD HIGH-CONTRAST) -->
+      <div class="flex items-center bg-pitch px-3 py-1.5 rounded-2xl border-2 border-teal-500/60 shadow-2xl space-x-3 sm:space-x-4">
+        <!-- Running Digital Clock (Large & High Contrast) -->
+        <div class="text-center min-w-[85px] sm:min-w-[105px]">
+          <div class="text-[9px] sm:text-[10px] mono uppercase text-teal-400 font-extrabold tracking-widest" id="periodDisplay">1ST HALF</div>
+          <div class="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-wider text-teal-300 leading-tight" id="clockDisplay">00:00</div>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button id="timerToggleBtn" onclick="toggleTimer()" class="w-12 h-12 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-black flex items-center justify-center text-lg transition active:scale-90 active:translate-y-0.5 shadow-lg border border-teal-200">
+        <!-- Clock Controls -->
+        <div class="flex items-center gap-1">
+          <button id="timerToggleBtn" onclick="toggleTimer()" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-black flex items-center justify-center text-xl transition active:scale-90 shadow-lg border border-teal-200" title="Play / Pause Clock">
             ▶
           </button>
-          <button onclick="advancePeriod()" title="Next Half / Finish" class="w-12 h-12 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border-2 border-border flex items-center justify-center text-sm font-bold transition active:scale-90">
+          <button onclick="advancePeriod()" title="Next Half / Finish" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border-2 border-border flex items-center justify-center text-sm font-bold transition active:scale-90">
             ⏭
           </button>
-          <div class="flex flex-col gap-1">
-            <button onclick="adjustClock(60)" class="px-2 py-1 rounded-lg bg-surface border border-border text-[10px] font-mono hover:bg-slate-700 text-slate-300 active:scale-95 font-bold">+1m</button>
-            <button onclick="adjustClock(-60)" class="px-2 py-1 rounded-lg bg-surface border border-border text-[10px] font-mono hover:bg-slate-700 text-slate-300 active:scale-95 font-bold">-1m</button>
+          <div class="flex flex-col gap-0.5">
+            <button onclick="adjustClock(60)" class="px-1.5 py-0.5 rounded bg-surface border border-border text-[9px] font-mono hover:bg-slate-700 text-slate-300 active:scale-95 font-bold">+1m</button>
+            <button onclick="adjustClock(-60)" class="px-1.5 py-0.5 rounded bg-surface border border-border text-[9px] font-mono hover:bg-slate-700 text-slate-300 active:scale-95 font-bold">-1m</button>
+          </div>
+        </div>
+
+        <div class="h-8 w-px bg-border/80"></div>
+
+        <!-- Integrated Scoreboard -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-1.5">
+            <span class="display text-sm sm:text-base text-teal-300 font-bold truncate max-w-[80px] sm:max-w-[100px]" id="homeSquadName">AJAX ASPIRE</span>
+            <span class="text-2xl sm:text-3xl font-black font-mono text-white bg-surface/80 px-2 py-0.5 rounded-lg border border-border" id="scoreAjax">0</span>
+          </div>
+          <span class="text-slate-500 font-black text-xs sm:text-sm">–</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-2xl sm:text-3xl font-black font-mono text-rose-400 bg-surface/80 px-2 py-0.5 rounded-lg border border-border" id="scoreOpponent">0</span>
+            <span class="display text-sm sm:text-base text-slate-300 font-bold truncate max-w-[80px] sm:max-w-[100px]" id="oppSquadName">OPPONENT</span>
           </div>
         </div>
       </div>
 
-      <!-- Action & Export Buttons: Athletic Command Bar (48px Ergonomic Touch Targets) -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <button id="commitMatchHubBtn" onclick="commitMatchToHub()" class="min-h-[46px] text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-black px-4 py-2.5 rounded-xl transition shadow-xl flex items-center gap-2 active:scale-95 active:translate-y-0.5 border-2 border-emerald-400">
+      <!-- Action & Utility Buttons -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button id="commitMatchHubBtn" onclick="commitMatchToHub()" class="min-h-[42px] text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3.5 py-2 rounded-xl transition shadow-xl flex items-center gap-1.5 active:scale-95 border-2 border-emerald-400">
           <span>⚡ COMMIT MATCH TO HUB</span>
         </button>
-        <button onclick="flagSidelineBookmark()" class="min-h-[46px] text-xs bg-amber-500/25 hover:bg-amber-500/35 border-2 border-amber-400 text-amber-200 font-extrabold px-3.5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5 active:scale-95 active:translate-y-0.5">
-          <span>📌 Flag Film</span>
+        <button onclick="openNewGameModal()" class="min-h-[42px] text-xs bg-pitch hover:bg-surface border border-border text-slate-200 font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 active:scale-95" title="Match Setup">
+          <span>⚙️ Setup</span>
         </button>
-        <button onclick="openNewGameModal()" class="min-h-[46px] text-xs bg-pitch hover:bg-surface border-2 border-border text-slate-200 font-bold px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 active:scale-95">
-          <span>⚙️ Match Setup</span>
-        </button>
-        <button onclick="exportStatisticsCsv()" class="min-h-[46px] text-xs bg-surface hover:bg-slate-700 text-slate-200 border-2 border-border px-3 py-2.5 rounded-xl transition flex items-center gap-1 font-bold active:scale-95">
+        <button onclick="exportStatisticsCsv()" class="min-h-[42px] text-xs bg-surface hover:bg-slate-700 text-slate-200 border border-border px-2.5 py-2 rounded-xl transition flex items-center gap-1 font-bold active:scale-95" title="Export CSV">
           <span>💾 CSV</span>
         </button>
-        <button onclick="openHistoryModal()" class="min-h-[46px] text-xs bg-pitch hover:bg-surface border-2 border-border text-slate-200 px-3 py-2.5 rounded-xl transition font-bold active:scale-95">
+        <button onclick="openHistoryModal()" class="min-h-[42px] text-xs bg-pitch hover:bg-surface border border-border text-slate-200 px-2.5 py-2 rounded-xl transition font-bold active:scale-95" title="Saved Games">
           <span>📁 Games</span>
         </button>
-        <button onclick="resetCurrentMatch()" class="min-h-[46px] text-xs bg-surface hover:bg-slate-700 text-slate-300 border-2 border-border px-3 py-2.5 rounded-xl transition flex items-center gap-1 active:scale-95 font-semibold" title="Clear test match and reset board">
-          <span>🔄 Reset</span>
+        <button onclick="resetCurrentMatch()" class="min-h-[42px] text-xs bg-surface hover:bg-slate-700 text-slate-400 hover:text-white border border-border px-2.5 py-2 rounded-xl transition flex items-center gap-1 active:scale-95 font-semibold" title="Reset match">
+          <span>🔄</span>
         </button>
       </div>
     </div>
 
-    <!-- Live Scoreboard & Opponent Quick Action Bar -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-border/70">
-      <!-- Scoreboard Display -->
-      <div class="flex items-center justify-between bg-pitch/80 p-2.5 rounded-xl border border-border/80">
-        <div class="flex items-center gap-2">
-          <span class="display text-xl text-teal-300 font-bold truncate max-w-[120px]" id="homeSquadName">AJAX ASPIRE</span>
-          <span class="text-3xl font-black font-mono text-white" id="scoreAjax">0</span>
-        </div>
-        <span class="text-slate-500 font-bold text-sm">VS</span>
-        <div class="flex items-center gap-2">
-          <span class="text-3xl font-black font-mono text-rose-400" id="scoreOpponent">0</span>
-          <span class="display text-xl text-slate-200 font-bold truncate max-w-[120px]" id="oppSquadName">OPPONENT</span>
-        </div>
+    <!-- Row 2: Compact Single-Line Telemetry & Opponent / Set Piece Command Strip -->
+    <div id="summaryDashboardHud" class="pt-2 border-t border-border/70 flex items-center justify-between gap-2 flex-wrap text-xs">
+      
+      <!-- Left: Opponent Quick Tag Bar -->
+      <div class="flex items-center gap-1 flex-wrap">
+        <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Opp:</span>
+        <button onclick="logOpponentGoal()" class="px-2 py-0.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold hover:bg-rose-500/30 active:scale-95 text-[11px]">+Goal</button>
+        <button onclick="logOpponentShot()" class="px-2 py-0.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold hover:bg-sky-500/30 active:scale-95 text-[11px]">+Shot (<span id="oppShotsCount">0</span>)</button>
+        <button onclick="logOpponentSub()" class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold hover:bg-amber-500/30 active:scale-95 text-[11px]">+Sub (<span id="oppSubsCount">0</span>)</button>
+        <button onclick="logOpponentCorner()" class="px-2 py-0.5 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700 text-[11px]">+Corner (<span id="oppCornersCount">0</span>)</button>
+        <button onclick="logOpponentFoul()" class="px-2 py-0.5 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700 text-[11px]">+Foul (<span id="oppFoulsCount">0</span>)</button>
       </div>
 
-      <!-- Quick Opponent Events Bar -->
-      <div class="flex items-center justify-between bg-pitch/80 p-2 rounded-xl border border-border/80 text-xs">
-        <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Opponent:</span>
-        <div class="flex items-center gap-1.5 flex-wrap justify-end">
-          <button onclick="logOpponentGoal()" class="px-2 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold hover:bg-rose-500/30 active:scale-95">
-            + Opp Goal
-          </button>
-          <button onclick="logOpponentShot()" class="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold hover:bg-sky-500/30 active:scale-95">
-            + Opp Shot (<span id="oppShotsCount">0</span>)
-          </button>
-          <button onclick="logOpponentSub()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold hover:bg-amber-500/30 active:scale-95">
-            + Opp Sub (<span id="oppSubsCount">0</span>)
-          </button>
-          <button onclick="logOpponentCorner()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
-            + Corner (<span id="oppCornersCount">0</span>)
-          </button>
-          <button onclick="logOpponentFoul()" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700">
-            + Foul (<span id="oppFoulsCount">0</span>)
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUMMARY DASHBOARD COMPONENT (HUD): SHOTS, PRESSING, TERRITORY & HALFTIME AI -->
-    <div id="summaryDashboardHud" class="pt-2 border-t border-border/70 space-y-2">
-      <!-- KPI Row: 4 Metric Cards + AI Halftime Button -->
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
-        <!-- Card 1: Shots Split -->
-        <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
-            <span>Shots Split</span>
-            <span class="text-teal-400 font-bold" id="hudShotsSummary">0 vs 0</span>
-          </div>
-          <div class="text-sm font-black text-white mt-1 flex items-baseline gap-1.5">
-            <span id="hudAjaxShots">0</span>
-            <span class="text-[10px] text-slate-400 font-normal">(<span id="hudAjaxSot">0</span> on / <span id="hudAjaxOut18">0</span> out 18)</span>
-          </div>
-          <div class="text-[9px] text-slate-400 mt-0.5">Opp: <span id="hudOppShots">0</span> shots</div>
-        </div>
-
-        <!-- Card 2: Press Efficiency -->
-        <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
-            <span>Press Rate</span>
-            <span class="text-teal-400 font-bold" id="hudPressPct">--%</span>
-          </div>
-          <div class="text-sm font-black text-white mt-1 flex items-baseline gap-1">
-            <span id="hudPressWon">0</span><span class="text-xs text-slate-400">/</span><span id="hudPressTotal" class="text-xs text-slate-400">0</span>
-            <span class="text-[9px] text-emerald-400 font-semibold ml-1">Won</span>
-          </div>
-          <div class="w-full bg-surface h-1.5 rounded-full overflow-hidden mt-1">
-            <div id="hudPressBar" class="bg-teal-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-          </div>
-        </div>
-
-        <!-- Card 3: Territory Flow (Defending vs Attacking GK) -->
-        <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
-            <span>Territory Flow</span>
-            <span class="text-teal-400 font-bold" id="hudTerritoryTilt">50/50</span>
-          </div>
-          <div class="text-xs font-bold text-white mt-1">
-            <span class="text-emerald-300" id="hudGkDef">0</span> Def GK <span class="text-slate-500 font-normal">(High Press)</span>
-          </div>
-          <div class="text-[10px] text-slate-400 mt-0.5">
-            <span class="text-sky-300" id="hudGkAtt">0</span> Att GK (Build-Out)
-          </div>
-        </div>
-
-        <!-- Card 4: Disciplinary (Fouls & Cards) -->
-        <div class="bg-pitch/90 p-2 rounded-xl border border-border/80 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase">
-            <span>Discipline</span>
-            <span class="text-amber-400 font-bold" id="hudCardsCount">0 🟨</span>
-          </div>
-          <div class="text-xs font-bold text-white mt-1 flex items-center gap-1.5">
-            <span>Ajax: <span id="hudAjaxFouls" class="text-amber-300 font-mono">0</span>F</span>
-            <span id="hudAjaxCardsBadge" class="hidden items-center gap-0.5"></span>
-          </div>
-          <div class="text-[10px] text-slate-400 mt-0.5">Opp: <span id="hudOppFouls" class="font-mono text-slate-300">0</span>F</div>
-        </div>
-
-        <!-- Card 5: Halftime AI Tactical Report Trigger -->
-        <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-teal-900/40 via-pitch/90 to-amber-900/30 p-2 rounded-xl border border-teal-500/40 flex flex-col justify-between shadow-lg">
-          <div class="flex items-center justify-between text-[10px] text-teal-300 font-bold uppercase mono">
-            <span>AI Tactical Coach</span>
-            <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
-          </div>
-          <button onclick="openHalftimeAIModal()" class="w-full mt-1 py-1.5 px-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-pitch font-black text-xs flex items-center justify-center gap-1 transition active:scale-95 shadow">
-            <span>⚡ AI Halftime Report</span>
-          </button>
-          <div class="text-[9px] text-center text-slate-400 mt-0.5">Game flow &amp; adjustments</div>
-        </div>
+      <!-- Center: Ajax Set Pieces & Phase Triggers -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <span class="text-[10px] mono uppercase text-teal-400 font-bold shrink-0">Ajax:</span>
+        <button onclick="logQuickCorner()" class="px-2.5 py-0.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-bold active:scale-95 flex items-center gap-1 text-[11px]" title="Record Ajax Corner Kick">
+          <span>🚩 Corner</span>
+        </button>
+        <button onclick="logQuickSetPiece()" class="px-2.5 py-0.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 font-bold active:scale-95 flex items-center gap-1 text-[11px]" title="Record Ajax Free Kick / Set Piece from Foul">
+          <span>🎯 Free Kick</span>
+        </button>
+        <button onclick="logPhaseEvent('goal_kick_att')" class="px-2 py-0.5 rounded-lg bg-surface hover:bg-slate-700 text-slate-300 border border-border text-[11px]" title="Ajax Goal Kick Build-Out">
+          <span>🧱 Build</span>
+        </button>
+        <button onclick="logPhaseEvent('goal_kick_def')" class="px-2 py-0.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 font-bold text-[11px]" title="Opponent Goal Kick High Press">
+          <span>🎯 Press</span>
+        </button>
       </div>
 
-      <!-- Quick Phase & Possession Bar (Build-out, High Press, Press Duels, Crosses) -->
-      <div class="flex items-center justify-between bg-card p-2 rounded-xl border border-border/80 text-xs flex-wrap gap-1.5">
-        <span class="text-[10px] mono uppercase text-teal-400 font-bold shrink-0">Phase &amp; Press:</span>
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <button onclick="logPhaseEvent('goal_kick_att')" class="px-2.5 py-1 rounded-lg bg-surface hover:bg-slate-700 text-slate-200 border border-border flex items-center gap-1 active:scale-95" title="Ajax Build-Out from deep (Our Goal Kick)">
-            <span>🧱 Our Goal Kick (Build)</span>
-          </button>
-          <button onclick="logPhaseEvent('goal_kick_def')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1 active:scale-95" title="Opponent Goal Kick / High Press Territory">
-            <span>🎯 Opp Goal Kick (Press)</span>
-          </button>
-          <button onclick="logPhaseEvent('press_won')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-bold flex items-center gap-1 active:scale-95">
-            <span>⚡ Press Won</span>
-          </button>
-          <button onclick="logPhaseEvent('press_lost')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 font-semibold flex items-center gap-1 active:scale-95">
-            <span>💨 Press Lost</span>
-          </button>
-          <button onclick="openCrossModal()" class="px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/40 font-semibold flex items-center gap-1 active:scale-95">
-            <span>👟 Cross Attempt</span>
-          </button>
+      <!-- Right: Live Telemetry Metric Pills & AI Halftime Trigger -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <!-- Shots Split Pill -->
+        <div class="px-2 py-0.5 rounded-lg bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Ajax vs Opponent Shots">
+          <span class="text-slate-400 font-mono text-[10px]">Shots:</span>
+          <span class="text-white font-bold" id="hudAjaxShots">0</span><span class="text-slate-500">-</span><span class="text-slate-300 font-bold" id="hudOppShots">0</span>
+          <span class="text-[10px] text-teal-400">(<span id="hudAjaxSot">0</span> on / <span id="hudAjaxOut18">0</span> out)</span>
+          <span id="hudShotsSummary" class="hidden">0 vs 0</span>
         </div>
+
+        <!-- Press Rate Pill -->
+        <div class="px-2 py-0.5 rounded-lg bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Press Efficiency">
+          <span class="text-slate-400 font-mono text-[10px]">Press:</span>
+          <span class="text-teal-400 font-bold" id="hudPressPct">--%</span>
+          <span class="text-[10px] text-emerald-400">(<span id="hudPressWon">0</span>/<span id="hudPressTotal">0</span>)</span>
+          <div id="hudPressBar" class="hidden"></div>
+        </div>
+
+        <!-- Territory Flow Pill -->
+        <div class="px-2 py-0.5 rounded-lg bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Territory Flow">
+          <span class="text-slate-400 font-mono text-[10px]">Tilt:</span>
+          <span class="text-teal-300 font-bold" id="hudTerritoryTilt">50/50</span>
+          <span class="text-[9px] text-slate-400">(<span id="hudGkDef">0</span> def / <span id="hudGkAtt">0</span> att)</span>
+        </div>
+
+        <!-- Discipline Pill -->
+        <div class="px-2 py-0.5 rounded-lg bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Discipline">
+          <span id="hudCardsCount" class="text-amber-400 font-bold">0 🟨</span>
+          <span class="text-[10px] text-slate-300 font-mono">Ajax:<span id="hudAjaxFouls" class="text-amber-300">0</span>F</span>
+          <span class="text-[10px] text-slate-400 font-mono">Opp:<span id="hudOppFouls">0</span>F</span>
+          <span id="hudAjaxCardsBadge" class="hidden items-center gap-0.5"></span>
+        </div>
+
+        <!-- AI Halftime Trigger Button -->
+        <button onclick="openHalftimeAIModal()" class="px-2.5 py-1 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 active:scale-95 shadow">
+          <span>🤖 Halftime AI</span>
+        </button>
       </div>
+
     </div>
   </header>
 
@@ -350,130 +303,44 @@
       </div>
     </div>
 
-    <!-- RIGHT COLUMN: QUICK ACTION STAT LOGGER & LIVE FEED (4 OF 12 COLS) -->
-    <div class="lg:col-span-4 space-y-3">
+    <!-- RIGHT COLUMN: LARGE LIVE EVENTS TIMELINE & FILM REVIEW (4 OF 12 COLS) -->
+    <div class="lg:col-span-4 flex flex-col space-y-2.5">
 
-      <!-- 1-TAP SIDELINE FILM BOOKMARK BANNER (ALWAYS ACCESSIBLE) -->
-      <div class="bg-card p-3 rounded-2xl border-2 border-amber-500/50 space-y-1.5 shadow-lg">
-        <button onclick="flagSidelineBookmark()" class="w-full py-2.5 px-3 bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 border border-amber-400/60 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 active:scale-95 shadow">
-          <span class="text-base">📌</span>
-          <span>Flag Moment for Film Review (1-Tap)</span>
+      <!-- 1-TAP SIDELINE FILM BOOKMARK BANNER -->
+      <div class="bg-card p-2.5 rounded-2xl border border-amber-500/50 flex items-center justify-between gap-2 shadow-sm">
+        <button onclick="flagSidelineBookmark()" class="flex-1 py-2 px-3 bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 border border-amber-400/60 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 active:scale-95">
+          <span class="text-sm">📌</span>
+          <span>Flag Film Moment (1-Tap)</span>
         </button>
-        <p class="text-[10px] text-slate-400 text-center leading-snug">
-          Drops a timestamped Veo bookmark (tags selected player if active, then auto-clears).
-        </p>
       </div>
-      
-      <!-- Selected Player Action Panel (Auto-deselects after logging an action) -->
-      <div id="playerActionCard" class="bg-card p-4 rounded-2xl border border-border space-y-3 shadow-xl transition-all">
-        <div class="flex items-center justify-between border-b border-border/80 pb-2.5">
-          <div class="flex items-center space-x-2.5">
-            <span id="actJersey" class="w-8 h-8 rounded-lg bg-surface text-slate-400 border border-border font-mono font-black flex items-center justify-center text-sm">👆</span>
-            <div>
-              <h3 id="actName" class="font-bold text-slate-300 text-sm leading-tight">Select a Player on Pitch</h3>
-              <div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-                <span id="actRole" class="mono text-teal-400 font-bold">Tap any jersey</span>
-                <span>·</span>
-                <span id="actMins" class="mono text-slate-400">Auto-clears after action</span>
-              </div>
-            </div>
+
+      <!-- SPACIOUS LIVE EVENTS FEED PANEL (FULL HEIGHT) -->
+      <div class="bg-card p-3 rounded-2xl border border-border flex flex-col flex-1 shadow-xl">
+        <!-- Feed Header & Controls -->
+        <div class="flex items-center justify-between border-b border-border/80 pb-2 mb-2">
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-xs uppercase tracking-wider text-white">📜 Live Events</span>
+            <span class="text-[10px] bg-pitch text-teal-400 px-1.5 py-0.5 rounded-full border border-teal-500/30 mono font-bold" id="eventCountLabel">0</span>
           </div>
-          <button id="deselectBtn" onclick="deselectPlayer()" class="hidden text-slate-400 hover:text-white text-sm font-bold w-7 h-7 rounded-full bg-pitch items-center justify-center border border-border">✕</button>
-        </div>
-
-        <!-- 1-Tap Stat Event Buttons (16 Quick Actions · iPad Pro Tactile Touch Grid) -->
-        <div class="grid grid-cols-4 sm:grid-cols-4 gap-2 text-xs font-bold">
-          <button onclick="logSelectedEvent('goal')" class="min-h-[50px] p-2 rounded-xl bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-200 border-2 border-emerald-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">⚽</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Goal</span>
-          </button>
-          <button onclick="logSelectedEvent('assist')" class="min-h-[50px] p-2 rounded-xl bg-teal-500/25 hover:bg-teal-500/35 text-teal-200 border-2 border-teal-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">🅰️</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Assist</span>
-          </button>
-          <button onclick="logSelectedEvent('keyPass')" class="min-h-[50px] p-2 rounded-xl bg-purple-500/25 hover:bg-purple-500/35 text-purple-200 border-2 border-purple-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">🔑</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Key Pass</span>
-          </button>
-          <button onclick="logSelectedEvent('sot')" class="min-h-[50px] p-2 rounded-xl bg-sky-500/25 hover:bg-sky-500/35 text-sky-200 border-2 border-sky-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">🎯</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Shot On</span>
-          </button>
-
-          <button onclick="logSelectedEvent('soff')" class="min-h-[50px] p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border-2 border-slate-600 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">🥅</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Shot Off</span>
-          </button>
-          <button onclick="openShotOut18Modal()" class="min-h-[50px] p-2 rounded-xl bg-indigo-500/25 hover:bg-indigo-500/35 text-indigo-200 border-2 border-indigo-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm" title="Shot taken from outside the 18-yard penalty area">
-            <span class="text-base">🚀</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Out 18</span>
-          </button>
-          <button onclick="logSelectedEvent('duelWon')" class="min-h-[50px] p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-teal-200 border-2 border-teal-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">💪</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Duel Won</span>
-          </button>
-          <button onclick="logSelectedEvent('duelLost')" class="min-h-[50px] p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border-2 border-rose-500/70 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">❌</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Duel Lost</span>
-          </button>
-
-          <button onclick="promptTurnoverZone()" class="min-h-[50px] p-2 rounded-xl bg-rose-600/30 hover:bg-rose-600/40 text-rose-100 border-2 border-rose-400 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">⚠️</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Turnover</span>
-          </button>
-          <button onclick="logSelectedEvent('foul')" class="min-h-[50px] p-2 rounded-xl bg-amber-500/25 hover:bg-amber-500/35 text-amber-200 border-2 border-amber-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">🛑</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Foul</span>
-          </button>
-          <button onclick="logSelectedEvent('yellow')" class="min-h-[50px] p-2 rounded-xl bg-yellow-500/25 hover:bg-yellow-500/35 text-yellow-200 border-2 border-yellow-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">🟨</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Yellow</span>
-          </button>
-          <button onclick="logSelectedEvent('save')" class="min-h-[50px] p-2 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/35 text-emerald-200 border-2 border-emerald-400/80 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">🧤</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Save GK</span>
-          </button>
-
-          <button onclick="logSelectedEvent('pressWon')" class="min-h-[50px] p-2 rounded-xl bg-teal-600/25 hover:bg-teal-600/35 text-teal-200 border-2 border-teal-400 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">⚡</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Press Won</span>
-          </button>
-          <button onclick="logSelectedEvent('pressLost')" class="min-h-[50px] p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border-2 border-rose-500/70 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">💨</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Press Lost</span>
-          </button>
-          <button onclick="openCrossModal()" class="min-h-[50px] p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border-2 border-slate-600 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">👟</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Cross</span>
-          </button>
-          <button onclick="flagSidelineBookmark()" class="min-h-[50px] p-2 rounded-xl bg-amber-500/30 hover:bg-amber-500/40 text-amber-200 border-2 border-amber-400 flex flex-col items-center justify-center gap-1 transition active:scale-95 active:translate-y-0.5 shadow-sm">
-            <span class="text-base">📌</span>
-            <span class="text-[11px] font-black uppercase tracking-wider">Flag Film</span>
+          <button onclick="undoLastEvent()" class="text-[11px] text-amber-300 hover:text-amber-200 underline font-mono flex items-center gap-1 active:scale-95">
+            <span>⎌ Undo Last</span>
           </button>
         </div>
 
-        <!-- Quick Sub Out or Explicit Position Swap Buttons -->
-        <div class="pt-2 border-t border-border/70 flex items-center justify-between text-xs">
-          <button onclick="subSelectedPlayerOff()" class="text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-rose-500/10 transition">
-            <span>⬇️ Sub to Bench</span>
-          </button>
-          <button id="swapPositionBtn" onclick="toggleSwapMode()" class="text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1 px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-500/10 transition">
-            <span>🔄 Swap Field Position</span>
-          </button>
+        <!-- Filter Chips Bar -->
+        <div class="flex items-center gap-1 overflow-x-auto pb-2 text-[10px] font-mono no-scrollbar">
+          <button type="button" onclick="setEventFilter('all')" id="efPill-all" class="px-2 py-1 rounded-lg bg-teal-500 text-slate-950 font-bold shrink-0">All</button>
+          <button type="button" onclick="setEventFilter('goals')" id="efPill-goals" class="px-2 py-1 rounded-lg bg-pitch text-slate-300 border border-border shrink-0 hover:text-white">⚽ Goals/Shots</button>
+          <button type="button" onclick="setEventFilter('subs')" id="efPill-subs" class="px-2 py-1 rounded-lg bg-pitch text-slate-300 border border-border shrink-0 hover:text-white">🔄 Subs</button>
+          <button type="button" onclick="setEventFilter('setpieces')" id="efPill-setpieces" class="px-2 py-1 rounded-lg bg-pitch text-slate-300 border border-border shrink-0 hover:text-white">🚩 Set Pieces</button>
+          <button type="button" onclick="setEventFilter('cards')" id="efPill-cards" class="px-2 py-1 rounded-lg bg-pitch text-slate-300 border border-border shrink-0 hover:text-white">🟨 Cards/Fouls</button>
+          <button type="button" onclick="setEventFilter('film')" id="efPill-film" class="px-2 py-1 rounded-lg bg-pitch text-slate-300 border border-border shrink-0 hover:text-white">📌 Film</button>
         </div>
+
+        <!-- Spacious Scrollable Feed List -->
+        <div id="eventsFeedList" class="space-y-1.5 flex-1 max-h-[560px] sm:max-h-[640px] overflow-y-auto pr-1 text-xs"></div>
       </div>
 
-      <!-- Live Match Event Log Feed -->
-      <div class="bg-card p-3.5 rounded-2xl border border-border space-y-2.5">
-        <div class="flex items-center justify-between text-xs">
-          <span class="font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-            <span>📜 Live Match Events</span>
-            <span class="text-[10px] bg-pitch text-teal-400 px-1.5 py-0.2 rounded mono" id="eventCountLabel">0</span>
-          </span>
-          <button onclick="undoLastEvent()" class="text-[10px] text-amber-300 hover:text-amber-200 underline font-mono">⎌ Undo Last</button>
-        </div>
-        <div id="eventsFeedList" class="space-y-1.5 max-h-64 overflow-y-auto pr-1 text-xs"></div>
-      </div>
     </div>
   </main>
 
@@ -656,23 +523,28 @@
   </div>
 
   <!-- ======================================================== -->
-  <!-- MODAL: SHOT OUTSIDE 18 ACCURACY SELECTOR -->
+  <!-- MODAL: SHOT OUTSIDE 18 ACCURACY & DECISION SELECTOR -->
   <!-- ======================================================== -->
   <div id="shotOut18Modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
     <div class="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative space-y-3 text-center">
       <div class="mono text-[10px] uppercase text-indigo-400 font-bold">Shot Outside the 18 Box</div>
       <h3 class="display text-xl text-white" id="shotOut18PlayerName">Log Outside 18 Shot</h3>
-      <p class="text-xs text-slate-400">Did the long-range strike hit the target?</p>
-      <div class="grid grid-cols-2 gap-2.5 pt-1">
-        <button onclick="commitShotOut18(true)" class="p-3.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/50 flex flex-col items-center gap-1 active:scale-95">
-          <span class="text-2xl">🎯</span>
-          <span class="font-bold text-xs">On Target</span>
+      <p class="text-xs text-slate-400">Select shot quality and decision:</p>
+      <div class="grid grid-cols-3 gap-2 pt-1">
+        <button onclick="commitShotOut18('on_target')" class="p-3 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/50 flex flex-col items-center gap-1 active:scale-95">
+          <span class="text-xl">🎯</span>
+          <span class="font-bold text-[11px] leading-tight">On Target</span>
           <span class="text-[9px] text-sky-400">Forces GK save</span>
         </button>
-        <button onclick="commitShotOut18(false)" class="p-3.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border border-border flex flex-col items-center gap-1 active:scale-95">
-          <span class="text-2xl">🥅</span>
-          <span class="font-bold text-xs">Off Target</span>
-          <span class="text-[9px] text-slate-400">Wide or high</span>
+        <button onclick="commitShotOut18('good_look')" class="p-3 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/50 flex flex-col items-center gap-1 active:scale-95">
+          <span class="text-xl">✨</span>
+          <span class="font-bold text-[11px] leading-tight">Quality Look</span>
+          <span class="text-[9px] text-teal-400">Good decision</span>
+        </button>
+        <button onclick="commitShotOut18('poor_selection')" class="p-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/50 flex flex-col items-center gap-1 active:scale-95">
+          <span class="text-xl">⚠️</span>
+          <span class="font-bold text-[11px] leading-tight">Poor Choice</span>
+          <span class="text-[9px] text-rose-400">Forced / A3 TO</span>
         </button>
       </div>
       <button onclick="closeModal('shotOut18Modal')" class="mt-2 text-xs text-slate-400 hover:text-white">Cancel</button>
@@ -920,6 +792,7 @@
       <!-- TAB 1: QUICK STATS GRID -->
       <div id="pamViewStats" class="space-y-3">
         <div class="grid grid-cols-4 gap-1.5 text-[11px] font-semibold">
+          <!-- Finishing -->
           <button type="button" onclick="logTrackerEventFromModal('goal')" class="p-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
             <span class="text-xl">⚽</span>
             <span>Goal</span>
@@ -928,23 +801,34 @@
             <span class="text-xl">🅰️</span>
             <span>Assist</span>
           </button>
-          <button type="button" onclick="logTrackerEventFromModal('keyPass')" class="p-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🔑</span>
-            <span>Key Pass</span>
-          </button>
           <button type="button" onclick="logTrackerEventFromModal('sot')" class="p-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
             <span class="text-xl">🎯</span>
             <span>Shot On</span>
           </button>
-
           <button type="button" onclick="logTrackerEventFromModal('soff')" class="p-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border flex flex-col items-center gap-1 active:scale-95 transition">
             <span class="text-xl">🥅</span>
             <span>Shot Off</span>
           </button>
-          <button type="button" onclick="openTrackerShotOut18FromModal()" class="p-2.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🚀</span>
-            <span>Out 18</span>
+
+          <!-- Passing & Set Pieces -->
+          <button type="button" onclick="logTrackerEventFromModal('keyPass')" class="p-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🔑</span>
+            <span>Key Pass</span>
           </button>
+          <button type="button" onclick="logTrackerEventFromModal('corner')" class="p-2.5 rounded-xl bg-teal-500/25 hover:bg-teal-500/35 text-teal-200 border border-teal-400/60 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🚩</span>
+            <span>Corner</span>
+          </button>
+          <button type="button" onclick="logTrackerEventFromModal('setPiece')" class="p-2.5 rounded-xl bg-purple-500/25 hover:bg-purple-500/35 text-purple-200 border border-purple-400/60 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🎯</span>
+            <span>Free Kick</span>
+          </button>
+          <button type="button" onclick="openTrackerCrossFromModal()" class="p-2.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">👟</span>
+            <span>Cross</span>
+          </button>
+
+          <!-- Defending & Duels -->
           <button type="button" onclick="logTrackerEventFromModal('duelWon')" class="p-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 flex flex-col items-center gap-1 active:scale-95 transition">
             <span class="text-xl">💪</span>
             <span>Duel Won</span>
@@ -953,10 +837,19 @@
             <span class="text-xl">❌</span>
             <span>Duel Lost</span>
           </button>
-
+          <button type="button" onclick="logTrackerEventFromModal('pressWon')" class="p-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">⚡</span>
+            <span>Press Won</span>
+          </button>
           <button type="button" onclick="promptTrackerTurnoverFromModal()" class="p-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
             <span class="text-xl">⚠️</span>
             <span>Turnover</span>
+          </button>
+
+          <!-- Goalkeeping, Discipline & Review -->
+          <button type="button" onclick="logTrackerEventFromModal('save')" class="p-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="text-xl">🧤</span>
+            <span>Save GK</span>
           </button>
           <button type="button" onclick="logTrackerEventFromModal('foul')" class="p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
             <span class="text-xl">🛑</span>
@@ -965,23 +858,6 @@
           <button type="button" onclick="logTrackerEventFromModal('yellow')" class="p-2.5 rounded-xl bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
             <span class="text-xl">🟨</span>
             <span>Yellow</span>
-          </button>
-          <button type="button" onclick="logTrackerEventFromModal('save')" class="p-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">🧤</span>
-            <span>Save GK</span>
-          </button>
-
-          <button type="button" onclick="logTrackerEventFromModal('pressWon')" class="p-2.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">⚡</span>
-            <span>Press Won</span>
-          </button>
-          <button type="button" onclick="logTrackerEventFromModal('pressLost')" class="p-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">💨</span>
-            <span>Press Lost</span>
-          </button>
-          <button type="button" onclick="openTrackerCrossFromModal()" class="p-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
-            <span class="text-xl">👟</span>
-            <span>Cross</span>
           </button>
           <button type="button" onclick="flagTrackerBookmarkFromModal()" class="p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex flex-col items-center gap-1 active:scale-95 transition">
             <span class="text-xl">📌</span>
@@ -999,13 +875,23 @@
         </div>
       </div>
 
-      <!-- TAB 2: INSTANT BENCH SUB PICKER -->
+      <!-- TAB 2: INSTANT BENCH SUB PICKER WITH RETROACTIVE TIME SELECTOR -->
       <div id="pamViewSub" class="hidden space-y-2.5">
         <div class="text-[11px] text-slate-300 font-semibold flex items-center justify-between">
-          <span>Tap a bench player to put in at <span id="pamSubSlotName" class="text-teal-300 font-bold font-mono">POS</span>:</span>
+          <span>Tap bench player to put in at <span id="pamSubSlotName" class="text-teal-300 font-bold font-mono">POS</span>:</span>
           <span class="text-[10px] mono text-slate-400">1-Tap Sub &amp; Done</span>
         </div>
-        <div id="pamBenchList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1"></div>
+        <!-- Retroactive Sub Timing Selector -->
+        <div class="flex items-center gap-1.5 p-1.5 rounded-xl bg-pitch/80 border border-border/80 text-[11px]">
+          <span class="text-[10px] mono text-slate-400 uppercase font-bold shrink-0">Sub Time:</span>
+          <div class="flex items-center gap-1 flex-wrap flex-1" id="pamSubTimePills">
+            <button type="button" onclick="setPamSubOffset(0)" id="subPill0" class="px-2 py-1 rounded-lg bg-teal-500 text-slate-950 font-bold text-[10px] transition">Now</button>
+            <button type="button" onclick="setPamSubOffset(5)" id="subPill5" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:text-white text-[10px] transition">-5m</button>
+            <button type="button" onclick="setPamSubOffset(10)" id="subPill10" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:text-white text-[10px] transition">-10m</button>
+            <button type="button" onclick="promptPamSubCustomTime()" id="subPillCustom" class="px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:text-white text-[10px] transition">Custom...</button>
+          </div>
+        </div>
+        <div id="pamBenchList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1"></div>
         <div class="pt-2 border-t border-border/70">
           <button type="button" onclick="subCurrentPamPlayerOff()" class="w-full py-2.5 bg-surface hover:bg-slate-700 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95">
             <span>⬇️ Take Off (Leave Position Vacant)</span>
@@ -1026,7 +912,7 @@
   </div>
 
   <!-- ======================================================== -->
-  <!-- MODAL: EDIT / CORRECT MATCH EVENT (SIDELINE STAT FIXER) -->
+  <!-- MODAL: EDIT / CORRECT MATCH EVENT (SIDELINE STAT FIXER & SUB RECONCILER) -->
   <!-- ======================================================== -->
   <div id="editEventModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
     <div class="bg-surface border border-teal-500/50 rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-2xl relative space-y-4 max-h-[92vh] overflow-y-auto">
@@ -1049,14 +935,39 @@
           <span class="text-xs font-bold text-white block">Match Minute</span>
           <span class="text-[10px] text-slate-400">Timestamp when event occurred</span>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
+          <button type="button" onclick="adjustEditEventMinute(-5)" class="px-2 py-1 rounded-lg bg-surface hover:bg-slate-700 text-slate-300 font-mono text-[11px] font-bold border border-border active:scale-95">-5m</button>
           <button type="button" onclick="adjustEditEventMinute(-1)" class="w-8 h-8 rounded-lg bg-surface hover:bg-slate-700 text-white font-mono font-bold text-sm flex items-center justify-center border border-border active:scale-95">–</button>
           <span id="eemMinuteDisplay" class="mono text-base font-black text-teal-300 w-12 text-center">24'</span>
           <button type="button" onclick="adjustEditEventMinute(1)" class="w-8 h-8 rounded-lg bg-surface hover:bg-slate-700 text-white font-mono font-bold text-sm flex items-center justify-center border border-border active:scale-95">+</button>
+          <button type="button" onclick="adjustEditEventMinute(5)" class="px-2 py-1 rounded-lg bg-surface hover:bg-slate-700 text-slate-300 font-mono text-[11px] font-bold border border-border active:scale-95">+5m</button>
         </div>
       </div>
 
-      <!-- Player Assignment Selector -->
+      <!-- Dedicated Substitution Reconciler (Visible only for Sub Events) -->
+      <div id="eemSubSection" class="hidden space-y-2.5 bg-pitch/90 p-3.5 rounded-xl border border-teal-500/50">
+        <div class="flex items-center justify-between">
+          <span class="mono text-[10px] uppercase text-teal-400 font-bold">🔄 Substitution Minute Reconciliation</span>
+          <span class="text-[10px] mono text-amber-300 font-bold" id="eemSubPositionSlot">Slot: RB</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="p-2.5 rounded-lg bg-surface/80 border border-emerald-500/30">
+            <div class="text-[9px] mono text-emerald-400 uppercase font-bold">Incoming (ON)</div>
+            <div class="font-bold text-white text-xs mt-0.5 truncate" id="eemSubInPlayer">#23 Player</div>
+            <div class="text-[11px] text-emerald-300 mono mt-1 font-semibold" id="eemSubInPreview">Gains 0 mins</div>
+          </div>
+          <div class="p-2.5 rounded-lg bg-surface/80 border border-rose-500/30">
+            <div class="text-[9px] mono text-rose-400 uppercase font-bold">Outgoing (OFF)</div>
+            <div class="font-bold text-white text-xs mt-0.5 truncate" id="eemSubOutPlayer">#5 Player</div>
+            <div class="text-[11px] text-rose-300 mono mt-1 font-semibold" id="eemSubOutPreview">Loses 0 mins</div>
+          </div>
+        </div>
+        <div class="p-2 rounded-lg bg-surface/50 border border-border text-[11px] text-slate-300 leading-relaxed" id="eemSubDeltaSummary">
+          Transfer preview: adjusting minute shifts on-pitch playing time between both players.
+        </div>
+      </div>
+
+      <!-- Player Assignment Selector (Hidden for Sub Events) -->
       <div class="space-y-1.5" id="eemPlayerSection">
         <label class="mono text-[10px] uppercase text-slate-400 font-bold flex items-center justify-between">
           <span>Assigned Player:</span>
@@ -1065,14 +976,14 @@
         <div id="eemPlayerGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto pr-1"></div>
       </div>
 
-      <!-- Event Type Switcher (1-Tap Grid) -->
-      <div class="space-y-1.5">
+      <!-- Event Type Switcher (Hidden for Sub Events) -->
+      <div class="space-y-1.5" id="eemTypeSection">
         <label class="mono text-[10px] uppercase text-slate-400 font-bold">Change Event Type:</label>
         <div id="eemTypeGrid" class="grid grid-cols-4 gap-1.5 text-[11px] font-semibold"></div>
       </div>
 
-      <!-- Pitch Third / Zone Selector -->
-      <div class="space-y-1.5">
+      <!-- Pitch Third / Zone Selector (Hidden for Sub Events) -->
+      <div class="space-y-1.5" id="eemZoneSection">
         <label class="mono text-[10px] uppercase text-slate-400 font-bold">Pitch Zone / Third:</label>
         <div class="grid grid-cols-3 gap-1.5 text-xs font-bold">
           <button type="button" id="eemZoneD3" onclick="setEditEventZone('D3')" class="p-2 rounded-xl border border-border bg-pitch text-slate-300 transition">D3 · Defending</button>
@@ -1098,7 +1009,6 @@
 
     </div>
   </div>
-
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none duration-300 z-50"></div>
 
@@ -1615,9 +1525,9 @@
         nameEl.textContent = p.name;
         nameEl.className = 'font-bold text-white text-sm leading-tight';
       }
-      document.getElementById('actRole').textContent = `${p.currentPos || 'Field'} (${simplifyPos(p.currentPos)})`;
-      document.getElementById('actMins').textContent = `${p.mins}' played (${p.goals}G · ${p.assists}A · ${p.keyPasses || 0}KP · ${p.turnovers}TO)`;
-      document.getElementById('activeSubPrompt').textContent = `Active: #${p.jersey} ${p.name}. Log action (auto-completes) or tap bench player to sub!`;
+      if (document.getElementById('actRole')) document.getElementById('actRole').textContent = `${p.currentPos || 'Field'} (${simplifyPos(p.currentPos)})`;
+      if (document.getElementById('actMins')) document.getElementById('actMins').textContent = `${p.mins}' played (${p.goals}G · ${p.assists}A · ${p.keyPasses || 0}KP · ${p.turnovers}TO)`;
+      if (document.getElementById('activeSubPrompt')) document.getElementById('activeSubPrompt').textContent = `Active: #${p.jersey} ${p.name}. Tap node or sub!`;
 
       const closeBtn = document.getElementById('deselectBtn');
       if (closeBtn) closeBtn.classList.replace('hidden', 'flex');
@@ -1642,9 +1552,9 @@
         nameEl.textContent = 'Select a Player on Pitch';
         nameEl.className = 'font-bold text-slate-300 text-sm leading-tight';
       }
-      document.getElementById('actRole').textContent = 'Tap any jersey';
-      document.getElementById('actMins').textContent = 'Auto-clears after action';
-      document.getElementById('activeSubPrompt').textContent = 'Tap player to sub or log stats';
+      if (document.getElementById('actRole')) document.getElementById('actRole').textContent = 'Tap any jersey';
+      if (document.getElementById('actMins')) document.getElementById('actMins').textContent = 'Auto-clears after action';
+      if (document.getElementById('activeSubPrompt')) document.getElementById('activeSubPrompt').textContent = 'Tap player to sub or log stats';
 
       const closeBtn = document.getElementById('deselectBtn');
       if (closeBtn) closeBtn.classList.replace('flex', 'hidden');
@@ -1696,11 +1606,13 @@
       }).join('');
     }
 
-    function onTapBenchPlayer(benchJersey) {
+    function onTapBenchPlayer(benchJersey, customMinute = null) {
       // If an on-pitch slot was selected -> PERFORM THE SUB!
       if (selectedSlot) {
         const outJersey = onPitchPlayers[selectedSlot];
-        const curMins = Math.floor(matchSeconds / 60);
+        const clockMins = Math.floor(matchSeconds / 60);
+        const subMins = (customMinute !== null && customMinute !== undefined) ? parseInt(customMinute, 10) : clockMins;
+        const delta = clockMins - subMins; // if sub took place delta mins ago
 
         onPitchPlayers[selectedSlot] = benchJersey;
         if (playerStats[outJersey]) {
@@ -1712,18 +1624,36 @@
           playerStats[benchJersey].currentPos = selectedSlot;
         }
 
+        // Retroactive minutes transfer if sub took place earlier (delta > 0)
+        if (delta > 0) {
+          const pos = simplifyPos(selectedSlot);
+          if (playerStats[benchJersey]) {
+            playerStats[benchJersey].mins = (playerStats[benchJersey].mins || 0) + delta;
+            playerStats[benchJersey].benchMins = Math.max(0, (playerStats[benchJersey].benchMins || 0) - delta);
+            if (pos) playerStats[benchJersey].posMins[pos] = (playerStats[benchJersey].posMins[pos] || 0) + delta;
+          }
+          if (playerStats[outJersey]) {
+            playerStats[outJersey].mins = Math.max(0, (playerStats[outJersey].mins || 0) - delta);
+            playerStats[outJersey].benchMins = (playerStats[outJersey].benchMins || 0) + delta;
+            if (pos) playerStats[outJersey].posMins[pos] = Math.max(0, (playerStats[outJersey].posMins[pos] || 0) - delta);
+          }
+        }
+
         const outName = playerStats[outJersey]?.name || `#${outJersey}`;
         const inName = playerStats[benchJersey]?.name || `#${benchJersey}`;
 
         logMatchEvent({
-          time: curMins,
+          time: subMins,
           type: 'sub',
-          desc: `SUB (${curMins}'): #${benchJersey} ${inName} ON for #${outJersey} ${outName} at ${selectedSlot}`,
+          desc: `SUB (${subMins}'): #${benchJersey} ${inName} ON for #${outJersey} ${outName} at ${selectedSlot}`,
           jersey: benchJersey,
+          inJersey: benchJersey,
+          outJersey: outJersey,
+          slot: selectedSlot,
           zone: 'M3'
         });
 
-        showToast(`Subbed #${benchJersey} ON for #${outJersey}`);
+        showToast(`Subbed #${benchJersey} ON for #${outJersey} (at min ${subMins}')`);
         deselectPlayer();
         renderPitch();
         renderBench();
@@ -1752,6 +1682,9 @@
         type: 'sub',
         desc: `SUB OUT (${curMins}'): #${j} to Bench (Slot ${selectedSlot} now vacant)`,
         jersey: j,
+        inJersey: null,
+        outJersey: j,
+        slot: selectedSlot,
         zone: 'M3'
       });
 
@@ -1934,8 +1867,61 @@
        INSTANT CONTEXTUAL PLAYER ACTION MODAL CONTROLLER
        ========================================================= */
     let pamCurrentSlot = null;
+    let pamSubOffset = 0;
+    let pamSubCustomMinute = null;
+
+    function setPamSubOffset(offset) {
+      pamSubOffset = offset;
+      pamSubCustomMinute = null;
+      updatePamSubPillsUI();
+    }
+
+    function promptPamSubCustomTime() {
+      const curMins = Math.floor(matchSeconds / 60);
+      const val = prompt(`Enter match minute for this substitution (0 to ${Math.max(80, curMins + 10)}):`, String(curMins));
+      if (val === null) return;
+      const parsed = parseInt(val, 10);
+      if (isNaN(parsed) || parsed < 0) {
+        showToast('Invalid minute entered.');
+        return;
+      }
+      pamSubCustomMinute = parsed;
+      pamSubOffset = Math.max(0, curMins - parsed);
+      updatePamSubPillsUI();
+    }
+
+    function updatePamSubPillsUI() {
+      const curMins = Math.floor(matchSeconds / 60);
+      const pill0 = document.getElementById('subPill0');
+      const pill5 = document.getElementById('subPill5');
+      const pill10 = document.getElementById('subPill10');
+      const pillCustom = document.getElementById('subPillCustom');
+
+      const activeCls = 'px-2 py-1 rounded-lg bg-teal-500 text-slate-950 font-bold text-[10px] transition shadow';
+      const inactiveCls = 'px-2 py-1 rounded-lg bg-surface text-slate-300 border border-border hover:text-white text-[10px] transition';
+
+      if (pill0) {
+        pill0.className = (pamSubCustomMinute === null && pamSubOffset === 0) ? activeCls : inactiveCls;
+        pill0.textContent = `Now (${curMins}')`;
+      }
+      if (pill5) {
+        pill5.className = (pamSubCustomMinute === null && pamSubOffset === 5) ? activeCls : inactiveCls;
+        pill5.textContent = `-5m (${Math.max(0, curMins - 5)}')`;
+      }
+      if (pill10) {
+        pill10.className = (pamSubCustomMinute === null && pamSubOffset === 10) ? activeCls : inactiveCls;
+        pill10.textContent = `-10m (${Math.max(0, curMins - 10)}')`;
+      }
+      if (pillCustom) {
+        pillCustom.className = (pamSubCustomMinute !== null) ? activeCls : inactiveCls;
+        pillCustom.textContent = pamSubCustomMinute !== null ? `Min ${pamSubCustomMinute}'` : 'Custom...';
+      }
+    }
 
     function openTrackerPlayerActionModal(slot, initialTab = 'stats') {
+      pamSubOffset = 0;
+      pamSubCustomMinute = null;
+      updatePamSubPillsUI();
       pamCurrentSlot = slot;
       selectedSlot = slot;
       const jersey = onPitchPlayers[slot];
@@ -2054,7 +2040,11 @@
     function commitTrackerSubFromModal(benchJersey) {
       if (!pamCurrentSlot) return;
       selectedSlot = pamCurrentSlot;
-      onTapBenchPlayer(benchJersey);
+      const curMins = Math.floor(matchSeconds / 60);
+      const targetMin = pamSubCustomMinute !== null ? pamSubCustomMinute : Math.max(0, curMins - pamSubOffset);
+      onTapBenchPlayer(benchJersey, targetMin);
+      pamSubOffset = 0;
+      pamSubCustomMinute = null;
       closeTrackerPlayerActionModal();
     }
 
@@ -2246,6 +2236,10 @@
         p.pressLost = (p.pressLost || 0) + 1;
         logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'pressLost', desc: `💨 PRESS LOST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
         showToast(`💨 Press lost logged for #${j}`);
+      } else if (eventType === 'setPiece') {
+        p.setPieces = (p.setPieces || 0) + 1;
+        logMatchEvent({ time: curMins, type: 'setPiece', desc: `🎯 FREE KICK / SET PIECE: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: slot.includes('A') ? 'A3' : (slot.includes('D') ? 'D3' : 'M3') });
+        showToast(`🎯 Free kick logged for #${j}`);
       }
 
       // Auto-deselect player immediately after completing the action
@@ -2330,26 +2324,44 @@
       document.getElementById('shotOut18Modal').classList.replace('hidden', 'flex');
     }
 
-    function commitShotOut18(onTarget) {
+    function commitShotOut18(subType) {
       closeModal('shotOut18Modal');
       if (!selectedPlayerJersey || !playerStats[selectedPlayerJersey]) return;
       const j = selectedPlayerJersey;
       const p = playerStats[j];
       const curMins = Math.floor(matchSeconds / 60);
 
+      const isTarget = (subType === 'on_target' || subType === true);
+      const isPoor = (subType === 'poor_selection');
+      const isGoodLook = (subType === 'good_look');
+
       p.shots++;
       p.shotsOutside18 = (p.shotsOutside18 || 0) + 1;
-      if (onTarget) p.sot++;
-      else p.soff++;
+      if (isTarget) {
+        p.sot++;
+      } else {
+        p.soff++;
+        if (isPoor) {
+          p.turnovers = (p.turnovers || 0) + 1;
+          p.toA = (p.toA || 0) + 1;
+        }
+      }
+
+      const desc = isTarget
+        ? `🚀 SHOT OUTSIDE 18 (On Target): #${j} ${p.name.split(' ')[0]} at ${curMins}'`
+        : isGoodLook
+        ? `🚀 SHOT OUTSIDE 18 (Good Rhythm / Open Look): #${j} ${p.name.split(' ')[0]} at ${curMins}'`
+        : `🚀 SHOT OUTSIDE 18 (Poor Selection / Ignored Pass): #${j} ${p.name.split(' ')[0]} at ${curMins}'`;
 
       logMatchEvent({
         time: curMins,
         half: currentPeriod <= 1 ? 'H1' : 'H2',
         type: 'shot_outside_18',
-        onTarget,
+        onTarget: isTarget,
+        subType: typeof subType === 'string' ? subType : (subType ? 'on_target' : 'good_look'),
         jersey: j,
         zone: 'A3',
-        desc: `🚀 SHOT OUTSIDE 18 (${onTarget ? 'On Target' : 'Off Target'}): #${j} ${p.name.split(' ')[0]} at ${curMins}'`
+        desc
       });
 
       deselectPlayer();
@@ -2357,7 +2369,7 @@
       updateScoreboard();
       updateSummaryHud();
       saveState();
-      showToast(`🚀 Shot outside 18 (${onTarget ? 'Target' : 'Off'}) logged for #${j}`);
+      showToast(isTarget ? `🚀 Shot outside 18 on target logged for #${j}` : `🚀 Shot outside 18 logged for #${j}`);
     }
 
     let currentCrossSide = 'left';
@@ -2496,27 +2508,131 @@
       showToast(`Undid: ${ev.desc}`);
     }
 
+
+    function logQuickCorner() {
+      if (selectedPlayerJersey) {
+        logSelectedEvent('corner');
+        return;
+      }
+      openQuickSetPiecePicker('corner');
+    }
+
+    function logQuickSetPiece() {
+      if (selectedPlayerJersey) {
+        logSelectedEvent('setPiece');
+        return;
+      }
+      openQuickSetPiecePicker('setPiece');
+    }
+
+    function openQuickSetPiecePicker(type) {
+      const onPitchEntries = Object.entries(onPitchPlayers).filter(([slot, j]) => j && playerStats[j]);
+      if (!onPitchEntries.length) {
+        showToast('No players currently on pitch.');
+        return;
+      }
+      const curMins = Math.floor(matchSeconds / 60);
+      const label = type === 'corner' ? 'Corner Kick' : 'Free Kick / Set Piece';
+      const promptText = `Select player jersey for ${label} at ${curMins}':\n` + 
+        onPitchEntries.map(([s, j]) => `#${j} ${playerStats[j].name.split(' ')[0]} (${s})`).join(', ') + 
+        '\n(Or enter Team to log without specific player)';
+      const entered = prompt(promptText, onPitchEntries[0] ? String(onPitchEntries[0][1]) : '');
+      if (entered === null) return;
+
+      const trimmed = entered.trim().replace(/^#/, '');
+      const jersey = parseInt(trimmed, 10);
+      if (!isNaN(jersey) && playerStats[jersey]) {
+        selectedPlayerJersey = jersey;
+        logSelectedEvent(type);
+      } else {
+        if (type === 'corner') {
+          oppStats.corners = (oppStats.corners || 0);
+          logMatchEvent({ time: curMins, type: 'corner', desc: `🚩 CORNER KICK (Team) at ${curMins}'`, zone: 'A3' });
+          showToast(`🚩 Team corner kick logged at ${curMins}'`);
+        } else {
+          logMatchEvent({ time: curMins, type: 'setPiece', desc: `🎯 FREE KICK / SET PIECE (Team) at ${curMins}'`, zone: 'A3' });
+          showToast(`🎯 Team free kick logged at ${curMins}'`);
+        }
+        updateScoreboard();
+        saveState();
+      }
+    }
+
+        let currentEventFilter = 'all';
+
+    function setEventFilter(filter) {
+      currentEventFilter = filter;
+      const filters = ['all', 'goals', 'subs', 'setpieces', 'cards', 'film'];
+      filters.forEach(f => {
+        const pill = document.getElementById(`efPill-${f}`);
+        if (!pill) return;
+        if (f === filter) {
+          pill.className = 'px-2 py-1 rounded-lg bg-teal-500 text-slate-950 font-bold shrink-0 transition shadow';
+        } else {
+          pill.className = 'px-2 py-1 rounded-lg bg-pitch text-slate-300 border border-border shrink-0 hover:text-white transition';
+        }
+      });
+      renderEventsFeed();
+    }
+
     function renderEventsFeed() {
       const container = document.getElementById('eventsFeedList');
       if (!container) return;
-      document.getElementById('eventCountLabel').textContent = matchEvents.length;
+      const countLabel = document.getElementById('eventCountLabel');
+      if (countLabel) countLabel.textContent = matchEvents.length;
 
       if (!matchEvents.length) {
-        container.innerHTML = `<div class="p-4 text-center text-slate-500 italic">No match events logged yet.</div>`;
+        container.innerHTML = `<div class="p-6 text-center text-slate-500 italic">No match events logged yet. Tap any pitch node to log live stats.</div>`;
         return;
       }
 
-      container.innerHTML = matchEvents.map(e => {
+      const filtered = matchEvents.filter(e => {
+        if (currentEventFilter === 'all') return true;
+        if (currentEventFilter === 'goals') {
+          return e.type === 'goal' || e.type === 'assist' || e.type === 'sot' || e.type === 'soff' || e.type === 'shot' || e.type === 'shot_outside_18' || e.type === 'oppGoal' || e.type === 'oppShot';
+        }
+        if (currentEventFilter === 'subs') {
+          return e.type === 'sub' || e.type === 'oppSub';
+        }
+        if (currentEventFilter === 'setpieces') {
+          return e.type === 'corner' || e.type === 'oppCorner' || e.type === 'setPiece' || e.type === 'cross' || e.type === 'cross_attempt';
+        }
+        if (currentEventFilter === 'cards') {
+          return e.type === 'yellow' || e.type === 'yellowCard' || e.type === 'redCard' || e.type === 'foul' || e.type === 'oppFoul';
+        }
+        if (currentEventFilter === 'film') {
+          return e.type === 'bookmark' || e.isBookmark || e.filmReview;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="p-6 text-center text-slate-500 italic">No events match filter "${currentEventFilter}".</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(e => {
         if (!e.id) e.id = 'ev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+        const isSub = e.type === 'sub' || e.type === 'oppSub';
+        const isGoal = e.type === 'goal' || e.type === 'oppGoal';
+        const isCorner = e.type === 'corner' || e.type === 'oppCorner' || e.type === 'setPiece';
+        const isCard = e.type === 'yellow' || e.type === 'yellowCard' || e.type === 'redCard';
+
+        let borderCls = 'border-border/60 hover:border-teal-500/60 bg-pitch/70';
+        if (isGoal) borderCls = 'border-emerald-500/50 bg-emerald-950/20';
+        else if (isSub) borderCls = 'border-amber-500/40 bg-amber-950/15';
+        else if (isCorner) borderCls = 'border-purple-500/40 bg-purple-950/15';
+        else if (isCard) borderCls = 'border-yellow-500/50 bg-yellow-950/20';
+
         return `
-          <div onclick="openEditEventModal('${e.id}')" class="p-2 rounded-xl bg-pitch/60 hover:bg-slate-800/80 border border-border/60 hover:border-teal-500/50 flex items-center justify-between text-xs cursor-pointer transition group" title="Click to edit or delete event">
+          <div onclick="openEditEventModal('${e.id}')" class="p-2.5 rounded-xl ${borderCls} border flex items-center justify-between text-xs cursor-pointer transition group shadow-sm active:scale-[0.99]" title="Click to edit, adjust time, or reconcile minutes">
             <div class="flex items-center gap-2 min-w-0 pr-1">
-              <span class="font-mono text-teal-400 font-bold shrink-0">${e.time}'</span>
-              <span class="text-slate-200 truncate group-hover:text-white">${e.desc}</span>
+              <span class="font-mono text-teal-400 font-bold shrink-0 text-xs">${e.time}'</span>
+              <span class="text-slate-200 truncate group-hover:text-white leading-tight">${e.desc}</span>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
               ${e.zone ? `<span class="mono text-[9px] px-1 py-0.2 rounded border ${e.zone==='D3'?'bg-rose-500/20 text-rose-300 border-rose-500/30':e.zone==='M3'?'bg-sky-500/20 text-sky-300 border-sky-500/30':'bg-amber-500/20 text-amber-300 border-amber-500/30'}">${e.zone}</span>` : ''}
-              <span class="text-[10px] text-slate-500 group-hover:text-teal-400 transition ml-0.5">✏️</span>
+              <span class="text-xs text-slate-500 group-hover:text-teal-400 transition ml-0.5">✏️</span>
             </div>
           </div>
         `;
@@ -2548,6 +2664,7 @@
       { type: 'redCard', label: 'Red Card', icon: '🟥' },
       { type: 'save', label: 'GK Save', icon: '🧤' },
       { type: 'corner', label: 'Corner Kick', icon: '🚩' },
+      { type: 'setPiece', label: 'Free Kick', icon: '🎯' },
       { type: 'cross', label: 'Cross', icon: '👟' },
       { type: 'pressWon', label: 'Press Won', icon: '⚡' },
       { type: 'pressLost', label: 'Press Lost', icon: '💨' },
@@ -2595,7 +2712,13 @@
           p.shots = Math.max(0, (p.shots || 0) - 1);
           p.shotsOutside18 = Math.max(0, (p.shotsOutside18 || 0) - 1);
           if (ev.onTarget) p.sot = Math.max(0, (p.sot || 0) - 1);
-          else p.soff = Math.max(0, (p.soff || 0) - 1);
+          else {
+            p.soff = Math.max(0, (p.soff || 0) - 1);
+            if (ev.subType === 'poor_selection') {
+              p.turnovers = Math.max(0, (p.turnovers || 0) - 1);
+              p.toA = Math.max(0, (p.toA || 0) - 1);
+            }
+          }
         }
       } else if (ev.type === 'foul') {
         if (p) p.fouls = Math.max(0, (p.fouls || 0) - 1);
@@ -2618,6 +2741,8 @@
         if (p) p.saves = Math.max(0, (p.saves || 0) - 1);
       } else if (ev.type === 'corner') {
         if (p) p.corners = Math.max(0, (p.corners || 0) - 1);
+      } else if (ev.type === 'setPiece') {
+        if (p) p.setPieces = Math.max(0, (p.setPieces || 0) - 1);
       } else if (ev.type === 'cross') {
         if (p) p.crosses = Math.max(0, (p.crosses || 0) - 1);
       } else if (ev.type === 'cross_attempt') {
@@ -2690,7 +2815,13 @@
           p.shots = (p.shots || 0) + 1;
           p.shotsOutside18 = (p.shotsOutside18 || 0) + 1;
           if (ev.onTarget) p.sot = (p.sot || 0) + 1;
-          else p.soff = (p.soff || 0) + 1;
+          else {
+            p.soff = (p.soff || 0) + 1;
+            if (ev.subType === 'poor_selection') {
+              p.turnovers = (p.turnovers || 0) + 1;
+              p.toA = (p.toA || 0) + 1;
+            }
+          }
         }
       } else if (ev.type === 'foul') {
         if (p) p.fouls = (p.fouls || 0) + 1;
@@ -2713,6 +2844,8 @@
         if (p) p.saves = (p.saves || 0) + 1;
       } else if (ev.type === 'corner') {
         if (p) p.corners = (p.corners || 0) + 1;
+      } else if (ev.type === 'setPiece') {
+        if (p) p.setPieces = (p.setPieces || 0) + 1;
       } else if (ev.type === 'cross') {
         if (p) p.crosses = (p.crosses || 0) + 1;
       } else if (ev.type === 'cross_attempt') {
@@ -2772,6 +2905,7 @@
         case 'redCard': return `🟥 RED CARD: ${who} at ${time}'`;
         case 'save': return `🧤 SAVE (GK): ${who} at ${time}'`;
         case 'corner': return `🚩 CORNER KICK: ${who} at ${time}'`;
+        case 'setPiece': return `🎯 FREE KICK / SET PIECE: ${who} at ${time}'`;
         case 'cross': return `👟 CROSS: ${who} at ${time}'`;
         case 'cross_attempt': return `👟 CROSS (${(extra?.side || 'left').toUpperCase()}): ${who} at ${time}'`;
         case 'pressWon': return `⚡ PRESS WON: ${who} at ${time}'`;
@@ -2785,6 +2919,75 @@
         case 'goal_kick_att': return `🧱 AJAX BUILD-OUT (Goal Kick) at ${time}'`;
         case 'goal_kick_def': return `🎯 OPPONENT GOAL KICK (High Press) at ${time}'`;
         default: return `${type.toUpperCase()}: ${who} at ${time}'`;
+      }
+    }
+
+    function getSubDetails(ev) {
+      if (!ev) return { inJersey: null, outJersey: null, slot: '' };
+      let inJersey = ev.inJersey || ev.jersey || null;
+      let outJersey = ev.outJersey || null;
+      let slot = ev.slot || '';
+
+      if ((!outJersey || !inJersey || !slot) && ev.desc) {
+        const m1 = ev.desc.match(/#(\d+).*?ON\s+for\s+#(\d+)(?:\s+at\s+([A-Za-z0-9_-]+))?/i);
+        if (m1) {
+          if (!inJersey) inJersey = parseInt(m1[1], 10);
+          if (!outJersey) outJersey = parseInt(m1[2], 10);
+          if (!slot && m1[3]) slot = m1[3];
+        } else {
+          const m2 = ev.desc.match(/SUB OUT.*?#(\d+).*?(?:Slot\s+([A-Za-z0-9_-]+))?/i);
+          if (m2) {
+            if (!outJersey) outJersey = parseInt(m2[1], 10);
+            if (!slot && m2[2]) slot = m2[2];
+          }
+        }
+      }
+      return {
+        inJersey: inJersey ? parseInt(inJersey, 10) : null,
+        outJersey: outJersey ? parseInt(outJersey, 10) : null,
+        slot: slot || ''
+      };
+    }
+
+    function updateSubDeltaPreview() {
+      const ev = (matchEvents || []).find(e => e.id === editActiveEventId);
+      if (!ev || ev.type !== 'sub') return;
+
+      const sub = getSubDetails(ev);
+      const oldTime = parseInt(ev.time, 10) || 0;
+      const newTime = editMinute;
+      const delta = oldTime - newTime; // delta > 0: sub happened earlier
+
+      const inP = sub.inJersey ? playerStats[sub.inJersey] : null;
+      const outP = sub.outJersey ? playerStats[sub.outJersey] : null;
+
+      const inName = inP ? `#${sub.inJersey} ${inP.name.split(' ')[0]}` : (sub.inJersey ? `#${sub.inJersey}` : 'None');
+      const outName = outP ? `#${sub.outJersey} ${outP.name.split(' ')[0]}` : (sub.outJersey ? `#${sub.outJersey}` : 'Bench');
+
+      const inEl = document.getElementById('eemSubInPlayer');
+      const outEl = document.getElementById('eemSubOutPlayer');
+      const slotEl = document.getElementById('eemSubPositionSlot');
+      const inPrev = document.getElementById('eemSubInPreview');
+      const outPrev = document.getElementById('eemSubOutPreview');
+      const sumEl = document.getElementById('eemSubDeltaSummary');
+
+      if (inEl) inEl.textContent = inName;
+      if (outEl) outEl.textContent = outName;
+      if (slotEl) slotEl.textContent = sub.slot ? `Slot: ${sub.slot}` : 'Pitch Sub';
+
+      if (delta > 0) {
+        if (inPrev) inPrev.textContent = `+${delta}' (+${delta} mins on pitch)`;
+        if (outPrev) outPrev.textContent = `-${delta}' (-${delta} mins on pitch)`;
+        if (sumEl) sumEl.textContent = `⚡ Moving sub earlier from ${oldTime}' to ${newTime}': ${inName} gains +${delta} mins, ${outName} loses ${delta} mins.`;
+      } else if (delta < 0) {
+        const absD = Math.abs(delta);
+        if (inPrev) inPrev.textContent = `-${absD}' (-${absD} mins on pitch)`;
+        if (outPrev) outPrev.textContent = `+${absD}' (+${absD} mins on pitch)`;
+        if (sumEl) sumEl.textContent = `⚡ Moving sub later from ${oldTime}' to ${newTime}': ${inName} loses ${absD} mins, ${outName} gains +${absD} mins.`;
+      } else {
+        if (inPrev) inPrev.textContent = `No minute change`;
+        if (outPrev) outPrev.textContent = `No minute change`;
+        if (sumEl) sumEl.textContent = `Sub timestamp unchanged (${newTime}'). Playing time will not be shifted.`;
       }
     }
 
@@ -2803,7 +3006,10 @@
       editExtra = {
         onTarget: ev.onTarget !== undefined ? ev.onTarget : (editType === 'sot' || editType === 'goal'),
         side: ev.side || 'left',
-        outcome: ev.outcome || 'shot'
+        outcome: ev.outcome || 'shot',
+        inJersey: ev.inJersey,
+        outJersey: ev.outJersey,
+        slot: ev.slot
       };
 
       const minDisp = document.getElementById('eemMinuteDisplay');
@@ -2813,12 +3019,29 @@
       const iconElem = document.getElementById('eemIcon');
       if (iconElem) {
         const opt = EVENT_TYPE_OPTIONS.find(o => o.type === editType);
-        iconElem.textContent = opt ? opt.icon : '✏️';
+        iconElem.textContent = ev.type === 'sub' ? '🔄' : (opt ? opt.icon : '✏️');
       }
 
-      renderEditEventPlayerGrid();
-      renderEditEventTypeGrid();
-      setEditEventZone(editZone);
+      const subSection = document.getElementById('eemSubSection');
+      const playerSection = document.getElementById('eemPlayerSection');
+      const typeSection = document.getElementById('eemTypeSection');
+      const zoneSection = document.getElementById('eemZoneSection');
+
+      if (ev.type === 'sub') {
+        if (subSection) subSection.classList.remove('hidden');
+        if (playerSection) playerSection.classList.add('hidden');
+        if (typeSection) typeSection.classList.add('hidden');
+        if (zoneSection) zoneSection.classList.add('hidden');
+        updateSubDeltaPreview();
+      } else {
+        if (subSection) subSection.classList.add('hidden');
+        if (playerSection) playerSection.classList.remove('hidden');
+        if (typeSection) typeSection.classList.remove('hidden');
+        if (zoneSection) zoneSection.classList.remove('hidden');
+        renderEditEventPlayerGrid();
+        renderEditEventTypeGrid();
+        setEditEventZone(editZone);
+      }
 
       const modal = document.getElementById('editEventModal');
       if (modal) modal.classList.replace('hidden', 'flex');
@@ -2836,6 +3059,7 @@
       if (minDisp) minDisp.textContent = `${editMinute}'`;
       const titleElem = document.getElementById('eemTitle');
       if (titleElem) titleElem.textContent = `Correct Event (${editMinute}')`;
+      updateSubDeltaPreview();
     }
 
     function renderEditEventPlayerGrid() {
@@ -2922,23 +3146,100 @@
       const ev = matchEvents[idx];
       if (!confirm(`Delete this event?\n\n"${ev.desc}"\n\nThis will automatically reverse the stats and card counts associated with it.`)) return;
 
-      reverseEventStats(ev);
+      if (ev.type === 'sub') {
+        const sub = getSubDetails(ev);
+        const inJ = sub.inJersey;
+        const outJ = sub.outJersey;
+        const slot = sub.slot;
+        const pos = slot ? simplifyPos(slot) : null;
+        const curMins = Math.floor(matchSeconds / 60);
+        const elapsed = Math.max(0, curMins - (ev.time || 0));
+
+        if (inJ && playerStats[inJ]) {
+          playerStats[inJ].mins = Math.max(0, (playerStats[inJ].mins || 0) - elapsed);
+          playerStats[inJ].benchMins = (playerStats[inJ].benchMins || 0) + elapsed;
+          if (pos) playerStats[inJ].posMins[pos] = Math.max(0, (playerStats[inJ].posMins[pos] || 0) - elapsed);
+          playerStats[inJ].onPitch = false;
+          playerStats[inJ].currentPos = 'Sub';
+        }
+        if (outJ && playerStats[outJ]) {
+          playerStats[outJ].mins = (playerStats[outJ].mins || 0) + elapsed;
+          playerStats[outJ].benchMins = Math.max(0, (playerStats[outJ].benchMins || 0) - elapsed);
+          if (pos) playerStats[outJ].posMins[pos] = (playerStats[outJ].posMins[pos] || 0) + elapsed;
+          playerStats[outJ].onPitch = true;
+          playerStats[outJ].currentPos = slot;
+        }
+        if (slot && outJ) {
+          onPitchPlayers[slot] = outJ;
+        }
+      } else {
+        reverseEventStats(ev);
+      }
+
       matchEvents.splice(idx, 1);
 
       updateScoreboard();
       renderPitch();
       renderBench();
       renderEventsFeed();
+      renderMinutesStream();
       saveState();
 
       closeEditEventModal();
-      showToast('🗑️ Event deleted and stats reversed cleanly.');
+      showToast('🗑️ Event deleted and minutes/stats reversed cleanly.');
     }
 
     function saveEventEdits() {
       if (!editActiveEventId) return;
       const ev = (matchEvents || []).find(e => e.id === editActiveEventId);
       if (!ev) return;
+
+      if (ev.type === 'sub') {
+        const sub = getSubDetails(ev);
+        const oldTime = parseInt(ev.time, 10) || 0;
+        const newTime = editMinute;
+        const subDelta = oldTime - newTime; // delta > 0: sub happened earlier
+
+        if (subDelta !== 0) {
+          const inJ = sub.inJersey;
+          const outJ = sub.outJersey;
+          const slot = sub.slot;
+          const pos = slot ? simplifyPos(slot) : null;
+
+          if (inJ && playerStats[inJ]) {
+            playerStats[inJ].mins = Math.max(0, (playerStats[inJ].mins || 0) + subDelta);
+            playerStats[inJ].benchMins = Math.max(0, (playerStats[inJ].benchMins || 0) - subDelta);
+            if (pos) playerStats[inJ].posMins[pos] = Math.max(0, (playerStats[inJ].posMins[pos] || 0) + subDelta);
+          }
+          if (outJ && playerStats[outJ]) {
+            playerStats[outJ].mins = Math.max(0, (playerStats[outJ].mins || 0) - subDelta);
+            playerStats[outJ].benchMins = (playerStats[outJ].benchMins || 0) + subDelta;
+            if (pos) playerStats[outJ].posMins[pos] = Math.max(0, (playerStats[outJ].posMins[pos] || 0) - subDelta);
+          }
+        }
+
+        ev.time = newTime;
+        ev.half = newTime <= 40 ? 'H1' : 'H2';
+        ev.inJersey = sub.inJersey;
+        ev.outJersey = sub.outJersey;
+        ev.slot = sub.slot;
+
+        const inName = sub.inJersey && playerStats[sub.inJersey] ? playerStats[sub.inJersey].name : `#${sub.inJersey}`;
+        const outName = sub.outJersey && playerStats[sub.outJersey] ? playerStats[sub.outJersey].name : `#${sub.outJersey}`;
+        ev.desc = sub.outJersey
+          ? `SUB (${newTime}'): #${sub.inJersey} ${inName.split(' ')[0]} ON for #${sub.outJersey} ${outName.split(' ')[0]}${sub.slot ? ' at ' + sub.slot : ''}`
+          : `SUB OUT (${newTime}'): #${sub.inJersey} to Bench`;
+
+        updateScoreboard();
+        renderPitch();
+        renderBench();
+        renderEventsFeed();
+        renderMinutesStream();
+        saveState();
+        closeEditEventModal();
+        showToast(`💾 Sub adjusted to min ${newTime}' (minutes reconciled cleanly)`);
+        return;
+      }
 
       // 1. Reverse stats for previous event state
       reverseEventStats(ev);
@@ -2963,6 +3264,7 @@
       renderPitch();
       renderBench();
       renderEventsFeed();
+      renderMinutesStream();
       saveState();
 
       closeEditEventModal();
@@ -3518,6 +3820,12 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
       };
       BASELINE_PLAYERS['AJAX ASPIRE U15 (LEAGUE)'] = BASELINE_PLAYERS['AJAX ASPIRE U15'];
 
+      const cleanNorm = s => String(s || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+
       squadKeysToUpdate.forEach(key => {
         const base = BASELINE_TOTALS[key] || { games: 0, mins: 0, won: 0, tied: 0, lost: 0, gf: 0, ga: 0, gd: 0, shots: 0, sot: 0, soff: 0, fouls: 0, corners: 0, cleanSheets: 0, winPct: 0 };
         const baseRoster = BASELINE_PLAYERS[key] || [];
@@ -3554,11 +3862,6 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
 
       // 2. Prepare update for the Google Sheet (Player_IDP tab)
       const statsPayload = {};
-      const cleanNorm = s => String(s || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '');
 
       // Calculate team-level match increments from player actions
       let matchShots = 0, matchSot = 0, matchSoff = 0, matchFouls = 0;
@@ -3716,21 +4019,59 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
           const isDuelWon = ev.type === 'duelWon';
           const isPressWon = ev.type === 'pressWon';
           const isSave = ev.type === 'save';
-          const isGlow = isGoal || isAssist || isKeyPass || isSOT || isDuelWon || isPressWon || isSave;
+          const isCorner = ev.type === 'corner';
+          const isSetPiece = ev.type === 'setPiece';
+          const isGlow = isGoal || isAssist || isKeyPass || isSOT || isDuelWon || isPressWon || isSave || isCorner || isSetPiece;
 
-          let cat = 'Tactical Moment';
-          let tag = ev.tag || cat;
-          if (isGoal) { cat = 'Offensive Moment'; tag = 'Quality Shot'; }
-          else if (isAssist) { cat = 'Offensive Moment'; tag = 'Decision on the Ball'; }
-          else if (isKeyPass) { cat = 'Offensive Moment'; tag = 'Key Pass / Line Breaker'; }
-          else if (isSOT) { cat = 'Offensive Moment'; tag = 'Shot on Target'; }
-          else if (ev.type === 'soff' || (ev.type === 'shot' && !ev.onTarget)) { cat = 'Offensive Moment'; tag = 'Shot Off Target'; }
-          else if (ev.type === 'turnover') { cat = 'Turnover'; tag = 'Turned into Pressure'; }
-          else if (ev.type === 'foul') { cat = 'Defensive Moment'; tag = 'Foul Committed'; }
-          else if (ev.type === 'duelWon') { cat = 'Defensive Moment'; tag = 'Good Press / Duel Won'; }
-          else if (ev.type === 'duelLost') { cat = 'Defensive Moment'; tag = 'Defensive Duel Lost'; }
-          else if (ev.type === 'yellow' || ev.type === 'yellowCard') { cat = 'Disciplinary'; tag = 'Caution / Yellow'; }
-          else if (ev.type === 'bookmark') { cat = 'Coach Film Bookmark'; tag = 'Bookmark'; }
+          let cat = 'Tactical_Shape';
+          let tag = ev.tag || 'Decision on the Ball';
+          if (isGoal) { cat = 'Finishing'; tag = 'Goal Scored'; }
+          else if (isAssist) { cat = 'Passing'; tag = 'Goal Assist'; }
+          else if (isKeyPass) { cat = 'Passing'; tag = 'Key Pass (Shot Assist)'; }
+          else if (isSOT) { cat = 'Finishing'; tag = 'Shot on Target'; }
+          else if (ev.type === 'soff' || (ev.type === 'shot' && !ev.onTarget)) {
+            cat = 'Finishing'; tag = 'Shot Off Target';
+          }
+          else if (ev.type === 'shot_outside_18') {
+            cat = 'Finishing';
+            if (ev.onTarget) tag = 'Shot on Target';
+            else if (ev.subType === 'poor_selection') tag = 'Poor Shot Selection';
+            else tag = 'Quality Shot';
+          }
+          else if (ev.type === 'turnover') {
+            cat = 'Carrying'; tag = 'Turned into Pressure';
+          }
+          else if (ev.type === 'foul') {
+            cat = 'Duel'; tag = 'Foul Conceded';
+          }
+          else if (ev.type === 'duelWon') {
+            cat = 'Duel'; tag = 'Ground Duel Won';
+          }
+          else if (ev.type === 'duelLost') {
+            cat = 'Duel'; tag = 'Ground Duel Lost';
+          }
+          else if (ev.type === 'pressWon') {
+            cat = 'Defending'; tag = 'Direct Pressure';
+          }
+          else if (ev.type === 'save') {
+            cat = 'Goalkeeping'; tag = 'Save (Clean / Held)';
+          }
+          else if (ev.type === 'corner') {
+            cat = 'Passing'; tag = 'Key Pass (Shot Assist)';
+          }
+          else if (ev.type === 'setPiece') {
+            cat = 'Duel'; tag = 'Foul Won';
+          }
+          else if (ev.type === 'yellow' || ev.type === 'yellowCard') {
+            cat = 'Administrative'; tag = 'Bookmark';
+          }
+          else if (ev.type === 'bookmark') {
+            cat = 'Administrative'; tag = 'Bookmark';
+          }
+
+          const jerseysList = ev.jersey ? [ev.jersey] : [];
+          const primaryJersey = jerseysList.length > 0 ? jerseysList[0] : null;
+          const secondaryJerseys = jerseysList.length > 1 ? jerseysList.slice(1) : [];
 
           const canonicalMatch = /rocklin.*(11|nov|26)/i.test(opponentName)
             ? 'Rocklin (Nov 1)'
@@ -3747,8 +4088,10 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
             zone: ev.zone || 'M3',
             z: ev.zone || 'M3',
             zoneDetail: ev.zone || 'M3',
-            jerseys: ev.jersey ? [ev.jersey] : [],
-            j: ev.jersey ? [ev.jersey] : [],
+            jerseys: jerseysList,
+            j: jerseysList,
+            primaryJersey,
+            secondaryJerseys,
             players: ev.jersey ? [`#${ev.jersey} ${pName}`] : ['Team'],
             playersRaw: ev.jersey ? `#${ev.jersey} ${pName}` : 'Team',
             category: cat,

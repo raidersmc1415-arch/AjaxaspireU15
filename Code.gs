@@ -40,6 +40,7 @@ function onOpen() {
     .addItem('Sync Match Stats', 'syncMatchData')
     .addItem('Initialize Match_Action_Log Tab', 'initMatchActionLogTabUI')
     .addItem('Verify / Migrate Match_Action_Log Columns', 'migrateMatchActionLogHeadersUI')
+    .addItem('Harmonize Match_Action_Log to V3.1 Taxonomy', 'harmonizeMatchActionLogToV31UI')
     .addItem('Heal Team Record (6-0-7)', 'healTeamAggregate')
     .addToUi();
 }
@@ -264,6 +265,7 @@ function doPost(e) {
     if (payload.action === 'savePitchsideDraft')      return handleSavePitchsideDraft(payload);
     if (payload.action === 'clearPitchsideDraft')     return handleClearPitchsideDraft(payload);
     if (payload.action === 'updateSeasonStats')       return handleUpdateSeasonStats(payload);
+    if (payload.action === 'harmonizeMatchActionLogToV31') return handleHarmonizeMatchActionLogToV31(payload);
 
     // Per-player write check: require valid player Name + PIN for IDP submissions and reflections
     var authCheck = verifyPlayerCredentials_(payload.name, payload.pin);
@@ -1546,6 +1548,307 @@ function migrateMatchActionLogHeadersUI() {
   SpreadsheetApp.getUi().alert('✅ Match_Action_Log schema verified. Column N (Note_To_Player) is active (' + Math.max(0, sheet.getLastRow() - 1) + ' action rows).');
 }
 
+function normalizeActionRowV31_(cat, tag, outcome, notes, matchName, idNum) {
+  var rawCat = String(cat || '').trim();
+  var rawTag = String(tag || '').trim();
+  var rawOut = String(outcome || '').trim();
+  var note = String(notes || '').toLowerCase();
+  var match = String(matchName || '').toLowerCase();
+  var id = Number(idNum) || 0;
+
+  var V31_FAMILIES = ['Passing', 'Carrying', 'Defending', 'Duel', 'Finishing', 'Goalkeeping', 'Tactical_Shape', 'Administrative'];
+  if (V31_FAMILIES.indexOf(rawCat) !== -1 && rawTag.indexOf('/') === -1 && rawTag !== 'Heavy Touch' && rawTag !== 'Forced Pass' && rawTag !== 'Goal' && rawTag !== 'Save') {
+    return { category: rawCat, tag: rawTag, outcome: rawOut };
+  }
+
+  var isManPat = match.indexOf('manchester pat') !== -1 && id >= 1 && id <= 55;
+
+  if (rawCat === 'Substitution' || rawTag === 'Substitution') {
+    return { category: 'Administrative', tag: 'Substitution', outcome: 'Neutral' };
+  }
+
+  if (rawOut === 'Goal Conceded' || rawTag === 'Goal Conceded') {
+    return { category: 'Goalkeeping', tag: 'Goal Conceded', outcome: 'Goal Conceded' };
+  }
+  if (rawCat === 'GK Action' || rawTag === 'Quality Save') {
+    return { category: 'Goalkeeping', tag: note.indexOf('parr') !== -1 ? 'Save (Parried)' : 'Save (Clean / Held)', outcome: rawOut };
+  }
+
+  if (rawOut === 'Goal Scored' || rawTag === 'Goal Scored') {
+    return { category: 'Finishing', tag: 'Goal Scored', outcome: 'Goal Scored' };
+  }
+  if (rawTag === 'Goal Assist' || rawTag === 'Assist') {
+    return { category: 'Passing', tag: 'Goal Assist', outcome: rawOut === 'Goal Scored' ? 'Goal Scored' : 'Glow' };
+  }
+
+  var resCat = rawCat;
+  var resTag = rawTag;
+  var resOut = rawOut;
+
+  switch (rawTag) {
+    case 'Key Pass / Line Break':
+    case 'Key Pass / Line Breaker':
+      if (isManPat && id === 47) {
+        resCat = 'Passing'; resTag = 'Key Pass (Shot Assist)';
+      } else if (isManPat && id === 50) {
+        resCat = 'Carrying'; resTag = 'Progressive Carry';
+      } else if (/\b(shot|shoot|shoots|goal|assist|attempt on goal)\b/.test(note)) {
+        resCat = 'Passing'; resTag = 'Key Pass (Shot Assist)';
+      } else if (/\b(dribbl|carri|carry|takes space|drives with)\b/.test(note) && !/\b(pass|plays to|finds|through ball|switches)\b/.test(note)) {
+        resCat = 'Carrying'; resTag = 'Progressive Carry';
+      } else {
+        resCat = 'Passing'; resTag = 'Line-Breaking Pass';
+      }
+      break;
+    case 'Progressive Pass':
+      resCat = 'Passing'; resTag = 'Progressive Pass'; break;
+    case 'Switch of Play':
+    case 'Switch Point of Attack':
+      resCat = 'Passing'; resTag = 'Switch Point of Attack'; break;
+    case 'Combination Play':
+    case 'Pass String':
+      resCat = 'Passing'; resTag = 'Combination Play'; break;
+    case 'Good Press / Duel Won':
+    case 'Pressing Trap Success':
+      if ((isManPat && id === 53) || /\b(foul called|whistled for a foul|foul against|commits a foul|free kick to them)\b/.test(note)) {
+        resCat = 'Duel'; resTag = 'Foul Conceded'; resOut = 'Grow';
+      } else if ((isManPat && (id === 5 || id === 6)) || /\b(clearance|clears|cleared)\b/.test(note)) {
+        resCat = 'Defending'; resTag = 'Clearance';
+      } else if ((isManPat && (id === 22 || id === 34)) || /\b(calling out|communicat|talking|directing)\b/.test(note)) {
+        resCat = 'Tactical_Shape'; resTag = 'Tactical Communication';
+      } else if ((isManPat && id === 44) || /\b(intercept|interception|cuts off|reads the pass|steps in front)\b/.test(note)) {
+        resCat = 'Defending'; resTag = 'Interception';
+      } else if ((isManPat && (id === 11 || id === 49)) || /\b(50\/50|shoulder|body|physical|duel won|wins the ball|tackle)\b/.test(note)) {
+        resCat = 'Duel'; resTag = 'Ground Duel Won';
+      } else {
+        resCat = 'Defending'; resTag = 'Direct Pressure';
+      }
+      break;
+    case 'Tackle Won': resCat = 'Defending'; resTag = 'Tackle'; break;
+    case 'Interception': resCat = 'Defending'; resTag = 'Interception'; break;
+    case 'Blocked Shot': resCat = 'Defending'; resTag = 'Blocked Shot'; break;
+    case 'Recovery Run': resCat = 'Defending'; resTag = 'Recovery Run'; break;
+    case 'Aerial Duel Won': resCat = 'Duel'; resTag = 'Aerial Duel Won'; break;
+    case 'Ground Duel Won': resCat = 'Duel'; resTag = 'Ground Duel Won'; break;
+    case 'Foul Won': resCat = 'Duel'; resTag = 'Foul Won'; break;
+    case 'No Challenge on 50/50': resCat = 'Duel'; resTag = 'No Challenge on 50/50'; break;
+    case '1v1 Defending Won': resCat = 'Duel'; resTag = 'Ground Duel Won'; break;
+    case '1v1 Dribble Won': resCat = 'Carrying'; resTag = '1v1 Dribble Won'; break;
+    case 'Progressive Carry': resCat = 'Carrying'; resTag = 'Progressive Carry'; break;
+    case 'Turned into Pressure': resCat = 'Carrying'; resTag = 'Turned into Pressure'; break;
+    case '1v1 Dribble Lost':
+    case 'Dispossessed': resCat = 'Carrying'; resTag = 'Dispossessed'; break;
+    case 'Poor Clearance / Heavy Touch':
+    case 'Heavy Touch':
+    case 'Miscontrol':
+      if (/\b(clearance|clear|clears)\b/.test(note) && !isManPat) {
+        resCat = 'Defending'; resTag = 'Poor Clearance';
+      } else {
+        resCat = 'Carrying'; resTag = 'Miscontrol';
+      }
+      break;
+    case 'Forced Pass into Def':
+    case 'Forced Pass':
+      if (
+        (isManPat && [1, 2, 8, 12, 14, 15, 28, 38, 41, 43, 46, 51].indexOf(id) !== -1) ||
+        /\b(no pressure|no immediate pressure|15 yards of space|time and space|out of bounds|unforced|nobody around|plenty of time)\b/.test(note)
+      ) {
+        resCat = 'Passing'; resTag = 'Unforced Turnover Pass';
+      } else {
+        resCat = 'Passing'; resTag = 'Forced Turnover Pass';
+      }
+      break;
+    case 'No Off-Ball Movement':
+    case 'No Off Ball Movement':
+    case 'Shape / Spacing':
+      resCat = 'Tactical_Shape'; resTag = 'Off-Ball Spacing Fault'; break;
+    case 'Scanning / Body Shape':
+    case 'Body Shape / Receiving':
+      resCat = 'Tactical_Shape'; resTag = 'Scanning & Pre-Orientation'; break;
+    case 'Support Angle':
+      resCat = 'Tactical_Shape'; resTag = 'Support Angle Offered'; break;
+    case 'Decision on the Ball':
+      resCat = 'Tactical_Shape'; resTag = 'Decision on the Ball'; break;
+    case 'Decision off the Ball':
+    case 'Anticipation':
+      resCat = 'Tactical_Shape'; resTag = 'Decision off the Ball'; break;
+    case "Lost Mark / Didn't Track Back":
+    case 'Lost Mark / Bad Recovery':
+    case 'Lost Mark / Recovery':
+      resCat = 'Defending'; resTag = 'Lost Mark / Recovery'; break;
+    case 'Defensive Duel Lost':
+      if (/\b(stab|lung|dole|dived in|bit on)\b/.test(note)) {
+        resCat = 'Defending'; resTag = 'Stabbed at the Ball';
+      } else {
+        resCat = 'Duel'; resTag = 'Ground Duel Lost';
+      }
+      break;
+    case 'Foul Conceded':
+      resCat = 'Duel'; resTag = 'Foul Conceded'; break;
+    case 'Shot on Target':
+      resCat = 'Finishing'; resTag = 'Shot on Target'; break;
+    case 'Quality Shot':
+      resCat = 'Finishing'; resTag = 'Quality Shot'; break;
+    case 'Shot Off Target - Inside Box':
+    case 'Shot Off Target':
+      resCat = 'Finishing'; resTag = 'Shot Off Target'; break;
+    case 'Shot Outside 18 (Off Target)':
+      resCat = 'Finishing';
+      if (resOut === 'Glow' || resOut === 'Neutral') {
+        resTag = 'Quality Shot';
+      } else {
+        resTag = 'Poor Shot Selection';
+      }
+      break;
+    case 'Poor Shot Selection':
+      resCat = 'Finishing'; resTag = 'Poor Shot Selection'; break;
+    case 'Cross Out of Bounds':
+      resCat = 'Finishing'; resTag = 'Cross Out of Bounds'; break;
+    case 'Poor Clearance':
+      resCat = 'Defending'; resTag = 'Poor Clearance'; break;
+    case 'Save':
+    case 'Quality Save':
+    case 'Save (Clean / Held)':
+      resCat = 'Goalkeeping'; resTag = note.indexOf('parr') !== -1 ? 'Save (Parried)' : 'Save (Clean / Held)'; break;
+    case 'Save (Parried)':
+      resCat = 'Goalkeeping'; resTag = 'Save (Parried)'; break;
+    case 'Box Aerial Claim':
+      resCat = 'Goalkeeping'; resTag = 'Box Aerial Claim'; break;
+    case 'Build-Out Distribution':
+      resCat = 'Goalkeeping'; resTag = 'Build-Out Distribution'; break;
+    case 'Tactical Communication':
+      resCat = 'Tactical_Shape'; resTag = 'Tactical Communication'; break;
+    case 'Team Shape Shift':
+      resCat = 'Tactical_Shape'; resTag = 'Team Shape Shift'; break;
+    case 'Goal':
+      if (resOut === 'Grow' || resOut === 'Goal Conceded') {
+        resCat = 'Goalkeeping'; resTag = 'Goal Conceded'; resOut = 'Goal Conceded';
+      } else {
+        resCat = 'Finishing'; resTag = 'Goal Scored'; resOut = 'Goal Scored';
+      }
+      break;
+    case 'Defensive Shape':
+    case 'Offensive Shape':
+    case 'Press Goal Kick':
+    case 'Tactical Moment':
+      resCat = 'Tactical_Shape';
+      resTag = (resOut === 'Grow') ? 'Off-Ball Spacing Fault' : 'Team Shape Shift';
+      break;
+    case 'Midfield movement good':
+    case 'Made Run':
+    case 'Made early run':
+    case 'Made late run':
+      resCat = 'Tactical_Shape';
+      resTag = (resOut === 'Grow') ? 'Decision off the Ball' : 'Support Angle Offered';
+      break;
+    case "Didn't Scan or Didn't have a Plan":
+      resCat = 'Tactical_Shape'; resTag = 'Decision on the Ball'; break;
+    case 'Positive Action':
+    case 'Offensive Moment':
+      if (/\b(dribbl|carri|carry|takes space)\b/.test(note)) {
+        resCat = 'Carrying'; resTag = 'Progressive Carry';
+      } else if (/\b(press|tackle|win|intercept)\b/.test(note)) {
+        resCat = 'Defending'; resTag = 'Direct Pressure';
+      } else {
+        resCat = 'Passing'; resTag = 'Progressive Pass';
+      }
+      break;
+    default:
+      if (rawCat === 'Offensive Moment') {
+        resCat = 'Passing'; resTag = rawTag || 'Progressive Pass';
+      } else if (rawCat === 'Defensive Moment') {
+        resCat = 'Defending'; resTag = rawTag || 'Direct Pressure';
+      } else if (rawCat === 'Turnover') {
+        resCat = 'Passing'; resTag = 'Forced Turnover Pass';
+      } else if (rawCat === 'Shot') {
+        resCat = 'Finishing'; resTag = rawTag || 'Quality Shot';
+      } else if (rawCat === 'Pass String') {
+        resCat = 'Passing'; resTag = 'Combination Play';
+      } else if (V31_FAMILIES.indexOf(rawCat) === -1) {
+        resCat = 'Tactical_Shape'; resTag = rawTag || 'Decision on the Ball';
+      }
+      break;
+  }
+  return { category: resCat, tag: resTag, outcome: resOut };
+}
+
+function harmonizeMatchActionLogToV31UI() {
+  var res = harmonizeMatchActionLogToV31();
+  SpreadsheetApp.getUi().alert(res.message);
+}
+
+function handleHarmonizeMatchActionLogToV31(payload) {
+  if (!isValidCoachPin(payload.pin)) {
+    return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
+  }
+  var res = harmonizeMatchActionLogToV31();
+  return jsonOut(res);
+}
+
+function harmonizeMatchActionLogToV31() {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Match_Action_Log');
+    if (!sheet || sheet.getLastRow() < 2) {
+      return { success: false, message: 'Match_Action_Log tab is empty or missing.' };
+    }
+    var data = sheet.getDataRange().getValues();
+    var headers = data[0].map(function(h) { return String(h || '').trim().toLowerCase(); });
+    var iId = headers.indexOf('event_id');
+    var iMatch = headers.indexOf('match_name');
+    var iOut = headers.indexOf('outcome');
+    var iCat = headers.indexOf('category');
+    var iTag = headers.indexOf('tag');
+    var iNotes = headers.indexOf('coach_notes');
+    var iUpd = headers.indexOf('last_updated');
+
+    if (iCat === -1 || iTag === -1) {
+      return { success: false, message: 'Category or Tag column not found in Match_Action_Log.' };
+    }
+
+    var updatedCount = 0;
+    var nowIso = new Date().toISOString();
+
+    for (var r = 1; r < data.length; r++) {
+      var row = data[r];
+      var evId = iId !== -1 ? row[iId] : r;
+      var match = iMatch !== -1 ? String(row[iMatch] || '') : '';
+      var curCat = String(row[iCat] || '');
+      var curTag = String(row[iTag] || '');
+      var curOut = iOut !== -1 ? String(row[iOut] || '') : '';
+      var curNotes = iNotes !== -1 ? String(row[iNotes] || '') : '';
+
+      var norm = normalizeActionRowV31_(curCat, curTag, curOut, curNotes, match, evId);
+      var changed = (norm.category !== curCat || norm.tag !== curTag || (curOut !== 'Goal Conceded' && norm.outcome !== curOut));
+
+      if (changed) {
+        row[iCat] = norm.category;
+        row[iTag] = norm.tag;
+        if (iOut !== -1 && curOut !== 'Goal Conceded') row[iOut] = norm.outcome;
+        if (iUpd !== -1) row[iUpd] = nowIso;
+        updatedCount++;
+      }
+    }
+
+    if (updatedCount > 0) {
+      sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
+    }
+
+    return {
+      success: true,
+      updatedCount: updatedCount,
+      totalRows: data.length - 1,
+      message: '✅ Successfully harmonized ' + updatedCount + ' rows to V3.1 Taxonomy in Match_Action_Log (' + (data.length - 1) + ' total rows).'
+    };
+  } catch(err) {
+    return { success: false, message: 'Error harmonizing Match_Action_Log: ' + err.toString() };
+  } finally {
+    try { lock.releaseLock(); } catch(e) {}
+  }
+}
+
 function buildActionRowFromMoment(m, nowStr) {
   var jList = Array.isArray(m.jerseys) ? m.jerseys : (Array.isArray(m.j) ? m.j : []);
   if (!jList.length && m.jersey) jList = [parseInt(m.jersey, 10)];
@@ -1578,6 +1881,11 @@ function buildActionRowFromMoment(m, nowStr) {
   var filmReview = Boolean(m.filmReview || m.isBookmark);
   var status = String(m.status || 'Published').trim();
   var eventId = String(m.eventId || m.id || (matchName.replace(/[^a-zA-Z0-9]/g, '') + '_' + half + '_' + clock.replace(':', '') + '_' + (primaryJersey || 'T')));
+
+  var norm = normalizeActionRowV31_(category, tag, outcome, note, matchName, eventId);
+  category = norm.category;
+  tag = norm.tag;
+  if (outcome !== 'Goal Conceded') outcome = norm.outcome;
 
   return [
     eventId,
@@ -1653,7 +1961,16 @@ function readAllMatchActionLogRows() {
     var playerRawStr = iPlayer !== -1 ? String(row[iPlayer] || '').trim() : '';
 
     var rawOut = iOut !== -1 ? String(row[iOut] || 'Glow').trim() : 'Glow';
-    var collapsedOut = rawOut === 'Goal Conceded' ? 'Grow' : (rawOut === 'Goal Scored' ? 'Glow' : rawOut);
+    var curNotes = iNotes !== -1 ? String(row[iNotes] || '').trim() : '';
+    var norm = normalizeActionRowV31_(
+      iCat !== -1 ? String(row[iCat] || 'General').trim() : 'General',
+      iTag !== -1 ? String(row[iTag] || 'Action').trim() : 'Action',
+      rawOut,
+      curNotes,
+      matchName,
+      evId
+    );
+    var collapsedOut = norm.outcome === 'Goal Conceded' ? 'Grow' : (norm.outcome === 'Goal Scored' ? 'Glow' : norm.outcome);
 
     results.push({
       id: isNaN(Number(evId)) ? evId : Number(evId),
@@ -1670,17 +1987,19 @@ function readAllMatchActionLogRows() {
       z: iZone !== -1 ? String(row[iZone] || 'M3').trim() : 'M3',
       outcome: collapsedOut,
       o: collapsedOut,
-      qualityRaw: rawOut,
-      isCritical: (rawOut === 'Goal Conceded'),
-      category: iCat !== -1 ? String(row[iCat] || 'General').trim() : 'General',
-      cat: iCat !== -1 ? String(row[iCat] || 'General').trim() : 'General',
-      tag: iTag !== -1 ? String(row[iTag] || 'Action').trim() : 'Action',
+      qualityRaw: norm.outcome,
+      isCritical: (norm.outcome === 'Goal Conceded'),
+      category: norm.category,
+      cat: norm.category,
+      tag: norm.tag,
       playersRaw: playerRawStr,
       players: playerRawStr ? playerRawStr.split(',').map(function(s) { return s.trim(); }) : [],
       jerseys: jerseys,
       j: jerseys,
-      note: iNotes !== -1 ? String(row[iNotes] || '').trim() : '',
-      n: iNotes !== -1 ? String(row[iNotes] || '').trim() : '',
+      primaryJersey: jerseys.length > 0 ? jerseys[0] : null,
+      secondaryJerseys: jerseys.length > 1 ? jerseys.slice(1) : [],
+      note: curNotes,
+      n: curNotes,
       noteToPlayer: iNoteToPlayer !== -1 ? String(row[iNoteToPlayer] || '').trim() : '',
       filmReview: isReview,
       status: iStatus !== -1 ? String(row[iStatus] || 'Published').trim() : 'Published',

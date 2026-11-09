@@ -499,4 +499,297 @@ check('6. healTeamAggregate() and updateTeamAggregateInRawMatchStats() use dynam
   assert(/11 GP, 6-0-5/.test(healRes.message), `Expected 11 GP, 6-0-5 in healRes.message, got: ${healRes.message}`);
 });
 
+// ---------------------------------------------------------------------------
+// CHECK 7: V3.1 Taxonomy, Single-Actor Attribution & Small-Sample Regression
+// ---------------------------------------------------------------------------
+check('7a. All 8 Action Families and specific tags are present in match-hub.html, film-moment-logger.html, and Code.gs', () => {
+  const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+  const fml = fs.readFileSync(path.join(ROOT, 'film-moment-logger.html'), 'utf8');
+  const amt = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+  const cgs = fs.readFileSync(path.join(ROOT, 'Code.gs'), 'utf8');
+
+  const families = ['Passing', 'Carrying', 'Defending', 'Duel', 'Finishing', 'Goalkeeping', 'Tactical_Shape', 'Administrative'];
+  families.forEach(fam => {
+    assert(mh.includes(fam), `match-hub.html missing family ${fam}`);
+    assert(fml.includes(fam), `film-moment-logger.html missing family ${fam}`);
+    assert(amt.includes(fam), `ajax-match-tracker.html missing family ${fam}`);
+    assert(cgs.includes(fam), `Code.gs missing family ${fam}`);
+  });
+
+  const specificTags = [
+    'Key Pass (Shot Assist)', 'Goal Assist', 'Line-Breaking Pass', 'Progressive Pass',
+    'Switch Point of Attack', 'Combination Play', 'Forced Turnover Pass', 'Unforced Turnover Pass',
+    'Progressive Carry', '1v1 Dribble Won', 'Turned into Pressure', 'Miscontrol', 'Dispossessed',
+    'Direct Pressure', 'Tackle', 'Interception', 'Clearance', 'Blocked Shot', 'Recovery Run',
+    'Poor Clearance', 'Stabbed at the Ball', 'Lost Mark / Recovery',
+    'Ground Duel Won', 'Aerial Duel Won', 'Foul Won', 'Ground Duel Lost', 'Foul Conceded', 'No Challenge on 50/50',
+    'Goal Scored', 'Shot on Target', 'Quality Shot', 'Shot Off Target', 'Poor Shot Selection', 'Cross Out of Bounds',
+    'Save (Clean / Held)', 'Save (Parried)', 'Box Aerial Claim', 'Build-Out Distribution', 'Goal Conceded',
+    'Scanning & Pre-Orientation', 'Support Angle Offered', 'Tactical Communication', 'Team Shape Shift', 'Off-Ball Spacing Fault'
+  ];
+
+  specificTags.forEach(tag => {
+    assert(mh.includes(tag), `match-hub.html missing tag ${tag}`);
+    assert(fml.includes(tag), `film-moment-logger.html missing tag ${tag}`);
+    assert(cgs.includes(tag), `Code.gs missing tag ${tag}`);
+  });
+});
+
+check('7b. V3.1 Film Index calculation: Primary actor 1.0x, Secondary 0.5x, and Bayesian Small-Sample regression', () => {
+  const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+  const ewStart = mh.indexOf('const EVENT_WEIGHTS =');
+  const ewEnd = mh.indexOf('function fmtNet(');
+  assert(ewStart !== -1 && ewEnd !== -1, 'Could not extract scoring code from match-hub.html');
+  const scoringCode = mh.slice(ewStart, ewEnd);
+
+  const sandbox = {
+    Math,
+    Number,
+    Array,
+    Object,
+    fmtNet: val => (val > 0 ? '+' : '') + Number(val).toFixed(1)
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(scoringCode, sandbox);
+
+  // Test event weights: Key Pass (Shot Assist) = +1.25, Line-Breaking Pass = base + 0.50 bonus (1.75 in M3)
+  assert.strictEqual(sandbox.eventWeight({ category: 'Passing', tag: 'Key Pass (Shot Assist)', outcome: 'Glow' }, 'M3'), 1.25);
+  assert.strictEqual(sandbox.eventWeight({ category: 'Passing', tag: 'Line-Breaking Pass', outcome: 'Glow' }, 'M3'), 1.75);
+
+  // Test attribution: primary player gets 1.0x, secondary gets 0.5x
+  const p1 = { jersey: 1, name: 'Player One', mins: 150, pos: 'CM', netScore: 0, glowCount: 0, growCount: 0, filmMinutes: 150, filmEventsCount: 12, toD: 0, toM: 0, toA: 0, filmEventIds: [101] };
+  const p2 = { jersey: 2, name: 'Player Two', mins: 150, pos: 'CM', netScore: 0, glowCount: 0, growCount: 0, filmMinutes: 150, filmEventsCount: 12, toD: 0, toM: 0, toA: 0, filmEventIds: [101] };
+  const teamObj = {
+    totals: { mins: 300 },
+    players: [p1, p2],
+    filmEvents: [
+      {
+        id: 101,
+        primaryJersey: 1,
+        secondaryJerseys: [2],
+        jerseys: [1, 2],
+        category: 'Passing',
+        tag: 'Key Pass (Shot Assist)',
+        zone: 'A3',
+        outcome: 'Glow'
+      }
+    ]
+  };
+
+  sandbox.applyNetMetrics(teamObj);
+  assert.strictEqual(p1.rawFilmPts, 1.25);
+  assert.strictEqual(p2.rawFilmPts, 0.63); // 0.625 rounded to 0.63
+
+  // Test Bayesian regression: 60 mins (45-119 range) regresses toward Par 80
+  const p3 = { jersey: 3, name: 'Player Three', mins: 60, pos: 'CM', netScore: 0, glowCount: 0, growCount: 0, filmMinutes: 60, filmEventsCount: 5, toD: 0, toM: 0, toA: 0, filmEventIds: [102] };
+  const smallSampleTeam = {
+    totals: { mins: 360 },
+    players: [p1, p2, p3],
+    filmEvents: [
+      {
+        id: 101,
+        primaryJersey: 1,
+        secondaryJerseys: [2],
+        jerseys: [1, 2],
+        category: 'Passing',
+        tag: 'Key Pass (Shot Assist)',
+        zone: 'A3',
+        outcome: 'Glow'
+      },
+      {
+        id: 102,
+        primaryJersey: 3,
+        secondaryJerseys: [],
+        jerseys: [3],
+        category: 'Passing',
+        tag: 'Key Pass (Shot Assist)',
+        zone: 'A3',
+        outcome: 'Glow'
+      }
+    ]
+  };
+  sandbox.applyNetMetrics(smallSampleTeam);
+  assert.strictEqual(p3.confidence, 'regressed');
+  assert(p3.indexNote.includes('Regressed'), 'Expected Regressed in indexNote for 60 min sample');
+
+  // Test under 45 mins: unindexed
+  const p4 = { jersey: 4, name: 'Player Four', mins: 30, pos: 'CM', netScore: 0, glowCount: 0, growCount: 0, filmMinutes: 30, filmEventsCount: 2, toD: 0, toM: 0, toA: 0, filmEventIds: [] };
+  const microSampleTeam = {
+    totals: { mins: 330 },
+    players: [p1, p2, p4],
+    filmEvents: [
+      {
+        id: 101,
+        primaryJersey: 1,
+        secondaryJerseys: [2],
+        jerseys: [1, 2],
+        category: 'Passing',
+        tag: 'Key Pass (Shot Assist)',
+        zone: 'A3',
+        outcome: 'Glow'
+      }
+    ]
+  };
+  sandbox.applyNetMetrics(microSampleTeam);
+  assert.strictEqual(p4.confidence, 'low_sample');
+  assert.strictEqual(p4.filmIndex, null);
+});
+
+// ---------------------------------------------------------------------------
+// CHECK 8: Sideline Tracker Ergonomics, Sub Minute Reconciliation & Set Pieces
+// ---------------------------------------------------------------------------
+check('8. Sideline Tracker substitution retroactive minutes reconciliation & set piece tracking', () => {
+  const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+
+  // Verify UI elements exist
+  assert(trackerHtml.includes('id="eemSubSection"'), 'eemSubSection missing in edit modal');
+  assert(trackerHtml.includes('id="efPill-setpieces"'), 'efPill-setpieces filter missing in feed');
+  assert(trackerHtml.includes('logQuickCorner()'), 'logQuickCorner trigger missing in tracker');
+  assert(trackerHtml.includes('logQuickSetPiece()'), 'logQuickSetPiece trigger missing in tracker');
+
+  // Extract tracker script logic into sandbox to test reconciliation math
+  const scriptMatches = trackerHtml.match(/<script[\s\S]*?<\/script>/gi);
+  assert(scriptMatches && scriptMatches.length >= 3, 'Expected at least 3 script tags in tracker');
+  const scriptContent = scriptMatches[2].replace(/<\/?script[^>]*>/gi, '');
+
+  // Set up mock DOM and window sandbox
+  const domState = {
+    elements: {},
+    addEventListener: () => {},
+    getElementById: function(id) {
+      if (!this.elements[id]) {
+        this.elements[id] = { textContent: '', className: '', style: {}, classList: { remove: () => {}, add: () => {}, replace: () => {} } };
+      }
+      return this.elements[id];
+    }
+  };
+
+  const sandbox = {
+    document: domState,
+    window: { addEventListener: () => {} },
+    localStorage: (() => {
+      let store = {};
+      return {
+        getItem: (k) => store[k] || null,
+        setItem: (k, v) => { store[k] = String(v); },
+        clear: () => { store = {}; }
+      };
+    })(),
+    sessionStorage: { getItem: () => '4111', setItem: () => {} },
+    showToast: () => {},
+    alert: () => {},
+    confirm: () => true,
+    prompt: () => '60',
+    fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) }),
+    Promise: Promise,
+    clearInterval: () => {},
+    setInterval: () => {},
+    setTimeout: () => {},
+    clearTimeout: () => {},
+    console: console,
+    Math: Math,
+    Date: Date,
+    parseInt: parseInt,
+    Object: Object,
+    Array: Array,
+    Set: Set
+  };
+
+  vm.createContext(sandbox);
+  vm.runInContext(scriptContent, sandbox);
+
+  // Initialize a mock match state inside sandbox context
+  const run = (expr) => vm.runInContext(expr, sandbox);
+  run(`
+    activeSquadKey = 'aspire';
+    initSquadMatch();
+    matchSeconds = 70 * 60; // Clock is at 70 minutes
+
+    // Ensure player 8 is on pitch at CAM and 23 is on bench
+    const p8 = playerStats[8];
+    if (!playerStats[23]) {
+      playerStats[23] = { jersey: 23, name: 'Substitute Player', mins: 0, benchMins: 70, posMins: {}, onPitch: false };
+    }
+    const p23 = playerStats[23];
+    p23.benchMins = 70;
+    p23.mins = 0;
+    p8.mins = 70;
+    p8.posMins = { CAM: 70 };
+    p8.benchMins = 0;
+    onPitchPlayers['CAM'] = 8;
+    selectedSlot = 'CAM';
+
+    // 1. Test retroactive sub at min 60 when match clock is at min 70 (10 min discrepancy)
+    onTapBenchPlayer(23, 60);
+  `);
+
+  const p23 = run('playerStats[23]');
+  const p8 = run('playerStats[8]');
+
+  // Verify delta was +10: p23 gained 10 mins on pitch, p8 lost 10 mins on pitch
+  assert.strictEqual(p23.mins, 10, 'Expected incoming player #23 to have 10 mins after min 60 sub at min 70 clock');
+  assert.strictEqual(p23.benchMins, 60, 'Expected incoming player #23 benchMins to decrease from 70 to 60');
+  assert.strictEqual(p8.mins, 60, 'Expected outgoing player #8 to have mins reduced from 70 to 60');
+  assert.strictEqual(p8.benchMins, 10, 'Expected outgoing player #8 benchMins to increase from 0 to 10');
+
+  // Verify sub event created with proper attributes
+  const subEv = run('matchEvents[0]');
+  assert.strictEqual(subEv.type, 'sub');
+  assert.strictEqual(subEv.time, 60);
+  assert.strictEqual(subEv.inJersey, 23);
+  assert.strictEqual(subEv.outJersey, 8);
+
+  // 2. Test editing sub event timestamp from 60' to 55' (further 5 minutes earlier)
+  run(`
+    editActiveEventId = '${subEv.id}';
+    editMinute = 55;
+    saveEventEdits();
+  `);
+
+  assert.strictEqual(run('playerStats[23].mins'), 15, 'Expected player #23 mins to adjust to 15 after editing sub to 55');
+  assert.strictEqual(run('playerStats[8].mins'), 55, 'Expected player #8 mins to adjust to 55 after editing sub to 55');
+
+  // 3. Test editing sub event timestamp in the other direction: from 55' to 65' (-10 delta)
+  run(`
+    editActiveEventId = '${subEv.id}';
+    editMinute = 65;
+    saveEventEdits();
+  `);
+
+  assert.strictEqual(run('playerStats[23].mins'), 5, 'Expected player #23 mins to adjust to 5 after editing sub to 65');
+  assert.strictEqual(run('playerStats[8].mins'), 65, 'Expected player #8 mins to adjust to 65 after editing sub to 65');
+
+  // 4. Test deleting the sub event: reverses elapsed time and restores #8 to slot
+  run(`
+    editActiveEventId = '${subEv.id}';
+    deleteEvent();
+  `);
+  assert.strictEqual(run("onPitchPlayers['CAM']"), 8, 'Expected outgoing player #8 to be restored to CAM');
+  assert.strictEqual(run('playerStats[8].onPitch'), true, 'Expected player #8 onPitch to be restored to true');
+  assert.strictEqual(run('playerStats[23].onPitch'), false, 'Expected player #23 onPitch to be false');
+
+  // 5. Test Corner and Set Piece logging and V3.1 taxonomy mapping
+  run(`
+    selectedPlayerJersey = 8;
+    selectedSlot = 'CAM';
+    logSelectedEvent('corner');
+    selectedPlayerJersey = 8;
+    logSelectedEvent('setPiece');
+  `);
+
+  assert.strictEqual(run('playerStats[8].corners'), 1, 'Expected p8 corners to increment to 1');
+  assert.strictEqual(run('playerStats[8].setPieces'), 1, 'Expected p8 setPieces to increment to 1');
+
+  // Verify commit payload contains Passing for Corner and Duel for Set Piece
+  run('commitMatchToHub()');
+  const rawCustom = sandbox.localStorage.getItem('matchhub_custom_data');
+  assert(rawCustom, 'Expected customData in localStorage');
+  const custom = JSON.parse(rawCustom);
+  const filmEvents = custom['AJAX ASPIRE U15'].filmEvents;
+  const cornerEv = filmEvents.find(e => (e.note || '').includes('CORNER KICK'));
+  assert(cornerEv && cornerEv.category === 'Passing', 'Expected corner kick to map to Passing');
+  const setPieceEv = filmEvents.find(e => (e.note || '').includes('SET PIECE'));
+  assert(setPieceEv && setPieceEv.category === 'Duel', 'Expected set piece to map to Duel');
+});
+
 console.log(`\nAll ${passed} regression checks passed.`);

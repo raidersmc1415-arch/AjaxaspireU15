@@ -56,7 +56,7 @@
         <div>
           <div class="mono text-[10px] uppercase tracking-widest text-brand-400 font-bold flex items-center gap-2">
             <span>AJAX ASPIRE U15 · FILM STUDY TOOLKIT</span>
-            <span class="px-2 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px]">v3 READY</span>
+            <span class="px-2 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px]">v3.1 READY</span>
           </div>
           <h1 class="display text-2xl sm:text-3xl text-white leading-tight">Smart Match Film Logger &amp; Voice Converter</h1>
           <p class="text-xs text-slate-400">Log moments via voice dictation, fast-tap while watching Veo, or parse raw transcripts without Excel date bugs.</p>
@@ -288,76 +288,83 @@
             </div>
             <!-- Category Filter Chips -->
             <div class="flex items-center gap-1 overflow-x-auto pb-0.5 text-[11px] font-semibold" id="actionFilterChips">
-              <button type="button" onclick="filterActionCategory('all')" id="afc-all" class="afc-btn px-2.5 py-1 rounded-lg border border-teal-500/50 bg-teal-500/20 text-teal-300 font-bold whitespace-nowrap transition">All (47)</button>
-              <button type="button" onclick="filterActionCategory('turnover')" id="afc-turnover" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🔴 Turnovers (13)</button>
+              <button type="button" onclick="filterActionCategory('all')" id="afc-all" class="afc-btn px-2.5 py-1 rounded-lg border border-teal-500/50 bg-teal-500/20 text-teal-300 font-bold whitespace-nowrap transition">All (43)</button>
               <button type="button" onclick="filterActionCategory('passing')" id="afc-passing" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🟢 Passing (8)</button>
+              <button type="button" onclick="filterActionCategory('carrying')" id="afc-carrying" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🏃 Carrying (5)</button>
               <button type="button" onclick="filterActionCategory('defending')" id="afc-defending" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🛡️ Defending (9)</button>
+              <button type="button" onclick="filterActionCategory('duel')" id="afc-duel" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">⚔️ Duel (6)</button>
               <button type="button" onclick="filterActionCategory('finishing')" id="afc-finishing" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">⚡ Finishing (6)</button>
-              <button type="button" onclick="filterActionCategory('movement')" id="afc-movement" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🧠 Decisions (6)</button>
               <button type="button" onclick="filterActionCategory('gk')" id="afc-gk" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🧤 Goalkeeping (5)</button>
+              <button type="button" onclick="filterActionCategory('tactical')" id="afc-tactical" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🧠 Tactical (7)</button>
+              <button type="button" onclick="filterActionCategory('admin')" id="afc-admin" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">📋 Admin (2)</button>
             </div>
           </div>
 
           <!-- Actions Grid (Filtered dynamically by filterActionCategory) -->
           <div class="flex flex-wrap gap-1.5 text-xs max-h-[220px] overflow-y-auto pr-1" id="quickTagList">
-            <!-- 🔴 Turnovers (13) -->
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Forced Pass', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Forced Pass</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Turned into Pressure', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Turned into Pressure</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Heavy Touch', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Heavy Touch</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Forced Pass into Def', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Forced Pass into Def</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Pass off target / Poor Quality', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Pass Off Target</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Didn\'t Scan or Didn\'t have a Plan', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Didn't Scan / No Plan</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Lost Mark / Bad Recovery', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Lost Mark / Bad Recovery</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Stabbed at the Ball', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Stabbed at the Ball</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Defensive Duel Lost', 'Grow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Defensive Duel Lost</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Poor Clearance', 'Grow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Poor Clearance</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('Poor Shot Selection', 'Grow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Poor Shot Selection</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('No Challenge on 50/50', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">No Challenge on 50/50</button>
-            <button type="button" data-cat="turnover" onclick="setRapidTag('No Off Ball Movement', 'Grow', 'Turnover')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">No Off-Ball Movement</button>
+            <!-- 🟢 Passing (8) -->
+            <button type="button" data-cat="passing" onclick="setRapidTag('Key Pass (Shot Assist)', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Key Pass (Shot Assist)</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Goal Assist', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 font-bold hover:bg-emerald-900/40 transition">Goal Assist</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Line-Breaking Pass', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Line-Breaking Pass</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Progressive Pass', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Progressive Pass</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Switch Point of Attack', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Switch Point of Attack</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Combination Play', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Combination Play (1-2s)</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Forced Turnover Pass', 'Grow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Forced Turnover Pass</button>
+            <button type="button" data-cat="passing" onclick="setRapidTag('Unforced Turnover Pass', 'Grow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Unforced Turnover Pass</button>
 
-            <!-- 🟢 Passing & Creation (8) -->
-            <button type="button" data-cat="passing" onclick="setRapidTag('Key Pass / Line Breaker', 'Glow', 'Key Pass')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Key Pass / Line Breaker</button>
-            <button type="button" data-cat="passing" onclick="setRapidTag('Combination Play', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Combination Play (1-2s)</button>
-            <button type="button" data-cat="passing" onclick="setRapidTag('Switch Point of Attack', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Switch Point of Attack</button>
-            <button type="button" data-cat="passing" onclick="setRapidTag('Through Ball into Space', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Through Ball into Space</button>
-            <button type="button" data-cat="passing" onclick="setRapidTag('Direct Entry to 9', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Direct Entry to 9</button>
-            <button type="button" data-cat="passing" onclick="setRapidTag('Composed Build-Out Escape', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Composed Build-Out Escape</button>
-            <button type="button" data-cat="passing" onclick="setRapidTag('Crossing', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Crossing / Box Delivery</button>
-            <button type="button" data-cat="passing" onclick="setRapidTag('Positive Action', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Positive Possession</button>
+            <!-- 🏃 Carrying (5) -->
+            <button type="button" data-cat="carrying" onclick="setRapidTag('Progressive Carry', 'Glow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Progressive Carry</button>
+            <button type="button" data-cat="carrying" onclick="setRapidTag('1v1 Dribble Won', 'Glow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">1v1 Dribble Won</button>
+            <button type="button" data-cat="carrying" onclick="setRapidTag('Turned into Pressure', 'Grow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Turned into Pressure</button>
+            <button type="button" data-cat="carrying" onclick="setRapidTag('Miscontrol', 'Grow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Miscontrol (Heavy Touch)</button>
+            <button type="button" data-cat="carrying" onclick="setRapidTag('Dispossessed', 'Grow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Dispossessed (Tackled)</button>
 
-            <!-- 🛡️ Defending & Pressing (9) -->
-            <button type="button" data-cat="defending" onclick="setRapidTag('Good Press / Duel Won', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Good Press / Duel Won</button>
-            <button type="button" data-cat="defending" onclick="setRapidTag('Tackle & Secure Possession', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Tackle & Secure Possession</button>
-            <button type="button" data-cat="defending" onclick="setRapidTag('Defensive Shape', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Defensive Shape / Shift</button>
-            <button type="button" data-cat="defending" onclick="setRapidTag('Recovery Run', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Recovery Tracking Run</button>
-            <button type="button" data-cat="defending" onclick="setRapidTag('Clearance', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Clearance (Strong)</button>
-            <button type="button" data-cat="defending" onclick="setRapidTag('Blocked Shot', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Blocked Shot / Cross</button>
-            <button type="button" data-cat="defending" onclick="setRapidTag('Stabbed at the Ball', 'Grow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-900/40 transition">Stabbed at Ball</button>
-            <button type="button" data-cat="defending" onclick="setRapidTag('Lost Mark / Didn\'t Track Back', 'Grow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-900/40 transition">Didn't Track Back</button>
-            <button type="button" data-cat="defending" onclick="setRapidTag('Foul Committed', 'Grow', 'Foul')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Foul Committed</button>
+            <!-- 🛡️ Defending (9) -->
+            <button type="button" data-cat="defending" onclick="setRapidTag('Direct Pressure', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Direct Pressure</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Tackle', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Tackle</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Interception', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Interception</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Clearance', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Clearance</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Blocked Shot', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Blocked Shot</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Recovery Run', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Recovery Run</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Poor Clearance', 'Grow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-900/40 transition">Poor Clearance</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Stabbed at the Ball', 'Grow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-900/40 transition">Stabbed at Ball</button>
+            <button type="button" data-cat="defending" onclick="setRapidTag('Lost Mark / Recovery', 'Grow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-900/40 transition">Lost Mark / Recovery</button>
 
-            <!-- ⚡ Finishing & Attacking (6) -->
-            <button type="button" data-cat="finishing" onclick="setRapidTag('Goal Scored', 'Goal Scored', 'Goal')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-400/50 bg-amber-500/20 text-amber-300 font-bold hover:bg-amber-500/30 transition">⚽ Goal Scored</button>
-            <button type="button" data-cat="finishing" onclick="setRapidTag('Assist', 'Glow', 'Assist')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Assist / Chance Created</button>
-            <button type="button" data-cat="finishing" onclick="setRapidTag('Shot on Target', 'Glow', 'Shot on Target')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Shot on Target</button>
-            <button type="button" data-cat="finishing" onclick="setRapidTag('Quality Shot', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Quality Shot</button>
-            <button type="button" data-cat="finishing" onclick="setRapidTag('1v1 Dribble Won', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">1v1 Dribble Won / Escape</button>
-            <button type="button" data-cat="finishing" onclick="setRapidTag('Shot Off Target', 'Grow', 'Shot')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Shot Off Target</button>
+            <!-- ⚔️ Duel (6) -->
+            <button type="button" data-cat="duel" onclick="setRapidTag('Ground Duel Won', 'Glow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Ground Duel Won</button>
+            <button type="button" data-cat="duel" onclick="setRapidTag('Aerial Duel Won', 'Glow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Aerial Duel Won</button>
+            <button type="button" data-cat="duel" onclick="setRapidTag('Foul Won', 'Glow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Foul Won</button>
+            <button type="button" data-cat="duel" onclick="setRapidTag('Ground Duel Lost', 'Grow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Ground Duel Lost</button>
+            <button type="button" data-cat="duel" onclick="setRapidTag('Foul Conceded', 'Grow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Foul Conceded</button>
+            <button type="button" data-cat="duel" onclick="setRapidTag('No Challenge on 50/50', 'Grow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">No Challenge on 50/50</button>
 
-            <!-- 🧠 Movement & Decisions (6) -->
-            <button type="button" data-cat="movement" onclick="setRapidTag('Decision on the Ball', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Decision on the Ball</button>
-            <button type="button" data-cat="movement" onclick="setRapidTag('Decision off the Ball', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Decision off the Ball</button>
-            <button type="button" data-cat="movement" onclick="setRapidTag('Scanning & Pre-Orientation', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Scanning & Pre-Orientation</button>
-            <button type="button" data-cat="movement" onclick="setRapidTag('Support Angle Offered', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Support Angle Offered</button>
-            <button type="button" data-cat="movement" onclick="setRapidTag('Made Run', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Made Penetrating Run</button>
-            <button type="button" data-cat="movement" onclick="setRapidTag('Offensive Shape', 'Glow', 'Offensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Offensive Shape & Width</button>
+            <!-- ⚡ Finishing (6) -->
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Goal Scored', 'Goal Scored', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-400/50 bg-amber-500/20 text-amber-300 font-bold hover:bg-amber-500/30 transition">⚽ Goal Scored</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Shot on Target', 'Glow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Shot on Target</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Quality Shot', 'Glow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Quality Shot</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Shot Off Target', 'Grow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Shot Off Target</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Poor Shot Selection', 'Grow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Poor Shot Selection</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Cross Out of Bounds', 'Grow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Cross Out of Bounds</button>
 
             <!-- 🧤 Goalkeeping (5) -->
-            <button type="button" data-cat="gk" onclick="setRapidTag('Save', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Save (Clean / Held)</button>
-            <button type="button" data-cat="gk" onclick="setRapidTag('Save (Parried)', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Save (Parried Wide)</button>
-            <button type="button" data-cat="gk" onclick="setRapidTag('Box Aerial Claim', 'Glow', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Box Aerial Punch / Claim</button>
-            <button type="button" data-cat="gk" onclick="setRapidTag('Build-out Distribution', 'Glow', 'Pass String')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Build-out Distribution</button>
-            <button type="button" data-cat="gk" onclick="setRapidTag('Goal Conceded', 'Goal Conceded', 'Defensive Moment')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/50 bg-rose-950/40 text-rose-300 font-bold hover:bg-rose-900/50 transition">🥅 Goal Conceded</button>
+            <button type="button" data-cat="gk" onclick="setRapidTag('Save (Clean / Held)', 'Glow', 'Goalkeeping')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Save (Clean / Held)</button>
+            <button type="button" data-cat="gk" onclick="setRapidTag('Save (Parried)', 'Glow', 'Goalkeeping')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Save (Parried Wide)</button>
+            <button type="button" data-cat="gk" onclick="setRapidTag('Box Aerial Claim', 'Glow', 'Goalkeeping')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Box Aerial Claim</button>
+            <button type="button" data-cat="gk" onclick="setRapidTag('Build-Out Distribution', 'Glow', 'Goalkeeping')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Build-Out Distribution</button>
+            <button type="button" data-cat="gk" onclick="setRapidTag('Goal Conceded', 'Goal Conceded', 'Goalkeeping')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/50 bg-rose-950/40 text-rose-300 font-bold hover:bg-rose-900/50 transition">🥅 Goal Conceded</button>
+
+            <!-- 🧠 Tactical_Shape (7) -->
+            <button type="button" data-cat="tactical" onclick="setRapidTag('Scanning & Pre-Orientation', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Scanning &amp; Pre-Orientation</button>
+            <button type="button" data-cat="tactical" onclick="setRapidTag('Support Angle Offered', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Support Angle Offered</button>
+            <button type="button" data-cat="tactical" onclick="setRapidTag('Tactical Communication', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Tactical Communication</button>
+            <button type="button" data-cat="tactical" onclick="setRapidTag('Team Shape Shift', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Team Shape Shift</button>
+            <button type="button" data-cat="tactical" onclick="setRapidTag('Off-Ball Spacing Fault', 'Grow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Off-Ball Spacing Fault</button>
+            <button type="button" data-cat="tactical" onclick="setRapidTag('Decision on the Ball', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Decision on the Ball</button>
+            <button type="button" data-cat="tactical" onclick="setRapidTag('Decision off the Ball', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Decision off the Ball</button>
+
+            <!-- 📋 Administrative (2) -->
+            <button type="button" data-cat="admin" onclick="setRapidTag('Substitution', 'Neutral', 'Administrative')" class="tag-btn px-2.5 py-1 rounded-lg border border-slate-500/30 bg-slate-800/40 text-slate-300 hover:bg-slate-700/50 transition">Substitution</button>
+            <button type="button" data-cat="admin" onclick="setRapidTag('Bookmark', 'Neutral', 'Administrative')" class="tag-btn px-2.5 py-1 rounded-lg border border-slate-500/30 bg-slate-800/40 text-slate-300 hover:bg-slate-700/50 transition">Bookmark</button>
           </div>
         </div>
 
@@ -593,7 +600,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     };
 
     let LOGGED_MOMENTS = [];
-    let selectedRapidPlayers = new Set();
+    let selectedRapidPlayers = []; // Ordered array: 1st element = Primary (1°), 2nd+ = Secondary (2°)
     let currentRapidZone = 'D3';
     let currentRapidOutcome = 'Glow';
     let currentRapidTag = 'Forced Pass';
@@ -654,21 +661,22 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     function setRapidTeamOnly() {
       rapidTeamSelected = !rapidTeamSelected;
       if (rapidTeamSelected) {
-        selectedRapidPlayers.clear();
+        selectedRapidPlayers = [];
       }
       updateRosterPickUi();
     }
 
     function toggleRapidPlayer(jersey) {
       rapidTeamSelected = false;
-      if (selectedRapidPlayers.has(jersey)) selectedRapidPlayers.delete(jersey);
-      else selectedRapidPlayers.add(jersey);
+      const idx = selectedRapidPlayers.indexOf(jersey);
+      if (idx !== -1) selectedRapidPlayers.splice(idx, 1);
+      else selectedRapidPlayers.push(jersey);
       updateRosterPickUi();
     }
 
     function clearRapidPlayers() {
       rapidTeamSelected = false;
-      selectedRapidPlayers.clear();
+      selectedRapidPlayers = [];
       updateRosterPickUi();
     }
 
@@ -682,17 +690,26 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       }
       const hint = document.getElementById('rapidMultiPlayerHint');
       if (hint) {
-        hint.classList.toggle('hidden', selectedRapidPlayers.size <= 1);
+        hint.classList.toggle('hidden', selectedRapidPlayers.length <= 1);
       }
       ASPIRE_ROSTER.forEach(p => {
         const btn = document.getElementById(`pBtn-${p.jersey}`);
         if (!btn) return;
-        const active = selectedRapidPlayers.has(p.jersey);
-        btn.classList.toggle('bg-teal-500/20', active);
-        btn.classList.toggle('border-teal-500/60', active);
-        btn.classList.toggle('text-teal-300', active);
-        btn.classList.toggle('bg-surface', !active);
-        btn.classList.toggle('border-border', !active);
+        const idx = selectedRapidPlayers.indexOf(p.jersey);
+        const isSel = idx !== -1;
+        const isPrim = idx === 0;
+        const roleText = isSel ? (isPrim ? ' (1°)' : ' (2°)') : '';
+        btn.classList.toggle('bg-teal-500/30', isPrim);
+        btn.classList.toggle('border-teal-400', isPrim);
+        btn.classList.toggle('ring-1', isPrim);
+        btn.classList.toggle('ring-teal-400', isPrim);
+        btn.classList.toggle('bg-amber-500/20', isSel && !isPrim);
+        btn.classList.toggle('border-amber-400', isSel && !isPrim);
+        btn.classList.toggle('text-white', isSel);
+        btn.classList.toggle('bg-surface', !isSel);
+        btn.classList.toggle('border-border', !isSel);
+        const span = btn.querySelector('span:nth-child(2)');
+        if (span) span.textContent = `${p.name.split(' ')[0]}${roleText}`;
       });
     }
 
@@ -781,7 +798,9 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       const half = document.getElementById('rapidHalf').value;
       const time = document.getElementById('rapidTime').value.trim() || '00:00';
       const notes = document.getElementById('rapidNotes').value.trim();
-      const jerseys = Array.from(selectedRapidPlayers).sort((a,b) => a - b);
+      const jerseys = selectedRapidPlayers.slice();
+      const primaryJersey = jerseys.length > 0 ? jerseys[0] : null;
+      const secondaryJerseys = jerseys.length > 1 ? jerseys.slice(1) : [];
 
       if (!rapidTeamSelected && !jerseys.length) {
         showToast('Please select an involved player (or tap Tag Unit / Team).');
@@ -789,7 +808,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       }
 
       // Safe players formatted string to protect against Excel date corruption:
-      const playersFormatted = rapidTeamSelected ? 'Team' : jerseys.map(j => `#${j}`).join(', ');
+      const playersFormatted = rapidTeamSelected ? 'Team' : jerseys.map((j, idx) => `#${j}${idx === 0 && jerseys.length > 1 ? ' (1°)' : ''}`).join(', ');
 
       // Outcome and Category mapping
       let qualityRaw = currentRapidOutcome === 'Glow' ? 'Good / Positive'
@@ -798,9 +817,9 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         : currentRapidOutcome;
 
       let category = currentRapidCategory
-        || (currentRapidOutcome.includes('Goal') ? 'Offensive Moment'
-          : currentRapidOutcome === 'Grow' ? 'Turnover'
-          : 'Offensive Moment');
+        || (currentRapidOutcome.includes('Goal') ? 'Finishing'
+          : currentRapidOutcome === 'Grow' ? 'Defending'
+          : 'Tactical_Shape');
 
       const momentObj = {
         date: new Date().toISOString().replace('T', ' ').slice(0, 19),
@@ -810,6 +829,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         zone: currentRapidZone,
         playersRaw: playersFormatted,
         jerseys,
+        primaryJersey,
+        secondaryJerseys,
         category,
         tag: currentRapidTag,
         quality: qualityRaw,
@@ -907,8 +928,6 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
     function parseSingleVoiceSnippet(text, defaultMatch, defaultHalf, defaultDate) {
       const lower = text.toLowerCase();
-
-      // 1. Time extraction (e.g. 14:22, 14:22:00, 32 minutes, 68', 68:33)
       let time = '00:00';
       const timeMatch = text.match(/\b(\d{1,2}:\d{2}(?::\d{2})?)\b/) || text.match(/\b(\d{1,2})\s*(?:mins?|minutes?|')\b/);
       if (timeMatch) {
@@ -920,12 +939,11 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         }
       }
 
-      // 2. Half extraction
-      let half = defaultHalf;
+      let half = defaultHalf || 'H1';
       if (lower.includes('first half') || lower.includes('1st half') || /\bh1\b/.test(lower)) half = 'H1';
       else if (lower.includes('second half') || lower.includes('2nd half') || /\bh2\b/.test(lower)) half = 'H2';
 
-      // 3. Zone extraction (explicit tokens take priority over descriptive phrases)
+      // Zone extraction (explicit tokens take priority over descriptive phrases)
       let zone = 'M3';
       const explicitZone = text.match(/\b(d3|m3|a3)\b/i);
       if (explicitZone) {
@@ -938,68 +956,140 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         zone = 'M3';
       }
 
-      // 4. Player resolution (strip time references first so minutes like 14:22 or 24 mins don't match jersey numbers)
+      // Player resolution (ordered by mention appearance in text so 1st = Primary Actor)
       const textWithoutTime = text
         .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g, ' ')
         .replace(/\b\d{1,2}\s*(?:mins?|minutes?|')\b/gi, ' ');
 
       const normText = (textWithoutTime || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-      const foundJerseys = new Set();
+      const playerMatches = [];
       ASPIRE_ROSTER.forEach(p => {
+        let firstIdx = -1;
         // Check jersey number with word boundary or # (preventing colon/time false matches)
         const numRegex = new RegExp(`(?:#\\s*${p.jersey}\\b|(?<![\\d:]\\s*)\\b${p.jersey}\\b(?![\\s:]*\\d|\\s*[']|\\s*mins?\\b|\\s*minutes?\\b))`, 'i');
-        if (numRegex.test(textWithoutTime)) foundJerseys.add(p.jersey);
+        const mNum = numRegex.exec(textWithoutTime);
+        if (mNum) firstIdx = mNum.index;
+
         // Check nicknames (must be at least 3 chars and match on word boundaries)
         p.nicknames.forEach(nick => {
           const clean = (nick || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
           if (clean.length >= 3) {
             const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const nickRegex = new RegExp(`\\b${escaped}\\b`, 'i');
-            if (nickRegex.test(normText)) foundJerseys.add(p.jersey);
+            const mNick = nickRegex.exec(normText);
+            if (mNick && (firstIdx === -1 || mNick.index < firstIdx)) {
+              firstIdx = mNick.index;
+            }
           }
         });
+
+        if (firstIdx !== -1) {
+          playerMatches.push({ jersey: p.jersey, idx: firstIdx });
+        }
       });
 
-      // If no players resolved, mark as Team
-      const jerseys = Array.from(foundJerseys).sort((a,b) => a - b);
+      playerMatches.sort((a, b) => a.idx - b.idx);
+      const jerseys = [];
+      playerMatches.forEach(pm => { if (!jerseys.includes(pm.jersey)) jerseys.push(pm.jersey); });
+      const primaryJersey = jerseys.length > 0 ? jerseys[0] : null;
+      const secondaryJerseys = jerseys.length > 1 ? jerseys.slice(1) : [];
       const playersRaw = jerseys.length ? jerseys.map(j => `#${j}`).join(', ') : 'Team';
 
-      // 5. Outcome & Quality
       let quality = 'Good / Positive';
-      if (/goal scored|finish clean|scores|found the net/i.test(text)) quality = 'Goal Scored';
-      else if (/goal conceded|conceding|fumbles.*goal|pk awarded/i.test(text)) quality = 'Goal Conceded';
-      else if (/shot off target|shot wide|over the bar|sails.*over|wide left|wide right|misses.*frame|misses.*wide/i.test(text)) quality = 'Poor / Negative';
-      else if (/cross out of bounds|overhit cross|delivery out of bounds|cross.*overhit|cross behind/i.test(text)) quality = 'Poor / Negative';
-      else if (/glow and grow|mixed/i.test(text)) quality = 'Glow and Grow (Good actions and Not so Good action)';
-      else if (/grow|turnover|poor|negative|mistake|forced|heavy touch|lost mark/i.test(text)) quality = 'Poor / Negative';
-      else if (/glow|positive|good|nice|quality|line breaker|great/i.test(text)) quality = 'Good / Positive';
-      else if (/neutral|complete/i.test(text)) quality = 'Neutral / Complete';
-
-      // 6. Action Tag & Category
+      let category = 'Tactical_Shape';
       let tag = 'Decision on the Ball';
-      if (/shot off target|shot wide|over the bar|sails.*over|wide left|wide right|misses.*frame|misses.*wide/i.test(text)) tag = 'Shot Off Target';
-      else if (/shot on target|quality shot|shots? on goal/i.test(text)) tag = 'Quality Shot';
-      else if (/goal scored|scores|found the net/i.test(text)) tag = 'Goal Scored';
-      else if (/cross out of bounds|overhit cross|delivery out of bounds/i.test(text)) tag = 'Cross Out of Bounds';
-      else if (/dangerous cross|good cross|cross/i.test(text) && /glow|good|nice|quality|dangerous/i.test(text)) tag = 'Dangerous Cross / Delivery';
-      else if (/forced pass/i.test(text)) tag = 'Forced Pass';
-      else if (/turned into pressure/i.test(text)) tag = 'Turned into Pressure';
-      else if (/heavy touch/i.test(text)) tag = 'Heavy Touch';
-      else if (/line breaker|key pass|through ball/i.test(text)) tag = 'Key Pass / Line Breaker';
-      else if (/press|duel won|tackle/i.test(text)) tag = 'Good Press / Duel Won';
-      else if (/clearance|clears/i.test(text)) tag = 'Clearance';
-      else if (/save|stops/i.test(text)) tag = 'Save';
-      else if (/defensive shape/i.test(text)) tag = 'Defensive Shape';
-      else if (/lost mark|bad recovery/i.test(text)) tag = 'Lost Mark / Bad Recovery';
-      else if (/didn't scan|didn't have a plan/i.test(text)) tag = "Didn't Scan or Didn't have a Plan";
-      else if (/shot/i.test(text)) tag = quality === 'Good / Positive' ? 'Quality Shot' : 'Shot Off Target';
 
-      let category = /shot/i.test(tag) ? 'Shot'
-        : /cross/i.test(tag) ? 'Cross'
-        : quality.includes('Goal') ? 'Offensive Moment'
-        : tag.includes('Pass') || tag.includes('Touch') || tag.includes('Pressure') ? 'Turnover'
-        : tag.includes('Duel') || tag.includes('Clearance') || tag.includes('Save') ? 'Defensive Moment'
-        : 'Offensive Moment';
+      if (/goal scored|finish clean|scores|found the net/i.test(text)) {
+        category = 'Finishing'; tag = 'Goal Scored'; quality = 'Goal Scored';
+      } else if (/goal conceded|conceding|fumbles.*goal|pk awarded/i.test(text)) {
+        category = 'Goalkeeping'; tag = 'Goal Conceded'; quality = 'Goal Conceded';
+      } else if (/shot off target|shot wide|over the bar|sails.*over|wide left|wide right|misses.*frame|misses.*wide/i.test(text)) {
+        category = 'Finishing'; tag = 'Shot Off Target'; quality = 'Poor / Negative';
+      } else if (/poor shot selection|forced shot/i.test(text)) {
+        category = 'Finishing'; tag = 'Poor Shot Selection'; quality = 'Poor / Negative';
+      } else if (/cross out of bounds|overhit cross|delivery out of bounds|cross.*overhit|cross behind/i.test(text)) {
+        category = 'Finishing'; tag = 'Cross Out of Bounds'; quality = 'Poor / Negative';
+      } else if (/shot on target/i.test(text)) {
+        category = 'Finishing'; tag = 'Shot on Target'; quality = 'Good / Positive';
+      } else if (/quality shot|good strike|tested the keeper/i.test(text)) {
+        category = 'Finishing'; tag = 'Quality Shot'; quality = 'Good / Positive';
+      } else if (/key pass|shot assist/i.test(text)) {
+        category = 'Passing'; tag = 'Key Pass (Shot Assist)'; quality = 'Good / Positive';
+      } else if (/goal assist|sets up.*goal/i.test(text)) {
+        category = 'Passing'; tag = 'Goal Assist'; quality = 'Good / Positive';
+      } else if (/line break|line-breaking pass|penetrat/i.test(text)) {
+        category = 'Passing'; tag = 'Line-Breaking Pass'; quality = 'Good / Positive';
+      } else if (/switch.*play|switch point of attack/i.test(text)) {
+        category = 'Passing'; tag = 'Switch Point of Attack'; quality = 'Good / Positive';
+      } else if (/combination play|1-2|one-two|pass string/i.test(text)) {
+        category = 'Passing'; tag = 'Combination Play'; quality = 'Good / Positive';
+      } else if (/progressive pass|advances ball/i.test(text)) {
+        category = 'Passing'; tag = 'Progressive Pass'; quality = 'Good / Positive';
+      } else if (/unforced turnover|unforced.*pass|bad giveaway.*no pressure/i.test(text)) {
+        category = 'Passing'; tag = 'Unforced Turnover Pass'; quality = 'Poor / Negative';
+      } else if (/forced pass|giveaway.*pressure|pass intercepted/i.test(text)) {
+        category = 'Passing'; tag = 'Forced Turnover Pass'; quality = 'Poor / Negative';
+      } else if (/1v1 dribble won|beats defender cleanly/i.test(text)) {
+        category = 'Carrying'; tag = '1v1 Dribble Won'; quality = 'Good / Positive';
+      } else if (/progressive carry|drives with the ball/i.test(text)) {
+        category = 'Carrying'; tag = 'Progressive Carry'; quality = 'Good / Positive';
+      } else if (/turned into pressure/i.test(text)) {
+        category = 'Carrying'; tag = 'Turned into Pressure'; quality = 'Poor / Negative';
+      } else if (/heavy touch|miscontrol/i.test(text)) {
+        category = 'Carrying'; tag = 'Miscontrol'; quality = 'Poor / Negative';
+      } else if (/dispossessed|stripped of the ball/i.test(text)) {
+        category = 'Carrying'; tag = 'Dispossessed'; quality = 'Poor / Negative';
+      } else if (/direct pressure|closing down/i.test(text)) {
+        category = 'Defending'; tag = 'Direct Pressure'; quality = 'Good / Positive';
+      } else if (/tackle|tackles/i.test(text)) {
+        category = 'Defending'; tag = 'Tackle'; quality = 'Good / Positive';
+      } else if (/intercept|reads pass/i.test(text)) {
+        category = 'Defending'; tag = 'Interception'; quality = 'Good / Positive';
+      } else if (/blocked shot|blocks cross/i.test(text)) {
+        category = 'Defending'; tag = 'Blocked Shot'; quality = 'Good / Positive';
+      } else if (/recovery run|tracks back/i.test(text)) {
+        category = 'Defending'; tag = 'Recovery Run'; quality = 'Good / Positive';
+      } else if (/poor clearance/i.test(text)) {
+        category = 'Defending'; tag = 'Poor Clearance'; quality = 'Poor / Negative';
+      } else if (/clearance|clears/i.test(text)) {
+        category = 'Defending'; tag = 'Clearance'; quality = 'Good / Positive';
+      } else if (/stabbed at the ball|dives in/i.test(text)) {
+        category = 'Defending'; tag = 'Stabbed at the Ball'; quality = 'Poor / Negative';
+      } else if (/lost mark|didn't track back|ball-watching/i.test(text)) {
+        category = 'Defending'; tag = 'Lost Mark / Recovery'; quality = 'Poor / Negative';
+      } else if (/aerial duel won|heads clear/i.test(text)) {
+        category = 'Duel'; tag = 'Aerial Duel Won'; quality = 'Good / Positive';
+      } else if (/foul won|draws foul/i.test(text)) {
+        category = 'Duel'; tag = 'Foul Won'; quality = 'Good / Positive';
+      } else if (/foul conceded|commits foul|whistled/i.test(text)) {
+        category = 'Duel'; tag = 'Foul Conceded'; quality = 'Poor / Negative';
+      } else if (/ground duel lost|duel lost/i.test(text)) {
+        category = 'Duel'; tag = 'Ground Duel Lost'; quality = 'Poor / Negative';
+      } else if (/ground duel won|50\/50 won|duel won/i.test(text)) {
+        category = 'Duel'; tag = 'Ground Duel Won'; quality = 'Good / Positive';
+      } else if (/save.*parried/i.test(text)) {
+        category = 'Goalkeeping'; tag = 'Save (Parried)'; quality = 'Good / Positive';
+      } else if (/save|stops.*shot/i.test(text)) {
+        category = 'Goalkeeping'; tag = 'Save (Clean / Held)'; quality = 'Good / Positive';
+      } else if (/box aerial claim/i.test(text)) {
+        category = 'Goalkeeping'; tag = 'Box Aerial Claim'; quality = 'Good / Positive';
+      } else if (/build-out distribution/i.test(text)) {
+        category = 'Goalkeeping'; tag = 'Build-Out Distribution'; quality = 'Good / Positive';
+      } else if (/scanning|pre-orientation/i.test(text)) {
+        category = 'Tactical_Shape'; tag = 'Scanning & Pre-Orientation'; quality = 'Good / Positive';
+      } else if (/support angle/i.test(text)) {
+        category = 'Tactical_Shape'; tag = 'Support Angle Offered'; quality = 'Good / Positive';
+      } else if (/tactical communication|talking|calling out/i.test(text)) {
+        category = 'Tactical_Shape'; tag = 'Tactical Communication'; quality = 'Good / Positive';
+      } else if (/shape shift|compact/i.test(text)) {
+        category = 'Tactical_Shape'; tag = 'Team Shape Shift'; quality = 'Good / Positive';
+      } else if (/spacing fault|no off-ball movement|static/i.test(text)) {
+        category = 'Tactical_Shape'; tag = 'Off-Ball Spacing Fault'; quality = 'Poor / Negative';
+      } else if (/glow and grow|mixed/i.test(text)) {
+        quality = 'Glow and Grow (Good actions and Not so Good action)';
+      } else if (/grow|turnover|poor|negative|mistake/i.test(text)) {
+        quality = 'Poor / Negative';
+      }
 
       return {
         date: `${defaultDate} 00:00:00`,
@@ -1009,6 +1099,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         zone,
         playersRaw,
         jerseys,
+        primaryJersey,
+        secondaryJerseys,
         category,
         tag,
         quality,
@@ -1308,6 +1400,253 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       if (document.getElementById('tableHeaderCount')) document.getElementById('tableHeaderCount').textContent = `${c} clips`;
     }
 
+    function isTurnoverEvent(e) {
+      if (!e) return false;
+      const tag = e.tag || '';
+      const cat = e.category || '';
+      if (cat === 'Turnover') return true;
+      if (/turnover|dispossessed|miscontrol|turned into pressure|poor clearance|stabbed at the ball/i.test(tag)) return true;
+      if (tag === 'Poor Shot Selection') return true;
+      return false;
+    }
+
+    function normalizeFilmEvent(ev) {
+      if (!ev || typeof ev !== 'object') return ev;
+      if (!Array.isArray(ev.jerseys)) ev.jerseys = [];
+      if (ev.primaryJersey === undefined) {
+        ev.primaryJersey = ev.jerseys.length > 0 ? ev.jerseys[0] : null;
+      }
+      if (!Array.isArray(ev.secondaryJerseys)) {
+        ev.secondaryJerseys = ev.jerseys.length > 1
+          ? ev.jerseys.filter((j, idx) => idx > 0 && j !== ev.primaryJersey)
+          : [];
+      }
+      if (ev.primaryJersey != null) {
+        ev.jerseys = [ev.primaryJersey, ...ev.secondaryJerseys.filter(j => j !== ev.primaryJersey)];
+      }
+
+      const rawCat = String(ev.category || '').trim();
+      const rawTag = String(ev.tag || '').trim();
+      const note = String(ev.note || ev.notes || '').toLowerCase();
+      const matchName = String(ev.match || '');
+      const idNum = Number(ev.id);
+
+      const V31_FAMILIES = ['Passing', 'Carrying', 'Defending', 'Duel', 'Finishing', 'Goalkeeping', 'Tactical_Shape', 'Administrative'];
+      if (V31_FAMILIES.includes(rawCat) && !rawTag.includes('/') && rawTag !== 'Heavy Touch' && rawTag !== 'Forced Pass' && rawTag !== 'Goal' && rawTag !== 'Save') {
+        return ev;
+      }
+
+      const isManPat = matchName.toLowerCase().includes('manchester pat') && idNum >= 1 && idNum <= 55;
+
+      if (rawCat === 'Substitution' || rawTag === 'Substitution') {
+        ev.category = 'Administrative';
+        ev.tag = 'Substitution';
+        ev.outcome = 'Neutral';
+        if (!ev.qualityRaw || ev.qualityRaw === 'Grow' || ev.qualityRaw === 'Glow') ev.qualityRaw = 'Neutral';
+        return ev;
+      }
+
+      if (ev.outcome === 'Goal Conceded' || ev.qualityRaw === 'Goal Conceded' || rawTag === 'Goal Conceded' || ev.quality === 'Goal Conceded') {
+        ev.category = 'Goalkeeping';
+        ev.tag = 'Goal Conceded';
+        ev.outcome = 'Goal Conceded';
+        ev.qualityRaw = 'Goal Conceded';
+        ev.quality = 'Goal Conceded';
+        return ev;
+      }
+      if (rawCat === 'GK Action' || rawTag === 'Quality Save') {
+        ev.category = 'Goalkeeping';
+        ev.tag = note.includes('parr') ? 'Save (Parried)' : 'Save (Clean / Held)';
+        return ev;
+      }
+
+      if (ev.outcome === 'Goal Scored' || ev.qualityRaw === 'Goal Scored' || rawTag === 'Goal Scored' || ev.quality === 'Goal Scored') {
+        ev.category = 'Finishing';
+        ev.tag = 'Goal Scored';
+        ev.outcome = 'Goal Scored';
+        ev.qualityRaw = 'Goal Scored';
+        ev.quality = 'Goal Scored';
+        return ev;
+      }
+      if (ev.qualityRaw === 'Assist' || rawTag === 'Goal Assist' || rawTag === 'Assist') {
+        ev.category = 'Passing';
+        ev.tag = 'Goal Assist';
+        if (ev.outcome !== 'Goal Scored') ev.outcome = 'Glow';
+        return ev;
+      }
+
+      switch (rawTag) {
+        case 'Key Pass / Line Break':
+        case 'Key Pass / Line Breaker':
+          if (isManPat && idNum === 47) {
+            ev.category = 'Passing'; ev.tag = 'Key Pass (Shot Assist)';
+          } else if (isManPat && idNum === 50) {
+            ev.category = 'Carrying'; ev.tag = 'Progressive Carry';
+          } else if (/\b(shot|shoot|shoots|goal|assist|attempt on goal)\b/.test(note)) {
+            ev.category = 'Passing'; ev.tag = 'Key Pass (Shot Assist)';
+          } else if (/\b(dribbl|carri|carry|takes space|drives with)\b/.test(note) && !/\b(pass|plays to|finds|through ball|switches)\b/.test(note)) {
+            ev.category = 'Carrying'; ev.tag = 'Progressive Carry';
+          } else {
+            ev.category = 'Passing'; ev.tag = 'Line-Breaking Pass';
+          }
+          break;
+        case 'Progressive Pass':
+          ev.category = 'Passing'; ev.tag = 'Progressive Pass'; break;
+        case 'Switch of Play':
+        case 'Switch Point of Attack':
+          ev.category = 'Passing'; ev.tag = 'Switch Point of Attack'; break;
+        case 'Combination Play':
+        case 'Pass String':
+          ev.category = 'Passing'; ev.tag = 'Combination Play'; break;
+        case 'Good Press / Duel Won':
+        case 'Pressing Trap Success':
+          if ((isManPat && idNum === 53) || /\b(foul called|whistled for a foul|foul against|commits a foul|free kick to them)\b/.test(note)) {
+            ev.category = 'Duel'; ev.tag = 'Foul Conceded'; ev.outcome = 'Grow'; ev.qualityRaw = 'Grow';
+          } else if ((isManPat && (idNum === 5 || idNum === 6)) || /\b(clearance|clears|cleared)\b/.test(note)) {
+            ev.category = 'Defending'; ev.tag = 'Clearance';
+          } else if ((isManPat && (idNum === 22 || idNum === 34)) || /\b(calling out|communicat|talking|directing)\b/.test(note)) {
+            ev.category = 'Tactical_Shape'; ev.tag = 'Tactical Communication';
+          } else if ((isManPat && idNum === 44) || /\b(intercept|interception|cuts off|reads the pass|steps in front)\b/.test(note)) {
+            ev.category = 'Defending'; ev.tag = 'Interception';
+          } else if ((isManPat && (idNum === 11 || idNum === 49)) || /\b(50\/50|shoulder|body|physical|duel won|wins the ball|tackle)\b/.test(note)) {
+            ev.category = 'Duel'; ev.tag = 'Ground Duel Won';
+          } else {
+            ev.category = 'Defending'; ev.tag = 'Direct Pressure';
+          }
+          break;
+        case 'Tackle Won': ev.category = 'Defending'; ev.tag = 'Tackle'; break;
+        case 'Interception': ev.category = 'Defending'; ev.tag = 'Interception'; break;
+        case 'Recovery Run': ev.category = 'Defending'; ev.tag = 'Recovery Run'; break;
+        case 'Aerial Duel Won': ev.category = 'Duel'; ev.tag = 'Aerial Duel Won'; break;
+        case '1v1 Defending Won': ev.category = 'Duel'; ev.tag = 'Ground Duel Won'; break;
+        case '1v1 Dribble Won': ev.category = 'Carrying'; ev.tag = '1v1 Dribble Won'; break;
+        case 'Progressive Carry': ev.category = 'Carrying'; ev.tag = 'Progressive Carry'; break;
+        case 'Turned into Pressure': ev.category = 'Carrying'; ev.tag = 'Turned into Pressure'; break;
+        case '1v1 Dribble Lost':
+        case 'Dispossessed': ev.category = 'Carrying'; ev.tag = 'Dispossessed'; break;
+        case 'Poor Clearance / Heavy Touch':
+        case 'Heavy Touch':
+        case 'Miscontrol':
+          if (/\b(clearance|clear|clears)\b/.test(note) && !isManPat) {
+            ev.category = 'Defending'; ev.tag = 'Poor Clearance';
+          } else {
+            ev.category = 'Carrying'; ev.tag = 'Miscontrol';
+          }
+          break;
+        case 'Forced Pass into Def':
+        case 'Forced Pass':
+          if (
+            (isManPat && [1, 2, 8, 12, 14, 15, 28, 38, 41, 43, 46, 51].includes(idNum)) ||
+            /\b(no pressure|no immediate pressure|15 yards of space|time and space|out of bounds|unforced|nobody around|plenty of time)\b/.test(note)
+          ) {
+            ev.category = 'Passing'; ev.tag = 'Unforced Turnover Pass';
+          } else {
+            ev.category = 'Passing'; ev.tag = 'Forced Turnover Pass';
+          }
+          break;
+        case 'No Off-Ball Movement':
+        case 'No Off Ball Movement':
+        case 'Shape / Spacing':
+          ev.category = 'Tactical_Shape'; ev.tag = 'Off-Ball Spacing Fault'; break;
+        case 'Scanning / Body Shape':
+        case 'Body Shape / Receiving':
+          ev.category = 'Tactical_Shape'; ev.tag = 'Scanning & Pre-Orientation'; break;
+        case 'Support Angle':
+          ev.category = 'Tactical_Shape'; ev.tag = 'Support Angle Offered'; break;
+        case 'Decision on the Ball':
+          ev.category = 'Tactical_Shape'; ev.tag = 'Decision on the Ball'; break;
+        case 'Decision off the Ball':
+        case 'Anticipation':
+          ev.category = 'Tactical_Shape'; ev.tag = 'Decision off the Ball'; break;
+        case "Lost Mark / Didn't Track Back":
+        case 'Lost Mark / Bad Recovery':
+        case 'Lost Mark / Recovery':
+          ev.category = 'Defending'; ev.tag = 'Lost Mark / Recovery'; break;
+        case 'Defensive Duel Lost':
+          if (/\b(stab|lung|dole|dived in|bit on)\b/.test(note)) {
+            ev.category = 'Defending'; ev.tag = 'Stabbed at the Ball';
+          } else {
+            ev.category = 'Duel'; ev.tag = 'Ground Duel Lost';
+          }
+          break;
+        case 'Foul Conceded':
+          ev.category = 'Duel'; ev.tag = 'Foul Conceded'; break;
+        case 'Shot on Target':
+          ev.category = 'Finishing'; ev.tag = 'Shot on Target'; break;
+        case 'Quality Shot':
+          ev.category = 'Finishing'; ev.tag = 'Quality Shot'; break;
+        case 'Shot Off Target - Inside Box':
+        case 'Shot Off Target':
+          ev.category = 'Finishing'; ev.tag = 'Shot Off Target'; break;
+        case 'Shot Outside 18 (Off Target)':
+          ev.category = 'Finishing';
+          if (ev.outcome === 'Glow' || ev.outcome === 'Neutral' || ev.qualityRaw === 'Glow & Grow') {
+            ev.tag = 'Quality Shot';
+          } else {
+            ev.tag = 'Poor Shot Selection';
+          }
+          break;
+        case 'Poor Shot Selection':
+          ev.category = 'Finishing'; ev.tag = 'Poor Shot Selection'; break;
+        case 'Cross Out of Bounds':
+          ev.category = 'Finishing'; ev.tag = 'Cross Out of Bounds'; break;
+        case 'Poor Clearance':
+          ev.category = 'Defending'; ev.tag = 'Poor Clearance'; break;
+        case 'Save':
+        case 'Quality Save':
+          ev.category = 'Goalkeeping'; ev.tag = note.includes('parr') ? 'Save (Parried)' : 'Save (Clean / Held)'; break;
+        case 'Goal':
+          if (ev.outcome === 'Grow' || ev.outcome === 'Goal Conceded' || ev.qualityRaw === 'Goal Conceded') {
+            ev.category = 'Goalkeeping'; ev.tag = 'Goal Conceded'; ev.outcome = 'Goal Conceded'; ev.qualityRaw = 'Goal Conceded';
+          } else {
+            ev.category = 'Finishing'; ev.tag = 'Goal Scored'; ev.outcome = 'Goal Scored'; ev.qualityRaw = 'Goal Scored';
+          }
+          break;
+        case 'Defensive Shape':
+        case 'Offensive Shape':
+        case 'Press Goal Kick':
+        case 'Tactical Moment':
+          ev.category = 'Tactical_Shape';
+          ev.tag = (ev.outcome === 'Grow' || ev.qualityRaw === 'Grow') ? 'Off-Ball Spacing Fault' : 'Team Shape Shift';
+          break;
+        case 'Midfield movement good':
+        case 'Made Run':
+        case 'Made early run':
+        case 'Made late run':
+          ev.category = 'Tactical_Shape';
+          ev.tag = (ev.outcome === 'Grow' || ev.qualityRaw === 'Grow') ? 'Decision off the Ball' : 'Support Angle Offered';
+          break;
+        case "Didn't Scan or Didn't have a Plan":
+          ev.category = 'Tactical_Shape'; ev.tag = 'Decision on the Ball'; break;
+        case 'Positive Action':
+        case 'Offensive Moment':
+          if (/\b(dribbl|carri|carry|takes space)\b/.test(note)) {
+            ev.category = 'Carrying'; ev.tag = 'Progressive Carry';
+          } else if (/\b(press|tackle|win|intercept)\b/.test(note)) {
+            ev.category = 'Defending'; ev.tag = 'Direct Pressure';
+          } else {
+            ev.category = 'Passing'; ev.tag = 'Progressive Pass';
+          }
+          break;
+        default:
+          if (rawCat === 'Offensive Moment') {
+            ev.category = 'Passing'; ev.tag = rawTag || 'Progressive Pass';
+          } else if (rawCat === 'Defensive Moment') {
+            ev.category = 'Defending'; ev.tag = rawTag || 'Direct Pressure';
+          } else if (rawCat === 'Turnover') {
+            ev.category = 'Passing'; ev.tag = 'Forced Turnover Pass';
+          } else if (rawCat === 'Shot') {
+            ev.category = 'Finishing'; ev.tag = rawTag || 'Quality Shot';
+          } else if (rawCat === 'Pass String') {
+            ev.category = 'Passing'; ev.tag = 'Combination Play';
+          } else if (!V31_FAMILIES.includes(rawCat)) {
+            ev.category = 'Tactical_Shape'; ev.tag = rawTag || 'Decision on the Ball';
+          }
+          break;
+      }
+      return ev;
+    }
+
     function updateRunningSummary() {
       // Check for stray La Morinda moments
       const lmCount = LOGGED_MOMENTS.filter(m => m.match === 'La Morinda' || /la morinda/i.test(m.match || '')).length;
@@ -1328,7 +1667,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         if (m.quality.includes('Positive') || m.quality.includes('Goal Scored')) glow++;
         else if (m.quality.includes('Negative') || m.quality.includes('Goal Conceded')) grow++;
 
-        if (m.category === 'Turnover' || m.tag.includes('Pass') || m.tag.includes('Touch') || m.tag.includes('Pressure')) {
+        if (isTurnoverEvent(m)) {
           if (m.zone === 'D3') toD++;
           else if (m.zone === 'M3') toM++;
           else if (m.zone === 'A3') toA++;
@@ -1512,7 +1851,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       try {
         const saved = JSON.parse(localStorage.getItem('ajax_aspire_active_moments') || '[]');
         if (Array.isArray(saved) && saved.length && saved.some(m => m.match === canonical || (/rocklin/i.test(m.match) && canonical.includes('Rocklin')))) {
-          LOGGED_MOMENTS = saved.filter(m => m.match === canonical || (/rocklin/i.test(m.match) && canonical.includes('Rocklin')));
+          LOGGED_MOMENTS = saved.filter(m => m.match === canonical || (/rocklin/i.test(m.match) && canonical.includes('Rocklin'))).map(normalizeFilmEvent);
           LOGGED_MOMENTS.forEach(m => m.match = canonical);
           updateCountBadges();
           renderMomentsTable();
@@ -1523,7 +1862,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
       // Fallback to builtin catalog
       if (BUILTIN_MATCH_CATALOG[canonical]) {
-        LOGGED_MOMENTS = JSON.parse(JSON.stringify(BUILTIN_MATCH_CATALOG[canonical]));
+        LOGGED_MOMENTS = JSON.parse(JSON.stringify(BUILTIN_MATCH_CATALOG[canonical])).map(normalizeFilmEvent);
         saveToLocalStorage();
         updateCountBadges();
         renderMomentsTable();
@@ -1532,61 +1871,79 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     }
 
     const RAPID_TAG_METADATA = {
-      // Turnovers & Dispossessions
-      'Forced Pass': { category: 'Turnover', quality: 'Poor / Negative' },
-      'Turned into Pressure': { category: 'Turnover', quality: 'Poor / Negative' },
-      'Heavy Touch': { category: 'Turnover', quality: 'Poor / Negative' },
-      'Forced Pass into Def': { category: 'Turnover', quality: 'Poor / Negative' },
-      'Pass off target / Poor Quality': { category: 'Turnover', quality: 'Poor / Negative' },
-      'Lost Mark / Bad Recovery': { category: 'Turnover', quality: 'Poor / Negative' },
-      'Stabbed at the Ball': { category: 'Turnover', quality: 'Poor / Negative' },
-      'Defensive Duel Lost': { category: 'Defensive Moment', quality: 'Poor / Negative' },
-      'Poor Clearance': { category: 'Defensive Moment', quality: 'Poor / Negative' },
-      'Poor Shot Selection': { category: 'Offensive Moment', quality: 'Poor / Negative' },
-      'No Challenge on 50/50': { category: 'Turnover', quality: 'Poor / Negative' },
-      'No Off Ball Movement': { category: 'Turnover', quality: 'Poor / Negative' },
+      // 1. Passing
+      'Key Pass (Shot Assist)': { category: 'Passing', quality: 'Good / Positive' },
+      'Goal Assist': { category: 'Passing', quality: 'Good / Positive' },
+      'Line-Breaking Pass': { category: 'Passing', quality: 'Good / Positive' },
+      'Progressive Pass': { category: 'Passing', quality: 'Good / Positive' },
+      'Switch Point of Attack': { category: 'Passing', quality: 'Good / Positive' },
+      'Combination Play': { category: 'Passing', quality: 'Good / Positive' },
+      'Forced Turnover Pass': { category: 'Passing', quality: 'Poor / Negative' },
+      'Unforced Turnover Pass': { category: 'Passing', quality: 'Poor / Negative' },
 
-      // Passing & Progression
-      'Key Pass / Line Breaker': { category: 'Pass String', quality: 'Good / Positive' },
-      'Combination Play': { category: 'Pass String', quality: 'Good / Positive' },
-      'Switch Point of Attack': { category: 'Pass String', quality: 'Good / Positive' },
-      'Through Ball into Space': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      'Direct Entry to 9': { category: 'Pass String', quality: 'Good / Positive' },
-      'Composed Build-Out Escape': { category: 'Pass String', quality: 'Good / Positive' },
-      'Crossing': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      'Positive Action': { category: 'Pass String', quality: 'Good / Positive' },
-      'Support Angle Offered': { category: 'Pass String', quality: 'Good / Positive' },
+      // 2. Carrying
+      'Progressive Carry': { category: 'Carrying', quality: 'Good / Positive' },
+      '1v1 Dribble Won': { category: 'Carrying', quality: 'Good / Positive' },
+      'Turned into Pressure': { category: 'Carrying', quality: 'Poor / Negative' },
+      'Miscontrol': { category: 'Carrying', quality: 'Poor / Negative' },
+      'Dispossessed': { category: 'Carrying', quality: 'Poor / Negative' },
 
-      // Defending & Pressing
-      'Good Press / Duel Won': { category: 'Defensive Moment', quality: 'Good / Positive' },
-      'Tackle & Secure Possession': { category: 'Defensive Moment', quality: 'Good / Positive' },
-      'Defensive Shape': { category: 'Defensive Moment', quality: 'Good / Positive' },
-      'Recovery Run': { category: 'Defensive Moment', quality: 'Good / Positive' },
-      'Clearance': { category: 'Defensive Moment', quality: 'Good / Positive' },
-      'Blocked Shot': { category: 'Defensive Moment', quality: 'Good / Positive' },
-      'Foul Committed': { category: 'Defensive Moment', quality: 'Poor / Negative' },
+      // 3. Defending
+      'Direct Pressure': { category: 'Defending', quality: 'Good / Positive' },
+      'Tackle': { category: 'Defending', quality: 'Good / Positive' },
+      'Interception': { category: 'Defending', quality: 'Good / Positive' },
+      'Clearance': { category: 'Defending', quality: 'Good / Positive' },
+      'Blocked Shot': { category: 'Defending', quality: 'Good / Positive' },
+      'Recovery Run': { category: 'Defending', quality: 'Good / Positive' },
+      'Poor Clearance': { category: 'Defending', quality: 'Poor / Negative' },
+      'Stabbed at the Ball': { category: 'Defending', quality: 'Poor / Negative' },
+      'Lost Mark / Recovery': { category: 'Defending', quality: 'Poor / Negative' },
 
-      // Finishing & Attacking
-      'Goal Scored': { category: 'Offensive Moment', quality: 'Goal Scored' },
-      'Assist': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      'Shot on Target': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      'Quality Shot': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      '1v1 Dribble Won': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      'Shot Off Target': { category: 'Offensive Moment', quality: 'Poor / Negative' },
+      // 4. Duel
+      'Ground Duel Won': { category: 'Duel', quality: 'Good / Positive' },
+      'Aerial Duel Won': { category: 'Duel', quality: 'Good / Positive' },
+      'Foul Won': { category: 'Duel', quality: 'Good / Positive' },
+      'Ground Duel Lost': { category: 'Duel', quality: 'Poor / Negative' },
+      'Foul Conceded': { category: 'Duel', quality: 'Poor / Negative' },
+      'No Challenge on 50/50': { category: 'Duel', quality: 'Poor / Negative' },
 
-      // Movement & Decisions
-      'Decision on the Ball': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      'Decision off the Ball': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      'Scanning & Pre-Orientation': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      'Made Run': { category: 'Offensive Moment', quality: 'Good / Positive' },
-      'Offensive Shape': { category: 'Offensive Moment', quality: 'Good / Positive' },
+      // 5. Finishing
+      'Goal Scored': { category: 'Finishing', quality: 'Goal Scored' },
+      'Shot on Target': { category: 'Finishing', quality: 'Good / Positive' },
+      'Quality Shot': { category: 'Finishing', quality: 'Good / Positive' },
+      'Shot Off Target': { category: 'Finishing', quality: 'Poor / Negative' },
+      'Poor Shot Selection': { category: 'Finishing', quality: 'Poor / Negative' },
+      'Cross Out of Bounds': { category: 'Finishing', quality: 'Poor / Negative' },
 
-      // Goalkeeping
-      'Save': { category: 'Defensive Moment', quality: 'Good / Positive' },
-      'Save (Parried)': { category: 'Defensive Moment', quality: 'Good / Positive' },
-      'Box Aerial Claim': { category: 'Defensive Moment', quality: 'Good / Positive' },
-      'Build-out Distribution': { category: 'Pass String', quality: 'Good / Positive' },
-      'Goal Conceded': { category: 'Defensive Moment', quality: 'Goal Conceded' }
+      // 6. Goalkeeping
+      'Save (Clean / Held)': { category: 'Goalkeeping', quality: 'Good / Positive' },
+      'Save (Parried)': { category: 'Goalkeeping', quality: 'Good / Positive' },
+      'Box Aerial Claim': { category: 'Goalkeeping', quality: 'Good / Positive' },
+      'Build-Out Distribution': { category: 'Goalkeeping', quality: 'Good / Positive' },
+      'Goal Conceded': { category: 'Goalkeeping', quality: 'Goal Conceded' },
+
+      // 7. Tactical_Shape
+      'Scanning & Pre-Orientation': { category: 'Tactical_Shape', quality: 'Good / Positive' },
+      'Support Angle Offered': { category: 'Tactical_Shape', quality: 'Good / Positive' },
+      'Tactical Communication': { category: 'Tactical_Shape', quality: 'Good / Positive' },
+      'Team Shape Shift': { category: 'Tactical_Shape', quality: 'Good / Positive' },
+      'Off-Ball Spacing Fault': { category: 'Tactical_Shape', quality: 'Poor / Negative' },
+      'Decision on the Ball': { category: 'Tactical_Shape', quality: 'Good / Positive' },
+      'Decision off the Ball': { category: 'Tactical_Shape', quality: 'Good / Positive' },
+
+      // 8. Administrative
+      'Substitution': { category: 'Administrative', quality: 'Neutral / Complete' },
+      'Bookmark': { category: 'Administrative', quality: 'Neutral / Complete' },
+
+      // Legacy Tag Mappings for backward safety
+      'Key Pass / Line Breaker': { category: 'Passing', quality: 'Good / Positive' },
+      'Key Pass / Line Break': { category: 'Passing', quality: 'Good / Positive' },
+      'Forced Pass': { category: 'Passing', quality: 'Poor / Negative' },
+      'Forced Pass into Def': { category: 'Passing', quality: 'Poor / Negative' },
+      'Heavy Touch': { category: 'Carrying', quality: 'Poor / Negative' },
+      'Good Press / Duel Won': { category: 'Defending', quality: 'Good / Positive' },
+      'Lost Mark / Bad Recovery': { category: 'Defending', quality: 'Poor / Negative' },
+      'Save': { category: 'Goalkeeping', quality: 'Good / Positive' }
     };
 
     function setEditMatchToRocklin() {
@@ -1710,6 +2067,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       const rawJers = document.getElementById('editMomentJerseys').value.trim();
       const parsedNums = (rawJers.match(/\d+/g) || []).map(Number).filter(n => n > 0 && n < 100);
       m.jerseys = parsedNums;
+      m.primaryJersey = parsedNums.length > 0 ? parsedNums[0] : null;
+      m.secondaryJerseys = parsedNums.length > 1 ? parsedNums.slice(1) : [];
       m.playersRaw = parsedNums.length
         ? parsedNums.map(j => {
             const pObj = (typeof ROSTER !== 'undefined' && Array.isArray(ROSTER)) ? ROSTER.find(r => r.jersey === j) : null;
@@ -1773,7 +2132,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
               m.match = 'Rocklin (Nov 1)';
             }
           });
-          LOGGED_MOMENTS = saved;
+          LOGGED_MOMENTS = saved.map(normalizeFilmEvent);
           updateCountBadges();
           renderMomentsTable();
           return;
@@ -1853,75 +2212,84 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       <!-- Category, Action Tag & Quality -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <div>
-          <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Category</label>
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Category (Action Family)</label>
           <select id="editMomentCategory" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-semibold focus:border-brand-500">
-            <option value="Turnover">Turnover</option>
-            <option value="Offensive Moment">Offensive Moment</option>
-            <option value="Defensive Moment">Defensive Moment</option>
-            <option value="Pass String">Pass String</option>
-            <option value="Goal">Goal</option>
-            <option value="Assist">Assist</option>
-            <option value="Foul">Foul</option>
+            <option value="Passing">Passing</option>
+            <option value="Carrying">Carrying</option>
+            <option value="Defending">Defending</option>
+            <option value="Duel">Duel</option>
+            <option value="Finishing">Finishing</option>
+            <option value="Goalkeeping">Goalkeeping</option>
+            <option value="Tactical_Shape">Tactical_Shape</option>
+            <option value="Administrative">Administrative</option>
           </select>
         </div>
         <div>
           <label class="block text-[10px] mono uppercase text-teal-400 font-bold mb-1">Action Tag (Quick-Tap List)</label>
           <select id="editMomentTagSelect" onchange="onEditTagSelectChange(this.value)" class="w-full bg-pitch text-xs p-2 rounded-xl border border-teal-500/50 text-white font-semibold focus:outline-none focus:border-brand-500">
-            <optgroup label="🔻 Turnovers & Dispossessions">
-              <option value="Forced Pass">Forced Pass</option>
-              <option value="Turned into Pressure">Turned into Pressure</option>
-              <option value="Heavy Touch">Heavy Touch</option>
-              <option value="Forced Pass into Def">Forced Pass into Def</option>
-              <option value="Pass off target / Poor Quality">Pass off target / Poor Quality</option>
-              <option value="Lost Mark / Bad Recovery">Lost Mark / Bad Recovery</option>
-              <option value="Stabbed at the Ball">Stabbed at the Ball</option>
-              <option value="Defensive Duel Lost">Defensive Duel Lost</option>
-              <option value="Poor Clearance">Poor Clearance</option>
-              <option value="Poor Shot Selection">Poor Shot Selection</option>
-              <option value="No Challenge on 50/50">No Challenge on 50/50</option>
-              <option value="No Off Ball Movement">No Off Ball Movement</option>
-            </optgroup>
-            <optgroup label="✨ Passing & Progression">
-              <option value="Key Pass / Line Breaker">Key Pass / Line Breaker</option>
-              <option value="Combination Play">Combination Play</option>
+            <optgroup label="⚽ Passing">
+              <option value="Key Pass (Shot Assist)">Key Pass (Shot Assist)</option>
+              <option value="Goal Assist">Goal Assist</option>
+              <option value="Line-Breaking Pass">Line-Breaking Pass</option>
+              <option value="Progressive Pass">Progressive Pass</option>
               <option value="Switch Point of Attack">Switch Point of Attack</option>
-              <option value="Through Ball into Space">Through Ball into Space</option>
-              <option value="Direct Entry to 9">Direct Entry to 9</option>
-              <option value="Composed Build-Out Escape">Composed Build-Out Escape</option>
-              <option value="Crossing">Crossing</option>
-              <option value="Positive Action">Positive Action</option>
-              <option value="Support Angle Offered">Support Angle Offered</option>
+              <option value="Combination Play">Combination Play</option>
+              <option value="Forced Turnover Pass">Forced Turnover Pass</option>
+              <option value="Unforced Turnover Pass">Unforced Turnover Pass</option>
             </optgroup>
-            <optgroup label="🛡️ Defending & Pressing">
-              <option value="Good Press / Duel Won">Good Press / Duel Won</option>
-              <option value="Tackle & Secure Possession">Tackle & Secure Possession</option>
-              <option value="Defensive Shape">Defensive Shape</option>
-              <option value="Recovery Run">Recovery Run</option>
+            <optgroup label="🏃 Carrying">
+              <option value="Progressive Carry">Progressive Carry</option>
+              <option value="1v1 Dribble Won">1v1 Dribble Won</option>
+              <option value="Turned into Pressure">Turned into Pressure</option>
+              <option value="Miscontrol">Miscontrol</option>
+              <option value="Dispossessed">Dispossessed</option>
+            </optgroup>
+            <optgroup label="🛡️ Defending">
+              <option value="Direct Pressure">Direct Pressure</option>
+              <option value="Tackle">Tackle</option>
+              <option value="Interception">Interception</option>
               <option value="Clearance">Clearance</option>
               <option value="Blocked Shot">Blocked Shot</option>
-              <option value="Foul Committed">Foul Committed</option>
+              <option value="Recovery Run">Recovery Run</option>
+              <option value="Poor Clearance">Poor Clearance</option>
+              <option value="Stabbed at the Ball">Stabbed at the Ball</option>
+              <option value="Lost Mark / Recovery">Lost Mark / Recovery</option>
             </optgroup>
-            <optgroup label="⚡ Finishing & Attacking">
+            <optgroup label="⚔️ Duel">
+              <option value="Ground Duel Won">Ground Duel Won</option>
+              <option value="Aerial Duel Won">Aerial Duel Won</option>
+              <option value="Foul Won">Foul Won</option>
+              <option value="Ground Duel Lost">Ground Duel Lost</option>
+              <option value="Foul Conceded">Foul Conceded</option>
+              <option value="No Challenge on 50/50">No Challenge on 50/50</option>
+            </optgroup>
+            <optgroup label="🎯 Finishing">
               <option value="Goal Scored">⚽ Goal Scored</option>
-              <option value="Assist">Assist / Chance Created</option>
               <option value="Shot on Target">Shot on Target</option>
               <option value="Quality Shot">Quality Shot</option>
-              <option value="1v1 Dribble Won">1v1 Dribble Won</option>
               <option value="Shot Off Target">Shot Off Target</option>
-            </optgroup>
-            <optgroup label="🧠 Movement & Decisions">
-              <option value="Decision on the Ball">Decision on the Ball</option>
-              <option value="Decision off the Ball">Decision off the Ball</option>
-              <option value="Scanning & Pre-Orientation">Scanning & Pre-Orientation</option>
-              <option value="Made Run">Made Run</option>
-              <option value="Offensive Shape">Offensive Shape</option>
+              <option value="Poor Shot Selection">Poor Shot Selection</option>
+              <option value="Cross Out of Bounds">Cross Out of Bounds</option>
             </optgroup>
             <optgroup label="🧤 Goalkeeping">
-              <option value="Save">Save (Clean / Held)</option>
+              <option value="Save (Clean / Held)">Save (Clean / Held)</option>
               <option value="Save (Parried)">Save (Parried)</option>
               <option value="Box Aerial Claim">Box Aerial Claim</option>
-              <option value="Build-out Distribution">Build-out Distribution</option>
+              <option value="Build-Out Distribution">Build-Out Distribution</option>
               <option value="Goal Conceded">🥅 Goal Conceded (-2.5)</option>
+            </optgroup>
+            <optgroup label="🧠 Tactical Shape">
+              <option value="Scanning & Pre-Orientation">Scanning & Pre-Orientation</option>
+              <option value="Support Angle Offered">Support Angle Offered</option>
+              <option value="Tactical Communication">Tactical Communication</option>
+              <option value="Team Shape Shift">Team Shape Shift</option>
+              <option value="Off-Ball Spacing Fault">Off-Ball Spacing Fault</option>
+              <option value="Decision on the Ball">Decision on the Ball</option>
+              <option value="Decision off the Ball">Decision off the Ball</option>
+            </optgroup>
+            <optgroup label="📋 Administrative">
+              <option value="Substitution">Substitution</option>
+              <option value="Bookmark">Bookmark</option>
             </optgroup>
             <optgroup label="Custom Tag">
               <option value="CUSTOM">+ Custom Action Tag...</option>
