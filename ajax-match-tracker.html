@@ -223,8 +223,12 @@
         </div>
 
         <!-- AI Halftime Trigger Button -->
-        <button onclick="openHalftimeAIModal()" class="px-2.5 py-1 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 active:scale-95 shadow">
+        <button onclick="openHalftimeAIModal()" class="px-2.5 py-1 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 active:scale-95 shadow" title="Halftime Tactical Talk & Adjustments">
           <span>🤖 Halftime AI</span>
+        </button>
+        <!-- AI Match Recap Trigger Button -->
+        <button onclick="openMatchRecapAIModal()" class="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 active:scale-95 shadow" title="Full-Match Recap & Two-Half Tactical Breakdown">
+          <span>📋 Match Recap AI</span>
         </button>
       </div>
 
@@ -696,6 +700,97 @@
           </button>
           <button onclick="closeModal('halftimeAiModal')" class="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs active:scale-95 shadow">
             <span>Close &amp; Continue Match</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: FULL MATCH RECAP AI REPORT (TWO-HALF TELEMETRY ENGINE) -->
+  <!-- ======================================================== -->
+  <div id="matchRecapAiModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-surface border border-emerald-500/50 rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl relative space-y-4 max-h-[92vh] overflow-y-auto">
+      <button onclick="closeModal('matchRecapAiModal')" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between gap-3 border-b border-border/80 pb-3 pr-8">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="mono text-[10px] uppercase text-emerald-400 font-black tracking-wider">FULL-MATCH AI RECAP · GEMINI ENGINE</span>
+            <span id="recapSentimentBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/50">DOMINANT VICTORY</span>
+          </div>
+          <h2 class="display text-2xl text-white mt-0.5" id="recapMatchTitle">Full Match Tactical Recap</h2>
+          <p class="text-xs text-slate-400">Two-half telemetry comparison, tactical adaptations, key performers, and training takeaways.</p>
+        </div>
+      </div>
+
+      <!-- Two-Half Telemetry Comparison Grid -->
+      <div class="bg-pitch/90 rounded-xl border border-border/80 p-3 text-xs space-y-2">
+        <div class="flex items-center justify-between text-[11px] mono font-bold text-slate-400 border-b border-border/60 pb-1.5">
+          <span>METRIC COMPARISON</span>
+          <div class="flex items-center gap-4">
+            <span class="text-teal-400">1ST HALF (H1)</span>
+            <span class="text-slate-500">|</span>
+            <span class="text-emerald-400">2ND HALF (H2)</span>
+            <span class="text-slate-500">|</span>
+            <span class="text-white">FULL MATCH</span>
+          </div>
+        </div>
+        <div class="space-y-1 font-mono text-[11px]" id="recapTwoHalfStatsRows">
+          <!-- Dynamically injected H1 vs H2 stats -->
+        </div>
+      </div>
+
+      <!-- AI Content Loading State -->
+      <div id="recapLoadingSpinner" class="hidden p-6 text-center space-y-2">
+        <div class="w-8 h-8 mx-auto border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+        <div class="text-xs text-emerald-300 font-bold">Synthesizing Both Halves with Gemini AI...</div>
+      </div>
+
+      <!-- AI Analysis Result Card -->
+      <div id="recapReportContent" class="space-y-3 text-xs">
+        <!-- 1. Full Match Flow & Tactical Arc -->
+        <div class="p-3 rounded-xl bg-pitch/90 border border-border/80 space-y-1">
+          <div class="mono text-[10px] uppercase text-emerald-400 font-bold flex items-center gap-1.5">
+            <span>📋 Full-Match Flow &amp; Tactical Arc</span>
+          </div>
+          <p id="recapGameFlowText" class="text-slate-200 leading-relaxed font-medium">
+            Generating full-match recap...
+          </p>
+        </div>
+
+        <!-- 2. Two-Half Adaptation & Halftime Adjustments Payoff -->
+        <div class="p-3 rounded-xl bg-pitch/90 border border-border/80 space-y-1.5">
+          <div class="mono text-[10px] uppercase text-teal-400 font-bold flex items-center gap-1.5">
+            <span>🔄 Halftime Adaptation &amp; 2nd-Half Execution</span>
+          </div>
+          <p id="recapAdaptationText" class="text-slate-300 leading-relaxed"></p>
+        </div>
+
+        <!-- 3. Key Standout Performers -->
+        <div class="p-3 rounded-xl bg-pitch/90 border border-border/80 space-y-1.5">
+          <div class="mono text-[10px] uppercase text-sky-400 font-bold flex items-center gap-1.5">
+            <span>⭐ Key Standout Contributors</span>
+          </div>
+          <ul id="recapStandoutsList" class="space-y-1 text-slate-300 list-disc list-inside"></ul>
+        </div>
+
+        <!-- 4. Post-Match Growth Focus & Training Takeaways -->
+        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1.5">
+          <div class="mono text-[10px] uppercase text-emerald-300 font-bold flex items-center gap-1.5">
+            <span>🎯 Film Review &amp; Training Session Focus</span>
+          </div>
+          <ul id="recapTakeawaysList" class="space-y-1 text-slate-200 list-disc list-inside font-medium"></ul>
+        </div>
+
+        <!-- Action / Sharing Buttons -->
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-border/80">
+          <button onclick="copyMatchRecapReport()" class="px-3.5 py-2 rounded-xl bg-pitch hover:bg-slate-800 text-slate-200 border border-border font-bold text-xs flex items-center gap-1.5 active:scale-95 transition">
+            <span>📋 Copy Post-Match Recap</span>
+          </button>
+          <button onclick="closeModal('matchRecapAiModal')" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs active:scale-95 shadow">
+            <span>Done</span>
           </button>
         </div>
       </div>
@@ -4097,6 +4192,237 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
     }
 
     /* =========================================================
+       FULL-MATCH RECAP AI (TWO-HALF TELEMETRY ENGINE + REPORT)
+       ========================================================= */
+    let cachedMatchRecapReport = null;
+
+    async function openMatchRecapAIModal() {
+      document.getElementById('matchRecapAiModal').classList.remove('hidden');
+      document.getElementById('matchRecapAiModal').classList.add('flex');
+      document.getElementById('recapLoadingSpinner').classList.remove('hidden');
+      document.getElementById('recapReportContent').classList.add('hidden');
+
+      // Separate events into H1 (<= 40 mins) and H2 (> 40 mins)
+      const isH1 = e => e.half === 'H1' || (e.time <= 40);
+      const isH2 = e => e.half === 'H2' || (e.time > 40);
+
+      const eventsH1 = (matchEvents || []).filter(isH1);
+      const eventsH2 = (matchEvents || []).filter(isH2);
+
+      // Goals
+      const goalsH1 = eventsH1.filter(e => e.type === 'goal').length;
+      const goalsH2 = eventsH2.filter(e => e.type === 'goal').length;
+      const totalAjaxGoals = goalsH1 + goalsH2;
+      const totalOppGoals = oppStats.goals || 0;
+
+      // Shots
+      const isShot = e => e.type === 'shot' || e.type === 'sot' || e.type === 'shot_outside_18' || e.type === 'goal';
+      const isSot = e => e.type === 'sot' || e.type === 'goal' || (e.type === 'shot_outside_18' && e.onTarget);
+
+      const shotsH1 = eventsH1.filter(isShot).length;
+      const shotsH2 = eventsH2.filter(isShot).length;
+      const sotH1 = eventsH1.filter(isSot).length;
+      const sotH2 = eventsH2.filter(isSot).length;
+
+      // Turnovers
+      const isTurnover = e => e.type === 'turnover' || (e.outcome === 'Grow' && e.category === 'Carrying');
+      const toH1 = eventsH1.filter(isTurnover).length;
+      const toH2 = eventsH2.filter(isTurnover).length;
+
+      // Pressing & Duels
+      const pressWonH1 = eventsH1.filter(e => e.type === 'pressWon' || e.type === 'duelWon').length;
+      const pressLostH1 = eventsH1.filter(e => e.type === 'pressLost' || e.type === 'duelLost').length;
+      const pressWonH2 = eventsH2.filter(e => e.type === 'pressWon' || e.type === 'duelWon').length;
+      const pressLostH2 = eventsH2.filter(e => e.type === 'pressLost' || e.type === 'duelLost').length;
+
+      const pressRateH1 = (pressWonH1 + pressLostH1) > 0 ? Math.round((pressWonH1 / (pressWonH1 + pressLostH1)) * 100) : 0;
+      const pressRateH2 = (pressWonH2 + pressLostH2) > 0 ? Math.round((pressWonH2 / (pressWonH2 + pressLostH2)) * 100) : 0;
+
+      const foulsH1 = eventsH1.filter(e => e.type === 'foul').length;
+      const foulsH2 = eventsH2.filter(e => e.type === 'foul').length;
+
+      // Populate two-half comparison table in modal
+      const statsRows = document.getElementById('recapTwoHalfStatsRows');
+      if (statsRows) {
+        statsRows.innerHTML = `
+          <div class="flex items-center justify-between py-1 border-b border-border/40">
+            <span class="text-slate-300">Goals Scored</span>
+            <div class="flex items-center gap-6">
+              <span class="text-teal-400 font-bold">${goalsH1}</span>
+              <span class="text-emerald-400 font-bold">${goalsH2}</span>
+              <span class="text-white font-black">${totalAjaxGoals} - ${totalOppGoals}</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 border-b border-border/40">
+            <span class="text-slate-300">Total Shots (On Target)</span>
+            <div class="flex items-center gap-6">
+              <span class="text-teal-400 font-bold">${shotsH1} (${sotH1})</span>
+              <span class="text-emerald-400 font-bold">${shotsH2} (${sotH2})</span>
+              <span class="text-white font-black">${shotsH1 + shotsH2} (${sotH1 + sotH2})</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 border-b border-border/40">
+            <span class="text-slate-300">Press / Duel Win Rate</span>
+            <div class="flex items-center gap-6">
+              <span class="text-teal-400 font-bold">${pressRateH1}%</span>
+              <span class="text-emerald-400 font-bold">${pressRateH2}%</span>
+              <span class="text-white font-black">${(pressWonH1 + pressWonH2 + pressLostH1 + pressLostH2) > 0 ? Math.round(((pressWonH1 + pressWonH2) / (pressWonH1 + pressWonH2 + pressLostH1 + pressLostH2)) * 100) : 0}%</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1">
+            <span class="text-slate-300">Turnovers Logged</span>
+            <div class="flex items-center gap-6">
+              <span class="text-teal-400 font-bold">${toH1}</span>
+              <span class="text-emerald-400 font-bold">${toH2}</span>
+              <span class="text-white font-black">${toH1 + toH2}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      if (document.getElementById('recapMatchTitle')) {
+        document.getElementById('recapMatchTitle').textContent = `Ajax Aspire vs. ${opponentName} (${totalAjaxGoals} - ${totalOppGoals})`;
+      }
+
+      // Standout Players
+      const standouts = [];
+      Object.values(playerStats || {}).forEach(p => {
+        if (!p || !p.name) return;
+        const achievements = [];
+        if (p.goals > 0) achievements.push(`${p.goals} goal${p.goals > 1 ? 's' : ''}`);
+        if (p.assists > 0) achievements.push(`${p.assists} assist${p.assists > 1 ? 's' : ''}`);
+        if (p.keyPasses > 0) achievements.push(`${p.keyPasses} key pass${p.keyPasses > 1 ? 'es' : ''}`);
+        if (p.shots > 2 && p.goals === 0) achievements.push(`${p.shots} shots (${p.sot || 0} SOT)`);
+        if (p.duelsWon > 3) achievements.push(`${p.duelsWon} duels won`);
+        if (p.saves > 0) achievements.push(`${p.saves} saves`);
+        if (achievements.length > 0) {
+          standouts.push(`<strong>#${p.jersey} ${p.name}:</strong> ${achievements.join(', ')} (${p.mins || 0} mins)`);
+        }
+      });
+
+      const fullTelemetry = {
+        opponent: opponentName,
+        ajaxScore: totalAjaxGoals,
+        oppScore: totalOppGoals,
+        shotsH1, shotsH2, sotH1, sotH2,
+        toH1, toH2,
+        pressRateH1, pressRateH2,
+        foulsH1, foulsH2,
+        standouts
+      };
+
+      let reportData = null;
+      try {
+        const resp = await fetch('/.netlify/functions/match-recap-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ telemetry: fullTelemetry })
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res && res.report) reportData = res.report;
+        }
+      } catch (e) {}
+
+      if (!reportData) {
+        reportData = runLocalMatchRecapRuleEngine(fullTelemetry);
+      }
+
+      cachedMatchRecapReport = reportData;
+      renderMatchRecapReport(reportData);
+    }
+
+    function runLocalMatchRecapRuleEngine(t) {
+      const goalDiff = t.ajaxScore - t.oppScore;
+      let sentiment = 'CONTESTED BATTLE';
+      if (goalDiff >= 3) sentiment = 'DOMINANT VICTORY';
+      else if (goalDiff > 0) sentiment = 'DECISIVE WIN';
+      else if (goalDiff === 0) sentiment = 'CONTESTED DRAW';
+      else if (goalDiff >= -2) sentiment = 'COMPETITIVE MATCH';
+      else sentiment = 'CHALLENGING DEFEAT';
+
+      const totalShots = t.shotsH1 + t.shotsH2;
+      const totalSot = t.sotH1 + t.sotH2;
+      const totalTo = t.toH1 + t.toH2;
+
+      const gameFlowSummary = `Ajax closed out a comprehensive 80-minute match against ${t.opponent} with a final score of ${t.ajaxScore} - ${t.oppScore}. The squad generated ${totalShots} total shots with ${totalSot} testing the target, maintaining proactive territory and disciplined structure across both periods.`;
+
+      const adaptationText = `In the opening half, Ajax registered ${t.goalsH1} goals on ${t.shotsH1} shots with a ${t.pressRateH1}% pressing duel success rate. During the second half, the team responded with ${t.goalsH2} goals on ${t.shotsH2} shots and a ${t.pressRateH2}% duel efficiency. Turnovers evolved from ${t.toH1} in H1 to ${t.toH2} in H2, reflecting ${t.toH2 <= t.toH1 ? 'sharper possession security in the second half' : 'sustained attacking tempo under late match fatigue'}.`;
+
+      const standouts = t.standouts && t.standouts.length > 0
+        ? t.standouts
+        : ['Full team effort: Balanced rotation and solid shift from all active positions.'];
+
+      const takeaways = [
+        'Passing & Distribution: Continue accelerating ball transfer speed across the backline to draw opposing pressure before triggering line-breaking passes.',
+        'Rest Defense & Compactness: Ensure central pivots and defenders maintain compact vertical spacing when fullbacks push forward into the attacking third.',
+        'Attacking Execution: Sustain second-half finishing quality by creating 2v1 overloads in wide channels and driving hard to the back post.'
+      ];
+
+      return {
+        sentiment,
+        gameFlowSummary,
+        adaptationText,
+        standouts,
+        takeaways
+      };
+    }
+
+    function renderMatchRecapReport(report) {
+      document.getElementById('recapLoadingSpinner').classList.add('hidden');
+      document.getElementById('recapReportContent').classList.remove('hidden');
+
+      const badge = document.getElementById('recapSentimentBadge');
+      const sentiment = (report.sentiment || 'DECISIVE WIN').toUpperCase();
+      badge.textContent = sentiment;
+      if (sentiment.includes('DOMINANT') || sentiment.includes('DECISIVE') || sentiment.includes('WIN')) {
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/50';
+      } else if (sentiment.includes('DEFEAT')) {
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/50';
+      } else {
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/50';
+      }
+
+      document.getElementById('recapGameFlowText').textContent = report.gameFlowSummary || '';
+      document.getElementById('recapAdaptationText').textContent = report.adaptationText || '';
+
+      const sList = document.getElementById('recapStandoutsList');
+      sList.innerHTML = (report.standouts || []).map(item => `<li>${item}</li>`).join('');
+
+      const tList = document.getElementById('recapTakeawaysList');
+      tList.innerHTML = (report.takeaways || []).map(item => `<li>${item}</li>`).join('');
+    }
+
+    function copyMatchRecapReport() {
+      if (!cachedMatchRecapReport) return;
+      let ajaxGoals = 0;
+      Object.values(playerStats).forEach(p => ajaxGoals += (p.goals || 0));
+      const oppGoals = oppStats.goals || 0;
+
+      const text = `AJAX ASPIRE U15 · POST-MATCH TACTICAL RECAP
+Match: Ajax Aspire ${ajaxGoals} - ${oppGoals} ${opponentName}
+Status: ${cachedMatchRecapReport.sentiment}
+---------------------------------------------------
+MATCH SUMMARY & TACTICAL ARC:
+${cachedMatchRecapReport.gameFlowSummary}
+
+TWO-HALF ADAPTATION & EXECUTION:
+${cachedMatchRecapReport.adaptationText}
+
+KEY STANDOUT PERFORMERS:
+${(cachedMatchRecapReport.standouts || []).map(s => '• ' + s.replace(/<[^>]*>/g, '')).join('\n')}
+
+FILM STUDY & TRAINING SESSION FOCUS:
+${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Post-match recap report copied to clipboard!');
+      }).catch(() => {
+        showToast('Recap ready on screen.');
+      });
+    }
+
+    /* =========================================================
        ZERO-UPLOAD COMMITTOR: COMMIT DIRECTLY TO MATCH HUB & GOOGLE SHEET
        ========================================================= */
     function commitMatchToHub() {
@@ -4567,6 +4893,18 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
             })
           }).catch(() => {});
         }
+
+        // 3. Save multi-device datasets permanently to Google Sheets KV store
+        fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveMatchHubData',
+            pin: coachPin,
+            datasets: customData
+          })
+        }).catch(() => {});
       } catch (draftErr) {}
 
       // Background POST directly into Google Sheets (Player_IDP)

@@ -666,3 +666,173 @@ Intercepts the ball and starts going forward, but she had options early maybe th
 2026-11-01 13:71:05,71:05,H2,A3,#89,Finishing,Good / Positive,Carlee snapshot on target from 16 yards,Rocklin (Nov 1),Shot on Target
 2026-11-02 12:00:34,72:00,H2,A3,"#34, #89",Passing,Poor / Negative,,Rocklin (Nov 1),Forced Turnover Pass
 2026-11-01 13:75:20,75:20,H2,A3,#89,Finishing,Poor / Negative,Carlee shot wide,Rocklin (Nov 1),Shot Off Target
+
+2026-11-08,1:00,H1,M3,#5,Carrying,Poor / Negative,⚠️ TURNOVER in M3: #5 Grace at 1',Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,1:00,H1,M3,#2,Tactical_Shape,Neutral,OTHER: #2 Giselle at 1',Crossfire #2 (Nov 8),Off-Ball Spacing Fault
+2026-11-08,1:00,H1,D3,#14,Tactical_Shape,Neutral,OTHER: #14 Kendall at 1',Crossfire #2 (Nov 8),Interception
+2026-11-08,2:00,H1,A3,#19,Carrying,Poor / Negative,MISCONTROL (Grow): #19 Amy in A3 (2'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,2:00,H1,D3,Team,Tactical_Shape,Neutral,🧱 AJAX BUILD-OUT (Goal Kick #1) at 2',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,3:00,H1,A3,#33,Tactical_Shape,Neutral,TACKLE (Glow): #33 Madisyn in A3 (3'),Crossfire #2 (Nov 8),Tackle
+2026-11-08,4:00,H1,A3,#2,Passing,Good / Positive,CORNER KICK: #2 Giselle at 4',Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,4:00,H1,A3,#8,Passing,Good / Positive,KEY PASS (SHOT ASSIST) (Glow): #8 Scarlett in A3 (4'),Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,5:00,H1,A3,#2,Passing,Good / Positive,KEY PASS (SHOT ASSIST) (Glow): #2 Giselle in A3 (5'),Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,5:00,H1,A3,#8,Passing,Good / Positive,GOAL ASSIST (Glow): #8 Scarlett in A3 (5'),Crossfire #2 (Nov 8),Goal Assist
+2026-11-08,5:00,H1,A3,#33,Finishing,Goal Scored,GOAL SCORED (Goal Scored): #33 Madisyn in A3 (5'),Crossfire #2 (Nov 8),Goal Scored
+2026-11-08,6:00,H1,M3,#50,Tactical_Shape,Neutral,TACKLE (Glow): #50 Alexa in M3 (6'),Crossfire #2 (Nov 8),Tackle
+2026-11-08,6:00,H1,M3,#2,Carrying,Poor / Negative,⚠️ TURNOVER in M3: #2 Giselle at 6',Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,6:00,H1,D3,#9,Tactical_Shape,Neutral,CLEARANCE (Glow): #9 Camila in D3 (6'),Crossfire #2 (Nov 8),Clearance
+2026-11-08,6:00,H1,A3,#2,Tactical_Shape,Neutral,👟 CROSS: #2 Giselle at 6',Crossfire #2 (Nov 8),Shot on Target
+2026-11-08,6:00,H1,A3,#8,Tactical_Shape,Neutral,INTERCEPTION (Glow): #8 Scarlett in A3 (6'),Crossfire #2 (Nov 8),Interception
+2026-11-08,7:00,H1,M3,#33,Carrying,Poor / Negative,⚠️ TURNOVER in M3: #33 Madisyn at 7',Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,8:00,H1,D3,#14,Tactical_Shape,Neutral,OTHER: #14 Kendall at 8',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,8:00,H1,D3,#14,Tactical_Shape,Neutral,OTHER: #14 Kendall at 8',Crossfire #2 (Nov 8),Interception
+2026-11-08,9:00,H1,M3,#8,Passing,Good / Positive,🔑 KEY PASS: #8 Scarlett at 9',Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,9:00,H1,D3,#33,Tactical_Shape,Neutral,OTHER: #33 Madisyn at 9',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,9:00,H1,A3,#23,Finishing,Goal Scored,GOAL SCORED (Goal Scored): #23 Sophia in A3 (9'),Crossfire #2 (Nov 8),Goal Scored
+2026-11-08,9:00,H1,A3,#2,Passing,Good / Positive,GOAL ASSIST (Glow): #2 Giselle in A3 (9'),Crossfire #2 (Nov 8),Goal Assist
+2026-11-08,9:00,H1,M3,#2,Carrying,Poor / Negative,⚠️ TURNOVER in M3: #2 Giselle at 9',Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,10:00,H1,A3,#14,Duel,Poor / Negative,FOUL CONCEDED (Grow): #14 Kendall in A3 (10'),Crossfire #2 (Nov 8),Foul Conceded
+2026-11-08,10:00,H1,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #1) at 10',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,10:00,H1,A3,#7,Finishing,Poor / Negative,SHOT OFF TARGET (Grow): #7 MacKenzie in A3 (10'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,11:00,H1,A3,#2,Defending,Good / Positive,DIRECT PRESSURE (Glow): #2 Giselle in A3 (11'),Crossfire #2 (Nov 8),Direct Pressure
+2026-11-08,12:00,H1,A3,#8,Finishing,Goal Scored,GOAL SCORED (Goal Scored): #8 Scarlett in A3 (12'),Crossfire #2 (Nov 8),Goal Scored
+2026-11-08,12:00,H1,A3,#9,Tactical_Shape,Neutral,PROGRESSIVE PASS (Glow): #9 Camila in A3 (12'),Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,12:00,H1,M3,#9,Tactical_Shape,Neutral,OTHER: #9 Camila at 12',Crossfire #2 (Nov 8),Tackle
+2026-11-08,12:00,H1,A3,#7,Finishing,Poor / Negative,POOR SHOT SELECTION (Grow): #7 MacKenzie in A3 (12'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,12:00,H1,A3,#2,Defending,Good / Positive,DIRECT PRESSURE (Glow): #2 Giselle in A3 (12'),Crossfire #2 (Nov 8),Direct Pressure
+2026-11-08,13:00,H1,M3,#23,Defending,Good / Positive,⚡ PRESS WON: #23 Sophia at 13',Crossfire #2 (Nov 8),Direct Pressure
+2026-11-08,14:00,H1,M3,#8,Tactical_Shape,Neutral,OTHER: #8 Scarlett at 14',Crossfire #2 (Nov 8),Switch Point of Attack
+2026-11-08,14:00,H1,M3,#33,Tactical_Shape,Neutral,OTHER: #33 Madisyn at 14',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,15:00,H1,A3,#14,Tactical_Shape,Neutral,OFF-BALL SPACING FAULT (Grow): #14 Kendall in A3 (15'),Crossfire #2 (Nov 8),Off-Ball Spacing Fault
+2026-11-08,15:00,H1,M3,#33,Tactical_Shape,Neutral,OTHER: #33 Madisyn at 15',Crossfire #2 (Nov 8),Interception
+2026-11-08,15:00,H1,M3,#33,Tactical_Shape,Neutral,OTHER: #33 Madisyn at 15',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,17:00,H1,A3,#14,Finishing,Goal Scored,GOAL SCORED (Goal Scored): #14 Kendall in A3 (17'),Crossfire #2 (Nov 8),Goal Scored
+2026-11-08,17:00,H1,A3,#14,Tactical_Shape,Neutral,DECISION OFF THE BALL (Glow): #14 Kendall in A3 (17'),Crossfire #2 (Nov 8),Decision off the Ball
+2026-11-08,17:00,H1,A3,#23,Tactical_Shape,Neutral,PROGRESSIVE CARRY (Glow): #23 Sophia in A3 (17'),Crossfire #2 (Nov 8),Progressive Carry
+2026-11-08,17:00,H1,M3,#8,Tactical_Shape,Neutral,OTHER: #8 Scarlett at 17',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,17:00,H1,M3,#8,Tactical_Shape,Neutral,OTHER: #8 Scarlett at 17',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,18:00,H1,A3,#33,Duel,Good / Positive,GROUND DUEL WON (Glow): #33 Madisyn in A3 (18'),Crossfire #2 (Nov 8),Ground Duel Won
+2026-11-08,18:00,H1,A3,#7,Finishing,Poor / Negative,QUALITY SHOT (Glow): #7 MacKenzie in A3 (18'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,19:00,H1,A3,#7,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press) at 19',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,19:00,H1,A3,#2,Finishing,Poor / Negative,SHOT OFF TARGET (Grow): #2 Giselle in A3 (19'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,20:00,H1,M3,#23,Carrying,Poor / Negative,DISPOSSESSED (Grow): #23 Sophia in M3 (20'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,21:00,H1,A3,#23,Carrying,Poor / Negative,TURNED INTO PRESSURE (Grow): #23 Sophia in A3 (21'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,21:00,H1,A3,#23,Carrying,Poor / Negative,DISPOSSESSED (Grow): #23 Sophia in A3 (21'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,22:00,H1,A3,#88,Goalkeeping,Good / Positive,SAVE (CLEAN / HELD) (Glow): #88 Sonia in A3 (22'),Crossfire #2 (Nov 8),Save (Clean / Held)
+2026-11-08,22:00,H1,D3,#50,Duel,Poor / Negative,🛑 FOUL COMMITTED: #50 Alexa at 22',Crossfire #2 (Nov 8),Foul Conceded
+2026-11-08,23:00,H1,M3,#37,Carrying,Poor / Negative,⚠️ TURNOVER in M3: #37 Brooklyn at 23',Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,23:00,H1,M3,#37,Carrying,Poor / Negative,FORCED TURNOVER PASS (Grow): #37 Brooklyn in M3 (23'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,25:00,H1,D3,#9,Tactical_Shape,Neutral,OTHER: #9 Camila at 25',Crossfire #2 (Nov 8),Interception
+2026-11-08,26:00,H1,D3,#5,Tactical_Shape,Neutral,OTHER: #5 Grace at 26',Crossfire #2 (Nov 8),Off-Ball Spacing Fault
+2026-11-08,26:00,H1,A3,#88,Tactical_Shape,Neutral,BLOCKED SHOT (Glow): #88 Sonia in A3 (26'),Crossfire #2 (Nov 8),Blocked Shot
+2026-11-08,29:00,H1,D3,#88,Goalkeeping,Good / Positive,🧤 SAVE (GK): #88 Sonia at 29',Crossfire #2 (Nov 8),Save (Clean / Held)
+2026-11-08,30:00,H1,M3,#50,Passing,Good / Positive,🔑 KEY PASS: #50 Alexa at 30',Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,30:00,H1,M3,#37,Carrying,Poor / Negative,⚠️ TURNOVER in M3: #37 Brooklyn at 30',Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,31:00,H1,A3,#37,Duel,Poor / Negative,GROUND DUEL LOST (Grow): #37 Brooklyn in A3 (31'),Crossfire #2 (Nov 8),Ground Duel Lost
+2026-11-08,32:00,H1,A3,#33,Finishing,Poor / Negative,QUALITY SHOT (Glow): #33 Madisyn in A3 (32'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,32:00,H1,A3,#33,Tactical_Shape,Neutral,PROGRESSIVE CARRY (Glow): #33 Madisyn in A3 (32'),Crossfire #2 (Nov 8),Progressive Carry
+2026-11-08,33:00,H1,A3,#33,Tactical_Shape,Neutral,👟 CROSS: #33 Madisyn at 33',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,33:00,H1,A3,#34,Tactical_Shape,Neutral,👟 CROSS: #34 Nairobi at 33',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,33:00,H1,A3,#50,Tactical_Shape,Neutral,PROGRESSIVE CARRY (Glow): #50 Alexa in A3 (33'),Crossfire #2 (Nov 8),Progressive Carry
+2026-11-08,34:00,H1,A3,#34,Finishing,Good / Positive,SHOT ON TARGET (Glow): #34 Nairobi in A3 (34'),Crossfire #2 (Nov 8),Shot on Target
+2026-11-08,35:00,H1,A3,#25,Finishing,Poor / Negative,SHOT OFF TARGET (Grow): #25 Ella in A3 (35'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,35:00,H1,A3,#33,Tactical_Shape,Neutral,PROGRESSIVE CARRY (Glow): #33 Madisyn in A3 (35'),Crossfire #2 (Nov 8),Progressive Carry
+2026-11-08,36:00,H1,D3,#89,Tactical_Shape,Neutral,OTHER: #89 Carlee at 36',Crossfire #2 (Nov 8),Tackle
+2026-11-08,36:00,H1,A3,#25,Carrying,Poor / Negative,FORCED TURNOVER PASS (Grow): #25 Ella in A3 (36'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,36:00,H1,D3,#89,Passing,Good / Positive,🔑 KEY PASS: #89 Carlee at 36',Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,36:00,H1,A3,#50,Tactical_Shape,Neutral,TACKLE (Glow): #50 Alexa in A3 (36'),Crossfire #2 (Nov 8),Tackle
+2026-11-08,36:00,H1,A3,#89,Tactical_Shape,Neutral,PROGRESSIVE PASS (Glow): #89 Carlee in A3 (36'),Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,36:00,H1,M3,#89,Tactical_Shape,Neutral,OTHER: #89 Carlee at 36',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,36:00,H1,M3,#33,Tactical_Shape,Neutral,OTHER: #33 Madisyn at 36',Crossfire #2 (Nov 8),Combination Play
+2026-11-08,36:00,H1,A3,#33,Tactical_Shape,Neutral,SUPPORT ANGLE OFFERED (Glow): #33 Madisyn in A3 (36'),Crossfire #2 (Nov 8),Support Angle Offered
+2026-11-08,36:00,H1,A3,#9,Tactical_Shape,Neutral,PROGRESSIVE PASS (Glow): #9 Camila in A3 (36'),Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,36:00,H1,A3,#50,Defending,Good / Positive,DIRECT PRESSURE (Glow): #50 Alexa in A3 (36'),Crossfire #2 (Nov 8),Direct Pressure
+2026-11-08,36:00,H1,A3,#37,Carrying,Poor / Negative,DISPOSSESSED (Grow): #37 Brooklyn in A3 (36'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,36:00,H1,M3,#4,Tactical_Shape,Neutral,OTHER: #4 Arianna at 36',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,36:00,H1,D3,#24,Carrying,Poor / Negative,FORCED TURNOVER PASS (Grow): #24 Evelyn in D3 (36'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,36:00,H1,D3,#9,Tactical_Shape,Neutral,OTHER: #9 Camila at 36',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,36:00,H1,D3,#89,Tactical_Shape,Neutral,PROGRESSIVE PASS (Glow): #89 Carlee in D3 (36'),Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,36:00,H1,M3,#34,Carrying,Poor / Negative,FORCED TURNOVER PASS (Grow): #34 Nairobi in M3 (36'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,39:00,H1,M3,#50,Carrying,Poor / Negative,⚠️ TURNOVER in M3: #50 Alexa at 39',Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,40:00,H1,A3,#23,Finishing,Poor / Negative,QUALITY SHOT (Glow): #23 Sophia in A3 (40'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,40:00,H2,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #3) at 40',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,40:00,H1,A3,#2,Carrying,Poor / Negative,MISCONTROL (Grow): #2 Giselle in A3 (40'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,40:00,H1,A3,#23,Tactical_Shape,Neutral,PROGRESSIVE PASS (Glow): #23 Sophia in A3 (40'),Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,40:00,H1,A3,#33,Tactical_Shape,Neutral,INTERCEPTION (Glow): #33 Madisyn in A3 (40'),Crossfire #2 (Nov 8),Interception
+2026-11-08,40:00,H1,A3,#2,Carrying,Poor / Negative,DISPOSSESSED (Grow): #2 Giselle in A3 (40'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,41:00,H2,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #5) at 41',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,41:00,H2,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #4) at 41',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,42:00,H2,A3,#14,Finishing,Goal Scored,GOAL SCORED (Goal Scored): #14 Kendall in A3 (42'),Crossfire #2 (Nov 8),Goal Scored
+2026-11-08,42:00,H2,A3,#14,Tactical_Shape,Neutral,1V1 DRIBBLE WON (Glow): #14 Kendall in A3 (42'),Crossfire #2 (Nov 8),1v1 Dribble Won
+2026-11-08,42:00,H2,A3,#24,Tactical_Shape,Neutral,PROGRESSIVE PASS (Glow): #24 Evelyn in A3 (42'),Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,42:00,H2,D3,#9,Tactical_Shape,Neutral,OTHER: #9 Camila at 42',Crossfire #2 (Nov 8),Interception
+2026-11-08,44:00,H2,A3,#14,Finishing,Goal Scored,GOAL SCORED (Goal Scored): #14 Kendall in A3 (44'),Crossfire #2 (Nov 8),Goal Scored
+2026-11-08,44:00,H2,A3,#7,Passing,Good / Positive,KEY PASS (SHOT ASSIST) (Glow): #7 MacKenzie in A3 (44'),Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,44:00,H2,A3,#7,Tactical_Shape,Neutral,COMBINATION PLAY (Glow): #7 MacKenzie in A3 (44'),Crossfire #2 (Nov 8),Combination Play
+2026-11-08,44:00,H2,M3,#50,Tactical_Shape,Neutral,OTHER: #50 Alexa at 44',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,44:00,H2,M3,#9,Tactical_Shape,Neutral,PROGRESSIVE PASS (Glow): #9 Camila in M3 (44'),Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,44:00,H2,M3,#9,Tactical_Shape,Neutral,INTERCEPTION (Glow): #9 Camila in M3 (44'),Crossfire #2 (Nov 8),Interception
+2026-11-08,45:00,H2,A3,#7,Duel,Good / Positive,GROUND DUEL WON (Glow): #7 MacKenzie in A3 (45'),Crossfire #2 (Nov 8),Ground Duel Won
+2026-11-08,46:00,H2,M3,#8,Carrying,Poor / Negative,DISPOSSESSED (Grow): #8 Scarlett in M3 (46'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,47:00,H2,A3,#2,Finishing,Poor / Negative,SHOT OFF TARGET (Grow): #2 Giselle in A3 (47'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,47:00,H2,A3,#23,Duel,Good / Positive,FOUL WON (Glow): #23 Sophia in A3 (47'),Crossfire #2 (Nov 8),Foul Won
+2026-11-08,48:00,H2,A3,#8,Tactical_Shape,Neutral,COMBINATION PLAY (Glow): #8 Scarlett in A3 (48'),Crossfire #2 (Nov 8),Combination Play
+2026-11-08,49:00,H2,D3,#14,Tactical_Shape,Neutral,INTERCEPTION (Glow): #14 Kendall in D3 (49'),Crossfire #2 (Nov 8),Interception
+2026-11-08,49:00,H2,D3,#2,Defending,Good / Positive,DIRECT PRESSURE (Glow): #2 Giselle in D3 (49'),Crossfire #2 (Nov 8),Direct Pressure
+2026-11-08,50:00,H2,A3,#14,Carrying,Poor / Negative,DISPOSSESSED (Grow): #14 Kendall in A3 (50'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,50:00,H2,A3,#24,Carrying,Poor / Negative,DISPOSSESSED (Grow): #24 Evelyn in A3 (50'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,51:00,H2,D3,#23,Tactical_Shape,Neutral,OTHER: #23 Sophia at 51',Crossfire #2 (Nov 8),Clearance
+2026-11-08,51:00,H2,D3,#5,Tactical_Shape,Neutral,OTHER: #5 Grace at 51',Crossfire #2 (Nov 8),Clearance
+2026-11-08,52:00,H2,M3,#8,Duel,Good / Positive,🎯 FREE KICK / SET PIECE: #8 Scarlett at 52',Crossfire #2 (Nov 8),Foul Won
+2026-11-08,53:00,H2,M3,#50,Tactical_Shape,Neutral,OTHER: #50 Alexa at 53',Crossfire #2 (Nov 8),Interception
+2026-11-08,54:00,H2,A3,#4,Finishing,Good / Positive,SHOT ON TARGET (Glow): #4 Arianna in A3 (54'),Crossfire #2 (Nov 8),Shot on Target
+2026-11-08,54:00,H2,A3,#2,Passing,Good / Positive,CORNER KICK: #2 Giselle at 54',Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,54:00,H2,A3,#2,Tactical_Shape,Neutral,👟 CROSS: #2 Giselle at 54',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,54:00,H2,A3,#23,Passing,Good / Positive,LINE-BREAKING PASS (Glow): #23 Sophia in A3 (54'),Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,55:00,H2,D3,#9,Tactical_Shape,Neutral,OTHER: #9 Camila at 55',Crossfire #2 (Nov 8),Tackle
+2026-11-08,55:00,H2,M3,#5,Tactical_Shape,Neutral,OTHER: #5 Grace at 55',Crossfire #2 (Nov 8),Clearance
+2026-11-08,56:00,H2,A3,#2,Administrative,Neutral,📌 Flagged for Film Review (56'): #2 Giselle,Crossfire #2 (Nov 8),Bookmark
+2026-11-08,58:00,H2,A3,#37,Carrying,Poor / Negative,UNFORCED TURNOVER PASS (Grow): #37 Brooklyn in A3 (58'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,58:00,H2,D3,#50,Tactical_Shape,Neutral,INTERCEPTION (Glow): #50 Alexa in D3 (58'),Crossfire #2 (Nov 8),Interception
+2026-11-08,58:00,H2,A3,#8,Finishing,Good / Positive,SHOT ON TARGET (Glow): #8 Scarlett in A3 (58'),Crossfire #2 (Nov 8),Shot on Target
+2026-11-08,59:00,H2,M3,#24,Tactical_Shape,Neutral,OTHER: #24 Evelyn at 59',Crossfire #2 (Nov 8),Interception
+2026-11-08,59:00,H2,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #6) at 59',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,59:00,H2,A3,#2,Finishing,Poor / Negative,SHOT OFF TARGET (Grow): #2 Giselle in A3 (59'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,59:00,H2,A3,#23,Finishing,Good / Positive,SHOT ON TARGET (Glow): #23 Sophia in A3 (59'),Crossfire #2 (Nov 8),Shot on Target
+2026-11-08,60:00,H2,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #7) at 60',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,60:00,H2,A3,#2,Finishing,Poor / Negative,SHOT OFF TARGET (Grow): #2 Giselle in A3 (60'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,60:00,H2,A3,#4,Finishing,Good / Positive,SHOT ON TARGET (Glow): #4 Arianna in A3 (60'),Crossfire #2 (Nov 8),Shot on Target
+2026-11-08,60:00,H2,A3,#8,Tactical_Shape,Neutral,COMBINATION PLAY (Glow): #8 Scarlett in A3 (60'),Crossfire #2 (Nov 8),Combination Play
+2026-11-08,60:00,H2,M3,#24,Tactical_Shape,Neutral,OTHER: #24 Evelyn at 60',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,61:00,H2,A3,#2,Finishing,Good / Positive,SHOT ON TARGET (Glow): #2 Giselle in A3 (61'),Crossfire #2 (Nov 8),Shot on Target
+2026-11-08,61:00,H2,A3,#33,Tactical_Shape,Neutral,INTERCEPTION (Glow): #33 Madisyn in A3 (61'),Crossfire #2 (Nov 8),Interception
+2026-11-08,62:00,H2,D3,#37,Duel,Poor / Negative,🛑 FOUL COMMITTED: #37 Brooklyn at 62',Crossfire #2 (Nov 8),Foul Conceded
+2026-11-08,63:00,H2,D3,#37,Tactical_Shape,Neutral,TACKLE (Glow): #37 Brooklyn in D3 (63'),Crossfire #2 (Nov 8),Tackle
+2026-11-08,63:00,H2,D3,#37,Defending,Good / Positive,DIRECT PRESSURE (Glow): #37 Brooklyn in D3 (63'),Crossfire #2 (Nov 8),Direct Pressure
+2026-11-08,64:00,H2,A3,#2,Passing,Good / Positive,CORNER KICK: #2 Giselle at 64',Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,65:00,H2,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #8) at 65',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,65:00,H2,A3,#37,Finishing,Poor / Negative,SHOT OFF TARGET (Grow): #37 Brooklyn in A3 (65'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,65:00,H2,A3,#34,Passing,Good / Positive,LINE-BREAKING PASS (Glow): #34 Nairobi in A3 (65'),Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,66:00,H2,A3,#4,Passing,Good / Positive,CORNER KICK: #4 Arianna at 66',Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,66:00,H2,A3,#37,Duel,Good / Positive,GROUND DUEL WON (Glow): #37 Brooklyn in A3 (66'),Crossfire #2 (Nov 8),Ground Duel Won
+2026-11-08,67:00,H2,D3,#33,Carrying,Poor / Negative,⚠️ TURNOVER in D3: #33 Madisyn at 67',Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,67:00,H2,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #9) at 67',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,67:00,H2,A3,#4,Finishing,Poor / Negative,SHOT OFF TARGET (Grow): #4 Arianna in A3 (67'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,68:00,H2,D3,#88,Tactical_Shape,Neutral,OPPONENT GOAL conceded (68'),Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,68:00,H2,D3,#88,Carrying,Poor / Negative,⚠️ TURNOVER in D3: #88 Sonia at 68',Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,69:00,H2,D3,Team,Tactical_Shape,Neutral,OPPONENT SHOT against (69'),Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,69:00,H2,D3,#24,Tactical_Shape,Neutral,OTHER: #24 Evelyn at 69',Crossfire #2 (Nov 8),Off-Ball Spacing Fault
+2026-11-08,73:00,H2,D3,#89,Tactical_Shape,Neutral,OTHER: #89 Carlee at 73',Crossfire #2 (Nov 8),Clearance
+2026-11-08,74:00,H2,A3,#24,Carrying,Poor / Negative,DISPOSSESSED (Grow): #24 Evelyn in A3 (74'),Crossfire #2 (Nov 8),Turned into Pressure
+2026-11-08,74:00,H2,M3,#50,Duel,Good / Positive,🎯 FREE KICK / SET PIECE: #50 Alexa at 74',Crossfire #2 (Nov 8),Foul Won
+2026-11-08,75:00,H2,D3,#89,Tactical_Shape,Neutral,TACKLE (Glow): #89 Carlee in D3 (75'),Crossfire #2 (Nov 8),Tackle
+2026-11-08,75:00,H2,D3,#9,Tactical_Shape,Neutral,OTHER: #9 Camila at 75',Crossfire #2 (Nov 8),Tackle
+2026-11-08,76:00,H2,M3,#50,Tactical_Shape,Neutral,OTHER: #50 Alexa at 76',Crossfire #2 (Nov 8),Interception
+2026-11-08,77:00,H2,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #10) at 77',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,77:00,H2,A3,#23,Tactical_Shape,Neutral,PROGRESSIVE CARRY (Glow): #23 Sophia in A3 (77'),Crossfire #2 (Nov 8),Progressive Carry
+2026-11-08,77:00,H2,A3,#50,Passing,Good / Positive,LINE-BREAKING PASS (Glow): #50 Alexa in A3 (77'),Crossfire #2 (Nov 8),Key Pass (Shot Assist)
+2026-11-08,78:00,H2,A3,#7,Tactical_Shape,Neutral,👟 CROSS: #7 MacKenzie at 78',Crossfire #2 (Nov 8),Progressive Pass
+2026-11-08,79:00,H2,A3,#37,Finishing,Poor / Negative,POOR SHOT SELECTION (Grow): #37 Brooklyn in A3 (79'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,79:00,H2,A3,Team,Tactical_Shape,Neutral,🎯 OPPONENT GOAL KICK (High Press #11) at 79',Crossfire #2 (Nov 8),Decision on the Ball
+2026-11-08,79:00,H2,A3,#25,Finishing,Poor / Negative,SHOT OFF TARGET (Grow): #25 Ella in A3 (79'),Crossfire #2 (Nov 8),Shot Off Target
+2026-11-08,80:00,H2,A3,#7,Tactical_Shape,Neutral,TACKLE (Glow): #7 MacKenzie in A3 (80'),Crossfire #2 (Nov 8),Tackle

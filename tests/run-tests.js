@@ -913,4 +913,118 @@ check('9. Sideline Match Tracker Harmonization with Film Log (Category Bar & One
   assert.strictEqual(evs[3].outcome, 'Glow');
 });
 
+// ---------------------------------------------------------------------------
+// CHECK 10: End of Match Recap AI & Two-Half Performance Engine
+// ---------------------------------------------------------------------------
+check('10. Sideline Tracker End of Match Recap AI button, modal, and two-half analytics', () => {
+  const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+
+  // 1. Verify button existence in header
+  assert(trackerHtml.includes('openMatchRecapAIModal()'), 'Missing openMatchRecapAIModal() call on Match Recap button');
+  assert(trackerHtml.includes('📋 Match Recap AI'), 'Missing Match Recap AI button in header');
+
+  // 2. Verify modal structure
+  assert(trackerHtml.includes('id="matchRecapAiModal"'), 'Missing #matchRecapAiModal in HTML');
+  assert(trackerHtml.includes('id="recapTwoHalfStatsRows"'), 'Missing #recapTwoHalfStatsRows container');
+  assert(trackerHtml.includes('id="recapSentimentBadge"'), 'Missing #recapSentimentBadge');
+  assert(trackerHtml.includes('copyMatchRecapReport()'), 'Missing copyMatchRecapReport() function call');
+
+  // 3. Test calculation logic in sandbox
+  const sandbox = {
+    document: {
+      getElementById: (id) => ({
+        classList: { remove: () => {}, add: () => {} },
+        textContent: '',
+        innerHTML: ''
+      })
+    },
+    matchEvents: [
+      { time: 10, half: 'H1', type: 'goal', jersey: 14 },
+      { time: 25, half: 'H1', type: 'shot', onTarget: true },
+      { time: 30, half: 'H1', type: 'turnover' },
+      { time: 55, half: 'H2', type: 'goal', jersey: 23 },
+      { time: 60, half: 'H2', type: 'turnover' }
+    ],
+    opponentName: 'Crossfire #2',
+    playerStats: {
+      14: { jersey: 14, name: 'Kendall Blair', goals: 1, assists: 0, mins: 60, keyPasses: 0, shots: 1, sot: 1, duelsWon: 2, saves: 0 },
+      23: { jersey: 23, name: 'Sophia Culver', goals: 1, assists: 0, mins: 55, keyPasses: 0, shots: 1, sot: 1, duelsWon: 1, saves: 0 }
+    },
+    oppStats: { goals: 1, shots: 2, fouls: 1 }
+  };
+  vm.createContext(sandbox);
+
+  const start = trackerHtml.indexOf('function runLocalMatchRecapRuleEngine(');
+  const end = trackerHtml.indexOf('function commitMatchToHub(');
+  assert(start !== -1 && end !== -1, 'Could not locate runLocalMatchRecapRuleEngine');
+  vm.runInContext(trackerHtml.slice(start, end), sandbox);
+
+  const testTelemetry = {
+    opponent: 'Crossfire #2',
+    ajaxScore: 6,
+    oppScore: 1,
+    shotsH1: 8, shotsH2: 10, sotH1: 5, sotH2: 7,
+    toH1: 12, toH2: 8,
+    pressRateH1: 55, pressRateH2: 65,
+    foulsH1: 2, foulsH2: 1,
+    standouts: ['#14 Kendall Blair: 3 goals']
+  };
+
+  const report = sandbox.runLocalMatchRecapRuleEngine(testTelemetry);
+  assert.strictEqual(report.sentiment, 'DOMINANT VICTORY', 'Expected Dominant Victory sentiment for 6-1 scoreline');
+  assert(report.gameFlowSummary.includes('Crossfire #2'), 'Expected gameFlowSummary to reference opponent');
+  assert(report.adaptationText.includes('55%') && report.adaptationText.includes('65%'), 'Expected adaptationText to reference H1 and H2 press rates');
+});
+
+// ---------------------------------------------------------------------------
+// CHECK 11: Cross-Device Cloud Datasets Sync & Overview Bar Clean-Up
+// ---------------------------------------------------------------------------
+check('11. Cloud datasets sync in Tracker & Match Hub, and removal of redundant tracker pill', () => {
+  const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+  const matchHubHtml = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+  const codeGs = fs.readFileSync(path.join(ROOT, 'Code.gs'), 'utf8');
+
+  // 1. Sideline tracker sends saveMatchHubData with datasets
+  assert(trackerHtml.includes("action: 'saveMatchHubData'"), 'Tracker does not call saveMatchHubData');
+  assert(trackerHtml.includes('datasets: customData'), 'Tracker does not send datasets in saveMatchHubData');
+
+  // 2. Code.gs handles saveMatchHubData and returns datasets in getMatchHubData
+  assert(codeGs.includes("action === 'saveMatchHubData'"), 'Code.gs missing route for saveMatchHubData');
+  assert(codeGs.includes("datasets_aspire") && codeGs.includes("datasets_league"), 'Code.gs missing team-split datasets handling');
+
+  // 3. Match Hub hydates res.datasets
+  assert(matchHubHtml.includes('res.datasets'), 'Match Hub does not process res.datasets');
+  assert(matchHubHtml.includes('updatedDatasets'), 'Match Hub does not handle updatedDatasets');
+
+  // 4. Redundant sideline tracker pill removed from overview nav-pill-bar in match-hub.html
+  const navPillBarMatch = matchHubHtml.match(/<div class="nav-pill-bar[^>]*>([\s\S]*?)<\/div>/);
+  assert(navPillBarMatch, 'nav-pill-bar not found in match-hub.html');
+  assert(!navPillBarMatch[1].includes('btn-tab-tracker'), 'btn-tab-tracker still exists in overview nav-pill-bar');
+
+  // 5. DEFAULT_DATA in match-hub.html reflects 3W-4L League record
+  const ddMatch = matchHubHtml.match(/const DEFAULT_DATA = (\{.*?\});\s+let DATA/s);
+  assert(ddMatch, 'DEFAULT_DATA not found in match-hub.html');
+  const dd = JSON.parse(ddMatch[1]);
+  assert.strictEqual(dd['AJAX ASPIRE U15 (LEAGUE)'].totals.games, 7, 'Expected 7 games in League DEFAULT_DATA');
+  assert.strictEqual(dd['AJAX ASPIRE U15 (LEAGUE)'].totals.won, 3, 'Expected 3 wins in League DEFAULT_DATA');
+  assert.strictEqual(dd['AJAX ASPIRE U15 (LEAGUE)'].totals.lost, 4, 'Expected 4 losses in League DEFAULT_DATA');
+});
+
+// ---------------------------------------------------------------------------
+// CHECK 12: Smart Film Logger Match Dropdown Dynamic Sync
+// ---------------------------------------------------------------------------
+check('12. Film Logger Match Dropdown dynamically synchronizes from submitted matches', () => {
+  const filmHtml = fs.readFileSync(path.join(ROOT, 'film-moment-logger.html'), 'utf8');
+
+  // 1. Crossfire #2 is in BUILTIN_MATCH_CATALOG
+  assert(filmHtml.includes('"Crossfire #2 (Nov 8)"'), 'BUILTIN_MATCH_CATALOG missing Crossfire #2 (Nov 8)');
+
+  // 2. Default selected match is Crossfire #2 (Nov 8)
+  assert(filmHtml.includes('<option value="Crossfire #2 (Nov 8)" selected>'), 'Crossfire #2 (Nov 8) is not default selected in dropdown');
+
+  // 3. Dynamic sync function exists
+  assert(filmHtml.includes('syncMatchesFromActionLog()'), 'Missing syncMatchesFromActionLog() call');
+  assert(filmHtml.includes('addMatchOptionIfMissing('), 'Missing addMatchOptionIfMissing function');
+});
+
 console.log(`\nAll ${passed} regression checks passed.`);

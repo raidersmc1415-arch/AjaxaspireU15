@@ -1207,11 +1207,17 @@ function getMatchHubData(pin) {
       return jsonOut({ success: false, error: 'Unauthorized coach PIN' });
     }
     var kv = getMatchHubKVMap();
+    var datasets = kv['datasets'] || {};
+    if (kv['datasets_aspire']) datasets['AJAX ASPIRE U15'] = kv['datasets_aspire'];
+    if (kv['datasets_league']) datasets['AJAX ASPIRE U15 (LEAGUE)'] = kv['datasets_league'];
+    if (kv['datasets_ga']) datasets['AJAX GA U15'] = kv['datasets_ga'];
+
     return jsonOut({
-      success: true,
+      success:   true,
       notes:     kv['notes']     || {},
       takeaways: kv['takeaways'] || {},
-      datasets:  kv['datasets']  || {}
+      datasets:  datasets,
+      history:   kv['match_history'] || []
     });
   } catch (err) {
     return jsonOut({ success: false, error: err.toString() });
@@ -1243,12 +1249,19 @@ function handleSaveMatchHubTakeaways(payload) {
 function handleSaveMatchHubData(payload) {
   if (!isValidCoachPin(payload.pin)) return jsonOut({ success: false, message: 'Unauthorized' });
   var kv = getMatchHubKVMap();
-  var datasets = kv['datasets'] || {};
   if (payload.datasets && typeof payload.datasets === 'object') {
-    for (var k in payload.datasets) {
-      datasets[k] = payload.datasets[k];
+    if (payload.datasets['AJAX ASPIRE U15']) {
+      var dAsp = payload.datasets['AJAX ASPIRE U15'];
+      setMatchHubKV('datasets_aspire', { totals: dAsp.totals, players: dAsp.players, filmSummary: dAsp.filmSummary });
     }
-    setMatchHubKV('datasets', datasets);
+    if (payload.datasets['AJAX ASPIRE U15 (LEAGUE)']) {
+      var dLea = payload.datasets['AJAX ASPIRE U15 (LEAGUE)'];
+      setMatchHubKV('datasets_league', { totals: dLea.totals, players: dLea.players, filmSummary: dLea.filmSummary });
+    }
+    if (payload.datasets['AJAX GA U15']) {
+      var dGa = payload.datasets['AJAX GA U15'];
+      setMatchHubKV('datasets_ga', { totals: dGa.totals, players: dGa.players, filmSummary: dGa.filmSummary });
+    }
   }
   return jsonOut({ success: true });
 }
