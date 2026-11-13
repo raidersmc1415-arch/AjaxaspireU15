@@ -2153,7 +2153,7 @@
               <div>
                 <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--forest); margin-bottom:4px;">Recent Match Action Log · Last 2 Matches</div>
                 <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                  <span>All Match Actions (Rocklin &amp; La Morinda)</span>
+                  <span id="player-film-title-text">All Match Actions (Last 2 Matches)</span>
                   <span class="badge badge-teal" id="player-film-count-badge">0 Moments</span>
                   <span class="badge badge-green" id="player-glow-rate-badge">0% Glows</span>
                 </div>
@@ -2163,7 +2163,7 @@
             <div class="film-log-body" id="film-log-body-panel" style="display:none;">
               <div class="film-filter-bar">
                 <select class="film-filter-select" id="film-log-match-filter" onchange="onMomentFilterChanged()">
-                  <option value="ALL">Both Matches (Rocklin &amp; La Morinda)</option>
+                  <option value="ALL">Both Matches (Last 2 Matches)</option>
                 </select>
                 <select class="film-filter-select" id="film-log-cat-filter" onchange="onMomentFilterChanged()">
                   <option value="ALL">All Categories</option>
@@ -3248,18 +3248,56 @@
       }
     }
 
-    // Recent Match Film Log logic (Scoped to Last 2 Matches · Option B)
-    function isRecentFilmMatch(matchName) {
-      const s = String(matchName || '').toLowerCase().trim();
-      if (!s) return false;
-      if (s.includes('la morinda') || s.includes('lamorinda')) return true;
-      if (s.includes('rocklin (nov 1') || s.includes('rocklin nov 1') || (s.includes('rocklin') && s.includes('nov'))) return true;
-      return false;
+    // Recent Match Film Log logic (Dynamically Scoped to Last 2 Matches)
+    function parseMatchSortScore(matchName, matchDateStr, maxId) {
+      if (matchDateStr) {
+        const ts = Date.parse(matchDateStr);
+        if (!isNaN(ts)) return ts;
+      }
+      const s = String(matchName || '');
+      const monthMap = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, sept:8, oct:9, nov:10, dec:11 };
+      const mNamed = s.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sept?|oct|nov|dec)[a-z]*\s+(\d{1,2})\b/i);
+      if (mNamed) {
+        const mon = monthMap[mNamed[1].toLowerCase().slice(0, 4)] ?? monthMap[mNamed[1].toLowerCase().slice(0, 3)];
+        if (mon !== undefined) return new Date(2026, mon, parseInt(mNamed[2], 10)).getTime();
+      }
+      const mSlash = s.match(/\b(\d{1,2})\/(\d{1,2})\b/);
+      if (mSlash) {
+        return new Date(2026, parseInt(mSlash[1], 10) - 1, parseInt(mSlash[2], 10)).getTime();
+      }
+      return Number(maxId) || 0;
+    }
+
+    function getRecentMatchNames(moments, maxMatches = 2) {
+      const byMatch = new Map();
+      (moments || []).forEach(m => {
+        const name = String(m.match || m.m || '').trim();
+        if (!name) return;
+        const numId = parseInt(m.id || m.eventId || 0, 10) || 0;
+        const prev = byMatch.get(name) || { name, dateStr: '', maxId: 0 };
+        if (m.matchDate && !prev.dateStr) prev.dateStr = m.matchDate;
+        if (numId > prev.maxId) prev.maxId = numId;
+        byMatch.set(name, prev);
+      });
+      return Array.from(byMatch.values())
+        .sort((a, b) => {
+          const sa = parseMatchSortScore(a.name, a.dateStr, a.maxId);
+          const sb = parseMatchSortScore(b.name, b.dateStr, b.maxId);
+          return (sb - sa) || (b.maxId - a.maxId);
+        })
+        .slice(0, maxMatches)
+        .map(x => x.name);
+    }
+
+    function filterToRecentMatches(moments, maxMatches = 2) {
+      const allowed = new Set(getRecentMatchNames(moments, maxMatches).map(n => n.toLowerCase()));
+      return (moments || []).filter(m => allowed.has(String(m.match || m.m || '').trim().toLowerCase()));
     }
 
     async function loadPlayerFilmMoments(playerName, jerseyNum) {
+      CURRENT_MOMENT_FILTER_MATCH = 'ALL';
       let moments = mergeMomentsWithLocalAndCloudEdits([], playerName, jerseyNum, null, null);
-      CURRENT_PLAYER_MOMENTS = moments.filter(m => isRecentFilmMatch(m.match || m.m || ''));
+      CURRENT_PLAYER_MOMENTS = filterToRecentMatches(moments, 2);
       const sec = document.getElementById('complete-film-log-section');
       if (sec) {
         sec.style.display = CURRENT_PLAYER_MOMENTS.length > 0 ? 'block' : 'none';
@@ -3279,7 +3317,7 @@
             Array.isArray(data.moments) ? data.moments : [],
             data.overrides || null
           );
-          CURRENT_PLAYER_MOMENTS = moments.filter(m => isRecentFilmMatch(m.match || m.m || ''));
+          CURRENT_PLAYER_MOMENTS = filterToRecentMatches(moments, 2);
           if (sec) {
             sec.style.display = CURRENT_PLAYER_MOMENTS.length > 0 ? 'block' : 'none';
           }
@@ -3322,6 +3360,7 @@
       const noteToPlayerVal = m.noteToPlayer !== undefined ? m.noteToPlayer : (m.playerNote || '');
       return {
         id: m.id || m.eventId || idxFallback || '',
+        matchDate: m.matchDate || '',
         match: m.m || m.match || 'Match',
         half: m.h || m.half || 'H1',
         time: m.t || m.time || '00:00',
@@ -3358,8 +3397,6 @@
           if (idStr && mapById.has(idStr)) mapById.delete(idStr);
           return;
         }
-        const mMatch = rawItem.match || rawItem.m || '';
-        if (!isRecentFilmMatch(mMatch)) return;
         const matchesPlayer = doesMomentMatchPlayer(rawItem, playerName, jerseyNum);
         const sig = getSig(rawItem);
         const existingKey = (idStr && mapById.has(idStr)) ? idStr : sigToId.get(sig);
@@ -3377,6 +3414,7 @@
           const nextNoteToPlayer = rawItem.noteToPlayer !== undefined ? rawItem.noteToPlayer : (rawItem.playerNote !== undefined ? rawItem.playerNote : prev.noteToPlayer);
           mapById.set(existingKey, {
             ...prev,
+            matchDate: rawItem.matchDate || prev.matchDate || '',
             match: rawItem.match || rawItem.m || prev.match,
             half: rawItem.half || rawItem.h || prev.half,
             time: rawItem.time || rawItem.t || prev.time,
@@ -3430,11 +3468,9 @@
 
     function filterCanonicalMomentsForPlayer(playerName, jerseyNum) {
       const list = window.CANONICAL_ASPIRE_MOMENTS || [];
-      return list.filter(m => {
-        const mMatch = m.m || m.match || '';
-        if (!isRecentFilmMatch(mMatch)) return false;
-        return doesMomentMatchPlayer(m, playerName, jerseyNum);
-      }).map((m, idx) => normalizeMomentItem(m, m.id || (idx + 1)));
+      const matched = list.filter(m => doesMomentMatchPlayer(m, playerName, jerseyNum))
+        .map((m, idx) => normalizeMomentItem(m, m.id || (idx + 1)));
+      return filterToRecentMatches(matched, 2);
     }
 
     function toggleFilmLogAccordion() {
@@ -3543,15 +3579,35 @@
         }
       }
 
-      // Populate match select options if needed
-      if (matchSelect && matchSelect.options.length <= 1) {
-        const matches = Array.from(new Set(CURRENT_PLAYER_MOMENTS.map(m => m.match))).filter(Boolean);
-        matches.forEach(m => {
+      // Update dynamic header & rebuild match select options
+      const recentMatchNames = getRecentMatchNames(CURRENT_PLAYER_MOMENTS, 2);
+      const titleEl = document.getElementById('player-film-title-text');
+      if (titleEl) {
+        titleEl.textContent = recentMatchNames.length
+          ? `All Match Actions (${recentMatchNames.join(' & ')})`
+          : 'All Match Actions (Last 2 Matches)';
+      }
+      if (matchSelect) {
+        const prevVal = CURRENT_MOMENT_FILTER_MATCH || 'ALL';
+        matchSelect.innerHTML = '';
+        const allOpt = document.createElement('option');
+        allOpt.value = 'ALL';
+        allOpt.textContent = recentMatchNames.length > 1
+          ? `Both Matches (${recentMatchNames.join(' & ')})`
+          : (recentMatchNames.length === 1 ? recentMatchNames[0] : 'Both Matches (Last 2 Matches)');
+        matchSelect.appendChild(allOpt);
+        recentMatchNames.forEach(m => {
           const opt = document.createElement('option');
           opt.value = m;
           opt.textContent = m;
           matchSelect.appendChild(opt);
         });
+        if (prevVal !== 'ALL' && recentMatchNames.includes(prevVal)) {
+          matchSelect.value = prevVal;
+        } else {
+          CURRENT_MOMENT_FILTER_MATCH = 'ALL';
+          matchSelect.value = 'ALL';
+        }
       }
 
       // Filter moments for the general accordion feed

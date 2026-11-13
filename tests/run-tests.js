@@ -1086,4 +1086,39 @@ check('13. Cross-device film moments parity, localStorage auto-heal & Event 668 
   assert.strictEqual(mockLocalStorage.getItem('ajax_aspire_active_moments'), null, 'Expected ajax_aspire_active_moments to be removed');
 });
 
+// ---------------------------------------------------------------------------
+// CHECK 14: Player Portal Dynamic Last-2-Matches Film Moments (Crossfire #2 fix)
+// ---------------------------------------------------------------------------
+check('14. Player Portal dynamically selects Last 2 Matches (including Crossfire #2)', () => {
+  const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+
+  assert(!indexHtml.includes('function isRecentFilmMatch('),
+    'index.html should not use hardcoded isRecentFilmMatch whitelist');
+  assert(indexHtml.includes('function getRecentMatchNames(') && indexHtml.includes('function filterToRecentMatches('),
+    'index.html missing dynamic getRecentMatchNames / filterToRecentMatches helpers');
+  assert(!indexHtml.includes('matchSelect.options.length <= 1'),
+    'index.html should not block matchSelect dropdown refresh with options.length <= 1');
+
+  const fnMatch = indexHtml.match(/(function parseMatchSortScore[\s\S]*?function filterToRecentMatches[\s\S]*?\n    \})/);
+  assert(fnMatch, 'Could not extract dynamic match helpers from index.html');
+
+  const sandbox = { Date, Number, Map, Set, Array, String, parseInt, isNaN };
+  vm.createContext(sandbox);
+  vm.runInContext(fnMatch[1], sandbox);
+
+  const sampleMoments = [
+    { id: 410, match: 'La Morinda', matchDate: '2026-10-18' },
+    { id: 520, match: 'Rocklin (Nov 1)', matchDate: '2026-11-01' },
+    { id: 700, match: 'Crossfire #2 (Nov 8)', matchDate: '2026-11-08' },
+    { id: 705, match: 'Crossfire #2 (Nov 8)', matchDate: '2026-11-08' }
+  ];
+
+  const recentNames = vm.runInContext(`getRecentMatchNames(${JSON.stringify(sampleMoments)}, 2)`, sandbox);
+  assert.deepStrictEqual(recentNames, ['Crossfire #2 (Nov 8)', 'Rocklin (Nov 1)'],
+    'Expected newest 2 matches to be Crossfire #2 (Nov 8) and Rocklin (Nov 1)');
+
+  const filtered = vm.runInContext(`filterToRecentMatches(${JSON.stringify(sampleMoments)}, 2)`, sandbox);
+  assert.strictEqual(filtered.length, 3, 'Expected 3 moments from the newest 2 matches (excluding La Morinda)');
+});
+
 console.log(`\nAll ${passed} regression checks passed.`);
