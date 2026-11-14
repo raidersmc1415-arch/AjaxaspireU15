@@ -361,13 +361,10 @@
           <span>Upload CSV</span>
         </label>
         <input type="file" id="excelInput" accept=".xlsx, .csv" class="hidden">
-        <button id="resetDataBtn" onclick="resetToDefaultData()" class="bg-card hover:bg-slate-800 text-slate-300 border border-border px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Reset cached browser data and reload embedded 1W-4L Aspire &amp; 3W-1D-0L GA stats">
+        <button id="resetDataBtn" onclick="resetToDefaultData()" class="bg-card hover:bg-slate-800 text-slate-300 border border-border px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Reset cached browser data and reload verified Season 26/27 stats &amp; Film Log">
           <span>Reset</span>
         </button>
-        <button id="exportHtmlBtn" onclick="exportUpdatedHtml()" class="bg-card hover:bg-slate-800 text-slate-200 border border-border px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Download self-contained match-hub.html with latest imported CSVs, takeaways &amp; notes">
-          <span class="hidden md:inline">Save HTML</span><span class="md:hidden">Save</span>
-        </button>
-        <button onclick="openShareModal()" class="bg-card hover:bg-slate-800 text-slate-200 border border-border px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Share summary or link">
+        <button onclick="openShareModal()" class="bg-card hover:bg-slate-800 text-slate-200 border border-border px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Share summary, link, or save HTML">
           <span>📤 Share</span>
         </button>
         <button onclick="lockHub()" class="bg-card hover:bg-rose-950/40 text-rose-300 hover:text-rose-200 border border-border px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Lock Match Hub on this device">
@@ -430,14 +427,20 @@
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 class="text-xs font-bold uppercase tracking-wider text-brand-400 flex items-center gap-1.5">
-              <span>Match Film Breakdown · Developmental Net Rating &amp; Turnovers by Third</span>
+              <span>Match-by-Match Game Film Index &amp; Turnover Triggers</span>
             </h3>
             <p id="overviewFilmSub" class="text-[11px] text-slate-400 mt-0.5"></p>
           </div>
-          <button type="button" onclick="switchTab('tab-film')" class="text-xs bg-pitch hover:bg-slate-800 accent-text border border-border px-3 py-1.5 rounded-xl font-semibold transition">
-            Open Full Film Log →
-          </button>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="switchTab('tab-charts')" class="text-xs bg-pitch hover:bg-slate-800 text-teal-300 border border-teal-500/40 px-3 py-1.5 rounded-xl font-semibold transition">
+              📊 Game Film Index Charts →
+            </button>
+            <button type="button" onclick="switchTab('tab-film')" class="text-xs bg-pitch hover:bg-slate-800 accent-text border border-border px-3 py-1.5 rounded-xl font-semibold transition">
+              Open Full Film Log →
+            </button>
+          </div>
         </div>
+        <div id="overviewMatchIndexStrip" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-0.5"></div>
         <div id="overviewFilmGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
       </div>
 
@@ -560,11 +563,8 @@
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <button type="button" onclick="toggleFilmModelLegend()" id="toggleLegendBtn" class="text-xs bg-pitch hover:bg-surface border border-brand-500/40 text-brand-400 hover:text-white px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5">
-                <span id="toggleLegendIcon">▾</span> <span id="toggleLegendText">Show Calculation Model &amp; Zone Matrix</span>
-              </button>
-              <button type="button" onclick="openFilmLegendModal()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1">
-                <span>Full Guide Modal</span> ↗
+              <button type="button" onclick="openFilmLegendModal()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1 min-h-[40px]">
+                <span>📖 Full Calculation Guide &amp; Examples</span> ↗
               </button>
             </div>
           </div>
@@ -598,128 +598,9 @@
             </div>
           </div>
 
-          <!-- Expandable Deep-Dive Panel -->
-          <div id="filmModelLegendBody" class="hidden pt-3 border-t border-border/70 space-y-4">
-            <!-- Visual Pitch Thirds & Outcome Matrix -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <!-- Zone x Outcome Matrix Table -->
-              <div class="bg-pitch/80 rounded-xl p-3.5 border border-border/70 space-y-2.5">
-                <div class="flex items-center justify-between">
-                  <h4 class="text-xs font-bold uppercase tracking-wider text-teal-400">1. Single-Charge Zone &times; Outcome Matrix</h4>
-                  <span class="text-[10px] mono text-slate-400">No Double-Charging</span>
-                </div>
-                <p class="text-[11px] text-slate-300 leading-snug">
-                  Every tagged moment is charged exactly once on the matrix below based on pitch location and action quality. The old v1 double-charge penalty (charging a Grow giveaway twice: once as Grow and once as Turnover) has been removed.
-                </p>
-                <div class="overflow-x-auto">
-                  <table class="w-full text-xs text-left">
-                    <thead class="text-[10px] uppercase font-bold text-slate-400 border-b border-border/70">
-                      <tr>
-                        <th class="py-1.5 px-2">Pitch Third</th>
-                        <th class="py-1.5 px-2 text-center text-emerald-400">Glow (+)</th>
-                        <th class="py-1.5 px-2 text-center text-rose-400">Grow (-)</th>
-                        <th class="py-1.5 px-2 text-center text-amber-300">Mixed (+)</th>
-                        <th class="py-1.5 px-2 text-slate-400">Tactical Context</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-border/40 font-mono text-[11px]">
-                      <tr>
-                        <td class="py-1.5 px-2 font-bold text-white">D3 (Defending)</td>
-                        <td class="py-1.5 px-2 text-center text-emerald-400 font-bold">+1.50</td>
-                        <td class="py-1.5 px-2 text-center text-rose-400 font-bold">-0.75 / -1.00 / -1.50</td>
-                        <td class="py-1.5 px-2 text-center text-amber-300">+0.25</td>
-                        <td class="py-1.5 px-2 font-sans text-[10px] text-slate-400">Spacing Fault (-0.75), Forced TO (-1.00), Unforced TO/Miscontrol (-1.50).</td>
-                      </tr>
-                      <tr>
-                        <td class="py-1.5 px-2 font-bold text-white">M3 (Middle)</td>
-                        <td class="py-1.5 px-2 text-center text-emerald-400 font-bold">+1.25</td>
-                        <td class="py-1.5 px-2 text-center text-rose-400 font-bold">-1.00</td>
-                        <td class="py-1.5 px-2 text-center text-amber-300">+0.25</td>
-                        <td class="py-1.5 px-2 font-sans text-[10px] text-slate-400">Line-breaking passes (+1.75) vs transitional vulnerability (-1.00).</td>
-                      </tr>
-                      <tr>
-                        <td class="py-1.5 px-2 font-bold text-white">A3 (Attacking)</td>
-                        <td class="py-1.5 px-2 text-center text-emerald-400 font-bold">+1.25</td>
-                        <td class="py-1.5 px-2 text-center text-rose-300 font-bold">-0.25 to -1.25</td>
-                        <td class="py-1.5 px-2 text-center text-amber-300">+0.25 / -0.50</td>
-                        <td class="py-1.5 px-2 font-sans text-[10px] text-slate-400">Inside-box miss (-0.25), Brave 1v1 (-0.50), Waste (-1.00), Poor Shot/Cross (-1.25).</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="p-2 rounded-lg bg-surface border border-border/60 text-[10px] text-slate-300 flex items-center justify-between flex-wrap gap-2">
-                  <span><strong>Clinical Rewards:</strong> Goal: <code class="text-emerald-400 font-bold">+2.50</code> · Goal Assist: <code class="text-teal-400 font-bold">+2.25</code> · Key Pass: <code class="text-teal-300 font-bold">+1.25</code> · Line-Break: <code class="text-sky-300 font-bold">+0.50 bonus</code></span>
-                  <span><strong>Conceded Error:</strong> <code class="text-rose-400 font-bold">-2.50 pts</code> · <strong>Attribution:</strong> <code class="text-amber-300 font-bold">1°=1.0x / 2°=0.5x</code></span>
-                </div>
-              </div>
-
-              <!-- Rating Scale Breakdown -->
-              <div class="bg-pitch/80 rounded-xl p-3.5 border border-border/70 space-y-2.5">
-                <div class="flex items-center justify-between">
-                  <h4 class="text-xs font-bold uppercase tracking-wider text-teal-400">2. The 0–100 Scale (80 = Role Par)</h4>
-                  <span class="text-[10px] mono text-slate-400">Normalized Index</span>
-                </div>
-                <p class="text-[11px] text-slate-300 leading-snug">
-                  An 80 represents meeting expectations for your position. Scores above 80 indicate net positive contributions over role baseline; scores below 80 highlight areas for targeted film study and skill reps.
-                </p>
-                <div class="space-y-1.5 text-xs">
-                  <div class="flex items-start gap-2 p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                    <span class="text-emerald-400 font-bold font-mono text-[11px] shrink-0 w-12">90–99</span>
-                    <span class="text-slate-200 text-[11px]"><strong>Elite / Dominant Impact:</strong> Consistent line-breaking execution, match-winning end-product, or commanding defensive dominance.</span>
-                  </div>
-                  <div class="flex items-start gap-2 p-1.5 rounded-lg bg-teal-500/10 border border-teal-500/20">
-                    <span class="text-teal-400 font-bold font-mono text-[11px] shrink-0 w-12">80–89</span>
-                    <span class="text-slate-200 text-[11px]"><strong>Solid / Role Par &amp; Above:</strong> High ball security, dependable tactical execution, and positive squad balance.</span>
-                  </div>
-                  <div class="flex items-start gap-2 p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <span class="text-amber-300 font-bold font-mono text-[11px] shrink-0 w-12">70–79</span>
-                    <span class="text-slate-200 text-[11px]"><strong>Developing / Active Contributor:</strong> High engagement with specific tactical focus areas (e.g. speed of play under pressure).</span>
-                  </div>
-                  <div class="flex items-start gap-2 p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20">
-                    <span class="text-rose-400 font-bold font-mono text-[11px] shrink-0 w-12">60–69</span>
-                    <span class="text-slate-200 text-[11px]"><strong>Tactical Focus Area:</strong> Elevated turnover rate or build-out mistakes under pressing requiring coaching focus.</span>
-                  </div>
-                  <div class="flex items-start gap-2 p-1.5 rounded-lg bg-slate-500/10 border border-border sm:col-span-2">
-                    <span class="text-slate-400 font-bold font-mono text-[11px] shrink-0 w-12">REG / –</span>
-                    <span class="text-slate-400 text-[11px]"><strong>Bayesian Small-Sample Regression:</strong> 45–119 mins shrinks toward Role Par 80 (<code>w = mins / 120</code>, tagged <code>REG</code>). Under 45 mins is unindexed (<code>–</code>).</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Multi-Position Minutes-Weighted Par & Amy Godinez Principle -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-              <!-- Multi-Position Par Calculation -->
-              <div class="bg-pitch/60 rounded-xl p-3 border border-border/60 space-y-2">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                  <span>3. Multi-Position Minutes-Weighted Par</span>
-                </h4>
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                  Players often split minutes across multiple roles (e.g. Centerback and Central Midfield). The engine calculates their personal baseline dynamically from their exact minutes in each role:
-                </p>
-                <div class="p-2.5 rounded-lg bg-surface border border-border/70 font-mono text-[11px] text-slate-200 space-y-1">
-                  <div class="text-teal-400 font-bold">Case Study: #50 Alexa Chipres</div>
-                  <div>Minutes: 52% Centerback (DEF) · 48% Central Mid (MID)</div>
-                  <div>Blended Par = (0.52 &times; -4.07) + (0.48 &times; -1.20) = <strong>-2.28 Net/80'</strong></div>
-                  <div class="text-emerald-400 font-bold">Film Index = 80 + (+1.88 - (-2.28)) &times; 2.0 = 88 / 100</div>
-                </div>
-              </div>
-
-              <!-- Silent Dependability & Confidence Rating -->
-              <div class="bg-pitch/60 rounded-xl p-3 border border-border/60 space-y-2">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                  <span>4. Sample Size &amp; "Silent Dependability"</span>
-                </h4>
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                  High sample requires <strong>&ge;250 minutes or &ge;12 events/80'</strong>. Medium is &ge;180 minutes or &ge;8 events/80'.
-                </p>
-                <div class="p-2.5 rounded-lg bg-surface border border-border/70 font-mono text-[11px] text-slate-200 space-y-1">
-                  <div class="text-teal-400 font-bold">The Amy God&iacute;nez Principle</div>
-                  <div>Minutes: 321' (3rd most on squad) · Turnovers: only 2.5 / 80'</div>
-                  <div class="text-slate-300 font-sans text-[10.5px]">A disciplined fullback with low turnovers logs fewer loud highlights because she plays clean, mistake-free soccer. Minutes played validates high confidence and earns an <strong>86 Index</strong>.</div>
-                </div>
-              </div>
-            </div>
+          <div class="p-2.5 rounded-xl bg-pitch/80 border border-border/70 text-[11px] text-slate-300 flex flex-wrap items-center justify-between gap-2">
+            <span><strong class="text-teal-400">Single-Charge Matrix:</strong> D3 Glow <code class="text-emerald-400">+1.50</code> · M3/A3 Glow <code class="text-emerald-400">+1.25</code> · Goal <code class="text-emerald-400">+2.50</code> · Assist <code class="text-teal-300">+2.25</code> · Line-Break <code class="text-sky-300">+0.50 bonus</code></span>
+            <span><strong class="text-rose-400">Penalties:</strong> D3 Grow <code class="text-rose-400">-0.75 to -1.50</code> · M3 Grow <code class="text-rose-400">-1.00</code> · Goal Conceded <code class="text-rose-400">-2.50</code> · <strong class="text-amber-300">Attribution:</strong> <code>1°=1.0x / 2°=0.5x</code></span>
           </div>
         </div>
 
@@ -767,88 +648,36 @@
           </div>
         </div>
 
-                <!-- Post-Match Film Study: Voice & Fast Clip Logger (Zero Uploads) -->
-        <div class="bg-card p-4 rounded-2xl border border-teal-500/40 shadow-xl space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border/80 pb-3">
-            <div class="flex items-center space-x-2.5">
-              <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-300 border border-teal-500/40 flex items-center justify-center font-black text-base shrink-0">🎙️</div>
-              <div>
-                <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                  <span>Film Study Room · Voice & Fast Clip Logger</span>
-                  <span class="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] font-mono font-bold">ZERO UPLOADS</span>
-                </h3>
-                <p class="text-[11px] text-slate-400">Review film on Veo at home. Speak notes with web mic, paste transcripts, or click sideline bookmarks to prefill clips.</p>
-              </div>
-            </div>
-
-            <!-- Target Match Selector -->
-            <div class="flex items-center gap-2 bg-pitch px-3 py-1.5 rounded-xl border border-border">
-              <span class="text-[10px] mono uppercase text-slate-400 font-bold">Reviewing:</span>
-              <select id="filmDirectMatchSelect" onchange="renderSidelineBookmarksForMatch()" class="bg-surface text-white text-xs rounded-lg px-2 py-1 border border-border font-medium focus:outline-none focus:border-teal-400">
-                <option value="La Morinda" selected>La Morinda (Oct 28)</option>
-                <option value="Woodland 10/11">Woodland (Oct 11)</option>
-                <option value="Crossfire">Crossfire (Sep 28)</option>
-                <option value="Woodland">Woodland (Sep 26)</option>
-                <option value="Rocklin">Rocklin (Sep 17)</option>
-                <option value="Manchester AVS FC">Manchester AVS FC</option>
-                <option value="Manchester Ventura Surf">Manchester Ventura Surf</option>
-                <option value="Manchester Pat">Manchester Pat</option>
-              </select>
+        <!-- Quick Film Study Actions (Direct Modal + Dedicated Smart Logger) -->
+        <div class="bg-card p-3.5 rounded-2xl border border-teal-500/40 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-300 border border-teal-500/40 flex items-center justify-center font-black text-base shrink-0">🎙️</div>
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-white">Veo Film Study &amp; Clip Tagging</h3>
+              <p class="text-[11px] text-slate-400">Tag moments live in the Voice &amp; Fast Logger or add a single timestamped clip directly to the Sheet.</p>
             </div>
           </div>
-
-          <!-- Sideline Bookmarks Tray (Recorded on pitch with 1-Tap) -->
-          <div class="bg-surface/80 p-3 rounded-xl border border-border/70 space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-slate-300 flex items-center gap-1.5">
-                <span>📌 Sideline Bookmarks</span>
-                <span class="text-[10px] text-slate-400 font-normal">(Flagged live on iPad — tap to load timestamp & zone)</span>
-              </span>
-            </div>
-            <div id="sidelineBookmarksList" class="flex items-center gap-2 flex-wrap min-h-[32px]">
-              <!-- Populated dynamically by renderSidelineBookmarksForMatch() -->
-            </div>
-          </div>
-
-          <!-- Dictation / Text Input Box -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-semibold text-slate-300">Observation Notes / Voice Snippets:</span>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="toggleFilmTabSpeechRecognition()" id="filmTabMicBtn" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95">
-                  <span id="filmTabMicDot" class="w-2 h-2 rounded-full bg-teal-400"></span>
-                  <span id="filmTabMicText">Dictate (Web Mic)</span>
-                </button>
-                <button type="button" onclick="document.getElementById('filmDirectInputText').value=''" class="text-[11px] text-slate-400 hover:text-slate-200">Clear</button>
-              </div>
-            </div>
-            <textarea id="filmDirectInputText" rows="3" class="w-full bg-pitch border border-border rounded-xl p-3 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-teal-400 transition" placeholder='Dictate or paste notes here, e.g.:
-"14:22, M3. Scarlett line breaking pass to Giselle wide. Glow."
-"23:14, D3. Sonia rushed punt down middle straight to attacker. Grow."'></textarea>
-            <div id="filmDirectMicLive" class="hidden text-[11px] text-teal-300 bg-teal-950/60 border border-teal-500/30 rounded-lg p-2 flex items-center gap-2">
-              <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
-              <span class="font-bold text-slate-300">Listening:</span>
-              <span id="filmDirectMicLiveText" class="text-white font-mono italic">Speak observation...</span>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
-              <span>💡</span>
-              <span>Moments append directly to this match&#39;s film log and update player Net / 80&#39; instantly.</span>
-            </div>
-            <button type="button" onclick="commitDirectFilmMoments()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-lg transition active:scale-95 flex items-center gap-1.5">
-              <span>⚡ Add Directly to Film Log (Zero Upload)</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="openNewFilmClipModal()" class="min-h-[40px] px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow transition active:scale-95 flex items-center gap-1.5">
+              <span>➕ Add Single Moment</span>
             </button>
+            <a href="film-moment-logger.html" target="_blank" class="min-h-[40px] px-3.5 py-2 rounded-xl bg-pitch hover:bg-surface text-teal-300 hover:text-white border border-teal-500/40 font-bold text-xs transition flex items-center gap-1.5">
+              <span>🎙️ Open Voice &amp; Fast Logger</span> ↗
+            </a>
           </div>
+          <!-- Hidden legacy anchors retained for backwards-compatible helper calls -->
+          <select id="filmDirectMatchSelect" class="hidden"><option value="Crossfire #2 (Nov 8)" selected>Crossfire #2 (Nov 8)</option></select>
+          <div id="sidelineBookmarksList" class="hidden"></div>
+          <textarea id="filmDirectInputText" class="hidden"></textarea>
+          <div id="filmDirectMicLive" class="hidden"><span id="filmDirectMicLiveText"></span></div>
+          <span id="filmTabMicDot" class="hidden"></span><span id="filmTabMicText" class="hidden"></span>
         </div>
 
 <!-- Match-by-Match Film Breakdown -->
         <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Film Breakdown by Match (Click to Filter Log)</h3>
-            <span id="filmMatchesHeaderCount" class="text-[10px] text-slate-400 mono">8 Reviewed Matches · 569 Tagged Moments</span>
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Film Breakdown by Match (Click to Filter Log or Inspect Game Charts)</h3>
+            <span id="filmMatchesHeaderCount" class="text-[10px] text-slate-400 mono"></span>
           </div>
           <div id="filmMatchCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
         </div>
@@ -907,8 +736,8 @@
               <option value="ALL">All Matches</option>
             </select>
             <select id="filmSortFilter" onchange="renderFilmLogList()" class="bg-pitch text-xs px-3 py-2 rounded-xl border border-border text-slate-200">
-              <option value="newest">Latest Matches First (Nov 1 → Sep)</option>
-              <option value="oldest">Chronological (Sep → Nov 1)</option>
+              <option value="newest">Latest Matches First (Newest → Oldest)</option>
+              <option value="oldest">Chronological (Oldest → Newest)</option>
             </select>
             <select id="filmZoneFilter" onchange="renderFilmLogList()" class="bg-pitch text-xs px-3 py-2 rounded-xl border border-border text-slate-200">
               <option value="ALL">All Field Zones (D3/M3/A3)</option>
@@ -936,20 +765,94 @@
 
     <!-- Charts -->
     <div id="tab-charts" class="tab-content hidden space-y-4">
+      <!-- Game & Half Filter Bar -->
+      <div id="chartsFilterBar" class="hidden bg-card p-3.5 rounded-2xl border border-border space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex flex-wrap items-center gap-2 min-w-0">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-brand-400 font-bold">Game Filter:</span>
+            <select id="chartsMatchFilter" onchange="setChartsMatchFilter(this.value)" aria-label="Filter Charts by Match" class="min-h-[40px] bg-pitch text-xs px-3 py-1.5 rounded-xl border border-border text-white font-semibold focus:outline-none focus:border-teal-400">
+              <option value="ALL">All Matches (Season Scope)</option>
+            </select>
+            <div id="chartsHalfFilter" class="flex items-center bg-pitch p-1 rounded-xl border border-border text-xs gap-1" role="group" aria-label="Filter by Half">
+              <button type="button" id="chartsHalfAll" onclick="setChartsHalfFilter('ALL')" class="min-h-[36px] px-2.5 py-1 rounded-lg font-semibold transition">Full Match</button>
+              <button type="button" id="chartsHalfH1" onclick="setChartsHalfFilter('H1')" class="min-h-[36px] px-2.5 py-1 rounded-lg font-semibold transition">1st Half</button>
+              <button type="button" id="chartsHalfH2" onclick="setChartsHalfFilter('H2')" class="min-h-[36px] px-2.5 py-1 rounded-lg font-semibold transition">2nd Half</button>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="jumpToFilmLogFromCharts()" class="min-h-[40px] text-xs bg-pitch hover:bg-surface text-teal-300 border border-teal-500/40 px-3 py-1.5 rounded-xl font-semibold transition">
+              🎬 Inspect Clips in Film Log →
+            </button>
+          </div>
+        </div>
+        <div id="chartsMatchPills" class="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[11px]"></div>
+      </div>
+
+      <!-- Overall Game Film Index Review Card (shown when team has film events) -->
+      <div id="gameFilmIndexCard" class="hidden bg-card p-4 rounded-2xl border border-border space-y-4">
+        <div class="flex flex-wrap items-start justify-between gap-3 border-b border-border/80 pb-3">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-teal-300 bg-teal-500/15 border border-teal-500/40 px-2 py-0.5 rounded font-bold">Game Film Index Review</span>
+              <span id="gfiTierBadge" class="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold border"></span>
+            </div>
+            <h3 id="gfiTitle" class="font-extrabold text-base sm:text-lg text-white mt-1.5">Overall Game Film Index</h3>
+            <p id="gfiSubtitle" class="text-[11px] text-slate-400 mt-0.5"></p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="text-right bg-pitch px-3.5 py-2 rounded-2xl border border-border">
+              <div class="text-[9px] font-mono uppercase text-slate-400 font-semibold">Game Index (Par 80)</div>
+              <div id="gfiScoreBadge" class="display text-3xl sm:text-4xl leading-none mt-0.5 text-brand-400">80</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="gfiKpiGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
+          <div class="bg-pitch/60 p-3.5 rounded-xl border border-border/80 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-teal-300">Action Family Net Impact (V3.1)</h4>
+              <span class="text-[10px] font-mono text-slate-400">Net Pts · Glow %</span>
+            </div>
+            <div id="gfiFamilyBars" class="space-y-2 text-xs"></div>
+          </div>
+          <div id="gfiStandoutsBox" class="bg-pitch/60 p-3.5 rounded-xl border border-border/80 space-y-3 text-xs"></div>
+        </div>
+      </div>
+
+      <!-- Game-by-Game Film Index & Glow % Progression Chart -->
+      <div id="chartGameProgressionCard" class="hidden bg-card p-4 rounded-2xl border border-border">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Game-by-Game Film Index (0–100) &amp; Glow % Progression</h3>
+            <p class="text-[10px] text-slate-500 mt-0.5">80 = Team Match Par · Tap any match bar to filter all charts &amp; Action Family splits below to that game</p>
+          </div>
+          <span id="gfiTrendBadge" class="text-[10px] accent-chip px-2.5 py-0.5 rounded border font-mono font-semibold">Season Trend</span>
+        </div>
+        <div class="relative h-60 w-full"><canvas id="chartGameProgression"></canvas></div>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-card p-4 rounded-2xl border border-border">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Attacking Output</h3>
-            <span class="text-[10px] accent-chip px-2 py-0.5 rounded border">Goals · Assists · Key Passes</span>
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Attacking &amp; Creative Output</h3>
+              <p id="contribSub" class="text-[10px] text-slate-500 mt-0.5">Goals · Assists · Key &amp; Line-Breaking Passes</p>
+            </div>
+            <span class="text-[10px] accent-chip px-2 py-0.5 rounded border shrink-0">Goals · Assists · Key Passes</span>
           </div>
           <div class="relative h-60 w-full"><canvas id="chartContributions"></canvas></div>
-          <p id="contribEmpty" class="hidden text-xs text-slate-500 text-center py-8">No goals, assists, or key passes logged yet.</p>
+          <p id="contribEmpty" class="hidden text-xs text-slate-500 text-center py-8">No goals, assists, or key passes logged for this selection.</p>
         </div>
 
         <div class="bg-card p-4 rounded-2xl border border-border">
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Turnovers by Pitch Third</h3>
-            <span id="toBadge" class="text-[10px] text-emerald-400 font-semibold"></span>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Turnovers by Pitch Third</h3>
+              <p id="toSub" class="text-[10px] text-slate-500 mt-0.5">Defending 3rd · Middle 3rd · Attacking 3rd</p>
+            </div>
+            <span id="toBadge" class="text-[10px] text-emerald-400 font-semibold shrink-0"></span>
           </div>
           <div class="relative h-52 flex items-center justify-center">
             <canvas id="chartTurnovers"></canvas>
@@ -967,7 +870,7 @@
         <div class="flex items-center justify-between mb-3">
           <div>
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Player Glow (Positive) vs. Grow (Coaching) Actions &amp; Turnovers</h3>
-            <p id="chartGlowGrowSub" class="text-[10px] text-slate-500 mt-0.5">From 569 timestamped film review events across 5 matches</p>
+            <p id="chartGlowGrowSub" class="text-[10px] text-slate-500 mt-0.5">Timestamped film review events</p>
           </div>
           <span class="text-[10px] bg-pitch text-slate-300 border border-border px-2 py-0.5 rounded font-mono">Glow · Grow · TOs</span>
         </div>
@@ -988,13 +891,24 @@
 
     <!-- Takeaways & Auto-Insights -->
     <div id="tab-tactics" class="tab-content hidden space-y-4">
-      <!-- Live Auto-Generated CSV Insights -->
+      <!-- Live Auto-Generated Match & Season Insights -->
       <div class="bg-card p-4 rounded-2xl border border-border space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-sm text-brand-400 flex items-center gap-2">
-            <span>Match &amp; Season Breakdown</span>
-          </h3>
-          <span class="text-[10px] bg-pitch text-slate-300 border border-border px-2 py-0.5 rounded font-mono">Stats + Film</span>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="font-bold text-sm text-brand-400 flex items-center gap-2">
+              <span>Match &amp; Season Intelligence</span>
+              <span class="text-[10px] bg-pitch text-slate-300 border border-border px-2 py-0.5 rounded font-mono">Stats + Film</span>
+            </h3>
+            <p id="insightsSub" class="text-[11px] text-slate-400 mt-0.5">Game Film Index, H1/H2 momentum, phase-of-play efficiency, and next-session focus.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="insightsMatchFilter" onchange="setInsightsMatchFilter(this.value)" aria-label="Filter Insights by Match" class="min-h-[40px] bg-pitch text-xs px-3 py-1.5 rounded-xl border border-border text-white font-semibold focus:outline-none focus:border-teal-400">
+              <option value="ALL">All Matches (Season Intelligence)</option>
+            </select>
+            <button type="button" onclick="jumpToChartsFromInsights()" class="min-h-[40px] text-xs bg-pitch hover:bg-surface text-teal-300 border border-teal-500/40 px-3 py-1.5 rounded-xl font-semibold transition">
+              📊 Open in Charts →
+            </button>
+          </div>
         </div>
         <div id="autoInsights" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-300"></div>
       </div>
@@ -1013,7 +927,7 @@
 
         <!-- Editor Panel -->
         <div id="takeawayEditor" class="hidden pt-3 border-t border-border space-y-3">
-          <div class="text-xs text-slate-400">Edit existing takeaways or add a new one below (saves locally and embeds when you click <strong class="text-brand-400">Save HTML</strong>):</div>
+          <div class="text-xs text-slate-400">Edit existing takeaways or add a new one below (saves locally and embeds when you click <strong class="text-brand-400">Share → Download Updated match-hub.html</strong>):</div>
           <div id="takeawayEditorList" class="space-y-2"></div>
           <div class="flex items-center gap-2 flex-wrap">
             <button type="button" onclick="addTakeawayRow()" class="bg-surface hover:bg-slate-800 text-slate-200 border border-border px-3 py-2 rounded-xl text-xs font-semibold">+ Add Point</button>
@@ -2962,7 +2876,10 @@
     let filmMatrixSort = 'netPer80';
     let selectedPlayer = null;
     let activeTab = 'tab-overview';
-    let chartContrib = null, chartWorkload = null, chartZones = null, chartGlowGrow = null;
+    let chartContrib = null, chartWorkload = null, chartZones = null, chartGlowGrow = null, chartGameProg = null;
+    let chartsMatchFilter = 'ALL';
+    let chartsHalfFilter = 'ALL';
+    let insightsMatchFilter = 'ALL';
     let isGuestMode = false;
 
     const $ = id => document.getElementById(id);
@@ -3374,6 +3291,251 @@
       return String(p.filmIndex);
     }
 
+    const GAME_FILM_FAMILIES = [
+      { key: 'Passing', label: 'Passing & Progression' },
+      { key: 'Carrying', label: 'Carrying & 1v1' },
+      { key: 'Defending', label: 'Defending & Press' },
+      { key: 'Duel', label: 'Duels & Set Pieces' },
+      { key: 'Finishing', label: 'Finishing & Box Entry' },
+      { key: 'Goalkeeping', label: 'Goalkeeping & Build-Out' },
+      { key: 'Tactical_Shape', label: 'Tactical Shape & Spacing' }
+    ];
+
+    function inferFilmEventHalf(e) {
+      const h = String(e?.half || '').trim().toUpperCase();
+      if (h === 'H1' || h === '1ST' || h === 'FIRST') return 'H1';
+      if (h === 'H2' || h === '2ND' || h === 'SECOND') return 'H2';
+      const mins = parseInt(String(e?.time || '0').split(':')[0], 10);
+      return (!isNaN(mins) && mins > 40) ? 'H2' : 'H1';
+    }
+
+    function isScoredFilmEvent(e) {
+      if (!e || typeof e !== 'object') return false;
+      if (e.category === 'Administrative' || e.tag === 'Substitution' || e.tag === 'Bookmark') return false;
+      return true;
+    }
+
+    function gameFilmIndexTier(idx) {
+      if (idx == null) return { label: 'No Film', cls: 'text-slate-400 border-border bg-pitch' };
+      if (idx >= 90) return { label: 'Elite Performance', cls: 'text-emerald-300 border-emerald-500/40 bg-emerald-500/15' };
+      if (idx >= 80) return { label: 'Above Team Par (80+)', cls: 'text-teal-300 border-teal-500/40 bg-teal-500/15' };
+      if (idx >= 70) return { label: 'Competitive / Developing', cls: 'text-amber-300 border-amber-500/40 bg-amber-500/15' };
+      return { label: 'High Coaching Focus (<70)', cls: 'text-rose-300 border-rose-500/40 bg-rose-500/15' };
+    }
+
+    function scoreSubsetFilmIndex(subsetEvents, baseNetPerClip = -0.16) {
+      const scored = (subsetEvents || []).filter(isScoredFilmEvent);
+      if (!scored.length) {
+        return {
+          index: null, netPts: 0, netPerClip: 0,
+          glow: 0, grow: 0, mixed: 0, neutral: 0, glowPct: 0,
+          turnovers: 0, toD: 0, toM: 0, toA: 0,
+          goalsScored: 0, goalsConceded: 0, totalClips: 0
+        };
+      }
+      let netPts = 0, glow = 0, grow = 0, mixed = 0, neutral = 0;
+      let turnovers = 0, toD = 0, toM = 0, toA = 0, goalsScored = 0, goalsConceded = 0;
+      scored.forEach(e => {
+        const isCrit = Boolean(e.isCritical || e.qualityRaw === 'Goal Conceded' || e.outcome === 'Goal Conceded' || e.tag === 'Goal Conceded');
+        const w = eventWeight(e, isCrit);
+        netPts += w;
+        if (e.outcome === 'Glow' || e.outcome === 'Goal Scored') glow++;
+        else if (e.outcome === 'Grow' || e.outcome === 'Goal Conceded') grow++;
+        else if (e.outcome === 'Glow & Grow') { glow++; grow++; mixed++; }
+        else neutral++;
+
+        if (isTurnoverEvent(e)) {
+          turnovers++;
+          if (e.zone === 'D3') toD++;
+          else if (e.zone === 'M3') toM++;
+          else if (e.zone === 'A3') toA++;
+        }
+        const isGoal = (e.qualityRaw === 'Goal Scored' || e.outcome === 'Goal Scored' || (e.tag === 'Goal Scored' && e.outcome !== 'Grow' && !isCrit));
+        if (isGoal) goalsScored++;
+        if (isCrit) goalsConceded++;
+      });
+      const totalClips = scored.length;
+      const netPerClip = netPts / totalClips;
+      const ggTotal = glow + grow;
+      const glowPct = ggTotal > 0 ? Math.round((glow * 100) / ggTotal) : 50;
+      const d3ToShare = totalClips > 0 ? (toD / totalClips) : 0;
+      const rawIdx = 80 + (netPerClip - baseNetPerClip) * 26 + (glowPct - 45) * 0.35 - (d3ToShare - 0.09) * 22;
+      const index = Math.max(50, Math.min(99, Math.round(rawIdx)));
+      return {
+        index,
+        netPts: Number(netPts.toFixed(2)),
+        netPerClip: Number(netPerClip.toFixed(2)),
+        glow, grow, mixed, neutral, glowPct,
+        turnovers, toD, toM, toA,
+        goalsScored, goalsConceded, totalClips
+      };
+    }
+
+    function computeGameFilmMetrics(allEvents, matchFilter = 'ALL', halfFilter = 'ALL') {
+      const events = Array.isArray(allEvents) ? allEvents : [];
+      const matchOrder = [];
+      const byMatchMap = {};
+      events.forEach(e => {
+        if (!e || !e.match) return;
+        if (!byMatchMap[e.match]) {
+          byMatchMap[e.match] = [];
+          matchOrder.push(e.match);
+        }
+        byMatchMap[e.match].push(e);
+      });
+
+      const allScored = events.filter(isScoredFilmEvent);
+      let baseNetSum = 0;
+      allScored.forEach(e => {
+        const isCrit = Boolean(e.isCritical || e.qualityRaw === 'Goal Conceded' || e.outcome === 'Goal Conceded' || e.tag === 'Goal Conceded');
+        baseNetSum += eventWeight(e, isCrit);
+      });
+      const baseNetPerClip = allScored.length ? (baseNetSum / allScored.length) : -0.16;
+
+      const matchSummaries = matchOrder.map(mName => {
+        const mEvents = byMatchMap[mName] || [];
+        const overall = scoreSubsetFilmIndex(mEvents, baseNetPerClip);
+        const h1 = scoreSubsetFilmIndex(mEvents.filter(e => inferFilmEventHalf(e) === 'H1'), baseNetPerClip);
+        const h2 = scoreSubsetFilmIndex(mEvents.filter(e => inferFilmEventHalf(e) === 'H2'), baseNetPerClip);
+        return { match: mName, ...overall, h1Index: h1.index, h2Index: h2.index };
+      });
+
+      const matchEvents = matchFilter && matchFilter !== 'ALL'
+        ? events.filter(e => e.match === matchFilter)
+        : events;
+
+      const scopedEvents = halfFilter && halfFilter !== 'ALL'
+        ? matchEvents.filter(e => inferFilmEventHalf(e) === halfFilter)
+        : matchEvents;
+
+      const overall = scoreSubsetFilmIndex(scopedEvents, baseNetPerClip);
+      const h1 = scoreSubsetFilmIndex(matchEvents.filter(e => inferFilmEventHalf(e) === 'H1'), baseNetPerClip);
+      const h2 = scoreSubsetFilmIndex(matchEvents.filter(e => inferFilmEventHalf(e) === 'H2'), baseNetPerClip);
+      const h2Delta = (h1.index != null && h2.index != null) ? (h2.index - h1.index) : null;
+
+      // V3.1 Action Family Breakdown (structured category & outcome fields only)
+      const famMap = {};
+      GAME_FILM_FAMILIES.forEach(f => {
+        famMap[f.key] = { family: f.key, label: f.label, clips: 0, glow: 0, grow: 0, mixed: 0, neutral: 0, netPts: 0 };
+      });
+
+      const growTagCounts = {};
+      const glowTagCounts = {};
+      const toReasonCounts = {};
+      const playerMap = {};
+
+      scopedEvents.filter(isScoredFilmEvent).forEach(e => {
+        const isCrit = Boolean(e.isCritical || e.qualityRaw === 'Goal Conceded' || e.outcome === 'Goal Conceded' || e.tag === 'Goal Conceded');
+        const w = eventWeight(e, isCrit);
+        const famKey = famMap[e.category] ? e.category : 'Tactical_Shape';
+        const fam = famMap[famKey];
+        fam.clips++;
+        fam.netPts += w;
+        if (e.outcome === 'Glow' || e.outcome === 'Goal Scored') fam.glow++;
+        else if (e.outcome === 'Grow' || e.outcome === 'Goal Conceded') fam.grow++;
+        else if (e.outcome === 'Glow & Grow') { fam.glow++; fam.grow++; fam.mixed++; }
+        else fam.neutral++;
+
+        const tagName = e.tag || e.category || 'Action';
+        const zoneTag = e.zone ? `${tagName} (${e.zone})` : tagName;
+        if (e.outcome === 'Grow' || e.outcome === 'Goal Conceded' || e.outcome === 'Glow & Grow' || isCrit) {
+          growTagCounts[zoneTag] = (growTagCounts[zoneTag] || 0) + 1;
+        }
+        if (e.outcome === 'Glow' || e.outcome === 'Goal Scored' || e.outcome === 'Glow & Grow') {
+          glowTagCounts[tagName] = (glowTagCounts[tagName] || 0) + 1;
+        }
+        if (isTurnoverEvent(e)) {
+          toReasonCounts[tagName] = (toReasonCounts[tagName] || 0) + 1;
+        }
+
+        // Player attribution (1° = 1.0x, 2° = 0.5x)
+        const rawJerseys = Array.isArray(e.jerseys) ? e.jerseys : [];
+        const jerseys = rawJerseys.map(j => Number(j)).filter(j => !isNaN(j) && j > 0);
+        const prim = e.primaryJersey != null ? Number(e.primaryJersey) : (jerseys.length ? jerseys[0] : null);
+        const isGoalScored = (e.qualityRaw === 'Goal Scored' || e.outcome === 'Goal Scored' || (e.tag === 'Goal Scored' && e.outcome !== 'Grow' && !isCrit));
+        const isAssist = (e.qualityRaw === 'Assist' || e.tag === 'Goal Assist' || e.tag === 'Assist');
+        const isKeyPass = (e.tag === 'Key Pass (Shot Assist)' || e.tag === 'Line-Breaking Pass' || e.tag === 'Key Pass / Line Breaker' || e.tag === 'Key Pass / Line Break');
+        const isShot = (e.category === 'Finishing' && (isGoalScored || e.tag === 'Shot on Target' || e.tag === 'Quality Shot' || e.tag === 'Shot Off Target' || e.tag === 'Poor Shot Selection'));
+        const isSot = (isGoalScored || e.tag === 'Shot on Target');
+
+        const seenJ = new Set();
+        jerseys.forEach((j, idx) => {
+          if (seenJ.has(j)) return;
+          seenJ.add(j);
+          const rosterMeta = ASPIRE_JERSEY_MAP[j];
+          const pNameFromEv = Array.isArray(e.players) && e.players[idx] ? String(e.players[idx]).replace(/^#\d+\s*/, '').trim() : '';
+          const pName = rosterMeta?.name || pNameFromEv || `#${j}`;
+          if (!playerMap[j]) {
+            playerMap[j] = {
+              jersey: j, name: pName, clips: 0, glow: 0, grow: 0, mixed: 0,
+              turnovers: 0, toD: 0, toM: 0, toA: 0,
+              goals: 0, assists: 0, keyPasses: 0, shots: 0, sot: 0, netPts: 0
+            };
+          }
+          const rec = playerMap[j];
+          const isPrimary = (prim === null || j === prim);
+          const mult = isPrimary ? 1.0 : 0.5;
+          rec.clips++;
+          rec.netPts += w * mult;
+          if (e.outcome === 'Glow' || e.outcome === 'Goal Scored') rec.glow++;
+          else if (e.outcome === 'Grow' || e.outcome === 'Goal Conceded') rec.grow++;
+          else if (e.outcome === 'Glow & Grow') { rec.glow++; rec.grow++; rec.mixed++; }
+
+          if (isTurnoverEvent(e)) {
+            rec.turnovers++;
+            if (e.zone === 'D3') rec.toD++;
+            else if (e.zone === 'M3') rec.toM++;
+            else if (e.zone === 'A3') rec.toA++;
+          }
+          if (isPrimary) {
+            if (isGoalScored) rec.goals++;
+            if (isAssist) rec.assists++;
+            if (isKeyPass) rec.keyPasses++;
+            if (isShot) rec.shots++;
+            if (isSot) rec.sot++;
+          }
+        });
+      });
+
+      const families = Object.values(famMap)
+        .filter(f => f.clips > 0)
+        .map(f => ({
+          ...f,
+          netPts: Number(f.netPts.toFixed(2)),
+          glowPct: (f.glow + f.grow) > 0 ? Math.round((f.glow * 100) / (f.glow + f.grow)) : null
+        }))
+        .sort((a, b) => Math.abs(b.netPts) - Math.abs(a.netPts));
+
+      const playerImpacts = Object.values(playerMap)
+        .map(p => ({
+          ...p,
+          netPts: Number(p.netPts.toFixed(2)),
+          glowPct: (p.glow + p.grow) > 0 ? Math.round((p.glow * 100) / (p.glow + p.grow)) : 0
+        }))
+        .sort((a, b) => b.netPts - a.netPts || b.glow - a.glow);
+
+      const topGrowTags = Object.entries(growTagCounts).sort((a, b) => b[1] - a[1]);
+      const topGlowTags = Object.entries(glowTagCounts).sort((a, b) => b[1] - a[1]);
+      const topToReasons = Object.entries(toReasonCounts).sort((a, b) => b[1] - a[1]);
+
+      return {
+        matchFilter,
+        halfFilter,
+        matchOrder,
+        matchSummaries,
+        baseNetPerClip: Number(baseNetPerClip.toFixed(3)),
+        overall,
+        h1,
+        h2,
+        h2Delta,
+        families,
+        playerImpacts,
+        topGrowTags,
+        topGlowTags,
+        topToReasons
+      };
+    }
+
     function sanitizeAndHealData() {
       // Safeguard against the 4W-4L combined club total row ever appearing as AJAX ASPIRE U15
       const asp = DATA['AJAX ASPIRE U15'];
@@ -3574,7 +3736,9 @@
       DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
       renderTeamSwitch();
       selectTeam(team.id);
-      showToast('Reset to verified stats (GA 3W-1D-0L · Aspire 1W-0D-4L + Film Log)!');
+      const curTotals = DATA[activeExportKey(team)]?.totals || {};
+      const curClips = DATA[activeExportKey(team)]?.filmEvents?.length || 0;
+      showToast(`Reset to verified stats (${curTotals.games || 0} GP · ${curClips} Film Clips)!`);
     }
 
     /* ---------- Dual-Rostered Swing Player Detection ---------- */
@@ -3619,10 +3783,10 @@
       const showScope = team.id === 'aspire' && !!DATA['AJAX ASPIRE U15 (LEAGUE)'];
       $('scopeBar').classList.toggle('hidden', !showScope);
       if (showScope) {
-        const allGames = DATA['AJAX ASPIRE U15']?.totals?.games || 9;
-        const lgGames = DATA['AJAX ASPIRE U15 (LEAGUE)']?.totals?.games || 6;
-        const allClips = DATA['AJAX ASPIRE U15']?.filmEvents?.length || 658;
-        const lgClips = DATA['AJAX ASPIRE U15 (LEAGUE)']?.filmEvents?.length || 514;
+        const allGames = DATA['AJAX ASPIRE U15']?.totals?.games || 10;
+        const lgGames = DATA['AJAX ASPIRE U15 (LEAGUE)']?.totals?.games || 7;
+        const allClips = DATA['AJAX ASPIRE U15']?.filmEvents?.length || 836;
+        const lgClips = DATA['AJAX ASPIRE U15 (LEAGUE)']?.filmEvents?.length || 692;
         $('scope-all').textContent = `All Competitions (${allGames} GP · ${allClips} Clips)`;
         $('scope-league').textContent = `GA & Aspire League (${lgGames} GP · ${lgClips} Clips)`;
         $('scope-all').className = `px-3 py-1.5 rounded-lg text-xs font-semibold transition ${aspireScope === 'all' ? 'accent-chip border shadow-sm' : 'text-slate-400 hover:text-white bg-pitch/40'}`;
@@ -3748,14 +3912,42 @@
     function renderOverviewFilmSnapshot() {
       const d = DATA[activeExportKey(team)];
       const fs = d?.filmSummary;
+      const events = d?.filmEvents || [];
       const card = $('overviewFilmCard');
       if (!fs || !fs.totalEvents) {
         card.classList.add('hidden');
         return;
       }
       card.classList.remove('hidden');
-      const glowPct = pct(fs.glow, fs.glow + fs.grow);
-      $('overviewFilmSub').innerHTML = `<strong>${fs.totalEvents} timestamped film events</strong> across ${fs.matches.length} reviewed matches · <strong>${fs.turnovers} Turnovers</strong> (${fs.toD} Def 3rd, ${fs.toM} Mid 3rd, ${fs.toA} Att 3rd) · <strong>${fs.glow} Glow</strong> (${glowPct}%) vs. <strong>${fs.grow} Grow</strong> actions`;
+      const gfm = computeGameFilmMetrics(events, 'ALL', 'ALL');
+      const ov = gfm.overall;
+      const tier = gameFilmIndexTier(ov.index);
+      const hSplitTxt = (gfm.h1.index != null && gfm.h2.index != null)
+        ? ` · H1 <strong>${gfm.h1.index}</strong> → H2 <strong>${gfm.h2.index}</strong>`
+        : '';
+      $('overviewFilmSub').innerHTML = `Overall Game Film Index: <strong class="text-brand-400">${ov.index ?? '–'}/100</strong> (${esc(tier.label)}) · <strong>${ov.glowPct}% Glow</strong> · Net <strong>${fmtNet(ov.netPts)} pts</strong> across ${gfm.matchSummaries.length} matches${hSplitTxt}`;
+
+      const stripEl = $('overviewMatchIndexStrip');
+      if (stripEl) {
+        const newestFirst = [...gfm.matchSummaries].reverse();
+        stripEl.innerHTML = newestFirst.map((m, idx) => {
+          const badgeCls = m.index >= 85 ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/40'
+            : m.index >= 80 ? 'text-teal-300 bg-teal-500/15 border-teal-500/40'
+            : m.index >= 72 ? 'text-amber-300 bg-amber-500/15 border-amber-500/40'
+            : 'text-rose-300 bg-rose-500/15 border-rose-500/40';
+          return `<button type="button" onclick="openMatchInCharts('${esc(m.match)}')" class="text-left bg-surface hover:border-teal-400/60 p-2.5 rounded-xl border border-border/80 transition space-y-1 ${idx === 0 ? 'ring-1 ring-teal-500/50' : ''}" title="Inspect ${esc(m.match)} in Game Charts">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[11px] font-bold text-white truncate">${esc(m.match)}</span>
+              <span class="text-[10px] font-mono font-black px-1.5 py-0.5 rounded border ${badgeCls}">${m.index ?? '–'}</span>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+              <span>${m.glowPct}% Glow</span>
+              <span>${fmtNet(m.netPts)}</span>
+            </div>
+            <div class="text-[9px] text-slate-400">${m.turnovers} TOs (D3:${m.toD}) · ${m.totalClips} clips</div>
+          </button>`;
+        }).join('');
+      }
 
       const topReasons = Object.entries(fs.toReasons || {}).slice(0, 4).map(([k, v]) =>
         `<div class="flex items-center justify-between text-[11px]"><span class="text-slate-300 truncate">${esc(k)}</span><span class="font-mono font-bold text-rose-400">${v} (${pct(v, fs.turnovers)}%)</span></div>`
@@ -4129,22 +4321,37 @@
         $('filmMatchesHeaderCount').textContent = `${(fs.matches || []).length} Reviewed Matches · ${totals.filmEventsCount || (fs.totalEvents || 0)} Tagged Moments`;
       }
 
-      // Match Cards (sorted newest match first so Rocklin Nov 1 is front and center!)
+      const gfm = computeGameFilmMetrics(events, 'ALL', 'ALL');
+      const gfmByMatch = {};
+      (gfm.matchSummaries || []).forEach(ms => { gfmByMatch[ms.match] = ms; });
+
+      // Match Cards (sorted newest match first)
       const sortedMatches = [...(fs.matches || [])].reverse();
-      $('filmMatchCards').innerHTML = sortedMatches.map(m => `
-        <div onclick="$('filmMatchFilter').value='${esc(m.match)}'; renderFilmLogList();" class="bg-surface hover:border-brand-500/50 cursor-pointer p-3 rounded-xl border border-border/80 transition space-y-1 ${m.match.includes('Nov 1') ? 'ring-1 ring-teal-500/50' : ''}">
-          <div class="flex items-center justify-between">
+      $('filmMatchCards').innerHTML = sortedMatches.map((m, idx) => {
+        const ms = gfmByMatch[m.match] || {};
+        const idxVal = ms.index != null ? ms.index : '–';
+        const idxCls = ms.index >= 85 ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/40'
+          : ms.index >= 80 ? 'text-teal-300 bg-teal-500/15 border-teal-500/40'
+          : ms.index >= 72 ? 'text-amber-300 bg-amber-500/15 border-amber-500/40'
+          : 'text-rose-300 bg-rose-500/15 border-rose-500/40';
+        return `
+        <div onclick="$('filmMatchFilter').value='${esc(m.match)}'; renderFilmLogList();" class="bg-surface hover:border-brand-500/50 cursor-pointer p-3 rounded-xl border border-border/80 transition space-y-1.5 ${idx === 0 ? 'ring-1 ring-teal-500/50' : ''}">
+          <div class="flex items-center justify-between gap-1.5">
             <span class="font-bold text-xs text-white truncate">${esc(m.match)}</span>
-            <span class="text-[10px] font-mono bg-pitch px-1.5 py-0.5 rounded text-slate-300">${m.events} clips</span>
+            <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${idxCls}" title="Game Film Index (80 = Par)">Index ${idxVal}</span>
           </div>
-          <div class="text-[11px] text-amber-300 font-medium">${m.turnovers} TOs <span class="text-slate-500 text-[10px]">(D3:${m.toD} · M3:${m.toM} · A3:${m.toA})</span></div>
-          <div class="flex items-center justify-between text-[10px]">
-            <span class="text-emerald-400 font-semibold">${m.glow} Glow</span>
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-amber-300 font-medium">${m.turnovers} TOs <span class="text-slate-500 text-[10px]">(D3:${m.toD}·M3:${m.toM}·A3:${m.toA})</span></span>
+            <span class="text-[10px] font-mono text-slate-400">${m.events} clips</span>
+          </div>
+          <div class="flex items-center justify-between text-[10px] pt-0.5">
+            <span class="text-emerald-400 font-semibold">${m.glow} Glow · ${m.glowPct}%</span>
             <span class="text-rose-400 font-semibold">${m.grow} Grow</span>
-            <span class="text-slate-400">${m.glowPct}% Glow</span>
+            <button type="button" onclick="event.stopPropagation(); openMatchInCharts('${esc(m.match)}')" class="text-[10px] font-semibold text-teal-300 hover:text-white underline">📊 Charts →</button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
 
       // Populate Match & Player filter dropdowns if needed
       const mf = $('filmMatchFilter');
@@ -4352,17 +4559,319 @@
         : '<p class="text-xs text-slate-500 text-center py-6">No film moments match those filters.</p>';
     }
 
-    /* ---------- Charts ---------- */
-    function renderCharts() {
-      if (typeof Chart === 'undefined') return;
-      const tick = { color: '#5A687A' };
-      const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim();
+    /* ---------- Charts & Game Film Index Review ---------- */
+    function setChartsMatchFilter(matchName) {
+      chartsMatchFilter = matchName || 'ALL';
+      renderCharts();
+    }
 
-      const producers = players.filter(p => p.goals > 0 || p.assists > 0 || (p.keyPasses || 0) > 0)
-        .sort((a, b) => (b.goals + b.assists + (b.keyPasses || 0)) - (a.goals + a.assists + (a.keyPasses || 0)));
+    function setChartsHalfFilter(halfVal) {
+      chartsHalfFilter = halfVal || 'ALL';
+      renderCharts();
+    }
+
+    function openMatchInCharts(matchName) {
+      chartsMatchFilter = matchName || 'ALL';
+      chartsHalfFilter = 'ALL';
+      switchTab('tab-charts');
+    }
+
+    function jumpToFilmLogFromCharts() {
+      switchTab('tab-film');
+      if ($('filmMatchFilter')) {
+        $('filmMatchFilter').value = chartsMatchFilter || 'ALL';
+        renderFilmLogList();
+      }
+    }
+
+    function setInsightsMatchFilter(matchName) {
+      insightsMatchFilter = matchName || 'ALL';
+      renderAutoInsights();
+    }
+
+    function jumpToChartsFromInsights() {
+      openMatchInCharts(insightsMatchFilter || 'ALL');
+    }
+
+    function renderGameFilmIndexReview(gfm, events) {
+      const filterBar = $('chartsFilterBar');
+      const card = $('gameFilmIndexCard');
+      const progCard = $('chartGameProgressionCard');
+      const hasFilm = Array.isArray(events) && events.length > 0 && (gfm?.matchOrder?.length || 0) > 0;
+
+      if (filterBar) filterBar.classList.toggle('hidden', !hasFilm);
+      if (card) card.classList.toggle('hidden', !hasFilm);
+      if (progCard) progCard.classList.toggle('hidden', !hasFilm);
+      if (!hasFilm) return;
+
+      const newestFirstMatches = [...(gfm.matchOrder || [])].reverse();
+      if (chartsMatchFilter !== 'ALL' && !gfm.matchOrder.includes(chartsMatchFilter)) {
+        chartsMatchFilter = 'ALL';
+      }
+
+      const mfEl = $('chartsMatchFilter');
+      if (mfEl) {
+        const msMap = {};
+        (gfm.matchSummaries || []).forEach(ms => { msMap[ms.match] = ms; });
+        mfEl.innerHTML = `<option value="ALL">All Matches (${gfm.matchOrder.length} Games · ${events.length} Clips)</option>` +
+          newestFirstMatches.map(m => {
+            const ms = msMap[m] || {};
+            return `<option value="${esc(m)}">${esc(m)} · Index ${ms.index ?? '–'} (${ms.totalClips || 0} clips)</option>`;
+          }).join('');
+        mfEl.value = chartsMatchFilter;
+      }
+
+      const pillsEl = $('chartsMatchPills');
+      if (pillsEl) {
+        const pillBtn = (val, label, active) => `<button type="button" onclick="setChartsMatchFilter('${esc(val)}')" class="shrink-0 min-h-[36px] px-2.5 py-1 rounded-xl border font-semibold transition ${active ? 'accent-chip shadow-sm' : 'bg-pitch text-slate-400 border-border hover:text-white'}">${label}</button>`;
+        const msMap = {};
+        (gfm.matchSummaries || []).forEach(ms => { msMap[ms.match] = ms; });
+        pillsEl.innerHTML = pillBtn('ALL', `All Matches (${gfm.matchOrder.length})`, chartsMatchFilter === 'ALL') +
+          newestFirstMatches.map(m => {
+            const ms = msMap[m] || {};
+            return pillBtn(m, `${esc(m)} <span class="font-mono text-[10px] opacity-80">${ms.index ?? '–'}</span>`, chartsMatchFilter === m);
+          }).join('');
+      }
+
+      const halfBtns = { ALL: $('chartsHalfAll'), H1: $('chartsHalfH1'), H2: $('chartsHalfH2') };
+      Object.entries(halfBtns).forEach(([k, btn]) => {
+        if (!btn) return;
+        const active = chartsHalfFilter === k;
+        btn.className = `min-h-[36px] px-2.5 py-1 rounded-lg font-semibold transition ${active ? 'accent-chip border shadow-sm' : 'text-slate-400 hover:text-white'}`;
+      });
+
+      const ov = gfm.overall;
+      const tier = gameFilmIndexTier(ov.index);
+      const halfLabel = chartsHalfFilter === 'H1' ? ' · 1st Half Only' : chartsHalfFilter === 'H2' ? ' · 2nd Half Only' : '';
+      const scopeName = chartsMatchFilter === 'ALL' ? `${team.label} · Season Film Scope (${gfm.matchOrder.length} Matches)` : chartsMatchFilter;
+
+      if ($('gfiTitle')) $('gfiTitle').textContent = `${scopeName}${halfLabel}`;
+      if ($('gfiSubtitle')) $('gfiSubtitle').textContent = `${ov.totalClips} scored film events · Team Baseline Par = 80 (${gfm.baseNetPerClip >= 0 ? '+' : ''}${gfm.baseNetPerClip} net/clip avg)`;
+      if ($('gfiTierBadge')) {
+        $('gfiTierBadge').className = `text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold border ${tier.cls}`;
+        $('gfiTierBadge').textContent = tier.label;
+      }
+      if ($('gfiScoreBadge')) {
+        $('gfiScoreBadge').textContent = ov.index != null ? `${ov.index}` : '–';
+        $('gfiScoreBadge').className = `display text-3xl sm:text-4xl leading-none mt-0.5 ${ov.index >= 85 ? 'text-emerald-400' : ov.index >= 80 ? 'text-teal-400' : ov.index >= 70 ? 'text-amber-300' : 'text-rose-400'}`;
+      }
+
+      const h1Idx = gfm.h1.index;
+      const h2Idx = gfm.h2.index;
+      const dVal = gfm.h2Delta;
+      const deltaStr = dVal == null
+        ? 'Single-half data only'
+        : (dVal > 0 ? `▲ +${dVal} H2 Momentum` : dVal < 0 ? `▼ ${dVal} H2 Drop` : 'Steady H1 → H2');
+      const deltaCls = dVal == null ? 'text-slate-400' : (dVal > 0 ? 'text-emerald-400' : dVal < 0 ? 'text-rose-400' : 'text-slate-300');
+
+      if ($('gfiKpiGrid')) {
+        $('gfiKpiGrid').innerHTML = `
+          <div class="bg-pitch/60 p-3 rounded-xl border border-border/80 space-y-0.5">
+            <div class="text-[10px] font-mono uppercase text-slate-400">Net Film Points</div>
+            <div class="display text-2xl ${ov.netPts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${ov.netPts > 0 ? '+' : ''}${ov.netPts.toFixed(1)}</div>
+            <div class="text-[10px] text-slate-400">${ov.netPerClip > 0 ? '+' : ''}${ov.netPerClip.toFixed(2)} pts / clip (${ov.totalClips} clips)</div>
+          </div>
+          <div class="bg-pitch/60 p-3 rounded-xl border border-border/80 space-y-0.5">
+            <div class="text-[10px] font-mono uppercase text-slate-400">H1 vs. H2 Index</div>
+            <div class="display text-2xl text-white">${h1Idx ?? '–'} <span class="text-sm font-sans text-slate-400">→</span> ${h2Idx ?? '–'}</div>
+            <div class="text-[10px] font-semibold ${deltaCls}">${deltaStr}</div>
+          </div>
+          <div class="bg-pitch/60 p-3 rounded-xl border border-border/80 space-y-0.5">
+            <div class="text-[10px] font-mono uppercase text-slate-400">Execution Rate</div>
+            <div class="display text-2xl ${ov.glowPct >= 50 ? 'text-emerald-400' : 'text-amber-300'}">${ov.glowPct}% Glow</div>
+            <div class="text-[10px] text-slate-400">${ov.glow} Glow · ${ov.grow} Grow (${ov.mixed} Mixed)</div>
+          </div>
+          <div class="bg-pitch/60 p-3 rounded-xl border border-border/80 space-y-0.5">
+            <div class="text-[10px] font-mono uppercase text-slate-400">Turnovers &amp; Film Goals</div>
+            <div class="display text-2xl text-white">${ov.turnovers} TOs</div>
+            <div class="text-[10px] text-slate-400">D3:${ov.toD} · M3:${ov.toM} · A3:${ov.toA} · Goals ${ov.goalsScored}:${ov.goalsConceded}</div>
+          </div>
+        `;
+      }
+
+      if ($('gfiFamilyBars')) {
+        const maxAbsNet = Math.max(...(gfm.families || []).map(f => Math.abs(f.netPts)), 1);
+        $('gfiFamilyBars').innerHTML = (gfm.families || []).length
+          ? gfm.families.map(f => {
+              const barW = Math.max(8, Math.round((Math.abs(f.netPts) / maxAbsNet) * 100));
+              const isPos = f.netPts > 0;
+              const isNeg = f.netPts < 0;
+              const netCls = isPos ? 'text-emerald-400' : isNeg ? 'text-rose-400' : 'text-slate-400';
+              const barColor = isPos ? '#15803D' : isNeg ? '#B91C1C' : '#64748B';
+              const rateTxt = f.glowPct != null ? `${f.glowPct}% Glow (${f.glow}G/${f.grow}Gr)` : `${f.neutral} Neutral`;
+              return `<div class="space-y-1">
+                <div class="flex items-center justify-between gap-2 text-[11px]">
+                  <span class="font-semibold text-white truncate">${esc(f.label)} <span class="text-[10px] text-slate-400 font-normal">(${f.clips})</span></span>
+                  <span class="font-mono font-bold ${netCls} shrink-0">${f.netPts > 0 ? '+' : ''}${f.netPts.toFixed(1)} <span class="text-[10px] text-slate-400 font-normal">· ${rateTxt}</span></span>
+                </div>
+                <div class="w-full h-1.5 bg-surface rounded-full overflow-hidden">
+                  <div class="h-full rounded-full" style="width:${barW}%; background:${barColor}"></div>
+                </div>
+              </div>`;
+            }).join('')
+          : '<p class="text-xs text-slate-500">No V3.1 Action Family clips logged for this filter.</p>';
+      }
+
+      if ($('gfiStandoutsBox')) {
+        const topPlayers = (gfm.playerImpacts || []).filter(p => p.clips >= 2).slice(0, 3);
+        const topGrow = (gfm.topGrowTags || []).slice(0, 3);
+        const weakestFam = [...(gfm.families || [])].filter(f => f.netPts < 0).sort((a, b) => a.netPts - b.netPts)[0];
+        $('gfiStandoutsBox').innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Top Game Film Standouts (1°/2° Weighted)</h4>
+              <span class="text-[10px] font-mono text-slate-400">Net Pts</span>
+            </div>
+            ${topPlayers.length ? topPlayers.map((p, idx) => `
+              <div class="flex items-center justify-between bg-surface px-2.5 py-2 rounded-lg border border-border/70">
+                <span class="font-semibold text-white truncate">${idx + 1}. <span class="font-mono text-brand-400">#${p.jersey}</span> ${esc(p.name)} <span class="text-[10px] text-slate-400 font-normal">(${p.glow}G/${p.grow}Gr${p.goals ? ` · ${p.goals}G` : ''}${p.keyPasses ? ` · ${p.keyPasses}KP` : ''})</span></span>
+                <span class="font-mono font-bold ${p.netPts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${p.netPts > 0 ? '+' : ''}${p.netPts.toFixed(1)}</span>
+              </div>
+            `).join('') : '<p class="text-[11px] text-slate-400">Not enough player-attributed clips in this selection.</p>'}
+          </div>
+          <div class="pt-2 border-t border-border/70 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-rose-400">Primary Match Focus &amp; Grow Triggers</h4>
+              ${weakestFam ? `<span class="text-[10px] font-mono text-rose-400 font-bold">${esc(weakestFam.label)} (${weakestFam.netPts.toFixed(1)})</span>` : ''}
+            </div>
+            ${topGrow.length ? `<div class="flex flex-wrap gap-1.5">${topGrow.map(([tag, cnt]) => `<span class="text-[10px] font-mono bg-surface border border-border px-2 py-1 rounded-lg text-slate-200"><strong class="text-rose-400">${cnt}×</strong> ${esc(tag)}</span>`).join('')}</div>` : '<p class="text-[11px] text-slate-400">Zero negative coaching events in this filter.</p>'}
+          </div>
+        `;
+      }
+
+      if ($('gfiTrendBadge') && gfm.matchSummaries.length >= 2) {
+        const last = gfm.matchSummaries[gfm.matchSummaries.length - 1];
+        const prev = gfm.matchSummaries[gfm.matchSummaries.length - 2];
+        const diff = (last.index != null && prev.index != null) ? (last.index - prev.index) : 0;
+        $('gfiTrendBadge').textContent = `Latest: ${last.match} (${last.index}) ${diff >= 0 ? '▲ +' : '▼ '}${diff} vs ${prev.match}`;
+      }
+    }
+
+    function renderCharts() {
+      const tick = { color: '#5A687A' };
+      const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#008496';
+      const d = DATA[activeExportKey(team)] || {};
+      const events = d.filmEvents || [];
+      const gfm = computeGameFilmMetrics(events, chartsMatchFilter, chartsHalfFilter);
+      renderGameFilmIndexReview(gfm, events);
+
+      const isFiltered = events.length > 0 && (chartsMatchFilter !== 'ALL' || chartsHalfFilter !== 'ALL');
+      const scopeTag = chartsMatchFilter === 'ALL'
+        ? (chartsHalfFilter === 'ALL' ? 'Season Totals' : `${chartsHalfFilter} Season Scope`)
+        : `${chartsMatchFilter}${chartsHalfFilter !== 'ALL' ? ` · ${chartsHalfFilter}` : ''}`;
+
+      if ($('contribSub')) {
+        $('contribSub').textContent = isFiltered
+          ? `Film-derived for ${scopeTag}: Goals, Assists & Key / Line-Breaking Passes`
+          : 'Goals · Assists · Key Passes across active scope';
+      }
+      if ($('toSub')) {
+        $('toSub').textContent = isFiltered
+          ? `Turnovers by third for ${scopeTag}`
+          : 'Defending 3rd · Middle 3rd · Attacking 3rd';
+      }
+
+      // Destroy previous chart instances safely
+      if (chartGameProg) { chartGameProg.destroy(); chartGameProg = null; }
       if (chartContrib) { chartContrib.destroy(); chartContrib = null; }
+      if (chartGlowGrow) { chartGlowGrow.destroy(); chartGlowGrow = null; }
+      if (chartZones) { chartZones.destroy(); chartZones = null; }
+      if (chartWorkload) { chartWorkload.destroy(); chartWorkload = null; }
+
+      // Compute Match-Aware Datasets
+      const producers = isFiltered
+        ? (gfm.playerImpacts || []).filter(p => p.goals > 0 || p.assists > 0 || p.keyPasses > 0)
+            .sort((a, b) => (b.goals + b.assists + b.keyPasses) - (a.goals + a.assists + a.keyPasses))
+        : players.filter(p => p.goals > 0 || p.assists > 0 || (p.keyPasses || 0) > 0)
+            .sort((a, b) => (b.goals + b.assists + (b.keyPasses || 0)) - (a.goals + a.assists + (a.keyPasses || 0)));
+
       $('chartContributions').parentElement.classList.toggle('hidden', !producers.length);
       $('contribEmpty').classList.toggle('hidden', !!producers.length);
+
+      const filmPlayers = isFiltered
+        ? [...(gfm.playerImpacts || [])].filter(p => (p.glow + p.grow + p.turnovers) > 0)
+            .sort((a, b) => (b.glow + b.grow) - (a.glow + a.grow))
+        : [...players].filter(p => ((p.glow || 0) + (p.grow || 0)) > 0)
+            .sort((a, b) => ((b.glow || 0) + (b.grow || 0)) - ((a.glow || 0) + (a.grow || 0)));
+
+      $('chartGlowGrowCard').classList.toggle('hidden', !filmPlayers.length);
+      if ($('chartGlowGrowSub')) {
+        const evCount = isFiltered ? gfm.overall.totalClips : (d.filmSummary?.totalEvents || events.length);
+        const matchCntText = isFiltered ? scopeTag : `${gfm.matchOrder.length || (totals.games || 1)} matches`;
+        $('chartGlowGrowSub').textContent = `From ${evCount} timestamped film events (${matchCntText})`;
+      }
+
+      const zoneData = isFiltered
+        ? [gfm.overall.toA, gfm.overall.toM, gfm.overall.toD]
+        : [totals.toA || sum('toA'), totals.toM || sum('toM'), totals.toD || sum('toD')];
+      const total = zoneData.reduce((a, b) => a + b, 0);
+      $('toBadge').textContent = `${total} total (${zoneData[2]} Def 3rd)`;
+      $('chartTurnovers').classList.toggle('hidden', total === 0);
+      $('turnoverEmpty').classList.toggle('hidden', total !== 0);
+      $('toCaption').textContent = total === 0 ? 'No turnovers logged in any third of the pitch for this filter.'
+        : zoneData[2] === 0 ? `Zero defensive-third turnovers (${zoneData[0]} Attacking, ${zoneData[1]} Middle): clean build-out from the back.`
+        : `Breakdown (${scopeTag}): ${zoneData[0]} Attacking 3rd · ${zoneData[1]} Middle 3rd · ${zoneData[2]} Defending 3rd`;
+
+      const squadPlayers = [...players].sort((a, b) => b.mins - a.mins || (b.benchMins || 0) - (a.benchMins || 0));
+      const maxMins = totals.mins || team.matchLength;
+      $('workloadWrap').style.height = Math.max(200, squadPlayers.length * 26 + 45) + 'px';
+      $('workloadTotal').textContent = isSeason() ? `Team max: ${maxMins}' over ${plural(totals.games, 'game')}` : `Match length: ${maxMins}'`;
+
+      if (typeof Chart === 'undefined') return;
+
+      // 0. Game-by-Game Film Index & Glow % Progression Chart
+      if ((gfm.matchSummaries || []).length > 0 && $('chartGameProgression')) {
+        const msList = gfm.matchSummaries;
+        chartGameProg = new Chart($('chartGameProgression'), {
+          data: {
+            labels: msList.map(m => m.match),
+            datasets: [
+              {
+                type: 'bar',
+                label: 'Game Film Index (0–100)',
+                data: msList.map(m => m.index),
+                backgroundColor: msList.map(m =>
+                  (chartsMatchFilter === m.match) ? '#00C2D6'
+                  : (m.index >= 85 ? '#15803D' : m.index >= 80 ? '#008496' : m.index >= 72 ? '#D97706' : '#B91C1C')
+                ),
+                borderRadius: 6,
+                yAxisID: 'y'
+              },
+              {
+                type: 'line',
+                label: 'Glow %',
+                data: msList.map(m => m.glowPct),
+                borderColor: '#1A2330',
+                backgroundColor: '#1A2330',
+                borderWidth: 2,
+                pointRadius: 4,
+                tension: 0.25,
+                yAxisID: 'y1'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: (evt, elems) => {
+              if (elems && elems.length > 0) {
+                const idx = elems[0].index;
+                const clickedMatch = msList[idx]?.match;
+                if (clickedMatch) {
+                  setChartsMatchFilter(chartsMatchFilter === clickedMatch ? 'ALL' : clickedMatch);
+                }
+              }
+            },
+            plugins: { legend: { labels: { color: '#5A687A', font: { size: 11 } } } },
+            scales: {
+              x: { ticks: { ...tick, font: { size: 10 } }, grid: { display: false } },
+              y: { min: 50, max: 100, ticks: { ...tick, stepSize: 10 }, grid: { color: '#DCE3EC' }, title: { display: true, text: 'Film Index', color: '#5A687A', font: { size: 10 } } },
+              y1: { position: 'right', min: 0, max: 100, ticks: { ...tick, callback: v => v + '%' }, grid: { display: false }, title: { display: true, text: 'Glow %', color: '#5A687A', font: { size: 10 } } }
+            }
+          }
+        });
+      }
+
       if (producers.length) {
         chartContrib = new Chart($('chartContributions'), {
           type: 'bar',
@@ -4371,7 +4880,7 @@
             datasets: [
               { label: 'Goals', data: producers.map(p => p.goals), backgroundColor: accent, borderRadius: 4 },
               { label: 'Assists', data: producers.map(p => p.assists), backgroundColor: '#008496', borderRadius: 4 },
-              { label: 'Key Passes', data: producers.map(p => p.keyPasses || 0), backgroundColor: '#1E2836', borderRadius: 4 }
+              { label: isFiltered ? 'Key & Line-Break Passes' : 'Key Passes', data: producers.map(p => p.keyPasses || 0), backgroundColor: '#1E2836', borderRadius: 4 }
             ]
           },
           options: {
@@ -4385,11 +4894,6 @@
         });
       }
 
-      // Glow vs Grow Chart (when team has film data)
-      const filmPlayers = [...players].filter(p => ((p.glow || 0) + (p.grow || 0)) > 0)
-        .sort((a, b) => ((b.glow || 0) + (b.grow || 0)) - ((a.glow || 0) + (a.grow || 0)));
-      $('chartGlowGrowCard').classList.toggle('hidden', !filmPlayers.length);
-      if (chartGlowGrow) { chartGlowGrow.destroy(); chartGlowGrow = null; }
       if (filmPlayers.length) {
         chartGlowGrow = new Chart($('chartGlowGrow'), {
           type: 'bar',
@@ -4412,11 +4916,6 @@
         });
       }
 
-      const squadPlayers = [...players].sort((a, b) => b.mins - a.mins || (b.benchMins || 0) - (a.benchMins || 0));
-      const maxMins = totals.mins || team.matchLength;
-      $('workloadWrap').style.height = Math.max(200, squadPlayers.length * 26 + 45) + 'px';
-      $('workloadTotal').textContent = isSeason() ? `Team max: ${maxMins}' over ${plural(totals.games, 'game')}` : `Match length: ${maxMins}'`;
-      if (chartWorkload) chartWorkload.destroy();
       chartWorkload = new Chart($('chartMinutes'), {
         type: 'bar',
         data: {
@@ -4446,15 +4945,6 @@
         }
       });
 
-      const zoneData = [totals.toA || sum('toA'), totals.toM || sum('toM'), totals.toD || sum('toD')];
-      const total = zoneData.reduce((a, b) => a + b, 0);
-      if (chartZones) { chartZones.destroy(); chartZones = null; }
-      $('toBadge').textContent = `${total} total (${zoneData[2]} Def 3rd)`;
-      $('chartTurnovers').classList.toggle('hidden', total === 0);
-      $('turnoverEmpty').classList.toggle('hidden', total !== 0);
-      $('toCaption').textContent = total === 0 ? 'No turnovers logged in any third of the pitch.'
-        : zoneData[2] === 0 ? `Zero defensive-third turnovers (${zoneData[0]} Attacking, ${zoneData[1]} Middle): clean build-out from the back.`
-        : `Breakdown: ${zoneData[0]} Attacking 3rd · ${zoneData[1]} Middle 3rd · ${zoneData[2]} Defending 3rd`;
       if (total > 0) {
         chartZones = new Chart($('chartTurnovers'), {
           type: 'doughnut',
@@ -4584,76 +5074,232 @@
       const cards = [];
       const maxMins = totals.mins || team.matchLength || 80;
       const d = DATA[activeExportKey(team)] || {};
-      const fs = d.filmSummary;
+      const events = Array.isArray(d.filmEvents) ? d.filmEvents : [];
+      const hasFilm = hasTeamFilm() && events.length > 0;
+      const selEl = $('insightsMatchFilter');
+      const subEl = $('insightsSub');
 
-      // 0. Live Film Log Summary (always reflects latest uploaded Film Log count)
-      if (fs && fs.totalEvents > 0) {
-        const gPct = pct(fs.glow, (fs.glow || 0) + (fs.grow || 0));
-        const topTrigs = Object.entries(fs.toReasons || {}).slice(0, 3).map(([k, v]) => `${esc(k)} (${v})`).join(', ');
-        cards.push({
-          title: `Film Log Overview (${fs.totalEvents} Moments Logged)`,
-          body: `<strong>${fs.totalEvents} timestamped film clips</strong> across ${fs.matches?.length || totals.games || 1} reviewed matches · <strong>${fs.glow} Glow</strong> (${gPct}%) vs. <strong>${fs.grow} Grow</strong> (${100 - gPct}%) · <strong>${fs.turnovers} Turnovers</strong> (D3: ${fs.toD}, M3: ${fs.toM}, A3: ${fs.toA}). Top triggers: ${topTrigs}.`
-        });
-      }
-
-      // 1. High Workload (>72% of team minutes)
-      const iron = players.filter(p => p.mins >= maxMins * 0.72).sort((a, b) => b.mins - a.mins);
-      if (iron.length) {
-        cards.push({
-          title: 'High Minute Load',
-          body: `${iron.map(p => `<strong>${esc(p.name)}</strong> (${p.mins}' / ${pct(p.mins, maxMins)}%)`).join(', ')} carried the heaviest minute load across ${plural(totals.games || 1, 'game')}.`
-        });
-      }
-
-      // 2. High Volume Shooters / Conversion Outliers
-      const highShots = players.filter(p => p.shots >= 3).sort((a, b) => b.shots - a.shots);
-      if (highShots.length) {
-        const clinical = highShots.filter(p => pct(p.goals, p.shots) >= 35);
-        const unlucky = highShots.filter(p => pct(p.goals, p.shots) < 20);
-        let txt = '';
-        if (clinical.length) txt += `<strong>Clinical:</strong> ${clinical.map(p => `${esc(p.name)} (${p.goals}G on ${p.shots} shots, ${pct(p.goals, p.shots)}%)`).join(', ')}. `;
-        if (unlucky.length) txt += `<strong>Volume without reward yet:</strong> ${unlucky.map(p => `${esc(p.name)} (${p.shots} shots, ${p.sot} SOT → ${p.goals}G)`).join(', ')}.`;
-        if (txt) cards.push({ title: 'Finishing & Shot Conversion', body: txt });
-      }
-
-      // 3. Positional Output
-      const multiPosScorers = players.filter(p => (p.posBreakdown || []).filter(r => r.goals + r.assists > 0).length > 0)
-        .sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists)).slice(0, 3);
-      if (multiPosScorers.length) {
-        const lines = multiPosScorers.map(p => {
-          const splits = (p.posBreakdown || []).filter(r => r.goals + r.assists > 0)
-            .map(r => `${r.pos}: ${r.goals}G/${r.assists}A in ${r.mins}'`).join(', ');
-          return `<strong>${esc(shortName(p.name))}</strong> (${splits})`;
-        });
-        cards.push({ title: 'Output by Position Played', body: lines.join(' · ') });
-      }
-
-      // 4. Turnovers & Film Impact Index
-      const toD = totals.toD || sum('toD');
-      const toPlayers = players.filter(p => (p.toD || 0) > 0).sort((a, b) => (b.toD || 0) - (a.toD || 0));
-      if (toD > 0) {
-        cards.push({
-          title: 'Build-Out Risk (Defending 3rd TOs)',
-          body: `<strong>${toD} turnovers in the defending 3rd</strong> (${totals.turnovers || sum('turnovers')} total; ${totals.toM || 0} Mid 3rd, ${totals.toA || 0} Att 3rd). Highest D3 exposure: ${toPlayers.slice(0, 4).map(p => `${esc(shortName(p.name))} (${p.toD} D3 / ${p.turnovers} tot)`).join(', ')}.`
-        });
+      if (!hasFilm) {
+        insightsMatchFilter = 'ALL';
+        if (selEl) selEl.classList.add('hidden');
+        if (subEl) subEl.textContent = 'Workload, finishing conversion, positional output, and rest-defense patterns.';
       } else {
+        let gfm = computeGameFilmMetrics(events, insightsMatchFilter, 'ALL');
+        if (insightsMatchFilter !== 'ALL' && !gfm.matchOrder.includes(insightsMatchFilter)) {
+          insightsMatchFilter = 'ALL';
+          gfm = computeGameFilmMetrics(events, 'ALL', 'ALL');
+        }
+
+        if (selEl) {
+          selEl.classList.remove('hidden');
+          const msMap = {};
+          (gfm.matchSummaries || []).forEach(ms => { msMap[ms.match] = ms; });
+          const newestFirst = [...(gfm.matchOrder || [])].reverse();
+          selEl.innerHTML = `<option value="ALL">All Matches (${gfm.matchOrder.length} Games · ${events.length} Clips)</option>` +
+            newestFirst.map(m => {
+              const ms = msMap[m] || {};
+              return `<option value="${esc(m)}">${esc(m)} · Index ${ms.index ?? '–'} (${ms.totalClips || 0} clips)</option>`;
+            }).join('');
+          selEl.value = insightsMatchFilter;
+        }
+
+        const ov = gfm.overall;
+        const tier = gameFilmIndexTier(ov.index);
+        if (subEl) {
+          subEl.textContent = insightsMatchFilter === 'ALL'
+            ? `Season Intelligence · ${gfm.matchOrder.length} reviewed matches (${events.length} clips) · Game Film Index ${ov.index ?? '–'}/100`
+            : `Match Intelligence · ${insightsMatchFilter} (${ov.totalClips} scored clips) · Game Film Index ${ov.index ?? '–'}/100`;
+        }
+
+        // 1. Game Film Index Verdict & Recent Form Trajectory
+        if (insightsMatchFilter === 'ALL' && gfm.matchSummaries.length >= 3) {
+          const avgIdx = arr => {
+            const valid = arr.filter(m => m.index != null);
+            return valid.length ? Math.round(valid.reduce((s, m) => s + m.index, 0) / valid.length) : null;
+          };
+          const recent2 = gfm.matchSummaries.slice(-2);
+          const earlier = gfm.matchSummaries.slice(0, -2);
+          const recentAvg = avgIdx(recent2);
+          const earlierAvg = avgIdx(earlier);
+          const trendDiff = (recentAvg != null && earlierAvg != null) ? (recentAvg - earlierAvg) : 0;
+          const trendTxt = trendDiff > 0
+            ? `<strong class="text-emerald-400">▲ +${trendDiff} upward trend</strong> (last 2 avg <strong>${recentAvg}</strong> vs. earlier <strong>${earlierAvg}</strong>)`
+            : trendDiff < 0
+              ? `<strong class="text-rose-400">▼ ${trendDiff} dip</strong> (last 2 avg <strong>${recentAvg}</strong> vs. earlier <strong>${earlierAvg}</strong>)`
+              : `<strong>Steady form</strong> (last 2 avg <strong>${recentAvg ?? '–'}</strong> vs. earlier <strong>${earlierAvg ?? '–'}</strong>)`;
+          cards.push({
+            badge: `Index ${ov.index ?? '–'} · ${tier.label}`,
+            badgeCls: tier.cls,
+            title: 'Game Film Index Verdict & Form Trajectory',
+            body: `Season Game Film Index stands at <strong>${ov.index ?? '–'}/100</strong> (${fmtNet(ov.netPts)} net pts · <strong>${ov.glowPct}% Glow</strong> across ${ov.totalClips} scored clips). Form check shows ${trendTxt}, led recently by ${recent2.map(m => `<strong>${esc(m.match)}</strong> (${m.index ?? '–'})`).join(' &amp; ')}.`
+          });
+        } else {
+          const vsPar = ov.index != null ? (ov.index - 80) : 0;
+          const parTxt = `${vsPar >= 0 ? '+' : ''}${vsPar} vs. Team Par (80)`;
+          cards.push({
+            badge: `Index ${ov.index ?? '–'} · ${tier.label}`,
+            badgeCls: tier.cls,
+            title: 'Game Film Index Verdict',
+            body: `<strong>${esc(insightsMatchFilter === 'ALL' ? team.label : insightsMatchFilter)}</strong> graded at <strong>${ov.index ?? '–'}/100</strong> (${parTxt}), finishing with <strong>${fmtNet(ov.netPts)}</strong> net pts · <strong>${ov.glow} Glow / ${ov.grow} Grow (${ov.glowPct}%)</strong> and <strong>${ov.goalsScored} GF : ${ov.goalsConceded} GA</strong> logged on film.`
+          });
+        }
+
+        // 2. 1st Half vs. 2nd Half Tactical Adaptation (H1 -> H2)
+        const h1 = gfm.h1;
+        const h2 = gfm.h2;
+        const hd = gfm.h2Delta;
+        const hBadge = hd == null
+          ? 'Half Split'
+          : (hd > 0 ? `▲ +${hd} H2 Surge` : hd < 0 ? `▼ ${hd} H2 Drop` : 'Steady H1 → H2');
+        const hBadgeCls = hd == null
+          ? 'bg-pitch text-slate-300 border-border'
+          : (hd > 0 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : hd < 0 ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' : 'bg-teal-500/15 text-teal-400 border-teal-500/30');
+        const hRead = hd == null
+          ? 'Only one half has timestamped clips in this scope.'
+          : hd >= 4
+            ? 'Strong halftime adjustment and second-half execution surge.'
+            : hd <= -4
+              ? 'Noticeable second-half execution drop—watch fatigue, pressing distances, and late build-out security.'
+              : 'Consistent execution level maintained across both halves.';
         cards.push({
-          title: 'Clean Rest Defense & Build-Out',
-          body: `<strong>0 turnovers in the defending 3rd</strong> across ${totals.mins || team.matchLength} minutes (${totals.turnovers || sum('turnovers')} total turnovers). Composed progression out of the backline.`
+          badge: hBadge,
+          badgeCls: hBadgeCls,
+          title: '1st Half vs. 2nd Half Tactical Adaptation',
+          body: `<strong>H1:</strong> Index <strong>${h1.index ?? '–'}</strong> (${h1.glowPct}% Glow · ${fmtNet(h1.netPts)} net · ${h1.turnovers} TOs) vs. <strong>H2:</strong> Index <strong>${h2.index ?? '–'}</strong> (${h2.glowPct}% Glow · ${fmtNet(h2.netPts)} net · ${h2.turnovers} TOs). ${hRead}`
+        });
+
+        // 3. Phase-of-Play Winner & Leak (V3.1 Action Families)
+        const fams = gfm.families || [];
+        const bestFam = [...fams].filter(f => f.netPts > 0).sort((a, b) => b.netPts - a.netPts)[0];
+        const worstFam = [...fams].filter(f => f.netPts < 0 || f.grow > 0).sort((a, b) => a.netPts - b.netPts || b.grow - a.grow)[0];
+        cards.push({
+          badge: bestFam ? `Top: ${bestFam.label}` : 'V3.1 Phases',
+          badgeCls: bestFam ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-pitch text-slate-300 border-border',
+          title: 'Phase-of-Play Winner & Leak (V3.1 Families)',
+          body: `${bestFam ? `<strong>Top Strength:</strong> ${esc(bestFam.label)} generated <strong>${fmtNet(bestFam.netPts)} net pts</strong> across ${bestFam.clips} clips (${bestFam.glowPct != null ? `${bestFam.glowPct}% Glow` : `${bestFam.neutral} Neutral`}). ` : 'No net-positive V3.1 family recorded in this filter. '}${worstFam ? `<strong>Primary Leak:</strong> ${esc(worstFam.label)} cost <strong>${fmtNet(worstFam.netPts)} net pts</strong> across ${worstFam.clips} clips (${worstFam.glowPct != null ? `${worstFam.glowPct}% Glow` : `${worstFam.grow} Grow`}).` : 'No net-negative V3.1 phase leaks detected.'}`
+        });
+
+        // 4. Build-Out & Rest-Defense Risk (D3 / M3 Turnovers)
+        const topTrig = (gfm.topToReasons || []).slice(0, 3).map(([k, v]) => `${esc(k)} (${v})`).join(', ');
+        const toPlayers = [...(gfm.playerImpacts || [])].filter(p => p.turnovers > 0)
+          .sort((a, b) => (b.toD - a.toD) || (b.turnovers - a.turnovers)).slice(0, 3);
+        const toCls = ov.toD === 0
+          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+          : ov.toD >= 5
+            ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+            : 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+        cards.push({
+          badge: `${ov.toD} D3 TOs · ${ov.turnovers} Total`,
+          badgeCls: toCls,
+          title: 'Build-Out & Rest-Defense Risk (D3 / M3)',
+          body: ov.turnovers > 0
+            ? `<strong>${ov.turnovers} turnovers</strong> across this scope (<strong>D3: ${ov.toD}</strong> · M3: ${ov.toM} · A3: ${ov.toA}).${topTrig ? ` Top triggers: <strong>${topTrig}</strong>.` : ''}${toPlayers.length ? ` Highest exposure: ${toPlayers.map(p => `<strong>#${p.jersey} ${esc(shortName(p.name))}</strong> (${p.toD} D3 / ${p.turnovers} tot)`).join(', ')}.` : ''}`
+            : `<strong>0 turnovers logged</strong> in this film scope—composed decision-making and clean ball security through all three thirds.`
+        });
+
+        // 5. Standout Impact Leaders & On-Ball Engines
+        const scopedStandouts = (gfm.playerImpacts || []).filter(p => p.clips >= 2).slice(0, 4);
+        const volEngine = [...(gfm.playerImpacts || [])].sort((a, b) => b.clips - a.clips || b.netPts - a.netPts)[0];
+        if (insightsMatchFilter !== 'ALL') {
+          cards.push({
+            badge: scopedStandouts[0] ? `MVP #${scopedStandouts[0].jersey} (${fmtNet(scopedStandouts[0].netPts)})` : 'Impact Leaders',
+            badgeCls: 'bg-teal-500/15 text-teal-400 border-teal-500/30',
+            title: 'Standout Impact Leaders & On-Ball Engines',
+            body: scopedStandouts.length
+              ? `<strong>Match Impact (1°/2° weighted):</strong> ${scopedStandouts.map(p => `#${p.jersey} ${esc(shortName(p.name))} (${fmtNet(p.netPts)} · ${p.glow}G/${p.grow}Gr)`).join(', ')}.${volEngine ? ` <strong>Highest involvements:</strong> #${volEngine.jersey} ${esc(shortName(volEngine.name))} (${volEngine.clips} clips).` : ''}`
+              : 'Not enough player-attributed film events in this match scope.'
+          });
+        } else {
+          const seasonIdxLeaders = [...players].filter(p => p.mins >= 120).sort((a, b) => (b.netPer80 || 0) - (a.netPer80 || 0)).slice(0, 4);
+          cards.push({
+            badge: seasonIdxLeaders[0] ? `#1 ${shortName(seasonIdxLeaders[0].name)} (${fmtFilmIndex(seasonIdxLeaders[0])})` : 'Season Leaders',
+            badgeCls: 'bg-teal-500/15 text-teal-400 border-teal-500/30',
+            title: 'Standout Impact Leaders & On-Ball Engines',
+            body: `<strong>Season Film Index (120'+):</strong> ${seasonIdxLeaders.map(p => `${esc(shortName(p.name))} (${fmtFilmIndex(p)}/100 · ${fmtNet(p.netPer80)}/80')`).join(', ')}.${scopedStandouts.length ? ` <strong>Raw Net Clips:</strong> ${scopedStandouts.slice(0, 3).map(p => `#${p.jersey} ${esc(shortName(p.name))} (${fmtNet(p.netPts)})`).join(', ')}.` : ''}`
+          });
+        }
+
+        // 6. Next Training Session Prescription
+        const t1 = gfm.topGrowTags?.[0];
+        const t2 = gfm.topGrowTags?.[1];
+        const riskZone = ov.toD >= 4 ? 'Defending 3rd (D3)' : (ov.toM >= ov.toA ? 'Middle 3rd (M3)' : 'Attacking 3rd (A3)');
+        const focusCore = t1
+          ? `Repetition priority #1: <strong>${esc(t1[0])}</strong> (${t1[1]}× logged)${t2 ? ` paired with <strong>${esc(t2[0])}</strong> (${t2[1]}×)` : ''}.`
+          : 'Maintain positive possession tempo and finishing sharpness.';
+        const famNote = worstFam
+          ? ` Design small-sided constraints inside <strong>${esc(worstFam.label)}</strong> concentrating on clean decisions in the <strong>${riskZone}</strong>.`
+          : ` Reinforce decision speed in the <strong>${riskZone}</strong>.`;
+        cards.push({
+          badge: 'Training Action',
+          badgeCls: 'bg-brand-600 text-white border-brand-600',
+          title: 'Next Training Session Prescription',
+          body: `${focusCore}${famNote}
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+              <a href="ajax-session-planner.html" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-teal-400 hover:underline">📋 Plan Session Around This Focus ↗</a>
+              <button type="button" onclick="jumpToChartsFromInsights()" class="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-slate-300 hover:text-white underline">📊 Open Scope in Charts →</button>
+            </div>`
         });
       }
 
-      if (hasTeamFilm()) {
-        const netLeaders = [...players].filter(p => p.mins >= 120).sort((a, b) => (b.netPer80 || 0) - (a.netPer80 || 0));
-        const highToRate = [...players].filter(p => p.mins >= 120).sort((a, b) => (b.toPer80 || 0) - (a.toPer80 || 0));
-        cards.push({
-          title: 'Film Impact Index (0–100) Leaders',
-          body: `<strong>Top Film Index (120'+):</strong> ${netLeaders.slice(0, 4).map(p => `${esc(shortName(p.name))} (${fmtFilmIndex(p)}/100 · ${p.glow} Glow / ${p.grow} Grow)`).join(', ')}.<br><strong>Highest TO/80' exposure (120'+):</strong> ${highToRate.slice(0, 3).map(p => `${esc(shortName(p.name))} (${p.toPer80}/80')`).join(', ')}.`
-        });
+      if (!hasFilm) {
+        // 1. High Workload (>72% of team minutes)
+        const iron = players.filter(p => p.mins >= maxMins * 0.72).sort((a, b) => b.mins - a.mins);
+        if (iron.length) {
+          cards.push({
+            badge: `${iron.length} High-Load`,
+            badgeCls: 'bg-teal-500/15 text-teal-400 border-teal-500/30',
+            title: 'High Minute Load',
+            body: `${iron.map(p => `<strong>${esc(p.name)}</strong> (${p.mins}' / ${pct(p.mins, maxMins)}%)`).join(', ')} carried the heaviest minute load across ${plural(totals.games || 1, 'game')}.`
+          });
+        }
+
+        // 2. High Volume Shooters / Conversion Outliers
+        const highShots = players.filter(p => p.shots >= 3).sort((a, b) => b.shots - a.shots);
+        if (highShots.length) {
+          const clinical = highShots.filter(p => pct(p.goals, p.shots) >= 35);
+          const unlucky = highShots.filter(p => pct(p.goals, p.shots) < 20);
+          let txt = '';
+          if (clinical.length) txt += `<strong>Clinical:</strong> ${clinical.map(p => `${esc(p.name)} (${p.goals}G on ${p.shots} shots, ${pct(p.goals, p.shots)}%)`).join(', ')}. `;
+          if (unlucky.length) txt += `<strong>Volume without reward yet:</strong> ${unlucky.map(p => `${esc(p.name)} (${p.shots} shots, ${p.sot} SOT → ${p.goals}G)`).join(', ')}.`;
+          if (txt) cards.push({ title: 'Finishing & Shot Conversion', body: txt });
+        }
+
+        // 3. Positional Output
+        const multiPosScorers = players.filter(p => (p.posBreakdown || []).filter(r => r.goals + r.assists > 0).length > 0)
+          .sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists)).slice(0, 3);
+        if (multiPosScorers.length) {
+          const lines = multiPosScorers.map(p => {
+            const splits = (p.posBreakdown || []).filter(r => r.goals + r.assists > 0)
+              .map(r => `${r.pos}: ${r.goals}G/${r.assists}A in ${r.mins}'`).join(', ');
+            return `<strong>${esc(shortName(p.name))}</strong> (${splits})`;
+          });
+          cards.push({ title: 'Output by Position Played', body: lines.join(' · ') });
+        }
+
+        // 4. Turnovers / Build-Out Security
+        const toD = totals.toD || sum('toD');
+        const toPlayers = players.filter(p => (p.toD || 0) > 0).sort((a, b) => (b.toD || 0) - (a.toD || 0));
+        if (toD > 0) {
+          cards.push({
+            title: 'Build-Out Risk (Defending 3rd TOs)',
+            body: `<strong>${toD} turnovers in the defending 3rd</strong> (${totals.turnovers || sum('turnovers')} total; ${totals.toM || 0} Mid 3rd, ${totals.toA || 0} Att 3rd). Highest D3 exposure: ${toPlayers.slice(0, 4).map(p => `${esc(shortName(p.name))} (${p.toD} D3 / ${p.turnovers} tot)`).join(', ')}.`
+          });
+        } else {
+          cards.push({
+            title: 'Clean Rest Defense & Build-Out',
+            body: `<strong>0 turnovers in the defending 3rd</strong> across ${totals.mins || team.matchLength} minutes (${totals.turnovers || sum('turnovers')} total turnovers). Composed progression out of the backline.`
+          });
+        }
       }
 
       $('autoInsights').innerHTML = cards.map(c =>
-        `<div class="bg-surface p-3 rounded-xl border border-border/80"><h4 class="font-bold text-white mb-1">${c.title}</h4><p class="text-slate-400">${c.body}</p></div>`
+        `<div class="bg-surface p-3.5 rounded-xl border border-border/80 flex flex-col gap-1.5">
+          <div class="flex items-start justify-between gap-2">
+            <h4 class="font-bold text-white leading-snug">${c.title}</h4>
+            ${c.badge ? `<span class="shrink-0 text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${c.badgeCls || 'bg-pitch text-slate-300 border-border'}">${esc(c.badge)}</span>` : ''}
+          </div>
+          <div class="text-slate-400">${c.body}</div>
+        </div>`
       ).join('');
     }
 

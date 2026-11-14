@@ -1257,4 +1257,119 @@ check('Match Tracker: AI shot counting (11 shots incl. soff), half split, opp ad
   assert.strictEqual(sandbox.logCalls[0].jersey, '10');
 });
 
+// ---------------------------------------------------------------------------
+// CHECK 16: Coach Hub Charts Game/Half Filter, Game Film Index & Insights
+// ---------------------------------------------------------------------------
+check('16a. match-hub.html exposes Game Film Index, Charts/Insights filters & removes redundant/stale elements', () => {
+  const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+  [
+    'id="chartsFilterBar"',
+    'id="chartsMatchFilter"',
+    'id="chartsHalfFilter"',
+    'id="gameFilmIndexCard"',
+    'id="chartGameProgression"',
+    'id="insightsMatchFilter"',
+  ].forEach(idAttr => {
+    assert(mh.includes(idAttr), `Expected ${idAttr} in match-hub.html`);
+  });
+  assert(!mh.includes('From 569 timestamped'), 'Stale "From 569 timestamped" label should be removed');
+  assert(!mh.includes('id="exportHtmlBtn"'), 'Redundant header id="exportHtmlBtn" should be removed');
+});
+
+check('16b. computeGameFilmMetrics scores matches/halves accurately & ignores free-text notes', () => {
+  const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+  const ddLine = mh.split('\n').find(l => l.includes('const DEFAULT_DATA ='));
+  assert(ddLine, 'DEFAULT_DATA line not found in match-hub.html');
+  const defaultData = JSON.parse(ddLine.replace(/^\s*const\s+DEFAULT_DATA\s*=\s*/, '').replace(/;\s*$/, ''));
+  const leagueEvents = defaultData['AJAX ASPIRE U15 (LEAGUE)'].filmEvents;
+
+  const jStart = mh.indexOf('const ASPIRE_JERSEY_MAP =');
+  const jEnd = mh.indexOf('/* Practice & Attendance Scorecard');
+  const vStart = mh.indexOf('const V31_TURNOVER_TAGS =');
+  const vEnd = mh.indexOf('function normalizeFilmEvent(');
+  const wStart = mh.indexOf('const EVENT_WEIGHTS =');
+  const wEnd = mh.indexOf('function fmtNet(');
+  const gStart = mh.indexOf('const GAME_FILM_FAMILIES =');
+  const gEnd = mh.indexOf('function sanitizeAndHealData(');
+  assert(jStart !== -1 && jEnd > jStart, 'Could not locate ASPIRE_JERSEY_MAP');
+  assert(vStart !== -1 && vEnd > vStart, 'Could not locate V31_TURNOVER_TAGS..isTurnoverEvent');
+  assert(wStart !== -1 && wEnd > wStart, 'Could not locate EVENT_WEIGHTS..eventWeight');
+  assert(gStart !== -1 && gEnd > gStart, 'Could not locate GAME_FILM_FAMILIES..computeGameFilmMetrics');
+
+  const sandbox = {};
+  vm.createContext(sandbox);
+  vm.runInContext(
+    [
+      mh.slice(jStart, jEnd),
+      mh.slice(vStart, vEnd),
+      mh.slice(wStart, wEnd),
+      mh.slice(gStart, gEnd),
+    ].join('\n;\n'),
+    sandbox
+  );
+
+  const season = sandbox.computeGameFilmMetrics(leagueEvents, 'ALL', 'ALL');
+  assert.strictEqual(season.matchOrder.length, 7, 'Expected 7 League matches in matchOrder');
+  assert(season.overall.index >= 50 && season.overall.index <= 99, 'Expected overall index in [50, 99]');
+  assert.strictEqual(season.overall.index, 79, `Expected League overall index 79, got ${season.overall.index}`);
+  assert.strictEqual(season.h1.index, 75, `Expected League H1 index 75, got ${season.h1.index}`);
+  assert.strictEqual(season.h2.index, 82, `Expected League H2 index 82, got ${season.h2.index}`);
+  assert.strictEqual(season.h2Delta, 7, `Expected League H2 delta +7, got ${season.h2Delta}`);
+
+  const cf2 = sandbox.computeGameFilmMetrics(leagueEvents, 'Crossfire #2 (Nov 8)', 'ALL');
+  const cf2RawCount = leagueEvents.filter(e => e.match === 'Crossfire #2 (Nov 8)').length;
+  assert.strictEqual(cf2RawCount, 169, `Expected 169 raw events for Crossfire #2, got ${cf2RawCount}`);
+  assert.strictEqual(cf2.overall.totalClips, 168, `Expected 168 scored clips (excluding 1 Administrative Bookmark) for Crossfire #2, got ${cf2.overall.totalClips}`);
+  assert.strictEqual(cf2.overall.index, 88, `Expected Crossfire #2 index 88, got ${cf2.overall.index}`);
+  assert(cf2.families.length >= 4, `Expected >=4 V3.1 Action Families in Crossfire #2, got ${cf2.families.length}`);
+  assert(cf2.playerImpacts.length >= 10, `Expected >=10 player impacts in Crossfire #2, got ${cf2.playerImpacts.length}`);
+
+  const cf2H1 = sandbox.computeGameFilmMetrics(leagueEvents, 'Crossfire #2 (Nov 8)', 'H1');
+  const cf2H2 = sandbox.computeGameFilmMetrics(leagueEvents, 'Crossfire #2 (Nov 8)', 'H2');
+  assert.strictEqual(
+    cf2H1.overall.totalClips + cf2H2.overall.totalClips,
+    cf2.overall.totalClips,
+    `Expected H1 (${cf2H1.overall.totalClips}) + H2 (${cf2H2.overall.totalClips}) === ${cf2.overall.totalClips}`
+  );
+
+  // Structured-only scoring invariant (AGENTS.md §2.2 & §2.3)
+  const gcEvent = {
+    id: 99001,
+    match: 'Synthetic Test',
+    half: '1st Half',
+    time: '10:00',
+    category: 'Defending',
+    tag: 'Goal Conceded',
+    outcome: 'Goal Conceded',
+    qualityRaw: 'Goal Conceded',
+    zone: 'D3',
+    jerseys: [89],
+    primaryJersey: 89,
+    note: 'Amazing goal scored by our striker!'
+  };
+  const growEventClean = {
+    id: 99002,
+    match: 'Synthetic Test',
+    half: '2nd Half',
+    time: '55:00',
+    category: 'Passing',
+    tag: 'Forced Turnover Pass',
+    outcome: 'Grow',
+    qualityRaw: 'Grow',
+    zone: 'D3',
+    jerseys: [14],
+    primaryJersey: 14,
+    note: 'Turned over on transition'
+  };
+  const growEventPosNote = { ...growEventClean, note: 'player scores a goal and assist' };
+
+  const gcRes = sandbox.computeGameFilmMetrics([gcEvent], 'Synthetic Test', 'ALL');
+  assert.strictEqual(gcRes.overall.netPts, -2.5, `Expected Goal Conceded to score -2.50 even with positive note, got ${gcRes.overall.netPts}`);
+
+  const cleanPair = sandbox.computeGameFilmMetrics([gcEvent, growEventClean], 'Synthetic Test', 'ALL');
+  const mutatedPair = sandbox.computeGameFilmMetrics([gcEvent, growEventPosNote], 'Synthetic Test', 'ALL');
+  assert.strictEqual(mutatedPair.overall.netPts, cleanPair.overall.netPts, 'Changing free-text .note must not affect overall.netPts');
+  assert.strictEqual(mutatedPair.overall.index, cleanPair.overall.index, 'Changing free-text .note must not affect overall.index');
+});
+
 console.log(`\nAll ${passed} regression checks passed.`);
