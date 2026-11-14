@@ -1320,7 +1320,11 @@ check('16b. computeGameFilmMetrics scores matches/halves accurately & ignores fr
   const cf2RawCount = leagueEvents.filter(e => e.match === 'Crossfire #2 (Nov 8)').length;
   assert.strictEqual(cf2RawCount, 169, `Expected 169 raw events for Crossfire #2, got ${cf2RawCount}`);
   assert.strictEqual(cf2.overall.totalClips, 168, `Expected 168 scored clips (excluding 1 Administrative Bookmark) for Crossfire #2, got ${cf2.overall.totalClips}`);
-  assert.strictEqual(cf2.overall.index, 88, `Expected Crossfire #2 index 88, got ${cf2.overall.index}`);
+  assert.strictEqual(cf2.overall.index, 89, `Expected Crossfire #2 index 89, got ${cf2.overall.index}`);
+  const ev496 = leagueEvents.find(e => e.id === 496);
+  assert(ev496, 'Expected event 496 in League filmEvents');
+  assert.strictEqual(ev496.primaryJersey, 2, `Expected event 496 primaryJersey === 2, got ${ev496.primaryJersey}`);
+  assert.strictEqual(sandbox.eventWeight(ev496), 3.5, `Expected rebalanced Goal Scored weight 3.5, got ${sandbox.eventWeight(ev496)}`);
   assert(cf2.families.length >= 4, `Expected >=4 V3.1 Action Families in Crossfire #2, got ${cf2.families.length}`);
   assert(cf2.playerImpacts.length >= 10, `Expected >=10 player impacts in Crossfire #2, got ${cf2.playerImpacts.length}`);
 
