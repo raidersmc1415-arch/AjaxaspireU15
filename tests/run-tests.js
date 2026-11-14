@@ -1554,4 +1554,126 @@ check('17d. ajax-match-tracker.html enforces 44px HUD targets, 8-tag Hot Bar & c
   assert.strictEqual(revSandbox.playerStats[23].toA, 0);
 });
 
+// ---------------------------------------------------------------------------
+// CHECK 17e: V3.1 Expanded Taxonomy & Shot Quality (xG-lite) Across All Layers
+// ---------------------------------------------------------------------------
+check('17e. All 6 new taxonomy tags & Shot Quality (xG-lite) lookup match across all 4 files', () => {
+  const newTags = [
+    'Big Chance Created',
+    'Box Entry',
+    'Counter-press Regain',
+    'Hold-Up Play',
+    'Big Chance Missed',
+    'Run in Behind'
+  ];
+  const files = ['Code.gs', 'film-moment-logger.html', 'ajax-match-tracker.html', 'match-hub.html'];
+  for (const fname of files) {
+    const content = fs.readFileSync(path.join(ROOT, fname), 'utf8');
+    for (const tag of newTags) {
+      assert(content.includes(tag), `Expected new taxonomy tag "${tag}" in ${fname}`);
+    }
+    assert(content.includes('SHOT_QUALITY_VALUES'), `Expected SHOT_QUALITY_VALUES table in ${fname}`);
+    assert(content.includes('function getShotQualityValue('), `Expected getShotQualityValue() helper in ${fname}`);
+  }
+
+  const hubHtml = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+  const start = hubHtml.indexOf('const EVENT_WEIGHTS =');
+  const end = hubHtml.indexOf('function fmtNet(', start);
+  assert(start !== -1 && end > start, 'Could not extract scoring slice from match-hub.html');
+  const scoringCode = hubHtml.slice(start, end);
+  const sandbox = { Math, Number, String, Boolean, Array, Object, Set };
+  vm.createContext(sandbox);
+  vm.runInContext(scoringCode, sandbox);
+
+  // Verify Shot Quality table + Header ×0.6 modifier (excluding Penalty)
+  assert.strictEqual(sandbox.getShotQualityValue('Penalty', false), 0.75);
+  assert.strictEqual(sandbox.getShotQualityValue('Penalty', true), 0.75);
+  assert.strictEqual(sandbox.getShotQualityValue('6-yard box', false), 0.35);
+  assert(Math.abs(sandbox.getShotQualityValue('6-yard box', true) - 0.21) < 1e-6);
+  assert.strictEqual(sandbox.getShotQualityValue('Central box', false), 0.15);
+  assert(Math.abs(sandbox.getShotQualityValue('Central box', true) - 0.09) < 1e-6);
+  assert.strictEqual(sandbox.getShotQualityValue('Wide box', false), 0.06);
+  assert(Math.abs(sandbox.getShotQualityValue('Wide box', true) - 0.036) < 1e-6);
+  assert.strictEqual(sandbox.getShotQualityValue('Outside 18', false), 0.03);
+  assert(Math.abs(sandbox.getShotQualityValue('Outside 18', true) - 0.018) < 1e-6);
+  assert.strictEqual(sandbox.getShotQualityValue('', false), 0);
+
+  // Verify weights of all 6 new taxonomy tags
+  assert.strictEqual(sandbox.eventWeight({ tag: 'Big Chance Created', outcome: 'Glow', zone: 'A3' }), 2.00);
+  assert.strictEqual(sandbox.eventWeight({ tag: 'Box Entry', outcome: 'Glow', zone: 'A3' }), 1.00);
+  assert.strictEqual(sandbox.eventWeight({ tag: 'Run in Behind', outcome: 'Glow', zone: 'A3' }), 0.75);
+  assert.strictEqual(sandbox.eventWeight({ tag: 'Counter-press Regain', outcome: 'Glow', zone: 'A3' }), 1.50);
+  assert.strictEqual(sandbox.eventWeight({ tag: 'Counter-press Regain', outcome: 'Glow', zone: 'M3' }), 1.25);
+  assert.strictEqual(sandbox.eventWeight({ tag: 'Hold-Up Play', outcome: 'Glow', zone: 'M3' }), 1.00);
+  assert.strictEqual(sandbox.eventWeight({ tag: 'Big Chance Missed', outcome: 'Grow', zone: 'A3' }), -0.50);
+});
+
+// ---------------------------------------------------------------------------
+// CHECK 17f: Coach Hub Consolidation, 8-KPI Match Report, Compact Roster & Tracker Removal
+// ---------------------------------------------------------------------------
+check('17f. match-hub.html removes dead #tab-tracker, consolidates to 5 tabs, exposes 8-KPI card & Roster toggle', () => {
+  const hubHtml = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+
+  // 1. Dead embedded tracker markup/modals removed
+  assert(!hubHtml.includes('id="tab-tracker"'), 'Expected dead #tab-tracker HTML to be removed from match-hub.html');
+  assert(!hubHtml.includes('id="trackerSetupModal"'), 'Expected dead #trackerSetupModal to be removed from match-hub.html');
+  assert(!hubHtml.includes('function initTrackerState('), 'Expected dead initTrackerState() tracker JS to be removed from match-hub.html');
+
+  // 2. Nav consolidated to 5 tabs with Analysis label
+  const navStart = hubHtml.indexOf('<div class="nav-pill-bar');
+  const navEnd = hubHtml.indexOf('</div>', navStart);
+  assert(navStart !== -1 && navEnd > navStart, 'Could not locate .nav-pill-bar');
+  const navSlice = hubHtml.slice(navStart, navEnd);
+  const tabBtns = navSlice.match(/id="btn-tab-[^"]+"/g) || [];
+  assert.strictEqual(tabBtns.length, 5, `Expected 5 consolidated nav tabs, got ${tabBtns.length}`);
+  assert(!navSlice.includes('btn-tab-tactics'), 'Expected #btn-tab-tactics removed after consolidation into Analysis');
+  assert(navSlice.includes('>Analysis</button>'), 'Expected #btn-tab-charts relabeled to Analysis');
+
+  // 3. Required UI elements + Check 16a IDs preserved
+  const required = [
+    'id="matchReport8KpiCard"',
+    'function renderMatchReport8KpiCard(',
+    'function toggleRosterMoreColumns(',
+    'id="rosterMoreColsBtn"',
+    'id="chartsFilterBar"',
+    'id="chartsMatchFilter"',
+    'id="chartsHalfFilter"',
+    'id="gameFilmIndexCard"',
+    'id="chartGameProgression"',
+    'id="insightsMatchFilter"',
+    'Attacking Threat',
+    'Ball Security',
+    'Defensive Intensity'
+  ];
+  for (const token of required) {
+    assert(hubHtml.includes(token), `Missing required token in match-hub.html: ${token}`);
+  }
+
+  // 4. Verify switchTab('tab-tactics') aliases cleanly to 'tab-charts'
+  const stStart = hubHtml.indexOf('function switchTab(');
+  const stEnd = hubHtml.indexOf('function toggleRosterMoreColumns(', stStart);
+  assert(stStart !== -1 && stEnd > stStart, 'Could not extract switchTab()');
+  let activeVar = null;
+  const shown = [];
+  const fakeDoc = {
+    querySelectorAll: () => [],
+  };
+  const swSandbox = {
+    activeTab: 'tab-overview',
+    $: (id) => id === 'tab-charts' ? { classList: { remove: (c) => { if (c === 'hidden') { activeVar = id; shown.push(id); } } } } : null,
+    document: fakeDoc,
+    setTimeout: () => {},
+    renderCharts: () => {},
+    renderTakeaways: () => {},
+    renderFilmTab: () => {},
+    renderReportCard: () => {},
+    localStorage: { setItem: () => {} }
+  };
+  vm.createContext(swSandbox);
+  vm.runInContext(hubHtml.slice(stStart, stEnd), swSandbox);
+  swSandbox.switchTab('tab-tactics');
+  assert.strictEqual(swSandbox.activeTab, 'tab-charts', 'Expected switchTab("tab-tactics") to map to "tab-charts"');
+  assert.strictEqual(activeVar, 'tab-charts', 'Expected #tab-charts panel opened for tab-tactics alias');
+});
+
 console.log(`\nAll ${passed} regression checks passed.`);

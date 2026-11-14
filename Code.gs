@@ -1462,11 +1462,70 @@ function handleUpdateSeasonStats(payload) {
 
 // --- PART 16: MASTER MATCH_ACTION_LOG SHEET & CLOUD SYNC PIPELINE ---
 
+var V31_TAXONOMY_TREE = {
+  Passing: [
+    'Key Pass (Shot Assist)', 'Goal Assist', 'Big Chance Created', 'Line-Breaking Pass',
+    'Progressive Pass', 'Switch Point of Attack', 'Combination Play',
+    'Forced Turnover Pass', 'Unforced Turnover Pass'
+  ],
+  Carrying: [
+    'Box Entry', 'Progressive Carry', '1v1 Dribble Won', 'Turned into Pressure',
+    'Miscontrol', 'Dispossessed'
+  ],
+  Defending: [
+    'Direct Pressure', 'Tackle', 'Interception', 'Clearance', 'Blocked Shot',
+    'Recovery Run', 'Counter-press Regain', 'Poor Clearance',
+    'Stabbed at the Ball', 'Lost Mark / Recovery'
+  ],
+  Duel: [
+    'Ground Duel Won', 'Aerial Duel Won', 'Foul Won', 'Hold-Up Play',
+    'Ground Duel Lost', 'Foul Conceded', 'No Challenge on 50/50'
+  ],
+  Finishing: [
+    'Goal Scored', 'Shot on Target', 'Quality Shot', 'Shot Off Target',
+    'Big Chance Missed', 'Poor Shot Selection', 'Cross Out of Bounds'
+  ],
+  Goalkeeping: [
+    'Save (Clean / Held)', 'Save (Parried)', 'Box Aerial Claim',
+    'Build-Out Distribution', 'Goal Conceded'
+  ],
+  Tactical_Shape: [
+    'Scanning & Pre-Orientation', 'Support Angle Offered', 'Tactical Communication',
+    'Team Shape Shift', 'Run in Behind', 'Off-Ball Spacing Fault',
+    'Decision on the Ball', 'Decision off the Ball'
+  ],
+  Administrative: ['Substitution', 'Bookmark']
+};
+
+var SHOT_QUALITY_VALUES = {
+  'Penalty': 0.75,
+  '6-yard box': 0.35,
+  'Central box': 0.15,
+  'Wide box': 0.06,
+  'Outside 18': 0.03
+};
+
+function getShotQualityValue(shotLocation, isHeader) {
+  var raw = String(shotLocation || '').trim();
+  if (!raw) return 0;
+  var lower = raw.toLowerCase();
+  var key = '';
+  if (lower === 'penalty' || lower === 'pk') key = 'Penalty';
+  else if (lower === '6-yard box' || lower === 'six-yard box' || lower === '6 yard box' || lower === 'six_yard') key = '6-yard box';
+  else if (lower === 'central box' || lower === 'central_box' || lower === 'inside 18 (central)') key = 'Central box';
+  else if (lower === 'wide box' || lower === 'wide_box' || lower === 'inside 18 (wide)') key = 'Wide box';
+  else if (lower === 'outside 18' || lower === 'outside_18') key = 'Outside 18';
+  var base = SHOT_QUALITY_VALUES.hasOwnProperty(raw) ? SHOT_QUALITY_VALUES[raw] : (SHOT_QUALITY_VALUES[key] || 0);
+  if (!base) return 0;
+  if (isHeader && key !== 'Penalty') return Number((base * 0.6).toFixed(3));
+  return Number(base.toFixed(3));
+}
+
 var MATCH_ACTION_LOG_HEADERS = [
   'Event_ID', 'Match_Date', 'Match_Name', 'Opponent', 'Half',
   'Match_Clock', 'Zone', 'Outcome', 'Category', 'Tag',
   'Player_Name', 'Jersey_Num', 'Coach_Notes', 'Note_To_Player', 'Film_Review',
-  'Status', 'Last_Updated'
+  'Status', 'Last_Updated', 'Shot_Location', 'Set_Piece_Outcome'
 ];
 
 var ASPIRE_CANONICAL_ROSTER = [
@@ -1713,6 +1772,18 @@ function normalizeActionRowV31_(cat, tag, outcome, notes, matchName, idNum) {
         resTag = 'Poor Shot Selection';
       }
       break;
+    case 'Big Chance Created':
+      resCat = 'Passing'; resTag = 'Big Chance Created'; break;
+    case 'Box Entry':
+      resCat = 'Carrying'; resTag = 'Box Entry'; break;
+    case 'Counter-press Regain':
+      resCat = 'Defending'; resTag = 'Counter-press Regain'; break;
+    case 'Hold-Up Play':
+      resCat = 'Duel'; resTag = 'Hold-Up Play'; break;
+    case 'Big Chance Missed':
+      resCat = 'Finishing'; resTag = 'Big Chance Missed'; break;
+    case 'Run in Behind':
+      resCat = 'Tactical_Shape'; resTag = 'Run in Behind'; break;
     case 'Poor Shot Selection':
       resCat = 'Finishing'; resTag = 'Poor Shot Selection'; break;
     case 'Cross Out of Bounds':
@@ -1900,6 +1971,9 @@ function buildActionRowFromMoment(m, nowStr) {
   tag = norm.tag;
   if (outcome !== 'Goal Conceded') outcome = norm.outcome;
 
+  var shotLocation = String(m.shotLocation || '').trim();
+  var setPieceOutcome = String(m.setPieceOutcome || '').trim();
+
   return [
     eventId,
     matchDate,
@@ -1917,7 +1991,9 @@ function buildActionRowFromMoment(m, nowStr) {
     noteToPlayer,
     filmReview ? 'TRUE' : 'FALSE',
     status,
-    nowStr || new Date().toISOString()
+    nowStr || new Date().toISOString(),
+    shotLocation,
+    setPieceOutcome
   ];
 }
 
@@ -1943,9 +2019,11 @@ function readAllMatchActionLogRows() {
   var iJersey = idx('jersey_num');
   var iNotes  = idx('coach_notes');
   var iNoteToPlayer = idx('note_to_player') !== -1 ? idx('note_to_player') : idx('note to player');
-  var iRev    = idx('film_review');
-  var iStatus = idx('status');
-  var iUpd    = idx('last_updated');
+  var iRev     = idx('film_review');
+  var iStatus  = idx('status');
+  var iUpd     = idx('last_updated');
+  var iShotLoc = idx('shot_location') !== -1 ? idx('shot_location') : idx('shot location');
+  var iSetOut  = idx('set_piece_outcome') !== -1 ? idx('set_piece_outcome') : idx('set piece outcome');
 
   var results = [];
   for (var r = 1; r < data.length; r++) {
@@ -2016,7 +2094,9 @@ function readAllMatchActionLogRows() {
       noteToPlayer: iNoteToPlayer !== -1 ? String(row[iNoteToPlayer] || '').trim() : '',
       filmReview: isReview,
       status: iStatus !== -1 ? String(row[iStatus] || 'Published').trim() : 'Published',
-      updatedAt: iUpd !== -1 ? String(row[iUpd] || '').trim() : ''
+      updatedAt: iUpd !== -1 ? String(row[iUpd] || '').trim() : '',
+      shotLocation: iShotLoc !== -1 ? String(row[iShotLoc] || '').trim() : '',
+      setPieceOutcome: iSetOut !== -1 ? String(row[iSetOut] || '').trim() : ''
     });
   }
   return results;
@@ -2059,8 +2139,15 @@ function handleSaveMatchActionRows(payload) {
         if (rowId && incomingIds[rowId]) {
           continue;
         }
-        keptRows.push(existingData[r]);
+        var paddedRow = existingData[r].slice();
+        while (paddedRow.length < MATCH_ACTION_LOG_HEADERS.length) paddedRow.push('');
+        keptRows.push(paddedRow);
       }
+    }
+
+    var targetCols = MATCH_ACTION_LOG_HEADERS.length;
+    if (headerRow.length < targetCols) {
+      sheet.getRange(1, 1, 1, targetCols).setValues([MATCH_ACTION_LOG_HEADERS]);
     }
 
     var newRows = moments.map(function(m) {
@@ -2069,10 +2156,10 @@ function handleSaveMatchActionRows(payload) {
     var finalRows = keptRows.concat(newRows);
 
     if (sheet.getLastRow() > 1) {
-      sheet.getRange(2, 1, sheet.getLastRow() - 1, headerRow.length).clearContent();
+      sheet.getRange(2, 1, sheet.getLastRow() - 1, Math.max(headerRow.length, targetCols)).clearContent();
     }
     if (finalRows.length > 0) {
-      sheet.getRange(2, 1, finalRows.length, headerRow.length).setValues(finalRows);
+      sheet.getRange(2, 1, finalRows.length, targetCols).setValues(finalRows);
     }
 
     return jsonOut({
@@ -2160,6 +2247,8 @@ function handleUpdateSingleMatchAction(payload) {
         jerseys: m.jerseys || m.j || [],
         players: m.players || [],
         playersRaw: m.playersRaw || '',
+        shotLocation: m.shotLocation !== undefined ? String(m.shotLocation || '').trim() : '',
+        setPieceOutcome: m.setPieceOutcome !== undefined ? String(m.setPieceOutcome || '').trim() : '',
         updatedAt: nowStr
       };
       setMatchHubKV('film_moment_overrides', overrides);

@@ -141,98 +141,126 @@
 
       <!-- Action & Utility Buttons -->
       <div class="flex items-center gap-1.5 flex-wrap">
-        <button id="commitMatchHubBtn" onclick="commitMatchToHub()" class="min-h-[42px] text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3.5 py-2 rounded-xl transition shadow-xl flex items-center gap-1.5 active:scale-95 border-2 border-emerald-400">
+        <button id="commitMatchHubBtn" onclick="commitMatchToHub()" class="min-h-[44px] text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3.5 py-2 rounded-xl transition shadow-xl flex items-center gap-1.5 active:scale-95 border-2 border-emerald-400">
           <span>⚡ COMMIT MATCH TO HUB</span>
         </button>
-        <button onclick="openNewGameModal()" class="min-h-[42px] text-xs bg-pitch hover:bg-surface border border-border text-slate-200 font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 active:scale-95" title="Match Setup">
+        <div class="relative">
+          <button type="button" id="headerAiMenuBtn" onclick="document.getElementById('headerAiMenuDropdown').classList.toggle('hidden')" class="min-h-[44px] text-xs bg-teal-500 hover:bg-teal-400 text-slate-950 font-black px-3 py-2 rounded-xl transition flex items-center gap-1 active:scale-95 shadow">
+            <span>🤖 AI Reports ▾</span>
+          </button>
+          <div id="headerAiMenuDropdown" class="hidden absolute right-0 mt-1.5 w-48 bg-surface border border-teal-500/40 rounded-xl shadow-2xl p-1.5 space-y-1 z-50">
+            <button type="button" onclick="document.getElementById('headerAiMenuDropdown').classList.add('hidden'); openHalftimeAIModal()" class="w-full min-h-[44px] px-3 py-2 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 font-bold text-xs text-left flex items-center gap-2 transition">
+              <span>🤖 Halftime AI Talk</span>
+            </button>
+            <button type="button" onclick="document.getElementById('headerAiMenuDropdown').classList.add('hidden'); openMatchRecapAIModal()" class="w-full min-h-[44px] px-3 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 font-bold text-xs text-left flex items-center gap-2 transition">
+              <span>📋 Match Recap AI</span>
+            </button>
+          </div>
+        </div>
+        <button onclick="openNewGameModal()" class="min-h-[44px] text-xs bg-pitch hover:bg-surface border border-border text-slate-200 font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 active:scale-95" title="Match Setup">
           <span>⚙️ Setup</span>
         </button>
-        <button onclick="exportStatisticsCsv()" class="min-h-[42px] text-xs bg-surface hover:bg-slate-700 text-slate-200 border border-border px-2.5 py-2 rounded-xl transition flex items-center gap-1 font-bold active:scale-95" title="Export CSV">
+        <button onclick="exportStatisticsCsv()" class="min-h-[44px] text-xs bg-surface hover:bg-slate-700 text-slate-200 border border-border px-2.5 py-2 rounded-xl transition flex items-center gap-1 font-bold active:scale-95" title="Export CSV">
           <span>💾 CSV</span>
         </button>
-        <button onclick="openHistoryModal()" class="min-h-[42px] text-xs bg-pitch hover:bg-surface border border-border text-slate-200 px-2.5 py-2 rounded-xl transition font-bold active:scale-95" title="Saved Games">
+        <button onclick="openHistoryModal()" class="min-h-[44px] text-xs bg-pitch hover:bg-surface border border-border text-slate-200 px-2.5 py-2 rounded-xl transition font-bold active:scale-95" title="Saved Games">
           <span>📁 Games</span>
         </button>
-        <button onclick="resetCurrentMatch()" class="min-h-[42px] text-xs bg-surface hover:bg-slate-700 text-slate-400 hover:text-white border border-border px-2.5 py-2 rounded-xl transition flex items-center gap-1 active:scale-95 font-semibold" title="Reset match">
+        <button onclick="resetCurrentMatch()" class="min-h-[44px] text-xs bg-surface hover:bg-slate-700 text-slate-400 hover:text-white border border-border px-2.5 py-2 rounded-xl transition flex items-center gap-1 active:scale-95 font-semibold" title="Reset match">
           <span>🔄</span>
         </button>
       </div>
     </div>
 
-    <!-- Row 2: Compact Two-Row Responsive Pitchside HUD (44px+ Tap Targets) -->
-    <div id="summaryDashboardHud" class="pt-2 border-t border-border/70 flex items-center justify-between gap-2 flex-wrap text-xs">
-      
-      <!-- Left: Opponent Quick Tag Bar -->
-      <div class="flex items-center gap-1.5 flex-wrap">
-        <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Opp:</span>
-        <button onclick="logOpponentGoal()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold hover:bg-rose-500/30 active:scale-95 text-xs">+Goal</button>
-        <button onclick="logOpponentShot()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold hover:bg-sky-500/30 active:scale-95 text-xs">+Shot (<span id="oppShotsCount">0</span>)</button>
-        <button onclick="logOpponentSub()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold hover:bg-amber-500/30 active:scale-95 text-xs">+Sub (<span id="oppSubsCount">0</span>)</button>
-        <button onclick="logOpponentCorner()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-surface text-slate-300 border border-border hover:bg-slate-700 active:scale-95 text-xs font-semibold">+Corner (<span id="oppCornersCount">0</span>)</button>
-        <button onclick="logOpponentFoul()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-surface text-slate-300 border border-border hover:bg-slate-700 active:scale-95 text-xs font-semibold">+Foul (<span id="oppFoulsCount">0</span>)</button>
-        <button onclick="openOppAdjustModal()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-surface text-slate-300 border border-border hover:bg-slate-700 active:scale-95 text-xs" title="Adjust / Correct Opponent Stats">✏️</button>
+    <!-- Row 2: Two-Row Responsive Pitchside HUD (44px+ Tap Targets) -->
+    <div id="summaryDashboardHud" class="pt-2 border-t border-border/70 flex flex-col gap-2 text-xs">
+      <!-- HUD Row A: Opp & Ajax Primary Tap Actions -->
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Opp:</span>
+          <button onclick="logOpponentGoal()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold hover:bg-rose-500/30 active:scale-95 text-xs">+Goal</button>
+          <button onclick="logOpponentShot()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold hover:bg-sky-500/30 active:scale-95 text-xs">+Shot (<span id="oppShotsCount">0</span>)</button>
+          <button onclick="logOpponentBigChance()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-rose-500/25 text-rose-200 border border-rose-400/50 font-bold hover:bg-rose-500/35 active:scale-95 text-xs" title="Log Opponent Big Chance Conceded">+BigCh (<span id="oppBigChancesCount">0</span>)</button>
+          <button onclick="logOpponentSub()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold hover:bg-amber-500/30 active:scale-95 text-xs">+Sub (<span id="oppSubsCount">0</span>)</button>
+          <button onclick="logOpponentCorner()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-surface text-slate-300 border border-border hover:bg-slate-700 active:scale-95 text-xs font-semibold">+Corner (<span id="oppCornersCount">0</span>)</button>
+          <button onclick="logOpponentFoul()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-surface text-slate-300 border border-border hover:bg-slate-700 active:scale-95 text-xs font-semibold">+Foul (<span id="oppFoulsCount">0</span>)</button>
+          <button onclick="openOppAdjustModal()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-surface text-slate-300 border border-border hover:bg-slate-700 active:scale-95 text-xs" title="Adjust / Correct Opponent Stats">✏️</button>
+        </div>
+
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-[10px] mono uppercase text-teal-400 font-bold shrink-0">Ajax:</span>
+          <button onclick="logQuickCorner()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-bold active:scale-95 flex items-center gap-1 text-xs" title="Record Ajax Corner Kick">
+            <span>🚩 Corner</span>
+          </button>
+          <button onclick="logQuickSetPiece()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 font-bold active:scale-95 flex items-center gap-1 text-xs" title="Record Ajax Free Kick / Set Piece from Foul">
+            <span>🎯 Free Kick</span>
+          </button>
+          <button onclick="logPhaseEvent('goal_kick_kept')" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/35 text-xs font-bold active:scale-95" title="Ajax Goal Kick Build-Out Retained Possession">
+            <span>🧱 GK Kept</span>
+          </button>
+          <button onclick="logPhaseEvent('goal_kick_lost')" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/35 text-xs font-bold active:scale-95" title="Ajax Goal Kick Build-Out Lost Possession">
+            <span>🧱 GK Lost</span>
+          </button>
+          <button onclick="logPhaseEvent('goal_kick_def')" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 font-bold text-xs active:scale-95" title="Opponent Goal Kick High Press">
+            <span>🎯 Press</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Center: Ajax Set Pieces & Phase Triggers -->
+      <!-- HUD Row B: Live Coach KPI Strip -->
       <div class="flex items-center gap-1.5 flex-wrap">
-        <span class="text-[10px] mono uppercase text-teal-400 font-bold shrink-0">Ajax:</span>
-        <button onclick="logQuickCorner()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-bold active:scale-95 flex items-center gap-1 text-xs" title="Record Ajax Corner Kick">
-          <span>🚩 Corner</span>
-        </button>
-        <button onclick="logQuickSetPiece()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 font-bold active:scale-95 flex items-center gap-1 text-xs" title="Record Ajax Free Kick / Set Piece from Foul">
-          <span>🎯 Free Kick</span>
-        </button>
-        <button onclick="logPhaseEvent('goal_kick_att')" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border text-xs font-semibold active:scale-95" title="Ajax Goal Kick Build-Out">
-          <span>🧱 Build</span>
-        </button>
-        <button onclick="logPhaseEvent('goal_kick_def')" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 font-bold text-xs active:scale-95" title="Opponent Goal Kick High Press">
-          <span>🎯 Press</span>
-        </button>
-      </div>
-
-      <!-- Right: Live Telemetry Metric Pills & AI Halftime Trigger -->
-      <div class="flex items-center gap-1.5 flex-wrap">
-        <!-- Shots Split Pill -->
-        <div class="min-h-[38px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Ajax vs Opponent Shots">
+        <!-- Shots & xG-lite (approx) -->
+        <div class="min-h-[36px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1.5 text-[11px]" title="Shots, On Target & Shot Quality (xG-lite approx., not true Opta xG)">
           <span class="text-slate-400 font-mono text-[10px]">Shots:</span>
           <span class="text-white font-bold" id="hudAjaxShots">0</span><span class="text-slate-500">-</span><span class="text-slate-300 font-bold" id="hudOppShots">0</span>
           <span class="text-[10px] text-teal-400">(<span id="hudAjaxSot">0</span> on / <span id="hudAjaxOut18">0</span> out)</span>
+          <span class="text-slate-600">·</span>
+          <span class="text-slate-400 font-mono text-[10px]">xG-lite:</span>
+          <span class="text-emerald-300 font-mono font-bold" id="hudXgFor">0.00</span><span class="text-slate-500">-</span><span class="text-rose-300 font-mono font-bold" id="hudXgAgainst">0.00</span>
           <span id="hudShotsSummary" class="hidden">0 vs 0</span>
         </div>
 
-        <!-- Press Rate Pill -->
-        <div class="min-h-[38px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Press Efficiency">
+        <!-- Big Chances -->
+        <div class="min-h-[36px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Big Chances Created vs Conceded">
+          <span class="text-slate-400 font-mono text-[10px]">BigCh:</span>
+          <span class="text-emerald-300 font-bold font-mono" id="hudBigChFor">0</span><span class="text-slate-500">-</span><span class="text-rose-300 font-bold font-mono" id="hudBigChAgainst">0</span>
+        </div>
+
+        <!-- High Regains & Press -->
+        <div class="min-h-[36px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1.5 text-[11px]" title="Counter-Press / High Regains in A3+M3 and Press Efficiency">
+          <span class="text-slate-400 font-mono text-[10px]">High Regains:</span>
+          <span class="text-teal-300 font-bold font-mono" id="hudHighRegains">0</span>
+          <span class="text-slate-600">·</span>
           <span class="text-slate-400 font-mono text-[10px]">Press:</span>
           <span class="text-teal-400 font-bold" id="hudPressPct">--%</span>
           <span class="text-[10px] text-emerald-400">(<span id="hudPressWon">0</span>/<span id="hudPressTotal">0</span>)</span>
           <div id="hudPressBar" class="hidden"></div>
         </div>
 
-        <!-- Territory Flow Pill -->
-        <div class="min-h-[38px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Territory Flow">
-          <span class="text-slate-400 font-mono text-[10px]">Tilt:</span>
-          <span class="text-teal-300 font-bold" id="hudTerritoryTilt">50/50</span>
-          <span class="text-[9px] text-slate-400">(<span id="hudGkDef">0</span> def / <span id="hudGkAtt">0</span> att)</span>
+        <!-- GK Build Retention % -->
+        <div class="min-h-[36px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Goal-Kick Build-Out Retention % (Kept / Total)">
+          <span class="text-slate-400 font-mono text-[10px]">GK Ret:</span>
+          <span class="text-emerald-300 font-bold font-mono" id="hudGkRetention">--%</span>
+          <span class="text-[10px] text-slate-400">(<span id="hudGkKept">0</span>/<span id="hudGkAttTotal">0</span>)</span>
+          <span id="hudTerritoryTilt" class="hidden">50/50</span>
+          <span id="hudGkDef" class="hidden">0</span>
+          <span id="hudGkAtt" class="hidden">0</span>
+        </div>
+
+        <!-- Set Piece Shot Rate -->
+        <div class="min-h-[36px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Ajax Corners + Free Kicks Producing a Shot">
+          <span class="text-slate-400 font-mono text-[10px]">SP→Shot:</span>
+          <span class="text-purple-300 font-bold font-mono" id="hudSpShotRate">--</span>
         </div>
 
         <!-- Discipline Pill -->
-        <div class="min-h-[38px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Discipline">
+        <div class="min-h-[36px] px-2.5 py-1 rounded-xl bg-pitch border border-border/80 flex items-center gap-1 text-[11px]" title="Discipline">
           <span id="hudCardsCount" class="text-amber-400 font-bold">0 🟨</span>
           <span class="text-[10px] text-slate-300 font-mono">Ajax:<span id="hudAjaxFouls" class="text-amber-300">0</span>F</span>
           <span class="text-[10px] text-slate-400 font-mono">Opp:<span id="hudOppFouls">0</span>F</span>
           <span id="hudAjaxCardsBadge" class="hidden items-center gap-0.5"></span>
         </div>
-
-        <!-- AI Halftime Trigger Button -->
-        <button onclick="openHalftimeAIModal()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs flex items-center gap-1 active:scale-95 shadow" title="Halftime Tactical Talk & Adjustments">
-          <span>🤖 Halftime AI</span>
-        </button>
-        <!-- AI Match Recap Trigger Button -->
-        <button onclick="openMatchRecapAIModal()" class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 active:scale-95 shadow" title="Full-Match Recap & Two-Half Tactical Breakdown">
-          <span>📋 Match Recap AI</span>
-        </button>
       </div>
-
     </div>
   </header>
 
@@ -842,6 +870,14 @@
           </div>
         </div>
         <div class="flex items-center justify-between bg-pitch/80 border border-border rounded-xl px-3.5 py-2">
+          <span class="font-semibold text-rose-200">Big Chances Conceded</span>
+          <div class="flex items-center gap-2">
+            <button onclick="adjustOppStat('bigChances', -1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">−</button>
+            <span id="adjOppBigChances" class="w-8 text-center font-black text-white mono text-base">0</span>
+            <button onclick="adjustOppStat('bigChances', 1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">+</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between bg-pitch/80 border border-border rounded-xl px-3.5 py-2">
           <span class="font-semibold text-slate-200">Fouls</span>
           <div class="flex items-center gap-2">
             <button onclick="adjustOppStat('fouls', -1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">−</button>
@@ -930,6 +966,30 @@
   </div>
 
   <!-- ======================================================== -->
+  <!-- NON-BLOCKING QUICK TOAST: SET-PIECE OUTCOME & SHOT QUALITY -->
+  <!-- ======================================================== -->
+  <div id="setPieceOutcomeBar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-purple-400/60 rounded-2xl px-4 py-2.5 shadow-2xl flex items-center gap-2.5 text-xs">
+    <span class="font-bold text-purple-200" id="spOutcomePromptLabel">🚩 Set Piece → Shot?</span>
+    <button type="button" onclick="tagLastSetPieceOutcome('Shot')" class="min-h-[44px] px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black active:scale-95">→ Shot (Y)</button>
+    <button type="button" onclick="tagLastSetPieceOutcome('No Shot')" class="min-h-[44px] px-3.5 py-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border border-border font-bold active:scale-95">No Shot (N)</button>
+    <button type="button" onclick="document.getElementById('setPieceOutcomeBar').classList.add('hidden')" class="min-h-[44px] min-w-[44px] text-slate-400 hover:text-white font-bold">✕</button>
+  </div>
+
+  <div id="shotLocToastBar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-teal-400/60 rounded-2xl px-3.5 py-2.5 shadow-2xl flex items-center gap-1.5 flex-wrap justify-center text-xs max-w-[95vw]">
+    <span class="font-bold text-teal-200 mr-1" id="shotLocToastLabel">📍 Shot Loc (xG-lite):</span>
+    <button type="button" onclick="tagLastShotLocation('Penalty')" class="min-h-[44px] px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-200 border border-amber-400/50 font-bold active:scale-95">PK (0.75)</button>
+    <button type="button" onclick="tagLastShotLocation('6-yard box')" class="min-h-[44px] px-2.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/50 font-bold active:scale-95">6-yd (0.35)</button>
+    <button type="button" onclick="tagLastShotLocation('Central box')" class="min-h-[44px] px-2.5 py-1.5 rounded-xl bg-teal-500/20 text-teal-200 border border-teal-400/50 font-bold active:scale-95">Central (0.15)</button>
+    <button type="button" onclick="tagLastShotLocation('Wide box')" class="min-h-[44px] px-2.5 py-1.5 rounded-xl bg-sky-500/20 text-sky-200 border border-sky-400/50 font-bold active:scale-95">Wide (0.06)</button>
+    <button type="button" onclick="tagLastShotLocation('Outside 18')" class="min-h-[44px] px-2.5 py-1.5 rounded-xl bg-surface text-slate-200 border border-border font-bold active:scale-95">Out 18 (0.03)</button>
+    <label class="inline-flex items-center gap-1.5 px-2.5 min-h-[44px] rounded-xl bg-pitch border border-border text-slate-200 cursor-pointer font-semibold">
+      <input type="checkbox" id="shotToastIsHeader" class="w-4 h-4 rounded">
+      <span>Header ×0.6</span>
+    </label>
+    <button type="button" onclick="document.getElementById('shotLocToastBar').classList.add('hidden')" class="min-h-[44px] min-w-[44px] text-slate-400 hover:text-white font-bold">✕</button>
+  </div>
+
+  <!-- ======================================================== -->
   <!-- MODAL / BOTTOM SHEET: INSTANT CONTEXTUAL PLAYER ACTION & SUB MODAL -->
   <!-- ======================================================== -->
   <div id="trackerPlayerActionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
@@ -996,21 +1056,36 @@
             <span id="pamCatCountLabel" class="text-teal-300 font-mono text-[10px]">Select category to view actions</span>
           </div>
           <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold scrollbar-none" id="pamCategoryChips">
-            <button type="button" onclick="filterPamActionCategory('all')" id="pamCat-all" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-teal-500/50 bg-teal-500/25 text-teal-200 whitespace-nowrap active:scale-95 transition">All (43)</button>
-            <button type="button" onclick="filterPamActionCategory('passing')" id="pamCat-passing" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🟢 Passing (8)</button>
-            <button type="button" onclick="filterPamActionCategory('carrying')" id="pamCat-carrying" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🏃 Carrying (5)</button>
-            <button type="button" onclick="filterPamActionCategory('defending')" id="pamCat-defending" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🛡️ Defending (9)</button>
-            <button type="button" onclick="filterPamActionCategory('duel')" id="pamCat-duel" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">⚔️ Duel (6)</button>
-            <button type="button" onclick="filterPamActionCategory('finishing')" id="pamCat-finishing" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">⚡ Finishing (6)</button>
+            <button type="button" onclick="filterPamActionCategory('all')" id="pamCat-all" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-teal-500/50 bg-teal-500/25 text-teal-200 whitespace-nowrap active:scale-95 transition">All (54)</button>
+            <button type="button" onclick="filterPamActionCategory('passing')" id="pamCat-passing" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🟢 Passing (9)</button>
+            <button type="button" onclick="filterPamActionCategory('carrying')" id="pamCat-carrying" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🏃 Carrying (6)</button>
+            <button type="button" onclick="filterPamActionCategory('defending')" id="pamCat-defending" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🛡️ Defending (10)</button>
+            <button type="button" onclick="filterPamActionCategory('duel')" id="pamCat-duel" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">⚔️ Duel (7)</button>
+            <button type="button" onclick="filterPamActionCategory('finishing')" id="pamCat-finishing" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">⚡ Finishing (7)</button>
             <button type="button" onclick="filterPamActionCategory('gk')" id="pamCat-gk" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🧤 Goalkeeping (5)</button>
-            <button type="button" onclick="filterPamActionCategory('tactical')" id="pamCat-tactical" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🧠 Tactical (7)</button>
+            <button type="button" onclick="filterPamActionCategory('tactical')" id="pamCat-tactical" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🧠 Tactical (8)</button>
             <button type="button" onclick="filterPamActionCategory('admin')" id="pamCat-admin" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">📋 Admin (2)</button>
           </div>
         </div>
 
+        <!-- Optional Shot Location Pre-Selector (xG-lite approx.) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[11px]" id="pamShotLocBar">
+          <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Shot Loc:</span>
+          <button type="button" onclick="togglePamShotLoc('Penalty')" data-shot-loc="Penalty" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">PK</button>
+          <button type="button" onclick="togglePamShotLoc('6-yard box')" data-shot-loc="6-yard box" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">6-yd</button>
+          <button type="button" onclick="togglePamShotLoc('Central box')" data-shot-loc="Central box" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">Central</button>
+          <button type="button" onclick="togglePamShotLoc('Wide box')" data-shot-loc="Wide box" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">Wide</button>
+          <button type="button" onclick="togglePamShotLoc('Outside 18')" data-shot-loc="Outside 18" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">Out 18</button>
+          <button type="button" id="pamHeaderToggleBtn" onclick="togglePamHeader()" class="px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">Header ×0.6</button>
+        </div>
+
         <!-- Action Tag Buttons Grid (Filtered by Category) -->
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[340px] sm:max-h-[380px] overflow-y-auto pr-1" id="pamActionTagGrid">
-          <!-- 🟢 Passing (8) -->
+          <!-- 🟢 Passing (9) -->
+          <button type="button" data-pam-cat="passing" onclick="logPamAction('Big Chance Created', 'Glow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-400/50 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">✨ Big Chance Created</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-200 shrink-0">+2.0</span>
+          </button>
           <button type="button" data-pam-cat="passing" onclick="logPamAction('Key Pass (Shot Assist)', 'Glow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
             <span class="truncate">🔑 Key Pass (Shot Assist)</span>
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
@@ -1044,7 +1119,11 @@
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
           </button>
 
-          <!-- 🏃 Carrying (5) -->
+          <!-- 🏃 Carrying (6) -->
+          <button type="button" data-pam-cat="carrying" onclick="logPamAction('Box Entry', 'Glow', 'Carrying')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-400/50 bg-emerald-950/40 text-emerald-200 hover:bg-emerald-900/60 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">📦 Box Entry</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">+1.0</span>
+          </button>
           <button type="button" data-pam-cat="carrying" onclick="logPamAction('Progressive Carry', 'Glow', 'Carrying')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
             <span class="truncate">🏃 Progressive Carry</span>
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
@@ -1066,7 +1145,11 @@
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
           </button>
 
-          <!-- 🛡️ Defending (9) -->
+          <!-- 🛡️ Defending (10) -->
+          <button type="button" data-pam-cat="defending" onclick="logPamAction('Counter-press Regain', 'Glow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-sky-400/50 bg-sky-500/20 text-sky-200 hover:bg-sky-500/30 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">⚡ Counter-press Regain</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-sky-500/20 text-sky-200 shrink-0">+1.5</span>
+          </button>
           <button type="button" data-pam-cat="defending" onclick="logPamAction('Direct Pressure', 'Glow', 'Defending')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
             <span class="truncate">⚡ Direct Pressure</span>
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
@@ -1104,7 +1187,11 @@
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
           </button>
 
-          <!-- ⚔️ Duel (6) -->
+          <!-- ⚔️ Duel (7) -->
+          <button type="button" data-pam-cat="duel" onclick="logPamAction('Hold-Up Play', 'Glow', 'Duel')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-400/50 bg-emerald-950/35 text-emerald-200 hover:bg-emerald-900/55 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🛡️ Hold-Up Play</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">+1.0</span>
+          </button>
           <button type="button" data-pam-cat="duel" onclick="logPamAction('Ground Duel Won', 'Glow', 'Duel')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-teal-500/40 bg-teal-950/30 text-teal-300 hover:bg-teal-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
             <span class="truncate">💪 Ground Duel Won</span>
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">+Glow</span>
@@ -1147,6 +1234,10 @@
             <span class="truncate">🥅 Shot Off Target</span>
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-slate-700 text-slate-300 shrink-0">-Grow</span>
           </button>
+          <button type="button" data-pam-cat="finishing" onclick="logPamAction('Big Chance Missed', 'Grow', 'Finishing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-400/50 bg-rose-950/40 text-rose-200 hover:bg-rose-900/60 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">💔 Big Chance Missed</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-0.5</span>
+          </button>
           <button type="button" data-pam-cat="finishing" onclick="logPamAction('Poor Shot Selection', 'Grow', 'Finishing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
             <span class="truncate">⚠️ Poor Shot Selection</span>
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">-Grow</span>
@@ -1178,7 +1269,11 @@
             <span class="text-[9px] mono px-1.5 py-0.5 rounded bg-rose-600 text-white font-black shrink-0">-2.5</span>
           </button>
 
-          <!-- 🧠 Tactical_Shape (7) -->
+          <!-- 🧠 Tactical_Shape (8) -->
+          <button type="button" data-pam-cat="tactical" onclick="logPamAction('Run in Behind', 'Glow', 'Tactical_Shape')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-purple-400/50 bg-purple-950/40 text-purple-200 hover:bg-purple-900/60 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
+            <span class="truncate">🏃‍♀️ Run in Behind</span>
+            <span class="text-[9px] mono px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 shrink-0">+0.75</span>
+          </button>
           <button type="button" data-pam-cat="tactical" onclick="logPamAction('Scanning & Pre-Orientation', 'Glow', 'Tactical_Shape')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-purple-500/40 bg-purple-950/30 text-purple-300 hover:bg-purple-900/50 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
             <span class="truncate">👀 Scanning &amp; Pre-Orient</span>
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 shrink-0">+Glow</span>
@@ -1539,7 +1634,10 @@
     let phaseStats = {
       pressWon: 0,
       pressLost: 0,
+      highRegains: 0,
       goalKicksAttacking: 0,
+      goalKicksKept: 0,
+      goalKicksLost: 0,
       goalKicksDefending: 0,
       crossesLeft: 0,
       crossesRight: 0
@@ -1551,6 +1649,7 @@
       sot: 0,
       soff: 0,
       shotsOutside18: 0,
+      bigChances: 0,
       subs: 0,
       corners: 0,
       fouls: 0,
@@ -1617,8 +1716,11 @@
           hasRed: false,
           pressWon: 0,
           pressLost: 0,
+          highRegains: 0,
           saves: 0,
           keyPasses: 0,
+          bigChancesCreated: 0,
+          bigChancesMissed: 0,
           duelsWon: 0,
           duelsLost: 0,
           posMins: {},
@@ -1641,8 +1743,8 @@
       });
 
       matchEvents = [];
-      oppStats = { goals: 0, shots: 0, sot: 0, soff: 0, shotsOutside18: 0, subs: 0, corners: 0, fouls: 0, yellowCards: 0 };
-      phaseStats = { pressWon: 0, pressLost: 0, goalKicksAttacking: 0, goalKicksDefending: 0, crossesLeft: 0, crossesRight: 0 };
+      oppStats = { goals: 0, shots: 0, sot: 0, soff: 0, shotsOutside18: 0, bigChances: 0, subs: 0, corners: 0, fouls: 0, yellowCards: 0 };
+      phaseStats = { pressWon: 0, pressLost: 0, highRegains: 0, goalKicksAttacking: 0, goalKicksKept: 0, goalKicksLost: 0, goalKicksDefending: 0, crossesLeft: 0, crossesRight: 0 };
       matchSeconds = 0;
       currentPeriod = 1;
       timerRunning = false;
@@ -2328,13 +2430,118 @@
       { tag: 'Goal Conceded', outcome: 'Goal Conceded', category: 'Goalkeeping', icon: '🥅' }
     ];
 
+    const SHOT_QUALITY_VALUES = {
+      'Penalty': 0.75,
+      '6-yard box': 0.35,
+      'Central box': 0.15,
+      'Wide box': 0.06,
+      'Outside 18': 0.03
+    };
+
+    function getShotQualityValue(shotLocation, isHeader) {
+      const raw = String(shotLocation || '').trim();
+      if (!raw) return 0;
+      const lower = raw.toLowerCase();
+      let key = raw;
+      if (lower === 'penalty' || lower === 'pk') key = 'Penalty';
+      else if (lower === '6-yard box' || lower === 'six-yard box' || lower === '6 yard box' || lower === 'six_yard') key = '6-yard box';
+      else if (lower === 'central box' || lower === 'central_box' || lower === 'inside 18 (central)') key = 'Central box';
+      else if (lower === 'wide box' || lower === 'wide_box' || lower === 'inside 18 (wide)') key = 'Wide box';
+      else if (lower === 'outside 18' || lower === 'outside_18') key = 'Outside 18';
+      const base = Object.prototype.hasOwnProperty.call(SHOT_QUALITY_VALUES, key) ? SHOT_QUALITY_VALUES[key] : 0;
+      if (!base) return 0;
+      if (isHeader && key !== 'Penalty') return Number((base * 0.6).toFixed(3));
+      return Number(base.toFixed(3));
+    }
+
+    let pamShotLocation = '';
+    let pamIsHeader = false;
+    let pendingShotEventId = null;
+    let pendingSetPieceEventId = null;
+    let shotToastTimer = null;
+    let spToastTimer = null;
+
+    function togglePamShotLoc(loc) {
+      pamShotLocation = (pamShotLocation === loc) ? '' : loc;
+      document.querySelectorAll('.pam-shot-loc-btn').forEach(btn => {
+        const active = btn.getAttribute('data-shot-loc') === pamShotLocation;
+        btn.className = active
+          ? 'pam-shot-loc-btn px-2 py-1 rounded-lg border border-teal-400 bg-teal-500/25 text-teal-200 font-bold whitespace-nowrap'
+          : 'pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap';
+      });
+    }
+
+    function togglePamHeader() {
+      pamIsHeader = !pamIsHeader;
+      const btn = document.getElementById('pamHeaderToggleBtn');
+      if (btn) {
+        btn.className = pamIsHeader
+          ? 'px-2 py-1 rounded-lg border border-amber-400 bg-amber-500/25 text-amber-200 font-bold whitespace-nowrap'
+          : 'px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap';
+      }
+    }
+
+    function showShotLocationBar(eventId, label) {
+      pendingShotEventId = eventId;
+      const bar = document.getElementById('shotLocToastBar');
+      const lbl = document.getElementById('shotLocToastLabel');
+      const hdr = document.getElementById('shotToastIsHeader');
+      if (hdr) hdr.checked = false;
+      if (lbl && label) lbl.textContent = label;
+      if (bar) bar.classList.remove('hidden');
+      if (shotToastTimer) clearTimeout(shotToastTimer);
+      shotToastTimer = setTimeout(() => { if (bar) bar.classList.add('hidden'); }, 7000);
+    }
+
+    function tagLastShotLocation(shotLocation) {
+      const hdr = document.getElementById('shotToastIsHeader');
+      const isHeader = hdr ? Boolean(hdr.checked) : false;
+      const ev = (matchEvents || []).find(e => e.id === pendingShotEventId) || matchEvents[0];
+      if (ev) {
+        ev.shotLocation = shotLocation;
+        ev.isHeader = isHeader;
+        ev.shotQuality = getShotQualityValue(shotLocation, isHeader);
+      }
+      const bar = document.getElementById('shotLocToastBar');
+      if (bar) bar.classList.add('hidden');
+      updateSummaryHud();
+      renderEventsFeed();
+      saveState();
+      showToast(`📍 Shot Quality: ${shotLocation}${isHeader ? ' (Header)' : ''} · ${getShotQualityValue(shotLocation, isHeader).toFixed(2)} xG-lite`);
+    }
+
+    function showSetPieceOutcomeBar(eventId, label) {
+      pendingSetPieceEventId = eventId;
+      const bar = document.getElementById('setPieceOutcomeBar');
+      const lbl = document.getElementById('spOutcomePromptLabel');
+      if (lbl && label) lbl.textContent = label;
+      if (bar) bar.classList.remove('hidden');
+      if (spToastTimer) clearTimeout(spToastTimer);
+      spToastTimer = setTimeout(() => { if (bar) bar.classList.add('hidden'); }, 8000);
+    }
+
+    function tagLastSetPieceOutcome(outcomeVal) {
+      const ev = (matchEvents || []).find(e => e.id === pendingSetPieceEventId) || matchEvents[0];
+      if (ev) {
+        ev.setPieceOutcome = outcomeVal;
+      }
+      const bar = document.getElementById('setPieceOutcomeBar');
+      if (bar) bar.classList.add('hidden');
+      updateSummaryHud();
+      renderEventsFeed();
+      saveState();
+      showToast(`🚩 Set-piece outcome: → ${outcomeVal}`);
+    }
+
     const HOT_BAR_LOOKUP = {
       'Goal Scored': { tag: 'Goal Scored', outcome: 'Goal Scored', category: 'Finishing', icon: '⚽' },
       'Shot on Target': { tag: 'Shot on Target', outcome: 'Glow', category: 'Finishing', icon: '🎯' },
       'Quality Shot': { tag: 'Quality Shot', outcome: 'Glow', category: 'Finishing', icon: '💥' },
       'Shot Off Target': { tag: 'Shot Off Target', outcome: 'Grow', category: 'Finishing', icon: '✖️' },
+      'Big Chance Missed': { tag: 'Big Chance Missed', outcome: 'Grow', category: 'Finishing', icon: '💔' },
       'Poor Shot Selection': { tag: 'Poor Shot Selection', outcome: 'Grow', category: 'Finishing', icon: '⚠️' },
       'Cross Out of Bounds': { tag: 'Cross Out of Bounds', outcome: 'Grow', category: 'Finishing', icon: '↪️' },
+      'Big Chance Created': { tag: 'Big Chance Created', outcome: 'Glow', category: 'Passing', icon: '✨' },
       'Key Pass (Shot Assist)': { tag: 'Key Pass (Shot Assist)', outcome: 'Glow', category: 'Passing', icon: '🔑' },
       'Goal Assist': { tag: 'Goal Assist', outcome: 'Glow', category: 'Passing', icon: '🅰️' },
       'Line-Breaking Pass': { tag: 'Line-Breaking Pass', outcome: 'Glow', category: 'Passing', icon: '⚡' },
@@ -2344,10 +2551,12 @@
       'Forced Turnover Pass': { tag: 'Forced Turnover Pass', outcome: 'Grow', category: 'Passing', icon: '⚠️' },
       'Unforced Turnover Pass': { tag: 'Unforced Turnover Pass', outcome: 'Grow', category: 'Passing', icon: '🛑' },
       'Progressive Carry': { tag: 'Progressive Carry', outcome: 'Glow', category: 'Carrying', icon: '🏃' },
+      'Box Entry': { tag: 'Box Entry', outcome: 'Glow', category: 'Carrying', icon: '📦' },
       '1v1 Dribble Won': { tag: '1v1 Dribble Won', outcome: 'Glow', category: 'Carrying', icon: '✨' },
       'Turned into Pressure': { tag: 'Turned into Pressure', outcome: 'Grow', category: 'Carrying', icon: '⚠️' },
       'Miscontrol': { tag: 'Miscontrol', outcome: 'Grow', category: 'Carrying', icon: '💨' },
       'Dispossessed': { tag: 'Dispossessed', outcome: 'Grow', category: 'Carrying', icon: '❌' },
+      'Counter-press Regain': { tag: 'Counter-press Regain', outcome: 'Glow', category: 'Defending', icon: '⚡' },
       'Tackle': { tag: 'Tackle', outcome: 'Glow', category: 'Defending', icon: '🦵' },
       'Interception': { tag: 'Interception', outcome: 'Glow', category: 'Defending', icon: '🧲' },
       'Direct Pressure': { tag: 'Direct Pressure', outcome: 'Glow', category: 'Defending', icon: '🔥' },
@@ -2358,6 +2567,7 @@
       'Stabbed at the Ball': { tag: 'Stabbed at the Ball', outcome: 'Grow', category: 'Defending', icon: '🛑' },
       'Lost Mark / Recovery': { tag: 'Lost Mark / Recovery', outcome: 'Grow', category: 'Defending', icon: '❌' },
       'Ground Duel Won': { tag: 'Ground Duel Won', outcome: 'Glow', category: 'Duel', icon: '⚔️' },
+      'Hold-Up Play': { tag: 'Hold-Up Play', outcome: 'Glow', category: 'Duel', icon: '🛡️' },
       'Aerial Duel Won': { tag: 'Aerial Duel Won', outcome: 'Glow', category: 'Duel', icon: '🦅' },
       'Foul Won': { tag: 'Foul Won', outcome: 'Glow', category: 'Duel', icon: '🚩' },
       'Ground Duel Lost': { tag: 'Ground Duel Lost', outcome: 'Grow', category: 'Duel', icon: '🔻' },
@@ -2372,6 +2582,7 @@
       'Support Angle Offered': { tag: 'Support Angle Offered', outcome: 'Glow', category: 'Tactical_Shape', icon: '📐' },
       'Tactical Communication': { tag: 'Tactical Communication', outcome: 'Glow', category: 'Tactical_Shape', icon: '🗣️' },
       'Team Shape Shift': { tag: 'Team Shape Shift', outcome: 'Glow', category: 'Tactical_Shape', icon: '🧩' },
+      'Run in Behind': { tag: 'Run in Behind', outcome: 'Glow', category: 'Tactical_Shape', icon: '🏃‍♀️' },
       'Off-Ball Spacing Fault': { tag: 'Off-Ball Spacing Fault', outcome: 'Grow', category: 'Tactical_Shape', icon: '⚠️' },
       'Decision on the Ball': { tag: 'Decision on the Ball', outcome: 'Glow', category: 'Tactical_Shape', icon: '💡' },
       'Decision off the Ball': { tag: 'Decision off the Ball', outcome: 'Glow', category: 'Tactical_Shape', icon: '🧭' }
@@ -2498,6 +2709,11 @@
 
       // 1. In-game player stat increments according to tag
       let mappedType = 'other';
+      const isShotTag = (tag === 'Goal Scored' || tag === 'Shot on Target' || tag === 'Quality Shot' || tag === 'Shot Off Target' || tag === 'Poor Shot Selection' || tag === 'Big Chance Missed');
+      const shotLoc = isShotTag ? (pamShotLocation || '') : '';
+      const isHdr = isShotTag ? Boolean(pamIsHeader) : false;
+      const shotQual = shotLoc ? getShotQualityValue(shotLoc, isHdr) : 0;
+
       if (tag === 'Goal Scored') {
         mappedType = 'goal';
         p.goals = (p.goals || 0) + 1;
@@ -2512,6 +2728,11 @@
         mappedType = 'soff';
         p.shots = (p.shots || 0) + 1;
         p.soff = (p.soff || 0) + 1;
+      } else if (tag === 'Big Chance Missed') {
+        mappedType = 'soff';
+        p.shots = (p.shots || 0) + 1;
+        p.soff = (p.soff || 0) + 1;
+        p.bigChancesMissed = (p.bigChancesMissed || 0) + 1;
       } else if (tag === 'Poor Shot Selection') {
         mappedType = 'soff';
         p.shots = (p.shots || 0) + 1;
@@ -2524,6 +2745,10 @@
         mappedType = 'assist';
         p.assists = (p.assists || 0) + 1;
         p.keyPasses = (p.keyPasses || 0) + 1;
+      } else if (tag === 'Big Chance Created') {
+        mappedType = 'keyPass';
+        p.keyPasses = (p.keyPasses || 0) + 1;
+        p.bigChancesCreated = (p.bigChancesCreated || 0) + 1;
       } else if (tag === 'Key Pass (Shot Assist)' || tag === 'Line-Breaking Pass') {
         mappedType = 'keyPass';
         p.keyPasses = (p.keyPasses || 0) + 1;
@@ -2533,7 +2758,7 @@
         if (zone === 'D3') p.toD = (p.toD || 0) + 1;
         else if (zone === 'A3') p.toA = (p.toA || 0) + 1;
         else p.toM = (p.toM || 0) + 1;
-      } else if (tag === 'Ground Duel Won' || tag === 'Aerial Duel Won') {
+      } else if (tag === 'Ground Duel Won' || tag === 'Aerial Duel Won' || tag === 'Hold-Up Play') {
         mappedType = 'duelWon';
         p.duelsWon = (p.duelsWon || 0) + 1;
       } else if (tag === 'Ground Duel Lost' || tag === 'No Challenge on 50/50') {
@@ -2545,9 +2770,14 @@
       } else if (tag === 'Foul Conceded') {
         mappedType = 'foul';
         p.fouls = (p.fouls || 0) + 1;
+      } else if (tag === 'Counter-press Regain') {
+        mappedType = 'pressWon';
+        p.pressWon = (p.pressWon || 0) + 1;
+        if (zone === 'A3' || zone === 'M3') p.highRegains = (p.highRegains || 0) + 1;
       } else if (tag === 'Direct Pressure') {
         mappedType = 'pressWon';
         p.pressWon = (p.pressWon || 0) + 1;
+        if (zone === 'A3' || zone === 'M3') p.highRegains = (p.highRegains || 0) + 1;
       } else if (tag === 'Save (Clean / Held)' || tag === 'Save (Parried)') {
         mappedType = 'save';
         p.saves = (p.saves || 0) + 1;
@@ -2571,7 +2801,7 @@
 
       // 2. Log structured match event with full v4.0 metadata
       const desc = `${tag.toUpperCase()} (${outcome}): #${j} ${p.name.split(' ')[0]} in ${zone} (${curMins}')`;
-      logMatchEvent({
+      const newEv = {
         time: curMins,
         half: (currentPeriod === 2 || curMins > getHalfLengthMinutes()) ? 'H2' : 'H1',
         type: mappedType,
@@ -2581,10 +2811,24 @@
         tag: tag,
         outcome: outcome,
         zone: zone
-      });
+      };
+      if (shotLoc) {
+        newEv.shotLocation = shotLoc;
+        newEv.isHeader = isHdr;
+        newEv.shotQuality = shotQual;
+      }
+      logMatchEvent(newEv);
 
       showToast(`Logged ${tag} for #${j} ${p.name.split(' ')[0]} in ${zone}`);
+      pamShotLocation = '';
+      pamIsHeader = false;
       closeTrackerPlayerActionModal();
+      if (isShotTag && !shotLoc && matchEvents[0]) {
+        showShotLocationBar(matchEvents[0].id, `📍 ${tag} (#${j}) Location:`);
+      }
+      if (tag === 'Foul Won' && matchEvents[0]) {
+        showSetPieceOutcomeBar(matchEvents[0].id, `🎯 Free Kick (#${j}) → Shot?`);
+      }
       deselectPlayer();
       renderPitch();
       renderBench();
@@ -2595,6 +2839,13 @@
     }
 
     function openTrackerPlayerActionModal(slot, initialTab = 'stats') {
+      pamShotLocation = '';
+      pamIsHeader = false;
+      document.querySelectorAll('.pam-shot-loc-btn').forEach(btn => {
+        btn.className = 'pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap';
+      });
+      const hdrBtn = document.getElementById('pamHeaderToggleBtn');
+      if (hdrBtn) hdrBtn.className = 'px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap';
       pamSubOffset = 0;
       pamSubCustomMinute = null;
       updatePamSubPillsUI();
@@ -2874,7 +3125,8 @@
         showToast(`🥅 Shot off logged for #${j}`);
       } else if (eventType === 'corner') {
         p.corners++;
-        logMatchEvent({ time: curMins, type: 'corner', desc: `CORNER KICK: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'corner', desc: `CORNER KICK: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        if (typeof showSetPieceOutcomeBar === 'function' && matchEvents[0]) showSetPieceOutcomeBar(matchEvents[0].id, `🚩 Corner (#${j}) → Shot?`);
         showToast(`🚩 Corner kick logged`);
       } else if (eventType === 'cross') {
         p.crosses++;
@@ -3045,6 +3297,9 @@
         subType: typeof subType === 'string' ? subType : (subType ? 'on_target' : 'good_look'),
         jersey: j,
         zone: 'A3',
+        shotLocation: 'Outside 18',
+        isHeader: false,
+        shotQuality: getShotQualityValue('Outside 18', false),
         desc
       });
 
@@ -3107,7 +3362,17 @@
       const curMins = Math.floor(matchSeconds / 60);
       const half = currentPeriod <= 1 ? 'H1' : 'H2';
 
-      if (type === 'goal_kick_att') {
+      if (type === 'goal_kick_kept') {
+        phaseStats.goalKicksKept = (phaseStats.goalKicksKept || 0) + 1;
+        phaseStats.goalKicksAttacking = (phaseStats.goalKicksKept || 0) + (phaseStats.goalKicksLost || 0);
+        logMatchEvent({ time: curMins, half, type: 'goal_kick_kept', zone: 'D3', outcome: 'Glow', desc: `🧱 AJAX BUILD-OUT KEPT (Goal Kick #${phaseStats.goalKicksAttacking}) at ${curMins}'` });
+        showToast(`🧱 Goal Kick Kept logged (${phaseStats.goalKicksKept}/${phaseStats.goalKicksAttacking})`);
+      } else if (type === 'goal_kick_lost') {
+        phaseStats.goalKicksLost = (phaseStats.goalKicksLost || 0) + 1;
+        phaseStats.goalKicksAttacking = (phaseStats.goalKicksKept || 0) + (phaseStats.goalKicksLost || 0);
+        logMatchEvent({ time: curMins, half, type: 'goal_kick_lost', zone: 'D3', outcome: 'Grow', desc: `🧱 AJAX BUILD-OUT LOST (Goal Kick #${phaseStats.goalKicksAttacking}) at ${curMins}'` });
+        showToast(`🧱 Goal Kick Lost logged (${phaseStats.goalKicksKept}/${phaseStats.goalKicksAttacking} kept)`);
+      } else if (type === 'goal_kick_att') {
         phaseStats.goalKicksAttacking = (phaseStats.goalKicksAttacking || 0) + 1;
         logMatchEvent({ time: curMins, half, type: 'goal_kick_att', zone: 'D3', desc: `🧱 AJAX BUILD-OUT (Goal Kick #${phaseStats.goalKicksAttacking}) at ${curMins}'` });
         showToast(`🧱 Our Goal Kick logged (Total: ${phaseStats.goalKicksAttacking})`);
@@ -3131,19 +3396,38 @@
 
     /* Opponent Events */
     function logOpponentGoal() {
+      const curMins = Math.floor(matchSeconds / 60);
       oppStats.goals++;
       oppStats.shots++;
       updateScoreboard();
+      logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'oppGoal', desc: `OPPONENT GOAL conceded (${curMins}')`, zone: 'D3' });
       updateSummaryHud();
-      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppGoal', desc: `OPPONENT GOAL conceded (${Math.floor(matchSeconds / 60)}')`, zone: 'D3' });
+      saveState();
+      if (typeof showShotLocationBar === 'function' && matchEvents[0]) {
+        showShotLocationBar(matchEvents[0].id, `📍 Opp Goal Shot Loc (xG-lite):`);
+      }
       showToast('Opponent goal logged.');
     }
     function logOpponentShot() {
+      const curMins = Math.floor(matchSeconds / 60);
       oppStats.shots++;
       const el = document.getElementById('oppShotsCount');
       if (el) el.textContent = oppStats.shots;
-      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppShot', desc: `OPPONENT SHOT against (${Math.floor(matchSeconds / 60)}')`, zone: 'D3' });
+      logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'oppShot', desc: `OPPONENT SHOT against (${curMins}')`, zone: 'D3' });
       showToast(`Opponent shot logged (Total: ${oppStats.shots})`);
+      updateSummaryHud();
+      saveState();
+      if (typeof showShotLocationBar === 'function' && matchEvents[0]) {
+        showShotLocationBar(matchEvents[0].id, `📍 Opp Shot Loc (xG-lite):`);
+      }
+    }
+    function logOpponentBigChance() {
+      const curMins = Math.floor(matchSeconds / 60);
+      oppStats.bigChances = (oppStats.bigChances || 0) + 1;
+      const el = document.getElementById('oppBigChancesCount');
+      if (el) el.textContent = oppStats.bigChances;
+      logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'oppBigChance', desc: `🚨 OPPONENT BIG CHANCE CONCEDED #${oppStats.bigChances} (${curMins}')`, zone: 'D3' });
+      showToast(`🚨 Opponent Big Chance logged (Total: ${oppStats.bigChances})`);
       updateSummaryHud();
       saveState();
     }
@@ -3184,6 +3468,7 @@
       const map = {
         adjOppGoals: oppStats.goals || 0,
         adjOppShots: oppStats.shots || 0,
+        adjOppBigChances: oppStats.bigChances || 0,
         adjOppSubs: oppStats.subs || 0,
         adjOppCorners: oppStats.corners || 0,
         adjOppFouls: oppStats.fouls || 0
@@ -3200,6 +3485,7 @@
       oppStats[field] = next;
       syncOppAdjustModalUI();
       updateScoreboard();
+      if (typeof updateSummaryHud === 'function') updateSummaryHud();
       saveState();
     }
 
@@ -3310,12 +3596,15 @@
         return;
       }
       if (type === 'corner') {
-        logMatchEvent({ time: curMins, type: 'corner', desc: `🚩 CORNER KICK (Team) at ${curMins}'`, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'corner', desc: `🚩 CORNER KICK (Team) at ${curMins}'`, zone: 'A3' });
+        if (typeof showSetPieceOutcomeBar === 'function' && matchEvents[0]) showSetPieceOutcomeBar(matchEvents[0].id, `🚩 Team Corner → Shot?`);
         showToast(`🚩 Team corner kick logged at ${curMins}'`);
       } else {
-        logMatchEvent({ time: curMins, type: 'setPiece', desc: `🎯 FREE KICK / SET PIECE (Team) at ${curMins}'`, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'setPiece', desc: `🎯 FREE KICK / SET PIECE (Team) at ${curMins}'`, zone: 'A3' });
+        if (typeof showSetPieceOutcomeBar === 'function' && matchEvents[0]) showSetPieceOutcomeBar(matchEvents[0].id, `🎯 Team Free Kick → Shot?`);
         showToast(`🎯 Team free kick logged at ${curMins}'`);
       }
+      if (typeof updateSummaryHud === 'function') updateSummaryHud();
       updateScoreboard();
       saveState();
     }
@@ -3528,11 +3817,24 @@
           else if (ev.zone === 'A3') p.toA = Math.max(0, (p.toA || 0) - 1);
         }
       } else if (ev.type === 'pressWon') {
-        if (p) p.pressWon = Math.max(0, (p.pressWon || 0) - 1);
+        if (p) {
+          p.pressWon = Math.max(0, (p.pressWon || 0) - 1);
+          if (ev.tag === 'Counter-press Regain' && (ev.zone === 'A3' || ev.zone === 'M3')) {
+            p.highRegains = Math.max(0, (p.highRegains || 0) - 1);
+          } else if (ev.tag === 'Direct Pressure' && (ev.zone === 'A3' || ev.zone === 'M3')) {
+            p.highRegains = Math.max(0, (p.highRegains || 0) - 1);
+          }
+        }
         else phaseStats.pressWon = Math.max(0, (phaseStats.pressWon || 0) - 1);
       } else if (ev.type === 'pressLost') {
         if (p) p.pressLost = Math.max(0, (p.pressLost || 0) - 1);
         else phaseStats.pressLost = Math.max(0, (phaseStats.pressLost || 0) - 1);
+      } else if (ev.type === 'goal_kick_kept') {
+        phaseStats.goalKicksKept = Math.max(0, (phaseStats.goalKicksKept || 0) - 1);
+        phaseStats.goalKicksAttacking = Math.max(0, (phaseStats.goalKicksAttacking || 0) - 1);
+      } else if (ev.type === 'goal_kick_lost') {
+        phaseStats.goalKicksLost = Math.max(0, (phaseStats.goalKicksLost || 0) - 1);
+        phaseStats.goalKicksAttacking = Math.max(0, (phaseStats.goalKicksAttacking || 0) - 1);
       } else if (ev.type === 'goal_kick_att') {
         phaseStats.goalKicksAttacking = Math.max(0, (phaseStats.goalKicksAttacking || 0) - 1);
       } else if (ev.type === 'goal_kick_def') {
@@ -3542,6 +3844,8 @@
         oppStats.shots = Math.max(0, (oppStats.shots || 0) - 1);
       } else if (ev.type === 'oppShot') {
         oppStats.shots = Math.max(0, (oppStats.shots || 0) - 1);
+      } else if (ev.type === 'oppBigChance') {
+        oppStats.bigChances = Math.max(0, (oppStats.bigChances || 0) - 1);
       } else if (ev.type === 'oppSub') {
         oppStats.subs = Math.max(0, (oppStats.subs || 0) - 1);
       } else if (ev.type === 'oppCorner') {
@@ -3640,11 +3944,22 @@
           else if (ev.zone === 'A3') p.toA = (p.toA || 0) + 1;
         }
       } else if (ev.type === 'pressWon') {
-        if (p) p.pressWon = (p.pressWon || 0) + 1;
+        if (p) {
+          p.pressWon = (p.pressWon || 0) + 1;
+          if ((ev.tag === 'Counter-press Regain' || ev.tag === 'Direct Pressure') && (ev.zone === 'A3' || ev.zone === 'M3')) {
+            p.highRegains = (p.highRegains || 0) + 1;
+          }
+        }
         else phaseStats.pressWon = (phaseStats.pressWon || 0) + 1;
       } else if (ev.type === 'pressLost') {
         if (p) p.pressLost = (p.pressLost || 0) + 1;
         else phaseStats.pressLost = (phaseStats.pressLost || 0) + 1;
+      } else if (ev.type === 'goal_kick_kept') {
+        phaseStats.goalKicksKept = (phaseStats.goalKicksKept || 0) + 1;
+        phaseStats.goalKicksAttacking = (phaseStats.goalKicksAttacking || 0) + 1;
+      } else if (ev.type === 'goal_kick_lost') {
+        phaseStats.goalKicksLost = (phaseStats.goalKicksLost || 0) + 1;
+        phaseStats.goalKicksAttacking = (phaseStats.goalKicksAttacking || 0) + 1;
       } else if (ev.type === 'goal_kick_att') {
         phaseStats.goalKicksAttacking = (phaseStats.goalKicksAttacking || 0) + 1;
       } else if (ev.type === 'goal_kick_def') {
@@ -3654,6 +3969,8 @@
         oppStats.shots = (oppStats.shots || 0) + 1;
       } else if (ev.type === 'oppShot') {
         oppStats.shots = (oppStats.shots || 0) + 1;
+      } else if (ev.type === 'oppBigChance') {
+        oppStats.bigChances = (oppStats.bigChances || 0) + 1;
       } else if (ev.type === 'oppSub') {
         oppStats.subs = (oppStats.subs || 0) + 1;
       } else if (ev.type === 'oppCorner') {
@@ -4085,7 +4402,29 @@
       });
 
       const oppShots = oppStats.shots || 0;
+      const oppBigChances = oppStats.bigChances || 0;
       const oppFouls = oppStats.fouls || 0;
+      if (document.getElementById('oppBigChancesCount')) document.getElementById('oppBigChancesCount').textContent = oppBigChances;
+
+      // Shot Quality (xG-lite approx.), Big Chances, High Regains (A3/M3), Set-Piece Shot Rate
+      let xgFor = 0, xgAgainst = 0, ajaxBigChances = 0, highRegains = 0, spTotal = 0, spShots = 0;
+      (matchEvents || []).forEach(ev => {
+        if (!ev) return;
+        const isOpp = typeof ev.type === 'string' && ev.type.startsWith('opp');
+        const q = Number(ev.shotQuality) || (ev.shotLocation ? getShotQualityValue(ev.shotLocation, ev.isHeader) : 0);
+        if (q > 0) {
+          if (isOpp) xgAgainst += q;
+          else xgFor += q;
+        }
+        if (ev.tag === 'Big Chance Created') ajaxBigChances++;
+        if (!isOpp && (ev.tag === 'Counter-press Regain' || ((ev.type === 'pressWon' || ev.tag === 'Direct Pressure') && (ev.zone === 'A3' || ev.zone === 'M3')))) {
+          highRegains++;
+        }
+        if (ev.type === 'corner' || ev.type === 'setPiece' || ev.tag === 'Foul Won') {
+          spTotal++;
+          if (ev.setPieceOutcome === 'Shot') spShots++;
+        }
+      });
 
       const elShotsSum = document.getElementById('hudShotsSummary');
       if (elShotsSum) elShotsSum.textContent = `${ajaxShots} vs ${oppShots}`;
@@ -4093,21 +4432,36 @@
       if (document.getElementById('hudAjaxSot')) document.getElementById('hudAjaxSot').textContent = ajaxSot;
       if (document.getElementById('hudAjaxOut18')) document.getElementById('hudAjaxOut18').textContent = ajaxOut18;
       if (document.getElementById('hudOppShots')) document.getElementById('hudOppShots').textContent = oppShots;
+      if (document.getElementById('hudXgFor')) document.getElementById('hudXgFor').textContent = xgFor.toFixed(2);
+      if (document.getElementById('hudXgAgainst')) document.getElementById('hudXgAgainst').textContent = xgAgainst.toFixed(2);
+      if (document.getElementById('hudBigChFor')) document.getElementById('hudBigChFor').textContent = ajaxBigChances;
+      if (document.getElementById('hudBigChAgainst')) document.getElementById('hudBigChAgainst').textContent = oppBigChances;
 
-      // Press Rate
+      // Press & High Regains
       const totalWon = (phaseStats.pressWon || 0) + playerPressWon;
       const totalLost = (phaseStats.pressLost || 0) + playerPressLost;
       const totalPress = totalWon + totalLost;
       const pressPct = totalPress > 0 ? Math.round((totalWon / totalPress) * 100) : 0;
 
+      if (document.getElementById('hudHighRegains')) document.getElementById('hudHighRegains').textContent = highRegains;
       if (document.getElementById('hudPressPct')) document.getElementById('hudPressPct').textContent = totalPress > 0 ? `${pressPct}%` : '--%';
       if (document.getElementById('hudPressWon')) document.getElementById('hudPressWon').textContent = totalWon;
       if (document.getElementById('hudPressTotal')) document.getElementById('hudPressTotal').textContent = totalPress;
       if (document.getElementById('hudPressBar')) document.getElementById('hudPressBar').style.width = `${pressPct}%`;
 
-      // Territory Flow
+      // Goal-Kick Build Retention % + Territory Flow
+      const gkKept = phaseStats.goalKicksKept || 0;
+      const gkLost = phaseStats.goalKicksLost || 0;
+      const gkAttSplit = gkKept + gkLost;
+      const gkAttTotal = gkAttSplit > 0 ? gkAttSplit : (phaseStats.goalKicksAttacking || 0);
+      const gkRetPct = gkAttSplit > 0 ? Math.round((gkKept / gkAttSplit) * 100) : null;
+      if (document.getElementById('hudGkRetention')) document.getElementById('hudGkRetention').textContent = gkRetPct !== null ? `${gkRetPct}%` : '--%';
+      if (document.getElementById('hudGkKept')) document.getElementById('hudGkKept').textContent = gkKept;
+      if (document.getElementById('hudGkAttTotal')) document.getElementById('hudGkAttTotal').textContent = gkAttTotal;
+      if (document.getElementById('hudSpShotRate')) document.getElementById('hudSpShotRate').textContent = spTotal > 0 ? `${spShots}/${spTotal} (${Math.round((spShots / spTotal) * 100)}%)` : '--';
+
       const defGk = phaseStats.goalKicksDefending || 0;
-      const attGk = phaseStats.goalKicksAttacking || 0;
+      const attGk = gkAttTotal;
       const totalGk = defGk + attGk;
       const oppHalfPct = totalGk > 0 ? Math.round((defGk / totalGk) * 100) : 50;
 
@@ -4407,8 +4761,28 @@
       const totalPress = totalPressWon + totalPressLost;
       const pressEfficiency = totalPress > 0 ? Math.round((totalPressWon / totalPress) * 100) + '%' : '0%';
 
+      let h1XgFor = 0, h1XgAgainst = 0, h1BigChFor = 0, h1BigChMissed = 0, h1HighRegains = 0, h1SpTotal = 0, h1SpShots = 0;
+      h1Events.forEach(e => {
+        if (!e) return;
+        const isOpp = typeof e.type === 'string' && e.type.startsWith('opp');
+        const q = Number(e.shotQuality) || (e.shotLocation ? getShotQualityValue(e.shotLocation, e.isHeader) : 0);
+        if (q > 0) { if (isOpp) h1XgAgainst += q; else h1XgFor += q; }
+        if (e.tag === 'Big Chance Created') h1BigChFor++;
+        if (e.tag === 'Big Chance Missed') h1BigChMissed++;
+        if (!isOpp && (e.tag === 'Counter-press Regain' || ((e.type === 'pressWon' || e.tag === 'Direct Pressure') && (e.zone === 'A3' || e.zone === 'M3')))) h1HighRegains++;
+        if (e.type === 'corner' || e.type === 'setPiece' || e.tag === 'Foul Won') {
+          h1SpTotal++;
+          if (e.setPieceOutcome === 'Shot') h1SpShots++;
+        }
+      });
+
+      const gkKept = phaseStats.goalKicksKept || 0;
+      const gkLost = phaseStats.goalKicksLost || 0;
+      const gkSplitTotal = gkKept + gkLost;
+      const gkRetentionPct = gkSplitTotal > 0 ? Math.round((gkKept / gkSplitTotal) * 100) + '%' : '--';
+
       const defGk = phaseStats.goalKicksDefending || 0;
-      const attGk = phaseStats.goalKicksAttacking || 0;
+      const attGk = gkSplitTotal > 0 ? gkSplitTotal : (phaseStats.goalKicksAttacking || 0);
       const totalGk = defGk + attGk;
       const territoryTilt = totalGk > 0 ? Math.round((defGk / totalGk) * 100) + '% in Opponent Half' : 'Balanced (50/50)';
 
@@ -4423,11 +4797,22 @@
         ajaxSoff,
         shotsOutside18: ajaxOut18,
         oppShots: oppStats.shots || 0,
+        oppBigChances: oppStats.bigChances || 0,
+        bigChancesCreated: h1BigChFor,
+        bigChancesMissed: h1BigChMissed,
+        xgFor: Number(h1XgFor.toFixed(2)),
+        xgAgainst: Number(h1XgAgainst.toFixed(2)),
+        highRegains: h1HighRegains,
         pressWon: totalPressWon,
         pressLost: totalPressLost,
         pressEfficiency,
         goalKicksDefending: defGk,
         goalKicksAttacking: attGk,
+        goalKicksKept: gkKept,
+        goalKicksLost: gkLost,
+        gkRetentionPct,
+        setPieceAttempts: h1SpTotal,
+        setPieceShots: h1SpShots,
         territoryTilt,
         crosses: (phaseStats.crossesLeft || 0) + (phaseStats.crossesRight || 0),
         ajaxFouls,
@@ -4439,11 +4824,11 @@
 
       // Update metric strips on modal
       if (document.getElementById('aiMetricShots')) document.getElementById('aiMetricShots').textContent = `${ajaxShots} - ${oppStats.shots || 0}`;
-      if (document.getElementById('aiMetricSot')) document.getElementById('aiMetricSot').textContent = `${ajaxSot} SOT · ${ajaxOut18} Out 18`;
-      if (document.getElementById('aiMetricPress')) document.getElementById('aiMetricPress').textContent = pressEfficiency;
-      if (document.getElementById('aiMetricPressWon')) document.getElementById('aiMetricPressWon').textContent = `${totalPressWon} Won / ${totalPress} Total`;
-      if (document.getElementById('aiMetricTerritory')) document.getElementById('aiMetricTerritory').textContent = territoryTilt;
-      if (document.getElementById('aiMetricGks')) document.getElementById('aiMetricGks').textContent = `${defGk} Def GK : ${attGk} Att GK`;
+      if (document.getElementById('aiMetricSot')) document.getElementById('aiMetricSot').textContent = `${ajaxSot} SOT · ${ajaxOut18} Out 18 · xG-lite ${h1XgFor.toFixed(2)}-${h1XgAgainst.toFixed(2)}`;
+      if (document.getElementById('aiMetricPress')) document.getElementById('aiMetricPress').textContent = `${h1HighRegains} High Regains (${pressEfficiency})`;
+      if (document.getElementById('aiMetricPressWon')) document.getElementById('aiMetricPressWon').textContent = `${totalPressWon} Won / ${totalPress} Total · BigCh ${h1BigChFor}-${oppStats.bigChances || 0}`;
+      if (document.getElementById('aiMetricTerritory')) document.getElementById('aiMetricTerritory').textContent = gkSplitTotal > 0 ? `${gkRetentionPct} GK Kept` : territoryTilt;
+      if (document.getElementById('aiMetricGks')) document.getElementById('aiMetricGks').textContent = `${gkKept}/${gkSplitTotal} Kept · SP Shot ${h1SpShots}/${h1SpTotal}`;
       if (document.getElementById('aiMetricFouls')) document.getElementById('aiMetricFouls').textContent = `${ajaxFouls} Ajax · ${oppStats.fouls || 0} Opp`;
       if (document.getElementById('aiMetricCards')) document.getElementById('aiMetricCards').textContent = `${ajaxYellows} Yellows`;
 
@@ -4485,9 +4870,13 @@
         sentiment = 'Under Pressure';
       }
 
-      const gameFlowSummary = `Ajax established a ${t.territoryTilt} field tilt against ${t.opponent}, registering ${t.ajaxShots} total shots with ${t.ajaxSot} on target. Counter-pressing registered at ${t.pressEfficiency} (${t.pressWon}/${t.pressWon + t.pressLost} duel attempts won).`;
+      const xgLine = (t.xgFor > 0 || t.xgAgainst > 0) ? ` Shot Quality (xG-lite approx.) reads ${Number(t.xgFor).toFixed(2)} - ${Number(t.xgAgainst).toFixed(2)}.` : '';
+      const gameFlowSummary = `Ajax established a ${t.territoryTilt} field tilt against ${t.opponent}, registering ${t.ajaxShots} total shots (${t.ajaxSot} on target), ${t.bigChancesCreated || 0} big chances created vs ${t.oppBigChances || 0} conceded.${xgLine} Counter-pressing logged ${t.highRegains || 0} High Regains in A3/M3 (${t.pressEfficiency}).`;
 
       const tacticalInsights = [];
+      if ((t.goalKicksKept || 0) + (t.goalKicksLost || 0) > 0) {
+        tacticalInsights.push(`Build-out retention: Retained ${t.goalKicksKept}/${(t.goalKicksKept || 0) + (t.goalKicksLost || 0)} goal kicks (${t.gkRetentionPct}).`);
+      }
       if (t.goalKicksDefending > t.goalKicksAttacking) {
         tacticalInsights.push(`Territorial dominance: Forced ${t.goalKicksDefending} opponent defending goal kicks, pinning ${t.opponent} into low-block build-out territory.`);
       } else if (t.goalKicksAttacking > t.goalKicksDefending) {
@@ -4500,6 +4889,9 @@
         tacticalInsights.push(`Shot selection: ${t.shotsOutside18} shots taken outside 18 box indicates opponent low block density; work third-man combinations inside the box.`);
       } else if (t.ajaxSot >= 3) {
         tacticalInsights.push(`Effective penetration: Created high-quality chances inside the box with ${t.ajaxSot} shots testing the goalkeeper.`);
+      }
+      if ((t.setPieceAttempts || 0) > 0) {
+        tacticalInsights.push(`Set-piece delivery: ${t.setPieceShots || 0} of ${t.setPieceAttempts} corners/free kicks generated a shot.`);
       }
 
       if (pressRate >= 60) {
@@ -4640,6 +5032,30 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
       const foulsH1 = eventsH1.filter(e => e.type === 'foul').length;
       const foulsH2 = eventsH2.filter(e => e.type === 'foul').length;
 
+      const sumXg = (evs, opp) => evs.reduce((s, e) => {
+        const isOpp = e && typeof e.type === 'string' && e.type.startsWith('opp');
+        if ((opp && !isOpp) || (!opp && isOpp)) return s;
+        return s + (Number(e && e.shotQuality) || (e && e.shotLocation ? getShotQualityValue(e.shotLocation, e.isHeader) : 0));
+      }, 0);
+      const xgForH1 = sumXg(eventsH1, false);
+      const xgForH2 = sumXg(eventsH2, false);
+      const xgForTotal = xgForH1 + xgForH2;
+      const xgAgainstTotal = sumXg(matchEvents || [], true);
+
+      const bigChH1 = eventsH1.filter(e => e && e.tag === 'Big Chance Created').length;
+      const bigChH2 = eventsH2.filter(e => e && e.tag === 'Big Chance Created').length;
+      const oppBigChTotal = oppStats.bigChances || 0;
+
+      const isHighRegain = e => e && !(typeof e.type === 'string' && e.type.startsWith('opp')) && (e.tag === 'Counter-press Regain' || ((e.type === 'pressWon' || e.tag === 'Direct Pressure') && (e.zone === 'A3' || e.zone === 'M3')));
+      const highRegH1 = eventsH1.filter(isHighRegain).length;
+      const highRegH2 = eventsH2.filter(isHighRegain).length;
+
+      const gkKeptTotal = phaseStats.goalKicksKept || 0;
+      const gkLostTotal = phaseStats.goalKicksLost || 0;
+      const gkRetPct = (gkKeptTotal + gkLostTotal) > 0 ? Math.round((gkKeptTotal / (gkKeptTotal + gkLostTotal)) * 100) : null;
+      const spAll = (matchEvents || []).filter(e => e && (e.type === 'corner' || e.type === 'setPiece' || e.tag === 'Foul Won'));
+      const spWithShot = spAll.filter(e => e.setPieceOutcome === 'Shot').length;
+
       // Populate two-half comparison table in modal
       const statsRows = document.getElementById('recapTwoHalfStatsRows');
       if (statsRows) {
@@ -4661,6 +5077,22 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
             </div>
           </div>
           <div class="flex items-center justify-between py-1 border-b border-border/40">
+            <span class="text-slate-300">Shot Quality (xG-lite approx.)</span>
+            <div class="flex items-center gap-6">
+              <span class="text-teal-400 font-bold">${xgForH1.toFixed(2)}</span>
+              <span class="text-emerald-400 font-bold">${xgForH2.toFixed(2)}</span>
+              <span class="text-white font-black">${xgForTotal.toFixed(2)} - ${xgAgainstTotal.toFixed(2)}</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 border-b border-border/40">
+            <span class="text-slate-300">Big Chances (High Regains A3/M3)</span>
+            <div class="flex items-center gap-6">
+              <span class="text-teal-400 font-bold">${bigChH1} (${highRegH1})</span>
+              <span class="text-emerald-400 font-bold">${bigChH2} (${highRegH2})</span>
+              <span class="text-white font-black">${bigChH1 + bigChH2}-${oppBigChTotal} (${highRegH1 + highRegH2} reg)</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 border-b border-border/40">
             <span class="text-slate-300">Press / Duel Win Rate</span>
             <div class="flex items-center gap-6">
               <span class="text-teal-400 font-bold">${pressRateH1}%</span>
@@ -4668,13 +5100,17 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
               <span class="text-white font-black">${(pressWonH1 + pressWonH2 + pressLostH1 + pressLostH2) > 0 ? Math.round(((pressWonH1 + pressWonH2) / (pressWonH1 + pressWonH2 + pressLostH1 + pressLostH2)) * 100) : 0}%</span>
             </div>
           </div>
-          <div class="flex items-center justify-between py-1">
+          <div class="flex items-center justify-between py-1 border-b border-border/40">
             <span class="text-slate-300">Turnovers Logged</span>
             <div class="flex items-center gap-6">
               <span class="text-teal-400 font-bold">${toH1}</span>
               <span class="text-emerald-400 font-bold">${toH2}</span>
               <span class="text-white font-black">${toH1 + toH2}</span>
             </div>
+          </div>
+          <div class="flex items-center justify-between py-1 text-[11px]">
+            <span class="text-slate-400">GK Build Kept · Set Pieces → Shot</span>
+            <span class="text-teal-300 font-mono font-bold">${gkRetPct !== null ? gkRetPct + '% (' + gkKeptTotal + '/' + (gkKeptTotal + gkLostTotal) + ')' : '--'} · SP ${spWithShot}/${spAll.length}</span>
           </div>
         `;
       }
@@ -4690,8 +5126,10 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         const achievements = [];
         if (p.goals > 0) achievements.push(`${p.goals} goal${p.goals > 1 ? 's' : ''}`);
         if (p.assists > 0) achievements.push(`${p.assists} assist${p.assists > 1 ? 's' : ''}`);
+        if (p.bigChancesCreated > 0) achievements.push(`${p.bigChancesCreated} big chance${p.bigChancesCreated > 1 ? 's' : ''}`);
         if (p.keyPasses > 0) achievements.push(`${p.keyPasses} key pass${p.keyPasses > 1 ? 'es' : ''}`);
         if (p.shots > 2 && p.goals === 0) achievements.push(`${p.shots} shots (${p.sot || 0} SOT)`);
+        if (p.highRegains > 1) achievements.push(`${p.highRegains} high regains`);
         if (p.duelsWon > 3) achievements.push(`${p.duelsWon} duels won`);
         if (p.saves > 0) achievements.push(`${p.saves} saves`);
         if (achievements.length > 0) {
@@ -4710,6 +5148,17 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         toH1, toH2,
         pressRateH1, pressRateH2,
         foulsH1, foulsH2,
+        xgFor: Number(xgForTotal.toFixed(2)),
+        xgAgainst: Number(xgAgainstTotal.toFixed(2)),
+        bigChancesFor: bigChH1 + bigChH2,
+        bigChancesAgainst: oppBigChTotal,
+        highRegainsH1: highRegH1,
+        highRegainsH2: highRegH2,
+        goalKicksKept: gkKeptTotal,
+        goalKicksLost: gkLostTotal,
+        gkRetentionPct: gkRetPct,
+        setPieceAttempts: spAll.length,
+        setPieceShots: spWithShot,
         oppShots: oppStats.shots || 0,
         oppCorners: oppStats.corners || 0,
         oppFouls: oppStats.fouls || 0,
@@ -4750,10 +5199,11 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
       const totalShots = t.shotsH1 + t.shotsH2;
       const totalSot = t.sotH1 + t.sotH2;
       const totalTo = t.toH1 + t.toH2;
+      const xgSnippet = (t.xgFor > 0 || t.xgAgainst > 0) ? ` Estimated shot quality (xG-lite approx.) finished ${Number(t.xgFor).toFixed(2)} vs ${Number(t.xgAgainst).toFixed(2)}.` : '';
 
-      const gameFlowSummary = `Ajax closed out a comprehensive ${t.matchMins || 80}-minute match against ${t.opponent} with a final score of ${t.ajaxScore} - ${t.oppScore}. The squad generated ${totalShots} total shots with ${totalSot} testing the target, maintaining proactive territory and disciplined structure across both periods.`;
+      const gameFlowSummary = `Ajax closed out a comprehensive ${t.matchMins || 80}-minute match against ${t.opponent} with a final score of ${t.ajaxScore} - ${t.oppScore}. The squad generated ${totalShots} total shots (${totalSot} on target), ${t.bigChancesFor || 0} big chances vs ${t.bigChancesAgainst || 0} conceded.${xgSnippet} High Regains in A3/M3 totaled ${(t.highRegainsH1 || 0) + (t.highRegainsH2 || 0)}.`;
 
-      const adaptationText = `In the opening half, Ajax registered ${t.goalsH1} goals on ${t.shotsH1} shots with a ${t.pressRateH1}% pressing duel success rate. During the second half, the team responded with ${t.goalsH2} goals on ${t.shotsH2} shots and a ${t.pressRateH2}% duel efficiency. Turnovers evolved from ${t.toH1} in H1 to ${t.toH2} in H2, reflecting ${t.toH2 <= t.toH1 ? 'sharper possession security in the second half' : 'sustained attacking tempo under late match fatigue'}.`;
+      const adaptationText = `In the opening half, Ajax registered ${t.goalsH1} goals on ${t.shotsH1} shots (${t.pressRateH1}% pressing duel win rate, ${t.highRegainsH1 || 0} high regains). In the second half, Ajax responded with ${t.goalsH2} goals on ${t.shotsH2} shots (${t.pressRateH2}% efficiency, ${t.highRegainsH2 || 0} high regains). Turnovers shifted from ${t.toH1} in H1 to ${t.toH2} in H2.${t.gkRetentionPct != null ? ` Goal-kick retention finished at ${t.gkRetentionPct}% (${t.goalKicksKept}/${(t.goalKicksKept || 0) + (t.goalKicksLost || 0)}).` : ''}`;
 
       const standouts = t.standouts && t.standouts.length > 0
         ? t.standouts
@@ -5852,9 +6302,12 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           const isSetPiece = ev.type === 'setPiece';
           const isGlow = isGoal || isAssist || isKeyPass || isSOT || isDuelWon || isPressWon || isSave || isCorner || isSetPiece;
 
-          let cat = 'Tactical_Shape';
+          let cat = ev.category || 'Tactical_Shape';
           let tag = ev.tag || 'Decision on the Ball';
-          if (isGoal) { cat = 'Finishing'; tag = 'Goal Scored'; }
+          if (ev.tag && ev.category) {
+            cat = ev.category;
+            tag = ev.tag;
+          } else if (isGoal) { cat = 'Finishing'; tag = 'Goal Scored'; }
           else if (isAssist) { cat = 'Passing'; tag = 'Goal Assist'; }
           else if (isKeyPass) { cat = 'Passing'; tag = 'Key Pass (Shot Assist)'; }
           else if (isSOT) { cat = 'Finishing'; tag = 'Shot on Target'; }
@@ -5910,6 +6363,13 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           if (isCorner) noteText = `CORNER KICK: #${ev.jersey || ''} ${pName} at ${ev.time}'`;
           else if (isSetPiece) noteText = `SET PIECE: #${ev.jersey || ''} ${pName} at ${ev.time}'`;
 
+          const evOutcome = ev.outcome || (isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Grow' : 'Neutral'));
+          const evQualityRaw = isGoal ? 'Goal Scored' : (ev.type === 'oppGoal' ? 'Goal Conceded' : (evOutcome === 'Glow' ? 'Good / Positive' : (evOutcome === 'Grow' ? 'Poor / Negative' : 'Neutral')));
+          const shotLocation = ev.shotLocation || '';
+          const isHeader = Boolean(ev.isHeader);
+          const shotQuality = shotLocation ? getShotQualityValue(shotLocation, isHeader) : (Number(ev.shotQuality) || 0);
+          const setPieceOutcome = ev.setPieceOutcome || '';
+
           newFilmMoments.push({
             id: maxId,
             match: canonicalMatch,
@@ -5930,12 +6390,16 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
             category: cat,
             cat: cat,
             tag: tag,
-            qualityRaw: isGoal ? 'Goal Scored' : (isGlow ? 'Good / Positive' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Poor / Negative' : 'Neutral')),
-            outcome: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Grow' : 'Neutral'),
-            o: isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || ev.type === 'soff' ? 'Grow' : 'Neutral'),
+            qualityRaw: evQualityRaw,
+            outcome: evOutcome,
+            o: evOutcome,
             note: noteText,
             notes: noteText,
             n: noteText,
+            shotLocation,
+            isHeader,
+            shotQuality,
+            setPieceOutcome,
             filmReview: !!ev.isBookmark
           });
         });
@@ -6595,8 +7059,8 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
         onPitchPlayers = state.onPitchPlayers || {};
         playerStats = state.playerStats || {};
         matchEvents = state.matchEvents || [];
-        oppStats = state.oppStats || { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 };
-        phaseStats = state.phaseStats || { pressWon: 0, pressLost: 0, goalKicksAttacking: 0, goalKicksDefending: 0, crossesLeft: 0, crossesRight: 0 };
+        oppStats = Object.assign({ goals: 0, shots: 0, sot: 0, soff: 0, shotsOutside18: 0, bigChances: 0, subs: 0, corners: 0, fouls: 0, yellowCards: 0 }, state.oppStats || {});
+        phaseStats = Object.assign({ pressWon: 0, pressLost: 0, highRegains: 0, goalKicksAttacking: 0, goalKicksKept: 0, goalKicksLost: 0, goalKicksDefending: 0, crossesLeft: 0, crossesRight: 0 }, state.phaseStats || {});
         absentPlayers = new Set(state.absentPlayers || []);
 
         document.getElementById('teamSelector').value = activeSquadKey;

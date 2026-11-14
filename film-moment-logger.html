@@ -290,21 +290,22 @@
             </div>
             <!-- Category Filter Chips -->
             <div class="flex items-center gap-1 overflow-x-auto pb-0.5 text-[11px] font-semibold" id="actionFilterChips">
-              <button type="button" onclick="filterActionCategory('all')" id="afc-all" class="afc-btn px-2.5 py-1 rounded-lg border border-teal-500/50 bg-teal-500/20 text-teal-300 font-bold whitespace-nowrap transition">All (43)</button>
-              <button type="button" onclick="filterActionCategory('passing')" id="afc-passing" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🟢 Passing (8)</button>
-              <button type="button" onclick="filterActionCategory('carrying')" id="afc-carrying" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🏃 Carrying (5)</button>
-              <button type="button" onclick="filterActionCategory('defending')" id="afc-defending" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🛡️ Defending (9)</button>
-              <button type="button" onclick="filterActionCategory('duel')" id="afc-duel" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">⚔️ Duel (6)</button>
-              <button type="button" onclick="filterActionCategory('finishing')" id="afc-finishing" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">⚡ Finishing (6)</button>
+              <button type="button" onclick="filterActionCategory('all')" id="afc-all" class="afc-btn px-2.5 py-1 rounded-lg border border-teal-500/50 bg-teal-500/20 text-teal-300 font-bold whitespace-nowrap transition">All (54)</button>
+              <button type="button" onclick="filterActionCategory('passing')" id="afc-passing" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🟢 Passing (9)</button>
+              <button type="button" onclick="filterActionCategory('carrying')" id="afc-carrying" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🏃 Carrying (6)</button>
+              <button type="button" onclick="filterActionCategory('defending')" id="afc-defending" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🛡️ Defending (10)</button>
+              <button type="button" onclick="filterActionCategory('duel')" id="afc-duel" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">⚔️ Duel (7)</button>
+              <button type="button" onclick="filterActionCategory('finishing')" id="afc-finishing" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">⚡ Finishing (7)</button>
               <button type="button" onclick="filterActionCategory('gk')" id="afc-gk" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🧤 Goalkeeping (5)</button>
-              <button type="button" onclick="filterActionCategory('tactical')" id="afc-tactical" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🧠 Tactical (7)</button>
+              <button type="button" onclick="filterActionCategory('tactical')" id="afc-tactical" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">🧠 Tactical (8)</button>
               <button type="button" onclick="filterActionCategory('admin')" id="afc-admin" class="afc-btn px-2.5 py-1 rounded-lg border border-border bg-surface text-slate-400 hover:text-white whitespace-nowrap transition">📋 Admin (2)</button>
             </div>
           </div>
 
           <!-- Actions Grid (Filtered dynamically by filterActionCategory) -->
           <div class="flex flex-wrap gap-1.5 text-xs max-h-[220px] overflow-y-auto pr-1" id="quickTagList">
-            <!-- 🟢 Passing (8) -->
+            <!-- 🟢 Passing (9) -->
+            <button type="button" data-cat="passing" onclick="setRapidTag('Big Chance Created', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-400/50 bg-emerald-500/20 text-emerald-200 font-bold hover:bg-emerald-500/30 transition">✨ Big Chance Created</button>
             <button type="button" data-cat="passing" onclick="setRapidTag('Key Pass (Shot Assist)', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Key Pass (Shot Assist)</button>
             <button type="button" data-cat="passing" onclick="setRapidTag('Goal Assist', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 font-bold hover:bg-emerald-900/40 transition">Goal Assist</button>
             <button type="button" data-cat="passing" onclick="setRapidTag('Line-Breaking Pass', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Line-Breaking Pass</button>
@@ -314,14 +315,16 @@
             <button type="button" data-cat="passing" onclick="setRapidTag('Forced Turnover Pass', 'Grow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Forced Turnover Pass</button>
             <button type="button" data-cat="passing" onclick="setRapidTag('Unforced Turnover Pass', 'Grow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Unforced Turnover Pass</button>
 
-            <!-- 🏃 Carrying (5) -->
+            <!-- 🏃 Carrying (6) -->
+            <button type="button" data-cat="carrying" onclick="setRapidTag('Box Entry', 'Glow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-400/50 bg-emerald-500/20 text-emerald-200 font-semibold hover:bg-emerald-500/30 transition">Box Entry</button>
             <button type="button" data-cat="carrying" onclick="setRapidTag('Progressive Carry', 'Glow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Progressive Carry</button>
             <button type="button" data-cat="carrying" onclick="setRapidTag('1v1 Dribble Won', 'Glow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">1v1 Dribble Won</button>
             <button type="button" data-cat="carrying" onclick="setRapidTag('Turned into Pressure', 'Grow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Turned into Pressure</button>
             <button type="button" data-cat="carrying" onclick="setRapidTag('Miscontrol', 'Grow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Miscontrol (Heavy Touch)</button>
             <button type="button" data-cat="carrying" onclick="setRapidTag('Dispossessed', 'Grow', 'Carrying')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Dispossessed (Tackled)</button>
 
-            <!-- 🛡️ Defending (9) -->
+            <!-- 🛡️ Defending (10) -->
+            <button type="button" data-cat="defending" onclick="setRapidTag('Counter-press Regain', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-400/50 bg-sky-500/20 text-sky-200 font-bold hover:bg-sky-500/30 transition">⚡ Counter-press Regain</button>
             <button type="button" data-cat="defending" onclick="setRapidTag('Direct Pressure', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Direct Pressure</button>
             <button type="button" data-cat="defending" onclick="setRapidTag('Tackle', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Tackle</button>
             <button type="button" data-cat="defending" onclick="setRapidTag('Interception', 'Glow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Interception</button>
@@ -332,7 +335,8 @@
             <button type="button" data-cat="defending" onclick="setRapidTag('Stabbed at the Ball', 'Grow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-900/40 transition">Stabbed at Ball</button>
             <button type="button" data-cat="defending" onclick="setRapidTag('Lost Mark / Recovery', 'Grow', 'Defending')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-950/20 text-amber-300 hover:bg-amber-900/40 transition">Lost Mark / Recovery</button>
 
-            <!-- ⚔️ Duel (6) -->
+            <!-- ⚔️ Duel (7) -->
+            <button type="button" data-cat="duel" onclick="setRapidTag('Hold-Up Play', 'Glow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-400/40 bg-emerald-950/30 text-emerald-200 font-semibold hover:bg-emerald-900/40 transition">Hold-Up Play</button>
             <button type="button" data-cat="duel" onclick="setRapidTag('Ground Duel Won', 'Glow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Ground Duel Won</button>
             <button type="button" data-cat="duel" onclick="setRapidTag('Aerial Duel Won', 'Glow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-sky-500/30 bg-sky-950/20 text-sky-300 hover:bg-sky-900/40 transition">Aerial Duel Won</button>
             <button type="button" data-cat="duel" onclick="setRapidTag('Foul Won', 'Glow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/40 transition">Foul Won</button>
@@ -340,11 +344,12 @@
             <button type="button" data-cat="duel" onclick="setRapidTag('Foul Conceded', 'Grow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Foul Conceded</button>
             <button type="button" data-cat="duel" onclick="setRapidTag('No Challenge on 50/50', 'Grow', 'Duel')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">No Challenge on 50/50</button>
 
-            <!-- ⚡ Finishing (6) -->
+            <!-- ⚡ Finishing (7) -->
             <button type="button" data-cat="finishing" onclick="setRapidTag('Goal Scored', 'Goal Scored', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-amber-400/50 bg-amber-500/20 text-amber-300 font-bold hover:bg-amber-500/30 transition">⚽ Goal Scored</button>
             <button type="button" data-cat="finishing" onclick="setRapidTag('Shot on Target', 'Glow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Shot on Target</button>
             <button type="button" data-cat="finishing" onclick="setRapidTag('Quality Shot', 'Glow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Quality Shot</button>
             <button type="button" data-cat="finishing" onclick="setRapidTag('Shot Off Target', 'Grow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Shot Off Target</button>
+            <button type="button" data-cat="finishing" onclick="setRapidTag('Big Chance Missed', 'Grow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-400/50 bg-rose-950/30 text-rose-200 font-semibold hover:bg-rose-900/40 transition">Big Chance Missed</button>
             <button type="button" data-cat="finishing" onclick="setRapidTag('Poor Shot Selection', 'Grow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Poor Shot Selection</button>
             <button type="button" data-cat="finishing" onclick="setRapidTag('Cross Out of Bounds', 'Grow', 'Finishing')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 transition">Cross Out of Bounds</button>
 
@@ -355,7 +360,8 @@
             <button type="button" data-cat="gk" onclick="setRapidTag('Build-Out Distribution', 'Glow', 'Goalkeeping')" class="tag-btn px-2.5 py-1 rounded-lg border border-indigo-500/30 bg-indigo-950/20 text-indigo-300 hover:bg-indigo-900/40 transition">Build-Out Distribution</button>
             <button type="button" data-cat="gk" onclick="setRapidTag('Goal Conceded', 'Goal Conceded', 'Goalkeeping')" class="tag-btn px-2.5 py-1 rounded-lg border border-rose-500/50 bg-rose-950/40 text-rose-300 font-bold hover:bg-rose-900/50 transition">🥅 Goal Conceded</button>
 
-            <!-- 🧠 Tactical_Shape (7) -->
+            <!-- 🧠 Tactical_Shape (8) -->
+            <button type="button" data-cat="tactical" onclick="setRapidTag('Run in Behind', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-400/50 bg-purple-950/30 text-purple-200 font-semibold hover:bg-purple-900/40 transition">Run in Behind</button>
             <button type="button" data-cat="tactical" onclick="setRapidTag('Scanning & Pre-Orientation', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Scanning &amp; Pre-Orientation</button>
             <button type="button" data-cat="tactical" onclick="setRapidTag('Support Angle Offered', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Support Angle Offered</button>
             <button type="button" data-cat="tactical" onclick="setRapidTag('Tactical Communication', 'Glow', 'Tactical_Shape')" class="tag-btn px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-950/20 text-purple-300 hover:bg-purple-900/40 transition">Tactical Communication</button>
@@ -367,6 +373,34 @@
             <!-- 📋 Administrative (2) -->
             <button type="button" data-cat="admin" onclick="setRapidTag('Substitution', 'Neutral', 'Administrative')" class="tag-btn px-2.5 py-1 rounded-lg border border-slate-500/30 bg-slate-800/40 text-slate-300 hover:bg-slate-700/50 transition">Substitution</button>
             <button type="button" data-cat="admin" onclick="setRapidTag('Bookmark', 'Neutral', 'Administrative')" class="tag-btn px-2.5 py-1 rounded-lg border border-slate-500/30 bg-slate-800/40 text-slate-300 hover:bg-slate-700/50 transition">Bookmark</button>
+          </div>
+          <!-- Optional Shot Quality (xG-lite) & Set-Piece Outcome context -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-border/40 text-[11px]">
+            <div>
+              <label class="block text-[9px] mono uppercase text-slate-400 font-bold mb-1">Shot Location (xG-lite approx.)</label>
+              <select id="rapidShotLocation" class="w-full bg-pitch text-xs p-1.5 rounded-lg border border-border text-white">
+                <option value="">-- Not a Shot / Unspecified --</option>
+                <option value="Penalty">Penalty (0.75)</option>
+                <option value="6-yard box">6-yard box (0.35)</option>
+                <option value="Central box">Central box (0.15)</option>
+                <option value="Wide box">Wide box (0.06)</option>
+                <option value="Outside 18">Outside 18 (0.03)</option>
+              </select>
+            </div>
+            <div class="flex items-end pb-1">
+              <label class="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+                <input type="checkbox" id="rapidIsHeader" class="w-4 h-4 rounded border-border bg-pitch text-teal-400">
+                <span>Header (×0.6 xG-lite)</span>
+              </label>
+            </div>
+            <div>
+              <label class="block text-[9px] mono uppercase text-slate-400 font-bold mb-1">Set-Piece Outcome (if SP)</label>
+              <select id="rapidSetPieceOutcome" class="w-full bg-pitch text-xs p-1.5 rounded-lg border border-border text-white">
+                <option value="">-- N/A --</option>
+                <option value="Shot">→ Produced Shot</option>
+                <option value="No Shot">→ No Shot</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -879,6 +913,14 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
           : currentRapidOutcome === 'Grow' ? 'Defending'
           : 'Tactical_Shape');
 
+      const shotLocEl = document.getElementById('rapidShotLocation');
+      const isHdrEl = document.getElementById('rapidIsHeader');
+      const spOutEl = document.getElementById('rapidSetPieceOutcome');
+      const shotLocation = shotLocEl ? shotLocEl.value : '';
+      const isHeader = isHdrEl ? Boolean(isHdrEl.checked) : false;
+      const shotQuality = getShotQualityValue(shotLocation, isHeader);
+      const setPieceOutcome = spOutEl ? spOutEl.value : '';
+
       const momentObj = {
         date: new Date().toISOString().replace('T', ' ').slice(0, 19),
         match,
@@ -893,12 +935,19 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         tag: currentRapidTag,
         quality: qualityRaw,
         notes,
+        shotLocation,
+        isHeader,
+        shotQuality,
+        setPieceOutcome,
         filmReview: Boolean(isRapidFilmReview)
       };
 
       LOGGED_MOMENTS.push(momentObj);
       saveToLocalStorage();
       document.getElementById('rapidNotes').value = '';
+      if (shotLocEl) shotLocEl.value = '';
+      if (isHdrEl) isHdrEl.checked = false;
+      if (spOutEl) spOutEl.value = '';
       isRapidFilmReview = false;
       updateRapidReviewButtonUI();
       adjustRapidTime(1); // Advance time by 1 min
@@ -1061,6 +1110,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         category = 'Finishing'; tag = 'Goal Scored'; quality = 'Goal Scored';
       } else if (/goal conceded|conceding|fumbles.*goal|pk awarded/i.test(text)) {
         category = 'Goalkeeping'; tag = 'Goal Conceded'; quality = 'Goal Conceded';
+      } else if (/big chance missed|missed.*big chance|missed.*sitter/i.test(text)) {
+        category = 'Finishing'; tag = 'Big Chance Missed'; quality = 'Poor / Negative';
       } else if (/shot off target|shot wide|over the bar|sails.*over|wide left|wide right|misses.*frame|misses.*wide/i.test(text)) {
         category = 'Finishing'; tag = 'Shot Off Target'; quality = 'Poor / Negative';
       } else if (/poor shot selection|forced shot/i.test(text)) {
@@ -1071,6 +1122,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         category = 'Finishing'; tag = 'Shot on Target'; quality = 'Good / Positive';
       } else if (/quality shot|good strike|tested the keeper/i.test(text)) {
         category = 'Finishing'; tag = 'Quality Shot'; quality = 'Good / Positive';
+      } else if (/big chance created|created.*big chance|clear-cut chance/i.test(text)) {
+        category = 'Passing'; tag = 'Big Chance Created'; quality = 'Good / Positive';
       } else if (/key pass|shot assist/i.test(text)) {
         category = 'Passing'; tag = 'Key Pass (Shot Assist)'; quality = 'Good / Positive';
       } else if (/goal assist|sets up.*goal/i.test(text)) {
@@ -1087,6 +1140,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         category = 'Passing'; tag = 'Unforced Turnover Pass'; quality = 'Poor / Negative';
       } else if (/forced pass|giveaway.*pressure|pass intercepted/i.test(text)) {
         category = 'Passing'; tag = 'Forced Turnover Pass'; quality = 'Poor / Negative';
+      } else if (/box entry|entered the box|enters the box|carry into (?:the )?18|pass into (?:the )?18/i.test(text)) {
+        category = 'Carrying'; tag = 'Box Entry'; quality = 'Good / Positive';
       } else if (/1v1 dribble won|beats defender cleanly/i.test(text)) {
         category = 'Carrying'; tag = '1v1 Dribble Won'; quality = 'Good / Positive';
       } else if (/progressive carry|drives with the ball/i.test(text)) {
@@ -1097,6 +1152,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         category = 'Carrying'; tag = 'Miscontrol'; quality = 'Poor / Negative';
       } else if (/dispossessed|stripped of the ball/i.test(text)) {
         category = 'Carrying'; tag = 'Dispossessed'; quality = 'Poor / Negative';
+      } else if (/counter-?press regain|5-sec regain|high regain|won it right back/i.test(text)) {
+        category = 'Defending'; tag = 'Counter-press Regain'; quality = 'Good / Positive';
       } else if (/direct pressure|closing down/i.test(text)) {
         category = 'Defending'; tag = 'Direct Pressure'; quality = 'Good / Positive';
       } else if (/tackle|tackles/i.test(text)) {
@@ -1115,6 +1172,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         category = 'Defending'; tag = 'Stabbed at the Ball'; quality = 'Poor / Negative';
       } else if (/lost mark|didn't track back|ball-watching/i.test(text)) {
         category = 'Defending'; tag = 'Lost Mark / Recovery'; quality = 'Poor / Negative';
+      } else if (/hold-?up play|held (?:the )?ball up|shields and lays off/i.test(text)) {
+        category = 'Duel'; tag = 'Hold-Up Play'; quality = 'Good / Positive';
       } else if (/aerial duel won|heads clear/i.test(text)) {
         category = 'Duel'; tag = 'Aerial Duel Won'; quality = 'Good / Positive';
       } else if (/foul won|draws foul/i.test(text)) {
@@ -1133,6 +1192,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         category = 'Goalkeeping'; tag = 'Box Aerial Claim'; quality = 'Good / Positive';
       } else if (/build-out distribution/i.test(text)) {
         category = 'Goalkeeping'; tag = 'Build-Out Distribution'; quality = 'Good / Positive';
+      } else if (/run in behind|runs in behind|stretch(?:es)? the line/i.test(text)) {
+        category = 'Tactical_Shape'; tag = 'Run in Behind'; quality = 'Good / Positive';
       } else if (/scanning|pre-orientation/i.test(text)) {
         category = 'Tactical_Shape'; tag = 'Scanning & Pre-Orientation'; quality = 'Good / Positive';
       } else if (/support angle/i.test(text)) {
@@ -1482,6 +1543,10 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       if (ev.primaryJersey != null) {
         ev.jerseys = [ev.primaryJersey, ...ev.secondaryJerseys.filter(j => j !== ev.primaryJersey)];
       }
+      ev.shotLocation = ev.shotLocation ? String(ev.shotLocation).trim() : '';
+      ev.isHeader = Boolean(ev.isHeader);
+      ev.shotQuality = ev.shotLocation ? getShotQualityValue(ev.shotLocation, ev.isHeader) : (Number(ev.shotQuality) || 0);
+      ev.setPieceOutcome = ev.setPieceOutcome ? String(ev.setPieceOutcome).trim() : '';
 
       const rawCat = String(ev.category || '').trim();
       const rawTag = String(ev.tag || '').trim();
@@ -1747,7 +1812,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
        CSV GENERATION & EXPORT
        ========================================================= */
     function generateCleanCsvString() {
-      const headers = ['Date', 'Timestamp (MM:SS)', 'Half', 'Field Zone', 'Player(s) Involved', 'Event Category', 'Quality / Outcome', 'Coaching Notes', 'Note to Player', 'Match', 'Short Form Tag'];
+      const headers = ['Date', 'Timestamp (MM:SS)', 'Half', 'Field Zone', 'Player(s) Involved', 'Event Category', 'Quality / Outcome', 'Coaching Notes', 'Note to Player', 'Match', 'Short Form Tag', 'Shot_Location', 'Set_Piece_Outcome'];
       const rows = LOGGED_MOMENTS.map(m => [
         csvEscape(m.date),
         csvEscape(m.time),
@@ -1759,7 +1824,9 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         csvEscape(m.notes),
         csvEscape(m.noteToPlayer || ''),
         csvEscape(m.match),
-        csvEscape(m.tag)
+        csvEscape(m.tag),
+        csvEscape(m.shotLocation || ''),
+        csvEscape(m.setPieceOutcome || '')
       ]);
       return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     }
@@ -1928,8 +1995,33 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       }
     }
 
+    const SHOT_QUALITY_VALUES = {
+      'Penalty': 0.75,
+      '6-yard box': 0.35,
+      'Central box': 0.15,
+      'Wide box': 0.06,
+      'Outside 18': 0.03
+    };
+
+    function getShotQualityValue(shotLocation, isHeader) {
+      const raw = String(shotLocation || '').trim();
+      if (!raw) return 0;
+      const lower = raw.toLowerCase();
+      let key = raw;
+      if (lower === 'penalty' || lower === 'pk') key = 'Penalty';
+      else if (lower === '6-yard box' || lower === 'six-yard box' || lower === '6 yard box' || lower === 'six_yard') key = '6-yard box';
+      else if (lower === 'central box' || lower === 'central_box' || lower === 'inside 18 (central)') key = 'Central box';
+      else if (lower === 'wide box' || lower === 'wide_box' || lower === 'inside 18 (wide)') key = 'Wide box';
+      else if (lower === 'outside 18' || lower === 'outside_18') key = 'Outside 18';
+      const base = Object.prototype.hasOwnProperty.call(SHOT_QUALITY_VALUES, key) ? SHOT_QUALITY_VALUES[key] : 0;
+      if (!base) return 0;
+      if (isHeader && key !== 'Penalty') return Number((base * 0.6).toFixed(3));
+      return Number(base.toFixed(3));
+    }
+
     const RAPID_TAG_METADATA = {
       // 1. Passing
+      'Big Chance Created': { category: 'Passing', quality: 'Good / Positive' },
       'Key Pass (Shot Assist)': { category: 'Passing', quality: 'Good / Positive' },
       'Goal Assist': { category: 'Passing', quality: 'Good / Positive' },
       'Line-Breaking Pass': { category: 'Passing', quality: 'Good / Positive' },
@@ -1940,6 +2032,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       'Unforced Turnover Pass': { category: 'Passing', quality: 'Poor / Negative' },
 
       // 2. Carrying
+      'Box Entry': { category: 'Carrying', quality: 'Good / Positive' },
       'Progressive Carry': { category: 'Carrying', quality: 'Good / Positive' },
       '1v1 Dribble Won': { category: 'Carrying', quality: 'Good / Positive' },
       'Turned into Pressure': { category: 'Carrying', quality: 'Poor / Negative' },
@@ -1947,6 +2040,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       'Dispossessed': { category: 'Carrying', quality: 'Poor / Negative' },
 
       // 3. Defending
+      'Counter-press Regain': { category: 'Defending', quality: 'Good / Positive' },
       'Direct Pressure': { category: 'Defending', quality: 'Good / Positive' },
       'Tackle': { category: 'Defending', quality: 'Good / Positive' },
       'Interception': { category: 'Defending', quality: 'Good / Positive' },
@@ -1958,6 +2052,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       'Lost Mark / Recovery': { category: 'Defending', quality: 'Poor / Negative' },
 
       // 4. Duel
+      'Hold-Up Play': { category: 'Duel', quality: 'Good / Positive' },
       'Ground Duel Won': { category: 'Duel', quality: 'Good / Positive' },
       'Aerial Duel Won': { category: 'Duel', quality: 'Good / Positive' },
       'Foul Won': { category: 'Duel', quality: 'Good / Positive' },
@@ -1970,6 +2065,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       'Shot on Target': { category: 'Finishing', quality: 'Good / Positive' },
       'Quality Shot': { category: 'Finishing', quality: 'Good / Positive' },
       'Shot Off Target': { category: 'Finishing', quality: 'Poor / Negative' },
+      'Big Chance Missed': { category: 'Finishing', quality: 'Poor / Negative' },
       'Poor Shot Selection': { category: 'Finishing', quality: 'Poor / Negative' },
       'Cross Out of Bounds': { category: 'Finishing', quality: 'Poor / Negative' },
 
@@ -1981,6 +2077,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       'Goal Conceded': { category: 'Goalkeeping', quality: 'Goal Conceded' },
 
       // 7. Tactical_Shape
+      'Run in Behind': { category: 'Tactical_Shape', quality: 'Good / Positive' },
       'Scanning & Pre-Orientation': { category: 'Tactical_Shape', quality: 'Good / Positive' },
       'Support Angle Offered': { category: 'Tactical_Shape', quality: 'Good / Positive' },
       'Tactical Communication': { category: 'Tactical_Shape', quality: 'Good / Positive' },
@@ -2091,6 +2188,12 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       document.getElementById('editMomentNotes').value = m.notes || '';
       const npEl = document.getElementById('editMomentNoteToPlayer');
       if (npEl) npEl.value = m.noteToPlayer || '';
+      const slEl = document.getElementById('editMomentShotLocation');
+      if (slEl) slEl.value = m.shotLocation || '';
+      const ihEl = document.getElementById('editMomentIsHeader');
+      if (ihEl) ihEl.checked = Boolean(m.isHeader);
+      const spEl = document.getElementById('editMomentSetPieceOutcome');
+      if (spEl) spEl.value = m.setPieceOutcome || '';
       const revCb = document.getElementById('editMomentFilmReview');
       if (revCb) revCb.checked = Boolean(m.filmReview);
       document.getElementById('momentEditModal').classList.remove('hidden');
@@ -2146,6 +2249,13 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       m.note = m.notes;
       const npSaveEl = document.getElementById('editMomentNoteToPlayer');
       m.noteToPlayer = npSaveEl ? npSaveEl.value.trim() : (m.noteToPlayer || '');
+      const slSaveEl = document.getElementById('editMomentShotLocation');
+      if (slSaveEl) m.shotLocation = slSaveEl.value || '';
+      const ihSaveEl = document.getElementById('editMomentIsHeader');
+      if (ihSaveEl) m.isHeader = Boolean(ihSaveEl.checked);
+      m.shotQuality = getShotQualityValue(m.shotLocation, m.isHeader);
+      const spSaveEl = document.getElementById('editMomentSetPieceOutcome');
+      if (spSaveEl) m.setPieceOutcome = spSaveEl.value || '';
       const revCb = document.getElementById('editMomentFilmReview');
       if (revCb) m.filmReview = revCb.checked;
 
@@ -2286,6 +2396,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
           <label class="block text-[10px] mono uppercase text-teal-400 font-bold mb-1">Action Tag (Quick-Tap List)</label>
           <select id="editMomentTagSelect" onchange="onEditTagSelectChange(this.value)" class="w-full bg-pitch text-xs p-2 rounded-xl border border-teal-500/50 text-white font-semibold focus:outline-none focus:border-brand-500">
             <optgroup label="⚽ Passing">
+              <option value="Big Chance Created">✨ Big Chance Created</option>
               <option value="Key Pass (Shot Assist)">Key Pass (Shot Assist)</option>
               <option value="Goal Assist">Goal Assist</option>
               <option value="Line-Breaking Pass">Line-Breaking Pass</option>
@@ -2296,6 +2407,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
               <option value="Unforced Turnover Pass">Unforced Turnover Pass</option>
             </optgroup>
             <optgroup label="🏃 Carrying">
+              <option value="Box Entry">Box Entry</option>
               <option value="Progressive Carry">Progressive Carry</option>
               <option value="1v1 Dribble Won">1v1 Dribble Won</option>
               <option value="Turned into Pressure">Turned into Pressure</option>
@@ -2303,6 +2415,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
               <option value="Dispossessed">Dispossessed</option>
             </optgroup>
             <optgroup label="🛡️ Defending">
+              <option value="Counter-press Regain">⚡ Counter-press Regain</option>
               <option value="Direct Pressure">Direct Pressure</option>
               <option value="Tackle">Tackle</option>
               <option value="Interception">Interception</option>
@@ -2314,6 +2427,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
               <option value="Lost Mark / Recovery">Lost Mark / Recovery</option>
             </optgroup>
             <optgroup label="⚔️ Duel">
+              <option value="Hold-Up Play">Hold-Up Play</option>
               <option value="Ground Duel Won">Ground Duel Won</option>
               <option value="Aerial Duel Won">Aerial Duel Won</option>
               <option value="Foul Won">Foul Won</option>
@@ -2326,6 +2440,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
               <option value="Shot on Target">Shot on Target</option>
               <option value="Quality Shot">Quality Shot</option>
               <option value="Shot Off Target">Shot Off Target</option>
+              <option value="Big Chance Missed">Big Chance Missed</option>
               <option value="Poor Shot Selection">Poor Shot Selection</option>
               <option value="Cross Out of Bounds">Cross Out of Bounds</option>
             </optgroup>
@@ -2337,6 +2452,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
               <option value="Goal Conceded">🥅 Goal Conceded (-2.5)</option>
             </optgroup>
             <optgroup label="🧠 Tactical Shape">
+              <option value="Run in Behind">Run in Behind</option>
               <option value="Scanning & Pre-Orientation">Scanning & Pre-Orientation</option>
               <option value="Support Angle Offered">Support Angle Offered</option>
               <option value="Tactical Communication">Tactical Communication</option>
@@ -2363,6 +2479,35 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
             <option value="Glow and Grow (Good actions and Not so Good action)">Glow &amp; Grow</option>
             <option value="Goal Scored">Goal Scored</option>
             <option value="Goal Conceded">Goal Conceded</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Shot Location (xG-lite) & Set-Piece Outcome -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-pitch/40 p-2.5 rounded-xl border border-border/60">
+        <div>
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Shot Location (xG-lite approx.)</label>
+          <select id="editMomentShotLocation" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-semibold">
+            <option value="">-- N/A --</option>
+            <option value="Penalty">Penalty (0.75)</option>
+            <option value="6-yard box">6-yard box (0.35)</option>
+            <option value="Central box">Central box (0.15)</option>
+            <option value="Wide box">Wide box (0.06)</option>
+            <option value="Outside 18">Outside 18 (0.03)</option>
+          </select>
+        </div>
+        <div class="flex items-end pb-1">
+          <label class="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+            <input type="checkbox" id="editMomentIsHeader" class="w-4 h-4 rounded border-border bg-pitch text-teal-400">
+            <span>Header (×0.6)</span>
+          </label>
+        </div>
+        <div>
+          <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Set-Piece Outcome</label>
+          <select id="editMomentSetPieceOutcome" class="w-full bg-pitch text-xs p-2 rounded-xl border border-border text-white font-semibold">
+            <option value="">-- N/A --</option>
+            <option value="Shot">→ Shot</option>
+            <option value="No Shot">→ No Shot</option>
           </select>
         </div>
       </div>
