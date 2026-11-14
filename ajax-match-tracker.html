@@ -170,6 +170,7 @@
         <button onclick="logOpponentSub()" class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold hover:bg-amber-500/30 active:scale-95 text-[11px]">+Sub (<span id="oppSubsCount">0</span>)</button>
         <button onclick="logOpponentCorner()" class="px-2 py-0.5 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700 text-[11px]">+Corner (<span id="oppCornersCount">0</span>)</button>
         <button onclick="logOpponentFoul()" class="px-2 py-0.5 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700 text-[11px]">+Foul (<span id="oppFoulsCount">0</span>)</button>
+        <button onclick="openOppAdjustModal()" class="px-2 py-0.5 rounded-lg bg-surface text-slate-300 border border-border hover:bg-slate-700 active:scale-95 text-[11px]" title="Adjust / Correct Opponent Stats">✏️</button>
       </div>
 
       <!-- Center: Ajax Set Pieces & Phase Triggers -->
@@ -793,6 +794,89 @@
             <span>Done</span>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: ADJUST OPPONENT STATS -->
+  <!-- ======================================================== -->
+  <div id="oppAdjustModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative space-y-4">
+      <button onclick="closeModal('oppAdjustModal')" class="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+      <div>
+        <div class="text-[10px] mono uppercase tracking-widest text-rose-400 font-bold">Opponent Stat Correction</div>
+        <h3 class="display text-2xl text-white">Adjust Opponent Totals</h3>
+      </div>
+      <div class="space-y-2.5 text-sm">
+        <div class="flex items-center justify-between bg-pitch/80 border border-border rounded-xl px-3.5 py-2">
+          <span class="font-semibold text-rose-300">Goals</span>
+          <div class="flex items-center gap-2">
+            <button onclick="adjustOppStat('goals', -1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">−</button>
+            <span id="adjOppGoals" class="w-8 text-center font-black text-white mono text-base">0</span>
+            <button onclick="adjustOppStat('goals', 1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">+</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between bg-pitch/80 border border-border rounded-xl px-3.5 py-2">
+          <span class="font-semibold text-sky-300">Shots</span>
+          <div class="flex items-center gap-2">
+            <button onclick="adjustOppStat('shots', -1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">−</button>
+            <span id="adjOppShots" class="w-8 text-center font-black text-white mono text-base">0</span>
+            <button onclick="adjustOppStat('shots', 1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">+</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between bg-pitch/80 border border-border rounded-xl px-3.5 py-2">
+          <span class="font-semibold text-amber-300">Subs</span>
+          <div class="flex items-center gap-2">
+            <button onclick="adjustOppStat('subs', -1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">−</button>
+            <span id="adjOppSubs" class="w-8 text-center font-black text-white mono text-base">0</span>
+            <button onclick="adjustOppStat('subs', 1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">+</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between bg-pitch/80 border border-border rounded-xl px-3.5 py-2">
+          <span class="font-semibold text-slate-200">Corners</span>
+          <div class="flex items-center gap-2">
+            <button onclick="adjustOppStat('corners', -1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">−</button>
+            <span id="adjOppCorners" class="w-8 text-center font-black text-white mono text-base">0</span>
+            <button onclick="adjustOppStat('corners', 1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">+</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between bg-pitch/80 border border-border rounded-xl px-3.5 py-2">
+          <span class="font-semibold text-slate-200">Fouls</span>
+          <div class="flex items-center gap-2">
+            <button onclick="adjustOppStat('fouls', -1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">−</button>
+            <span id="adjOppFouls" class="w-8 text-center font-black text-white mono text-base">0</span>
+            <button onclick="adjustOppStat('fouls', 1)" class="min-w-[44px] min-h-[44px] rounded-xl bg-surface hover:bg-slate-700 text-white font-bold text-lg border border-border active:scale-95">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end pt-1">
+        <button onclick="closeModal('oppAdjustModal')" class="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs active:scale-95">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: ONE-TAP SET PIECE / CORNER PLAYER PICKER -->
+  <!-- ======================================================== -->
+  <div id="quickSetPieceModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface border border-teal-500/40 rounded-2xl max-w-md w-full p-5 shadow-2xl relative space-y-4">
+      <button onclick="closeModal('quickSetPieceModal')" class="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-pitch text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+      <div>
+        <div class="text-[10px] mono uppercase tracking-widest text-teal-400 font-bold" id="qspSubtitle">Ajax Set Piece</div>
+        <h3 class="display text-2xl text-white" id="qspTitle">Select Player for Corner Kick</h3>
+      </div>
+      <div>
+        <div class="text-[10px] mono uppercase text-slate-400 font-bold mb-2">On Pitch</div>
+        <div id="qspOnPitchGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+      </div>
+      <div id="qspBenchWrap" class="hidden">
+        <div class="text-[10px] mono uppercase text-slate-500 font-bold mb-1.5">Bench</div>
+        <div id="qspBenchGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+      </div>
+      <div class="pt-2 border-t border-border/80 flex items-center justify-between gap-2">
+        <button id="qspTeamBtn" class="flex-1 min-h-[44px] px-3 py-2 rounded-xl bg-pitch hover:bg-slate-800 text-slate-200 border border-border font-bold text-xs active:scale-95">Log as Team (Unassigned)</button>
+        <button onclick="closeModal('quickSetPieceModal')" class="min-h-[44px] px-4 py-2 rounded-xl bg-surface hover:bg-slate-700 text-slate-400 border border-border font-bold text-xs active:scale-95">Cancel</button>
       </div>
     </div>
   </div>
@@ -2920,15 +3004,50 @@
       saveState();
     }
     function logOpponentCorner() {
-      oppStats.corners++;
-      document.getElementById('oppCornersCount').textContent = oppStats.corners;
-      showToast('Opponent corner logged.');
+      oppStats.corners = (oppStats.corners || 0) + 1;
+      const el = document.getElementById('oppCornersCount');
+      if (el) el.textContent = oppStats.corners;
+      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppCorner', desc: `OPPONENT CORNER #${oppStats.corners} (${Math.floor(matchSeconds / 60)}')`, zone: 'D3' });
+      showToast(`Opponent corner logged (Total: ${oppStats.corners})`);
+      saveState();
     }
     function logOpponentFoul() {
-      oppStats.fouls++;
-      document.getElementById('oppFoulsCount').textContent = oppStats.fouls;
-      showToast('Opponent foul logged.');
+      oppStats.fouls = (oppStats.fouls || 0) + 1;
+      const el = document.getElementById('oppFoulsCount');
+      if (el) el.textContent = oppStats.fouls;
+      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppFoul', desc: `OPPONENT FOUL #${oppStats.fouls} (${Math.floor(matchSeconds / 60)}')`, zone: 'M3' });
+      showToast(`Opponent foul logged (Total: ${oppStats.fouls})`);
       updateSummaryHud();
+      saveState();
+    }
+    function openOppAdjustModal() {
+      syncOppAdjustModalUI();
+      const modal = document.getElementById('oppAdjustModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+    function syncOppAdjustModalUI() {
+      const map = {
+        adjOppGoals: oppStats.goals || 0,
+        adjOppShots: oppStats.shots || 0,
+        adjOppSubs: oppStats.subs || 0,
+        adjOppCorners: oppStats.corners || 0,
+        adjOppFouls: oppStats.fouls || 0
+      };
+      for (const [id, val] of Object.entries(map)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      }
+    }
+    function adjustOppStat(field, delta) {
+      if (!oppStats || typeof oppStats !== 'object') return;
+      const cur = Number(oppStats[field]) || 0;
+      const next = Math.max(0, cur + delta);
+      oppStats[field] = next;
+      syncOppAdjustModalUI();
+      updateScoreboard();
       saveState();
     }
 
@@ -2981,29 +3100,70 @@
       }
       const curMins = Math.floor(matchSeconds / 60);
       const label = type === 'corner' ? 'Corner Kick' : 'Free Kick / Set Piece';
-      const promptText = `Select player jersey for ${label} at ${curMins}':\n` + 
-        onPitchEntries.map(([s, j]) => `#${j} ${playerStats[j].name.split(' ')[0]} (${s})`).join(', ') + 
-        '\n(Or enter Team to log without specific player)';
-      const entered = prompt(promptText, onPitchEntries[0] ? String(onPitchEntries[0][1]) : '');
-      if (entered === null) return;
 
-      const trimmed = entered.trim().replace(/^#/, '');
-      const jersey = parseInt(trimmed, 10);
-      if (!isNaN(jersey) && playerStats[jersey]) {
-        selectedPlayerJersey = jersey;
-        logSelectedEvent(type);
-      } else {
-        if (type === 'corner') {
-          oppStats.corners = (oppStats.corners || 0);
-          logMatchEvent({ time: curMins, type: 'corner', desc: `🚩 CORNER KICK (Team) at ${curMins}'`, zone: 'A3' });
-          showToast(`🚩 Team corner kick logged at ${curMins}'`);
+      const subtitleEl = document.getElementById('qspSubtitle');
+      const titleEl = document.getElementById('qspTitle');
+      const onPitchGrid = document.getElementById('qspOnPitchGrid');
+      const benchWrap = document.getElementById('qspBenchWrap');
+      const benchGrid = document.getElementById('qspBenchGrid');
+      const teamBtn = document.getElementById('qspTeamBtn');
+      const modal = document.getElementById('quickSetPieceModal');
+
+      if (!modal || !onPitchGrid) return;
+
+      if (subtitleEl) subtitleEl.textContent = `Ajax ${label} · ${curMins}'`;
+      if (titleEl) titleEl.textContent = `Tap Player for ${label}`;
+
+      onPitchGrid.innerHTML = onPitchEntries.map(([slot, j]) => {
+        const p = playerStats[j];
+        const firstName = p.name.split(' ')[0];
+        return `<button onclick="confirmQuickSetPiece('${type}', ${j})" class="min-h-[44px] px-2.5 py-2 rounded-xl bg-pitch hover:bg-teal-500/20 border border-teal-500/40 text-left flex items-center justify-between gap-1.5 active:scale-95 transition">
+          <span class="font-bold text-white text-xs truncate"><span class="text-teal-300 mono">#${j}</span> ${escapeHtml(firstName)}</span>
+          <span class="text-[10px] mono text-slate-400 shrink-0">${escapeHtml(slot)}</span>
+        </button>`;
+      }).join('');
+
+      const onPitchSet = new Set(onPitchEntries.map(([, j]) => Number(j)));
+      const benchList = Object.values(playerStats).filter(p => p && !onPitchSet.has(Number(p.jersey)));
+      if (benchWrap && benchGrid) {
+        if (benchList.length > 0) {
+          benchWrap.classList.remove('hidden');
+          benchGrid.innerHTML = benchList.map(p => {
+            const firstName = p.name.split(' ')[0];
+            return `<button onclick="confirmQuickSetPiece('${type}', ${p.jersey})" class="min-h-[44px] px-2.5 py-2 rounded-xl bg-pitch/60 hover:bg-slate-800 border border-border text-left flex items-center gap-1.5 active:scale-95 transition">
+              <span class="font-semibold text-slate-300 text-xs truncate"><span class="text-slate-400 mono">#${p.jersey}</span> ${escapeHtml(firstName)}</span>
+            </button>`;
+          }).join('');
         } else {
-          logMatchEvent({ time: curMins, type: 'setPiece', desc: `🎯 FREE KICK / SET PIECE (Team) at ${curMins}'`, zone: 'A3' });
-          showToast(`🎯 Team free kick logged at ${curMins}'`);
+          benchWrap.classList.add('hidden');
         }
-        updateScoreboard();
-        saveState();
       }
+
+      if (teamBtn) {
+        teamBtn.onclick = () => confirmQuickSetPiece(type, null);
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function confirmQuickSetPiece(type, jersey) {
+      closeModal('quickSetPieceModal');
+      const curMins = Math.floor(matchSeconds / 60);
+      if (jersey !== null && jersey !== undefined && playerStats[jersey]) {
+        selectedPlayerJersey = Number(jersey);
+        logSelectedEvent(type);
+        return;
+      }
+      if (type === 'corner') {
+        logMatchEvent({ time: curMins, type: 'corner', desc: `🚩 CORNER KICK (Team) at ${curMins}'`, zone: 'A3' });
+        showToast(`🚩 Team corner kick logged at ${curMins}'`);
+      } else {
+        logMatchEvent({ time: curMins, type: 'setPiece', desc: `🎯 FREE KICK / SET PIECE (Team) at ${curMins}'`, zone: 'A3' });
+        showToast(`🎯 Team free kick logged at ${curMins}'`);
+      }
+      updateScoreboard();
+      saveState();
     }
 
         let currentEventFilter = 'all';
@@ -3972,6 +4132,52 @@
       await generateHalftimeReport(false);
     }
 
+    function getHalfLengthMinutes() {
+      return Number(typeof halfLengthMinutes !== 'undefined' ? halfLengthMinutes : 40) || 40;
+    }
+
+    function isH1Event(e) {
+      if (!e) return false;
+      if (e.half === 'H1') return true;
+      if (e.half === 'H2') return false;
+      return (Number(e.time) || 0) <= getHalfLengthMinutes();
+    }
+
+    function isH2Event(e) {
+      if (!e) return false;
+      if (e.half === 'H2') return true;
+      if (e.half === 'H1') return false;
+      return (Number(e.time) || 0) > getHalfLengthMinutes();
+    }
+
+    function isAjaxShotEvent(e) {
+      if (!e) return false;
+      const t = e.type;
+      if (typeof t === 'string' && t.startsWith('opp')) return false;
+      if (t === 'shot' || t === 'sot' || t === 'soff' || t === 'shot_outside_18' || t === 'goal') return true;
+      const a = String(e.action || '').toLowerCase();
+      return a.includes('shot') || a === 'goal scored';
+    }
+
+    function isAjaxSotEvent(e) {
+      if (!e) return false;
+      const t = e.type;
+      if (typeof t === 'string' && t.startsWith('opp')) return false;
+      if (t === 'sot' || t === 'goal') return true;
+      if (t === 'shot_outside_18' && e.onTarget) return true;
+      const a = String(e.action || '').toLowerCase();
+      return a === 'shot on target' || a === 'goal scored';
+    }
+
+    function isAjaxOut18Event(e) {
+      if (!e) return false;
+      const t = e.type;
+      if (typeof t === 'string' && t.startsWith('opp')) return false;
+      if (t === 'shot_outside_18') return true;
+      const a = String(e.action || '').toLowerCase();
+      return a.includes('outside 18');
+    }
+
     async function generateHalftimeReport(forceRegen = false) {
       if (cachedHalftimeReport && !forceRegen) {
         renderHalftimeReport(cachedHalftimeReport);
@@ -3981,23 +4187,47 @@
       document.getElementById('aiLoadingSpinner').classList.remove('hidden');
       document.getElementById('aiReportContent').classList.add('hidden');
 
-      // Compile 1st-Half telemetry
-      let ajaxGoals = 0, ajaxShots = 0, ajaxSot = 0, ajaxSoff = 0, ajaxOut18 = 0;
-      let ajaxFouls = 0, ajaxYellows = 0;
-      let playerPressWon = 0, playerPressLost = 0;
+      // Compile 1st-Half telemetry from H1-filtered matchEvents (with playerStats fallback if matchEvents has 0 shot events)
+      const h1Events = (matchEvents || []).filter(isH1Event);
+      let ajaxGoals = h1Events.filter(e => e.type === 'goal').length;
+      let ajaxShots = h1Events.filter(isAjaxShotEvent).length;
+      let ajaxSot = h1Events.filter(isAjaxSotEvent).length;
+      let ajaxSoff = Math.max(0, ajaxShots - ajaxSot);
+      let ajaxOut18 = h1Events.filter(isAjaxOut18Event).length;
+      let ajaxFouls = h1Events.filter(e => e.type === 'foul' || (e.action && String(e.action).toLowerCase().includes('foul') && e.type !== 'oppFoul')).length;
+      let ajaxYellows = h1Events.filter(e => e.type === 'yellow' || (e.action && String(e.action).toLowerCase().includes('yellow'))).length;
+      let playerPressWon = h1Events.filter(e => e.type === 'press_won' || e.type === 'press').length;
+      let playerPressLost = h1Events.filter(e => e.type === 'press_lost').length;
       let cardedPlayers = [];
 
+      if (ajaxShots === 0) {
+        let psGoals = 0, psShots = 0, psSot = 0, psSoff = 0, psOut18 = 0, psFouls = 0, psYellows = 0, psPressWon = 0, psPressLost = 0;
+        Object.values(playerStats).forEach(p => {
+          psGoals += (p.goals || 0);
+          psShots += (p.shots || 0);
+          psSot += (p.sot || 0);
+          psSoff += (p.soff || 0);
+          psOut18 += (p.shotsOutside18 || 0);
+          psFouls += (p.fouls || 0);
+          psYellows += (p.yellowCards || 0);
+          psPressWon += (p.pressWon || 0);
+          psPressLost += (p.pressLost || 0);
+        });
+        if (psShots > 0 || psGoals > 0) {
+          ajaxGoals = psGoals;
+          ajaxShots = psShots;
+          ajaxSot = psSot;
+          ajaxSoff = psSoff;
+          ajaxOut18 = psOut18;
+          ajaxFouls = psFouls;
+          ajaxYellows = psYellows;
+          playerPressWon = psPressWon;
+          playerPressLost = psPressLost;
+        }
+      }
+
       Object.values(playerStats).forEach(p => {
-        ajaxGoals += (p.goals || 0);
-        ajaxShots += (p.shots || 0);
-        ajaxSot += (p.sot || 0);
-        ajaxSoff += (p.soff || 0);
-        ajaxOut18 += (p.shotsOutside18 || 0);
-        ajaxFouls += (p.fouls || 0);
-        ajaxYellows += (p.yellowCards || 0);
         if (p.yellowCards > 0) cardedPlayers.push(`#${p.jersey} ${p.name.split(' ')[0]}`);
-        playerPressWon += (p.pressWon || 0);
-        playerPressLost += (p.pressLost || 0);
       });
 
       const totalPressWon = (phaseStats.pressWon || 0) + playerPressWon;
@@ -4010,7 +4240,7 @@
       const totalGk = defGk + attGk;
       const territoryTilt = totalGk > 0 ? Math.round((defGk / totalGk) * 100) + '% in Opponent Half' : 'Balanced (50/50)';
 
-      const recentEventsSummary = matchEvents.slice(0, 8).map(e => `${e.time}': ${e.desc}`).join('; ');
+      const recentEventsSummary = h1Events.slice(0, 8).map(e => `${e.time}': ${e.desc}`).join('; ');
 
       const telemetry = {
         opponent: opponentName,
@@ -4202,12 +4432,9 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
       document.getElementById('recapLoadingSpinner').classList.remove('hidden');
       document.getElementById('recapReportContent').classList.add('hidden');
 
-      // Separate events into H1 (<= 40 mins) and H2 (> 40 mins)
-      const isH1 = e => e.half === 'H1' || (e.time <= 40);
-      const isH2 = e => e.half === 'H2' || (e.time > 40);
-
-      const eventsH1 = (matchEvents || []).filter(isH1);
-      const eventsH2 = (matchEvents || []).filter(isH2);
+      // Separate events into H1 and H2 using explicit half tag or halfLengthMinutes
+      const eventsH1 = (matchEvents || []).filter(isH1Event);
+      const eventsH2 = (matchEvents || []).filter(isH2Event);
 
       // Goals
       const goalsH1 = eventsH1.filter(e => e.type === 'goal').length;
@@ -4216,8 +4443,8 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
       const totalOppGoals = oppStats.goals || 0;
 
       // Shots
-      const isShot = e => e.type === 'shot' || e.type === 'sot' || e.type === 'shot_outside_18' || e.type === 'goal';
-      const isSot = e => e.type === 'sot' || e.type === 'goal' || (e.type === 'shot_outside_18' && e.onTarget);
+      const isShot = isAjaxShotEvent;
+      const isSot = isAjaxSotEvent;
 
       const shotsH1 = eventsH1.filter(isShot).length;
       const shotsH2 = eventsH2.filter(isShot).length;
@@ -4300,23 +4527,30 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
         }
       });
 
+      const matchMins = getHalfLengthMinutes() * 2;
       const fullTelemetry = {
         opponent: opponentName,
+        matchMins,
         ajaxScore: totalAjaxGoals,
         oppScore: totalOppGoals,
+        goalsH1, goalsH2,
         shotsH1, shotsH2, sotH1, sotH2,
         toH1, toH2,
         pressRateH1, pressRateH2,
         foulsH1, foulsH2,
+        oppShots: oppStats.shots || 0,
+        oppCorners: oppStats.corners || 0,
+        oppFouls: oppStats.fouls || 0,
+        oppSubs: oppStats.subs || 0,
         standouts
       };
 
       let reportData = null;
       try {
-        const resp = await fetch('/.netlify/functions/match-recap-ai', {
+        const resp = await fetch('/.netlify/functions/halftime-ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ telemetry: fullTelemetry })
+          body: JSON.stringify({ mode: 'full_match', telemetry: fullTelemetry })
         });
         if (resp.ok) {
           const res = await resp.json();
@@ -4345,7 +4579,7 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
       const totalSot = t.sotH1 + t.sotH2;
       const totalTo = t.toH1 + t.toH2;
 
-      const gameFlowSummary = `Ajax closed out a comprehensive 80-minute match against ${t.opponent} with a final score of ${t.ajaxScore} - ${t.oppScore}. The squad generated ${totalShots} total shots with ${totalSot} testing the target, maintaining proactive territory and disciplined structure across both periods.`;
+      const gameFlowSummary = `Ajax closed out a comprehensive ${t.matchMins || 80}-minute match against ${t.opponent} with a final score of ${t.ajaxScore} - ${t.oppScore}. The squad generated ${totalShots} total shots with ${totalSot} testing the target, maintaining proactive territory and disciplined structure across both periods.`;
 
       const adaptationText = `In the opening half, Ajax registered ${t.goalsH1} goals on ${t.shotsH1} shots with a ${t.pressRateH1}% pressing duel success rate. During the second half, the team responded with ${t.goalsH2} goals on ${t.shotsH2} shots and a ${t.pressRateH2}% duel efficiency. Turnovers evolved from ${t.toH1} in H1 to ${t.toH2} in H2, reflecting ${t.toH2 <= t.toH1 ? 'sharper possession security in the second half' : 'sustained attacking tempo under late match fatigue'}.`;
 

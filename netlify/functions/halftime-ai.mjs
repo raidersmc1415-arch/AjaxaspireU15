@@ -1,7 +1,7 @@
 // Netlify Function (v2) — Halftime AI Engine
 // Calls Gemini with match telemetry to provide an elite youth soccer tactical assessment.
 
-const MODEL = 'gemini-2.5-flash';
+const MODEL = 'gemini-3.8-flash';
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json',
@@ -32,9 +32,20 @@ export default async (req) => {
   ).replace(/\/+$/, '');
 
   try {
-    const { telemetry } = await req.json();
+    const { telemetry, mode } = await req.json();
+    const isFullMatch = mode === 'full_match' || (telemetry && telemetry.mode === 'full_match');
 
-    const systemPrompt = `Act as an elite youth competitive soccer tactical analyst and performance director. Analyze 1st-half match telemetry.
+    const systemPrompt = isFullMatch
+      ? `Act as an elite youth competitive soccer tactical analyst and performance director. Analyze full-match two-half telemetry accurately using the exact numbers provided.
+Respond strictly in valid JSON matching this schema:
+{
+  "sentiment": "DOMINANT VICTORY" | "DECISIVE WIN" | "CONTESTED DRAW" | "COMPETITIVE MATCH" | "CHALLENGING DEFEAT",
+  "gameFlowSummary": "2-sentence breakdown citing the exact score, total shots, and shots on target across the match.",
+  "adaptationText": "2-sentence comparison of 1st-half vs 2nd-half goals, shots, pressing rate, and turnovers.",
+  "standouts": ["Player 1 impact summary", "Player 2 impact summary"],
+  "takeaways": ["Training focus 1", "Training focus 2", "Training focus 3"]
+}`
+      : `Act as an elite youth competitive soccer tactical analyst and performance director. Analyze 1st-half match telemetry accurately using the exact numbers provided.
 Respond strictly in valid JSON matching this schema:
 {
   "sentiment": "Dominant" | "Contested" | "Under Pressure",
@@ -44,7 +55,16 @@ Respond strictly in valid JSON matching this schema:
   "recommendedHalfTimeAdjustments": ["Actionable adjustment 1", "Actionable adjustment 2"]
 }`;
 
-    const userPrompt = `Match Telemetry (1st Half):
+    const userPrompt = isFullMatch
+      ? `Match Telemetry (Full Match · ${telemetry.matchMins || 80} mins):
+- Opponent: ${telemetry.opponent || 'Opponent'}
+- Final Score: Ajax Aspire ${telemetry.ajaxScore || 0} - ${telemetry.oppScore || 0} ${telemetry.opponent || 'Opponent'}
+- 1st Half: ${telemetry.goalsH1 || 0} Goals, ${telemetry.shotsH1 || 0} Shots (${telemetry.sotH1 || 0} SOT), ${telemetry.pressRateH1 || 0}% Press/Duel Win, ${telemetry.toH1 || 0} Turnovers, ${telemetry.foulsH1 || 0} Fouls
+- 2nd Half: ${telemetry.goalsH2 || 0} Goals, ${telemetry.shotsH2 || 0} Shots (${telemetry.sotH2 || 0} SOT), ${telemetry.pressRateH2 || 0}% Press/Duel Win, ${telemetry.toH2 || 0} Turnovers, ${telemetry.foulsH2 || 0} Fouls
+- Total Shots: Ajax ${(telemetry.shotsH1 || 0) + (telemetry.shotsH2 || 0)} (${(telemetry.sotH1 || 0) + (telemetry.sotH2 || 0)} SOT) vs Opponent ${telemetry.oppShots || 0}
+- Opponent Corners: ${telemetry.oppCorners || 0}, Opponent Fouls: ${telemetry.oppFouls || 0}, Opponent Subs: ${telemetry.oppSubs || 0}
+- Standouts: ${(telemetry.standouts || []).map(s => String(s).replace(/<[^>]*>/g, '')).join('; ') || 'Balanced team effort'}`
+      : `Match Telemetry (1st Half):
 - Opponent: ${telemetry.opponent || 'Opponent'}
 - Score: Ajax Aspire ${telemetry.ajaxScore || 0} - ${telemetry.oppScore || 0} ${telemetry.opponent || 'Opponent'}
 - Total Shots: Ajax ${telemetry.ajaxShots || 0} (On Target: ${telemetry.ajaxSot || 0}, Off Target: ${telemetry.ajaxSoff || 0}, Outside 18: ${telemetry.shotsOutside18 || 0}) vs Opponent ${telemetry.oppShots || 0}

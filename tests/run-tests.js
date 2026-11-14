@@ -1121,4 +1121,140 @@ check('14. Player Portal dynamically selects Last 2 Matches (including Crossfire
   assert.strictEqual(filtered.length, 3, 'Expected 3 moments from the newest 2 matches (excluding La Morinda)');
 });
 
+// ---------------------------------------------------------------------------
+// Check 15: Match Tracker AI shot/half helpers, Opp stat adjust, Quick Set Piece picker, Gemini 3.8
+// ---------------------------------------------------------------------------
+check('Match Tracker: AI shot counting (11 shots incl. soff), half split, opp adjust, set-piece picker, Gemini 3.8', () => {
+  const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+  const aiFnCode = fs.readFileSync(path.join(ROOT, 'netlify/functions/halftime-ai.mjs'), 'utf8');
+
+  // Verify netlify function uses gemini-3.8-flash and supports full_match
+  assert(aiFnCode.includes('gemini-3.8-flash'), 'Expected halftime-ai.mjs to use gemini-3.8-flash');
+  assert(!aiFnCode.includes('gemini-2.5-flash'), 'Did not expect deprecated gemini-2.5-flash in halftime-ai.mjs');
+  assert(aiFnCode.includes("mode === 'full_match'"), 'Expected halftime-ai.mjs to support full_match mode');
+
+  // Verify tracker calls halftime-ai instead of non-existent match-recap-ai and no prompt() in openQuickSetPiecePicker
+  assert(!trackerHtml.includes('/.netlify/functions/match-recap-ai'), 'Did not expect non-existent match-recap-ai endpoint');
+  assert(trackerHtml.includes("id=\"oppAdjustModal\""), 'Expected #oppAdjustModal in ajax-match-tracker.html');
+  assert(trackerHtml.includes("id=\"quickSetPieceModal\""), 'Expected #quickSetPieceModal in ajax-match-tracker.html');
+
+  // Extract helper functions for VM testing
+  const helpersStart = trackerHtml.indexOf('function getHalfLengthMinutes()');
+  const helpersEnd = trackerHtml.indexOf('async function generateHalftimeReport');
+  assert(helpersStart > -1 && helpersEnd > helpersStart, 'Expected AI half/shot helpers in ajax-match-tracker.html');
+  const helpersSrc = trackerHtml.slice(helpersStart, helpersEnd);
+
+  const oppStart = trackerHtml.indexOf('function openOppAdjustModal()');
+  const oppEnd = trackerHtml.indexOf('function logMatchEvent(ev)');
+  assert(oppStart > -1 && oppEnd > oppStart, 'Expected openOppAdjustModal/adjustOppStat in ajax-match-tracker.html');
+  const oppSrc = trackerHtml.slice(oppStart, oppEnd);
+
+  const spStart = trackerHtml.indexOf('function openQuickSetPiecePicker(');
+  const spEnd = trackerHtml.indexOf("let currentEventFilter = 'all';");
+  assert(spStart > -1 && spEnd > spStart, 'Expected openQuickSetPiecePicker in ajax-match-tracker.html');
+  const spSrc = trackerHtml.slice(spStart, spEnd);
+  assert(!spSrc.includes('prompt('), 'openQuickSetPiecePicker should not use browser prompt()');
+
+  const elements = {};
+  const makeEl = (id) => {
+    if (!elements[id]) {
+      elements[id] = {
+        id,
+        textContent: '',
+        innerHTML: '',
+        classList: {
+          _set: new Set(['hidden']),
+          add(c) { this._set.add(c); },
+          remove(c) { this._set.delete(c); },
+          contains(c) { return this._set.has(c); }
+        }
+      };
+    }
+    return elements[id];
+  };
+
+  const sandbox = {
+    halfLengthMinutes: 35,
+    matchSeconds: 600,
+    selectedPlayerJersey: null,
+    oppStats: { goals: 1, shots: 4, subs: 2, corners: 3, fouls: 5 },
+    matchEvents: [],
+    pitchState: { ST: 10 },
+    onPitchPlayers: { ST: 10 },
+    playerStats: {
+      10: { jersey: 10, name: 'Carlee Test', pos: 'ST' },
+      22: { jersey: 22, name: 'Sonia Bench', pos: 'GK' }
+    },
+    logCalls: [],
+    updateScoreboard() {},
+    saveState() {},
+    showToast() {},
+    closeModal() {},
+    escapeHtml(s) { return String(s); },
+    logMatchEvent(ev) { sandbox.matchEvents.unshift(ev); },
+    logSelectedEvent(type) { sandbox.logCalls.push({ type, jersey: String(sandbox.selectedPlayerJersey) }); },
+    document: { getElementById: makeEl },
+    String, Number, Math, Array, Object, Set
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(helpersSrc + '\n' + oppSrc + '\n' + spSrc, sandbox);
+
+  // Test 11 shots across goal, sot, soff (Quality Shot / Shot Off Target / Poor Shot Selection), shot_outside_18, and oppShot exclusion
+  const sampleEvents = [
+    { half: 'H1', time: 5, type: 'goal', action: 'Goal Scored' },
+    { half: 'H1', time: 10, type: 'sot', action: 'Shot on Target' },
+    { half: 'H1', time: 12, type: 'soff', action: 'Quality Shot' },
+    { half: 'H1', time: 15, type: 'soff', action: 'Shot Off Target' },
+    { half: 'H1', time: 20, type: 'soff', action: 'Poor Shot Selection' },
+    { half: 'H1', time: 25, type: 'shot', action: 'Shot' },
+    { half: 'H1', time: 30, type: 'shot_outside_18', onTarget: true, action: 'Shot Outside 18' },
+    { half: 'H2', time: 38, type: 'soff', action: 'Quality Shot' },
+    { half: 'H2', time: 45, type: 'soff', action: 'Shot Off Target' },
+    { half: 'H2', time: 55, type: 'sot', action: 'Shot on Target' },
+    { half: 'H2', time: 65, type: 'shot_outside_18', onTarget: false, action: 'Shot Outside 18' },
+    { half: 'H2', time: 68, type: 'oppShot', action: 'Opponent Shot' }
+  ];
+  const counts = vm.runInContext(`
+    (() => {
+      const ev = ${JSON.stringify(sampleEvents)};
+      const h1 = ev.filter(isH1Event);
+      const h2 = ev.filter(isH2Event);
+      return {
+        totalShots: ev.filter(isAjaxShotEvent).length,
+        totalSot: ev.filter(isAjaxSotEvent).length,
+        h1Shots: h1.filter(isAjaxShotEvent).length,
+        h2Shots: h2.filter(isAjaxShotEvent).length,
+        h1Count: h1.length,
+        h2Count: h2.length
+      };
+    })()
+  `, sandbox);
+
+  assert.strictEqual(counts.totalShots, 11, 'Expected all 11 Ajax shots (including soff) to be counted and oppShot excluded');
+  assert.strictEqual(counts.totalSot, 4, 'Expected 4 shots on target (goal, 2 sot, 1 on-target shot_outside_18)');
+  assert.strictEqual(counts.h1Shots, 7, 'Expected 7 H1 shots');
+  assert.strictEqual(counts.h2Shots, 4, 'Expected 4 H2 shots (including minute 38 tagged H2 in 35-min half)');
+
+  // Test adjustOppStat & clamping at 0
+  vm.runInContext(`
+    adjustOppStat('shots', -1);
+    adjustOppStat('corners', -10);
+    adjustOppStat('subs', 1);
+    adjustOppStat('fouls', -2);
+  `, sandbox);
+  assert.strictEqual(sandbox.oppStats.shots, 3, 'Expected oppStats.shots decremented to 3');
+  assert.strictEqual(sandbox.oppStats.corners, 0, 'Expected oppStats.corners clamped at 0');
+  assert.strictEqual(sandbox.oppStats.subs, 3, 'Expected oppStats.subs incremented to 3');
+  assert.strictEqual(sandbox.oppStats.fouls, 3, 'Expected oppStats.fouls decremented to 3');
+
+  // Test openQuickSetPiecePicker opens modal & confirmQuickSetPiece logs selected player
+  vm.runInContext(`
+    openQuickSetPiecePicker('corner');
+    confirmQuickSetPiece('corner', '10');
+  `, sandbox);
+  assert.strictEqual(sandbox.logCalls.length, 1, 'Expected confirmQuickSetPiece to call logQuickSetPiece');
+  assert.strictEqual(sandbox.logCalls[0].type, 'corner');
+  assert.strictEqual(sandbox.logCalls[0].jersey, '10');
+});
+
 console.log(`\nAll ${passed} regression checks passed.`);
