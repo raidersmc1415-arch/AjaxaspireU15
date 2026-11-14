@@ -69,6 +69,7 @@
     .selected-node {
       animation: pulse-ring 1.5s infinite;
     }
+    .pam-tag-btn > span:last-child { display: none; }
     @keyframes pulse-ring {
       0% { box-shadow: 0 0 0 0 rgba(58, 191, 184, 0.7); }
       70% { box-shadow: 0 0 0 12px rgba(58, 191, 184, 0); }
@@ -1038,22 +1039,58 @@
         </button>
       </div>
 
-      <!-- TAB 1: CATEGORIZED ACTIONS (MATCHES FILM LOG TAXONOMY) -->
+      <!-- TAB 1: TOP PINNED ACTIONS + 3 CLEAN CATEGORY PILLS (OFFENSE / DEFENSE / SET PIECES) -->
       <div id="pamViewStats" class="space-y-3">
-        <!-- 2-Tap Quick Hot Bar (Top 8 High-Frequency Actions) -->
+        <!-- Layer 1: Top Frequent Actions (Auto-adapts from match & 838-event baseline) -->
         <div class="space-y-1.5" id="pamHotBarWrap">
-          <div class="flex items-center justify-between text-[11px] font-semibold text-amber-300">
-            <span>⚡ Quick Hot Bar (2-Tap Log):</span>
-            <span class="text-[10px] font-mono text-slate-400" id="pamHotBarHint">Auto-adapts to match frequency</span>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-teal-300">
+            <span>⚡ Top Actions (1-Tap Log)</span>
+            <span class="text-[10px] font-mono text-slate-400" id="pamHotBarHint">Auto-ranked · 1-tap</span>
           </div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5" id="pamHotBar"></div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="pamHotBar"></div>
         </div>
 
-        <!-- Action Category Selector Bar Up Top -->
-        <div class="space-y-1.5">
+        <!-- Layer 2: Simplified Category Pills (Offense · Defense · Set Pieces) -->
+        <div class="space-y-2 pt-1 border-t border-border/60">
+          <div class="grid grid-cols-3 gap-2" id="pamPrimaryGroupPills">
+            <button type="button" id="pamGroupBtn-offense" onclick="togglePamGroup('offense')" class="min-h-[44px] px-3 py-2 rounded-xl border border-emerald-500/40 bg-emerald-950/25 text-emerald-200 hover:bg-emerald-900/40 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 active:scale-95 transition">
+              <span>⚽ Offense</span>
+            </button>
+            <button type="button" id="pamGroupBtn-defense" onclick="togglePamGroup('defense')" class="min-h-[44px] px-3 py-2 rounded-xl border border-sky-500/40 bg-sky-950/25 text-sky-200 hover:bg-sky-900/40 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 active:scale-95 transition">
+              <span>🛡️ Defense</span>
+            </button>
+            <button type="button" id="pamGroupBtn-setpieces" onclick="togglePamGroup('setpieces')" class="min-h-[44px] px-3 py-2 rounded-xl border border-amber-500/40 bg-amber-950/25 text-amber-200 hover:bg-amber-900/40 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 active:scale-95 transition">
+              <span>🚩 Set Pieces</span>
+            </button>
+          </div>
+
+          <!-- Revealed Sub-Actions for Active Pill Only (Hidden until tapped) -->
+          <div id="pamSubActionWrap" class="hidden space-y-2 p-2.5 rounded-2xl bg-pitch/85 border border-border/80">
+            <div class="flex items-center justify-between text-[11px] font-bold">
+              <span id="pamSubActionTitle" class="text-teal-300 uppercase mono tracking-wider">Actions</span>
+              <button type="button" onclick="togglePamGroup(null)" class="text-[10px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-surface border border-border">Hide ✕</button>
+            </div>
+            <!-- Optional Shot Location Strip (shown ONLY when Offense is open) -->
+            <div id="pamShotLocWrap" class="hidden">
+              <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[11px]" id="pamShotLocBar">
+                <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Shot Loc:</span>
+                <button type="button" onclick="togglePamShotLoc('Penalty')" data-shot-loc="Penalty" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-surface text-slate-300 whitespace-nowrap">PK</button>
+                <button type="button" onclick="togglePamShotLoc('6-yard box')" data-shot-loc="6-yard box" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-surface text-slate-300 whitespace-nowrap">6-yd</button>
+                <button type="button" onclick="togglePamShotLoc('Central box')" data-shot-loc="Central box" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-surface text-slate-300 whitespace-nowrap">Central</button>
+                <button type="button" onclick="togglePamShotLoc('Wide box')" data-shot-loc="Wide box" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-surface text-slate-300 whitespace-nowrap">Wide</button>
+                <button type="button" onclick="togglePamShotLoc('Outside 18')" data-shot-loc="Outside 18" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-surface text-slate-300 whitespace-nowrap">Out 18</button>
+                <button type="button" id="pamHeaderToggleBtn" onclick="togglePamHeader()" class="px-2 py-1 rounded-lg border border-border bg-surface text-slate-300 whitespace-nowrap">Header ×0.6</button>
+              </div>
+            </div>
+            <div id="pamFocusedGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+          </div>
+        </div>
+
+        <!-- Optional Legacy 8-Family Catalog (Collapsed by default for film-detail needs) -->
+        <div id="pamFullCatalogWrap" class="hidden space-y-2 pt-2 border-t border-border/70">
           <div class="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-            <span>Action Family:</span>
-            <span id="pamCatCountLabel" class="text-teal-300 font-mono text-[10px]">Select category to view actions</span>
+            <span>Full Taxonomy Families:</span>
+            <span id="pamCatCountLabel" class="text-teal-300 font-mono text-[10px]">Select family</span>
           </div>
           <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold scrollbar-none" id="pamCategoryChips">
             <button type="button" onclick="filterPamActionCategory('all')" id="pamCat-all" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-teal-500/50 bg-teal-500/25 text-teal-200 whitespace-nowrap active:scale-95 transition">All (54)</button>
@@ -1066,21 +1103,7 @@
             <button type="button" onclick="filterPamActionCategory('tactical')" id="pamCat-tactical" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">🧠 Tactical (8)</button>
             <button type="button" onclick="filterPamActionCategory('admin')" id="pamCat-admin" class="pam-cat-btn px-2.5 py-1.5 rounded-xl border border-border bg-pitch text-slate-300 hover:text-white whitespace-nowrap active:scale-95 transition">📋 Admin (2)</button>
           </div>
-        </div>
-
-        <!-- Optional Shot Location Pre-Selector (xG-lite approx.) -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[11px]" id="pamShotLocBar">
-          <span class="text-[10px] mono uppercase text-slate-400 font-bold shrink-0">Shot Loc:</span>
-          <button type="button" onclick="togglePamShotLoc('Penalty')" data-shot-loc="Penalty" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">PK</button>
-          <button type="button" onclick="togglePamShotLoc('6-yard box')" data-shot-loc="6-yard box" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">6-yd</button>
-          <button type="button" onclick="togglePamShotLoc('Central box')" data-shot-loc="Central box" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">Central</button>
-          <button type="button" onclick="togglePamShotLoc('Wide box')" data-shot-loc="Wide box" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">Wide</button>
-          <button type="button" onclick="togglePamShotLoc('Outside 18')" data-shot-loc="Outside 18" class="pam-shot-loc-btn px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">Out 18</button>
-          <button type="button" id="pamHeaderToggleBtn" onclick="togglePamHeader()" class="px-2 py-1 rounded-lg border border-border bg-pitch text-slate-300 whitespace-nowrap">Header ×0.6</button>
-        </div>
-
-        <!-- Action Tag Buttons Grid (Filtered by Category) -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[340px] sm:max-h-[380px] overflow-y-auto pr-1" id="pamActionTagGrid">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[260px] overflow-y-auto pr-1" id="pamActionTagGrid">
           <!-- 🟢 Passing (9) -->
           <button type="button" data-pam-cat="passing" onclick="logPamAction('Big Chance Created', 'Glow', 'Passing')" class="pam-tag-btn min-h-[44px] p-2.5 rounded-xl border border-emerald-400/50 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30 flex items-center justify-between gap-1.5 text-xs font-bold active:scale-95 transition">
             <span class="truncate">✨ Big Chance Created</span>
@@ -1320,11 +1343,15 @@
             <span class="truncate">🔄 Sub Off to Bench</span>
             <span class="text-[9px] mono px-1 py-0.5 rounded bg-teal-500/20 text-teal-300 shrink-0">Sub</span>
           </button>
+          </div>
         </div>
 
-        <div class="flex items-center justify-between pt-2 border-t border-border/70 text-xs">
+        <div class="flex items-center justify-between pt-2 border-t border-border/70 text-xs gap-2">
           <button type="button" onclick="subCurrentPamPlayerOff()" class="text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 active:scale-95">
-            <span>⬇️ Quick Sub Off to Bench</span>
+            <span>⬇️ Quick Sub Off</span>
+          </button>
+          <button type="button" id="pamFullCatalogToggleBtn" onclick="togglePamFullCatalog()" class="text-[11px] text-slate-400 hover:text-teal-300 font-semibold">
+            All 54 Tags ▾
           </button>
           <button type="button" onclick="closeTrackerPlayerActionModal()" class="text-slate-400 hover:text-white font-medium">
             Done
@@ -1669,6 +1696,16 @@
       updateScoreboard();
       renderPamHotBar();
     });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && typeof syncWallClockElapsed === 'function') {
+        syncWallClockElapsed();
+      }
+    });
+    window.addEventListener('focus', () => {
+      if (typeof syncWallClockElapsed === 'function') {
+        syncWallClockElapsed();
+      }
+    });
 
     function showToast(msg) {
       const t = document.getElementById('toast');
@@ -1748,6 +1785,7 @@
       matchSeconds = 0;
       currentPeriod = 1;
       timerRunning = false;
+      lastTimerTickAtMs = null;
       clearInterval(timerInterval);
       if (typeof invalidateHalftimeCache === 'function') invalidateHalftimeCache();
 
@@ -1819,16 +1857,21 @@
       return false;
     }
 
+    var lastTimerTickAtMs = null;
+
     function toggleTimer() {
       const btn = document.getElementById('timerToggleBtn');
       if (timerRunning) {
+        if (typeof syncWallClockElapsed === 'function') syncWallClockElapsed();
         clearInterval(timerInterval);
         timerRunning = false;
+        lastTimerTickAtMs = null;
         if (btn) {
           btn.textContent = '▶';
           btn.classList.remove('bg-amber-400');
           btn.classList.add('bg-teal-400');
         }
+        saveState();
         showToast('Paused match clock.');
       } else {
         if (currentPeriod >= 3) {
@@ -1840,43 +1883,89 @@
           saveState();
         }
         timerRunning = true;
+        lastTimerTickAtMs = Date.now();
         if (btn) {
           btn.textContent = '⏸';
           btn.classList.remove('bg-teal-400', 'bg-teal-500');
           btn.classList.add('bg-amber-400');
         }
         timerInterval = setInterval(tickSecond, 1000);
+        saveState();
         showToast('Match clock running.');
       }
     }
 
+    function applyPlayerMinutesDelta(deltaMins) {
+      const step = parseInt(deltaMins, 10) || 0;
+      if (!step) return;
+      const onPitchSet = new Set();
+
+      // Update on-pitch starters (total + position minutes)
+      Object.entries(onPitchPlayers || {}).forEach(([slot, jersey]) => {
+        if (!jersey) return;
+        onPitchSet.add(Number(jersey));
+        const p = playerStats && playerStats[jersey];
+        if (!p) return;
+        p.mins = Math.max(0, (Number(p.mins) || 0) + step);
+        const pos = simplifyPos(slot);
+        if (!p.posMins) p.posMins = {};
+        p.posMins[pos] = Math.max(0, (Number(p.posMins[pos]) || 0) + step);
+      });
+
+      // Update active bench players (excluding absent/injured)
+      const sq = (typeof SQUADS !== 'undefined' && SQUADS[activeSquadKey]) ? SQUADS[activeSquadKey] : null;
+      const rosterList = (sq && Array.isArray(sq.roster)) ? sq.roster : Object.values(playerStats || {});
+      rosterList.forEach(rp => {
+        const j = Number(rp && rp.jersey);
+        if (!j || onPitchSet.has(j) || (absentPlayers && absentPlayers.has(j))) return;
+        const p = playerStats && playerStats[j];
+        if (p) {
+          p.benchMins = Math.max(0, (Number(p.benchMins) || 0) + step);
+        }
+      });
+    }
+
+    function syncWallClockElapsed(nowMs = Date.now()) {
+      if (!timerRunning) return 0;
+      if (typeof lastTimerTickAtMs !== 'number' || !lastTimerTickAtMs) {
+        lastTimerTickAtMs = nowMs;
+        return 0;
+      }
+      const rawElapsed = Math.floor((nowMs - lastTimerTickAtMs) / 1000);
+      if (rawElapsed <= 0) return 0;
+      // Cap runaway background catch-up at 55 minutes to prevent stale next-day jumps
+      const elapsedSec = Math.min(rawElapsed, 55 * 60);
+      const prevWholeMins = Math.floor((Number(matchSeconds) || 0) / 60);
+      matchSeconds = (Number(matchSeconds) || 0) + elapsedSec;
+      lastTimerTickAtMs = lastTimerTickAtMs + elapsedSec * 1000;
+      const nextWholeMins = Math.floor(matchSeconds / 60);
+      const deltaMins = nextWholeMins - prevWholeMins;
+
+      updateClockDisplay();
+      if (deltaMins > 0) {
+        applyPlayerMinutesDelta(deltaMins);
+        saveState();
+        if (typeof renderMinutesStream === 'function') renderMinutesStream();
+        if (typeof renderBench === 'function') renderBench();
+      }
+      return elapsedSec;
+    }
+
     function tickSecond() {
-      matchSeconds++;
+      if (typeof syncWallClockElapsed === 'function' && timerRunning && typeof lastTimerTickAtMs === 'number' && lastTimerTickAtMs) {
+        syncWallClockElapsed(Date.now());
+        return;
+      }
+      const prevWholeMins = Math.floor((Number(matchSeconds) || 0) / 60);
+      matchSeconds = (Number(matchSeconds) || 0) + 1;
       updateClockDisplay();
 
-      // Accrue minutes to on-pitch and bench players every 60 seconds
-      if (matchSeconds % 60 === 0) {
-        // Active on pitch players get +1 min to their total and current position
-        Object.entries(onPitchPlayers).forEach(([slot, jersey]) => {
-          if (playerStats[jersey]) {
-            playerStats[jersey].mins++;
-            const pos = simplifyPos(slot);
-            playerStats[jersey].posMins[pos] = (playerStats[jersey].posMins[pos] || 0) + 1;
-          }
-        });
-
-        // Bench players get +1 min to bench time (excluding absent/injured players)
-        const sq = SQUADS[activeSquadKey];
-        const onPitchSet = new Set(Object.values(onPitchPlayers));
-        sq.roster.forEach(p => {
-          if (!onPitchSet.has(p.jersey) && playerStats[p.jersey] && !absentPlayers.has(p.jersey)) {
-            playerStats[p.jersey].benchMins++;
-          }
-        });
-
+      const nextWholeMins = Math.floor(matchSeconds / 60);
+      if (nextWholeMins > prevWholeMins) {
+        applyPlayerMinutesDelta(nextWholeMins - prevWholeMins);
         saveState();
-        renderMinutesStream();
-        renderBench();
+        if (typeof renderMinutesStream === 'function') renderMinutesStream();
+        if (typeof renderBench === 'function') renderBench();
       }
     }
 
@@ -1894,8 +1983,20 @@
     }
 
     function adjustClock(deltaSec) {
-      matchSeconds = Math.max(0, matchSeconds + deltaSec);
+      const prevWholeMins = Math.floor((Number(matchSeconds) || 0) / 60);
+      matchSeconds = Math.max(0, (Number(matchSeconds) || 0) + deltaSec);
+      const nextWholeMins = Math.floor(matchSeconds / 60);
+      const deltaMins = nextWholeMins - prevWholeMins;
+      if (timerRunning && typeof lastTimerTickAtMs === 'number') {
+        lastTimerTickAtMs = Date.now();
+      }
+      if (deltaMins !== 0) {
+        applyPlayerMinutesDelta(deltaMins);
+        if (typeof renderMinutesStream === 'function') renderMinutesStream();
+        if (typeof renderBench === 'function') renderBench();
+      }
       updateClockDisplay();
+      saveState();
     }
 
     function updateClockDisplay() {
@@ -2491,25 +2592,25 @@
     }
 
     const DEFAULT_HOT_BAR_ACTIONS = [
-      { tag: 'Shot on Target', outcome: 'Glow', category: 'Finishing', icon: '🎯' },
-      { tag: 'Key Pass (Shot Assist)', outcome: 'Glow', category: 'Passing', icon: '🔑' },
-      { tag: 'Line-Breaking Pass', outcome: 'Glow', category: 'Passing', icon: '⚡' },
-      { tag: 'Progressive Pass', outcome: 'Glow', category: 'Passing', icon: '↗️' },
-      { tag: 'Tackle', outcome: 'Glow', category: 'Defending', icon: '🦵' },
-      { tag: 'Forced Turnover Pass', outcome: 'Grow', category: 'Passing', icon: '⚠️' },
-      { tag: 'Turned into Pressure', outcome: 'Grow', category: 'Carrying', icon: '⚠️' },
-      { tag: 'Miscontrol', outcome: 'Grow', category: 'Carrying', icon: '💨' }
+      { tag: 'Goal Scored', shortLabel: 'Goal Scored', outcome: 'Goal Scored', category: 'Finishing', icon: '⚽' },
+      { tag: 'Shot on Target', shortLabel: 'Shot on Target', outcome: 'Glow', category: 'Finishing', icon: '🎯' },
+      { tag: 'Key Pass (Shot Assist)', shortLabel: 'Key Pass', outcome: 'Glow', category: 'Passing', icon: '🔑' },
+      { tag: 'Direct Pressure', shortLabel: 'Direct Press', outcome: 'Glow', category: 'Defending', icon: '🔥' },
+      { tag: 'Forced Turnover Pass', shortLabel: 'Pass Turnover', outcome: 'Grow', category: 'Passing', icon: '⚠️' },
+      { tag: 'Turned into Pressure', shortLabel: 'Into Pressure', outcome: 'Grow', category: 'Carrying', icon: '⚠️' },
+      { tag: 'Miscontrol', shortLabel: 'Miscontrol', outcome: 'Grow', category: 'Carrying', icon: '💨' },
+      { tag: 'Shot Off Target', shortLabel: 'Shot Off', outcome: 'Grow', category: 'Finishing', icon: '🥅' }
     ];
 
     const DEFAULT_GK_HOT_BAR_ACTIONS = [
-      { tag: 'Save (Clean / Held)', outcome: 'Glow', category: 'Goalkeeping', icon: '🧤' },
-      { tag: 'Save (Parried)', outcome: 'Glow', category: 'Goalkeeping', icon: '🧤' },
-      { tag: 'Build-Out Distribution', outcome: 'Glow', category: 'Goalkeeping', icon: '🎯' },
-      { tag: 'Box Aerial Claim', outcome: 'Glow', category: 'Goalkeeping', icon: '✈️' },
-      { tag: 'Clearance', outcome: 'Glow', category: 'Defending', icon: '🦶' },
-      { tag: 'Progressive Pass', outcome: 'Glow', category: 'Passing', icon: '↗️' },
-      { tag: 'Forced Turnover Pass', outcome: 'Grow', category: 'Passing', icon: '⚠️' },
-      { tag: 'Goal Conceded', outcome: 'Goal Conceded', category: 'Goalkeeping', icon: '🥅' }
+      { tag: 'Save (Clean / Held)', shortLabel: 'Save Held', outcome: 'Glow', category: 'Goalkeeping', icon: '🧤' },
+      { tag: 'Save (Parried)', shortLabel: 'Save Parried', outcome: 'Glow', category: 'Goalkeeping', icon: '🧤' },
+      { tag: 'Build-Out Distribution', shortLabel: 'Distribution', outcome: 'Glow', category: 'Goalkeeping', icon: '🎯' },
+      { tag: 'Box Aerial Claim', shortLabel: 'Aerial Claim', outcome: 'Glow', category: 'Goalkeeping', icon: '✈️' },
+      { tag: 'Clearance', shortLabel: 'Clearance', outcome: 'Glow', category: 'Defending', icon: '🦶' },
+      { tag: 'Progressive Pass', shortLabel: 'Prog Pass', outcome: 'Glow', category: 'Passing', icon: '↗️' },
+      { tag: 'Forced Turnover Pass', shortLabel: 'Pass Turnover', outcome: 'Grow', category: 'Passing', icon: '⚠️' },
+      { tag: 'Goal Conceded', shortLabel: 'Goal Conceded', outcome: 'Goal Conceded', category: 'Goalkeeping', icon: '🥅' }
     ];
 
     const SHOT_QUALITY_VALUES = {
@@ -2616,59 +2717,100 @@
     }
 
     const HOT_BAR_LOOKUP = {
-      'Goal Scored': { tag: 'Goal Scored', outcome: 'Goal Scored', category: 'Finishing', icon: '⚽' },
-      'Shot on Target': { tag: 'Shot on Target', outcome: 'Glow', category: 'Finishing', icon: '🎯' },
-      'Quality Shot': { tag: 'Quality Shot', outcome: 'Glow', category: 'Finishing', icon: '💥' },
-      'Shot Off Target': { tag: 'Shot Off Target', outcome: 'Grow', category: 'Finishing', icon: '✖️' },
-      'Big Chance Missed': { tag: 'Big Chance Missed', outcome: 'Grow', category: 'Finishing', icon: '💔' },
-      'Poor Shot Selection': { tag: 'Poor Shot Selection', outcome: 'Grow', category: 'Finishing', icon: '⚠️' },
-      'Cross Out of Bounds': { tag: 'Cross Out of Bounds', outcome: 'Grow', category: 'Finishing', icon: '↪️' },
-      'Big Chance Created': { tag: 'Big Chance Created', outcome: 'Glow', category: 'Passing', icon: '✨' },
-      'Key Pass (Shot Assist)': { tag: 'Key Pass (Shot Assist)', outcome: 'Glow', category: 'Passing', icon: '🔑' },
-      'Goal Assist': { tag: 'Goal Assist', outcome: 'Glow', category: 'Passing', icon: '🅰️' },
-      'Line-Breaking Pass': { tag: 'Line-Breaking Pass', outcome: 'Glow', category: 'Passing', icon: '⚡' },
-      'Progressive Pass': { tag: 'Progressive Pass', outcome: 'Glow', category: 'Passing', icon: '↗️' },
-      'Switch Point of Attack': { tag: 'Switch Point of Attack', outcome: 'Glow', category: 'Passing', icon: '🔄' },
-      'Combination Play': { tag: 'Combination Play', outcome: 'Glow', category: 'Passing', icon: '🤝' },
-      'Forced Turnover Pass': { tag: 'Forced Turnover Pass', outcome: 'Grow', category: 'Passing', icon: '⚠️' },
-      'Unforced Turnover Pass': { tag: 'Unforced Turnover Pass', outcome: 'Grow', category: 'Passing', icon: '🛑' },
-      'Progressive Carry': { tag: 'Progressive Carry', outcome: 'Glow', category: 'Carrying', icon: '🏃' },
-      'Box Entry': { tag: 'Box Entry', outcome: 'Glow', category: 'Carrying', icon: '📦' },
-      '1v1 Dribble Won': { tag: '1v1 Dribble Won', outcome: 'Glow', category: 'Carrying', icon: '✨' },
-      'Turned into Pressure': { tag: 'Turned into Pressure', outcome: 'Grow', category: 'Carrying', icon: '⚠️' },
-      'Miscontrol': { tag: 'Miscontrol', outcome: 'Grow', category: 'Carrying', icon: '💨' },
-      'Dispossessed': { tag: 'Dispossessed', outcome: 'Grow', category: 'Carrying', icon: '❌' },
-      'Counter-press Regain': { tag: 'Counter-press Regain', outcome: 'Glow', category: 'Defending', icon: '⚡' },
-      'Tackle': { tag: 'Tackle', outcome: 'Glow', category: 'Defending', icon: '🦵' },
-      'Interception': { tag: 'Interception', outcome: 'Glow', category: 'Defending', icon: '🧲' },
-      'Direct Pressure': { tag: 'Direct Pressure', outcome: 'Glow', category: 'Defending', icon: '🔥' },
-      'Recovery Run': { tag: 'Recovery Run', outcome: 'Glow', category: 'Defending', icon: '🏃‍♀️' },
-      'Blocked Shot': { tag: 'Blocked Shot', outcome: 'Glow', category: 'Defending', icon: '🧱' },
-      'Clearance': { tag: 'Clearance', outcome: 'Glow', category: 'Defending', icon: '🦶' },
-      'Poor Clearance': { tag: 'Poor Clearance', outcome: 'Grow', category: 'Defending', icon: '⚠️' },
-      'Stabbed at the Ball': { tag: 'Stabbed at the Ball', outcome: 'Grow', category: 'Defending', icon: '🛑' },
-      'Lost Mark / Recovery': { tag: 'Lost Mark / Recovery', outcome: 'Grow', category: 'Defending', icon: '❌' },
-      'Ground Duel Won': { tag: 'Ground Duel Won', outcome: 'Glow', category: 'Duel', icon: '⚔️' },
-      'Hold-Up Play': { tag: 'Hold-Up Play', outcome: 'Glow', category: 'Duel', icon: '🛡️' },
-      'Aerial Duel Won': { tag: 'Aerial Duel Won', outcome: 'Glow', category: 'Duel', icon: '🦅' },
-      'Foul Won': { tag: 'Foul Won', outcome: 'Glow', category: 'Duel', icon: '🚩' },
-      'Ground Duel Lost': { tag: 'Ground Duel Lost', outcome: 'Grow', category: 'Duel', icon: '🔻' },
-      'Foul Conceded': { tag: 'Foul Conceded', outcome: 'Grow', category: 'Duel', icon: '🟨' },
-      'No Challenge on 50/50': { tag: 'No Challenge on 50/50', outcome: 'Grow', category: 'Duel', icon: '⚠️' },
-      'Save (Clean / Held)': { tag: 'Save (Clean / Held)', outcome: 'Glow', category: 'Goalkeeping', icon: '🧤' },
-      'Save (Parried)': { tag: 'Save (Parried)', outcome: 'Glow', category: 'Goalkeeping', icon: '🧤' },
-      'Box Aerial Claim': { tag: 'Box Aerial Claim', outcome: 'Glow', category: 'Goalkeeping', icon: '✈️' },
-      'Build-Out Distribution': { tag: 'Build-Out Distribution', outcome: 'Glow', category: 'Goalkeeping', icon: '🎯' },
-      'Goal Conceded': { tag: 'Goal Conceded', outcome: 'Goal Conceded', category: 'Goalkeeping', icon: '🥅' },
-      'Scanning & Pre-Orientation': { tag: 'Scanning & Pre-Orientation', outcome: 'Glow', category: 'Tactical_Shape', icon: '👀' },
-      'Support Angle Offered': { tag: 'Support Angle Offered', outcome: 'Glow', category: 'Tactical_Shape', icon: '📐' },
-      'Tactical Communication': { tag: 'Tactical Communication', outcome: 'Glow', category: 'Tactical_Shape', icon: '🗣️' },
-      'Team Shape Shift': { tag: 'Team Shape Shift', outcome: 'Glow', category: 'Tactical_Shape', icon: '🧩' },
-      'Run in Behind': { tag: 'Run in Behind', outcome: 'Glow', category: 'Tactical_Shape', icon: '🏃‍♀️' },
-      'Off-Ball Spacing Fault': { tag: 'Off-Ball Spacing Fault', outcome: 'Grow', category: 'Tactical_Shape', icon: '⚠️' },
-      'Decision on the Ball': { tag: 'Decision on the Ball', outcome: 'Glow', category: 'Tactical_Shape', icon: '💡' },
-      'Decision off the Ball': { tag: 'Decision off the Ball', outcome: 'Glow', category: 'Tactical_Shape', icon: '🧭' }
+      'Goal Scored': { tag: 'Goal Scored', shortLabel: 'Goal Scored', outcome: 'Goal Scored', category: 'Finishing', icon: '⚽' },
+      'Shot on Target': { tag: 'Shot on Target', shortLabel: 'Shot on Target', outcome: 'Glow', category: 'Finishing', icon: '🎯' },
+      'Quality Shot': { tag: 'Quality Shot', shortLabel: 'Quality Shot', outcome: 'Glow', category: 'Finishing', icon: '✨' },
+      'Shot Off Target': { tag: 'Shot Off Target', shortLabel: 'Shot Off', outcome: 'Grow', category: 'Finishing', icon: '🥅' },
+      'Big Chance Missed': { tag: 'Big Chance Missed', shortLabel: 'Big Chance Miss', outcome: 'Grow', category: 'Finishing', icon: '💔' },
+      'Poor Shot Selection': { tag: 'Poor Shot Selection', shortLabel: 'Poor Shot', outcome: 'Grow', category: 'Finishing', icon: '⚠️' },
+      'Cross Out of Bounds': { tag: 'Cross Out of Bounds', shortLabel: 'Bad Cross', outcome: 'Grow', category: 'Finishing', icon: '↪️' },
+      'Big Chance Created': { tag: 'Big Chance Created', shortLabel: 'Big Chance', outcome: 'Glow', category: 'Passing', icon: '✨' },
+      'Key Pass (Shot Assist)': { tag: 'Key Pass (Shot Assist)', shortLabel: 'Key Pass', outcome: 'Glow', category: 'Passing', icon: '🔑' },
+      'Goal Assist': { tag: 'Goal Assist', shortLabel: 'Assist', outcome: 'Glow', category: 'Passing', icon: '🅰️' },
+      'Line-Breaking Pass': { tag: 'Line-Breaking Pass', shortLabel: 'Line Break', outcome: 'Glow', category: 'Passing', icon: '⚡' },
+      'Progressive Pass': { tag: 'Progressive Pass', shortLabel: 'Prog Pass', outcome: 'Glow', category: 'Passing', icon: '↗️' },
+      'Switch Point of Attack': { tag: 'Switch Point of Attack', shortLabel: 'Switch Play', outcome: 'Glow', category: 'Passing', icon: '🔄' },
+      'Combination Play': { tag: 'Combination Play', shortLabel: '1-2 Combo', outcome: 'Glow', category: 'Passing', icon: '🤝' },
+      'Forced Turnover Pass': { tag: 'Forced Turnover Pass', shortLabel: 'Pass Turnover', outcome: 'Grow', category: 'Passing', icon: '⚠️' },
+      'Unforced Turnover Pass': { tag: 'Unforced Turnover Pass', shortLabel: 'Unforced TO', outcome: 'Grow', category: 'Passing', icon: '🛑' },
+      'Progressive Carry': { tag: 'Progressive Carry', shortLabel: 'Prog Carry', outcome: 'Glow', category: 'Carrying', icon: '🏃' },
+      'Box Entry': { tag: 'Box Entry', shortLabel: 'Box Entry', outcome: 'Glow', category: 'Carrying', icon: '📦' },
+      '1v1 Dribble Won': { tag: '1v1 Dribble Won', shortLabel: '1v1 Won', outcome: 'Glow', category: 'Carrying', icon: '✨' },
+      'Turned into Pressure': { tag: 'Turned into Pressure', shortLabel: 'Into Pressure', outcome: 'Grow', category: 'Carrying', icon: '⚠️' },
+      'Miscontrol': { tag: 'Miscontrol', shortLabel: 'Miscontrol', outcome: 'Grow', category: 'Carrying', icon: '💨' },
+      'Dispossessed': { tag: 'Dispossessed', shortLabel: 'Dispossessed', outcome: 'Grow', category: 'Carrying', icon: '❌' },
+      'Counter-press Regain': { tag: 'Counter-press Regain', shortLabel: 'Press Regain', outcome: 'Glow', category: 'Defending', icon: '⚡' },
+      'Tackle': { tag: 'Tackle', shortLabel: 'Tackle', outcome: 'Glow', category: 'Defending', icon: '🦵' },
+      'Interception': { tag: 'Interception', shortLabel: 'Interception', outcome: 'Glow', category: 'Defending', icon: '✂️' },
+      'Direct Pressure': { tag: 'Direct Pressure', shortLabel: 'Direct Press', outcome: 'Glow', category: 'Defending', icon: '🔥' },
+      'Recovery Run': { tag: 'Recovery Run', shortLabel: 'Recovery Run', outcome: 'Glow', category: 'Defending', icon: '💨' },
+      'Blocked Shot': { tag: 'Blocked Shot', shortLabel: 'Blocked Shot', outcome: 'Glow', category: 'Defending', icon: '🧱' },
+      'Clearance': { tag: 'Clearance', shortLabel: 'Clearance', outcome: 'Glow', category: 'Defending', icon: '🦶' },
+      'Poor Clearance': { tag: 'Poor Clearance', shortLabel: 'Poor Clear', outcome: 'Grow', category: 'Defending', icon: '⚠️' },
+      'Stabbed at the Ball': { tag: 'Stabbed at the Ball', shortLabel: 'Stabbed Ball', outcome: 'Grow', category: 'Defending', icon: '🛑' },
+      'Lost Mark / Recovery': { tag: 'Lost Mark / Recovery', shortLabel: 'Lost Mark', outcome: 'Grow', category: 'Defending', icon: '❌' },
+      'Ground Duel Won': { tag: 'Ground Duel Won', shortLabel: 'Duel Won', outcome: 'Glow', category: 'Duel', icon: '⚔️' },
+      'Hold-Up Play': { tag: 'Hold-Up Play', shortLabel: 'Hold-Up', outcome: 'Glow', category: 'Duel', icon: '🛡️' },
+      'Aerial Duel Won': { tag: 'Aerial Duel Won', shortLabel: 'Aerial Won', outcome: 'Glow', category: 'Duel', icon: '🦅' },
+      'Foul Won': { tag: 'Foul Won', shortLabel: 'Foul Won', outcome: 'Glow', category: 'Duel', icon: '🚩' },
+      'Ground Duel Lost': { tag: 'Ground Duel Lost', shortLabel: 'Duel Lost', outcome: 'Grow', category: 'Duel', icon: '🔻' },
+      'Foul Conceded': { tag: 'Foul Conceded', shortLabel: 'Foul Conceded', outcome: 'Grow', category: 'Duel', icon: '🛑' },
+      'No Challenge on 50/50': { tag: 'No Challenge on 50/50', shortLabel: 'No Challenge', outcome: 'Grow', category: 'Duel', icon: '⚠️' },
+      'Save (Clean / Held)': { tag: 'Save (Clean / Held)', shortLabel: 'Save Held', outcome: 'Glow', category: 'Goalkeeping', icon: '🧤' },
+      'Save (Parried)': { tag: 'Save (Parried)', shortLabel: 'Save Parried', outcome: 'Glow', category: 'Goalkeeping', icon: '🧤' },
+      'Box Aerial Claim': { tag: 'Box Aerial Claim', shortLabel: 'Aerial Claim', outcome: 'Glow', category: 'Goalkeeping', icon: '✈️' },
+      'Build-Out Distribution': { tag: 'Build-Out Distribution', shortLabel: 'Distribution', outcome: 'Glow', category: 'Goalkeeping', icon: '🎯' },
+      'Goal Conceded': { tag: 'Goal Conceded', shortLabel: 'Goal Conceded', outcome: 'Goal Conceded', category: 'Goalkeeping', icon: '🥅' },
+      'Scanning & Pre-Orientation': { tag: 'Scanning & Pre-Orientation', shortLabel: 'Scanning', outcome: 'Glow', category: 'Tactical_Shape', icon: '👀' },
+      'Support Angle Offered': { tag: 'Support Angle Offered', shortLabel: 'Support Angle', outcome: 'Glow', category: 'Tactical_Shape', icon: '📐' },
+      'Tactical Communication': { tag: 'Tactical Communication', shortLabel: 'Communication', outcome: 'Glow', category: 'Tactical_Shape', icon: '🗣️' },
+      'Team Shape Shift': { tag: 'Team Shape Shift', shortLabel: 'Shape Shift', outcome: 'Glow', category: 'Tactical_Shape', icon: '🧩' },
+      'Run in Behind': { tag: 'Run in Behind', shortLabel: 'Run Behind', outcome: 'Glow', category: 'Tactical_Shape', icon: '🏃‍♀️' },
+      'Off-Ball Spacing Fault': { tag: 'Off-Ball Spacing Fault', shortLabel: 'Spacing Fault', outcome: 'Grow', category: 'Tactical_Shape', icon: '⚠️' },
+      'Decision on the Ball': { tag: 'Decision on the Ball', shortLabel: 'Decision On', outcome: 'Glow', category: 'Tactical_Shape', icon: '💡' },
+      'Decision off the Ball': { tag: 'Decision off the Ball', shortLabel: 'Decision Off', outcome: 'Glow', category: 'Tactical_Shape', icon: '🧭' }
     };
+
+    const PAM_GROUP_ACTIONS = {
+      offense: [
+        { label: '⚽ Goal Scored', tag: 'Goal Scored', outcome: 'Goal Scored', cat: 'Finishing' },
+        { label: '🅰️ Goal Assist', tag: 'Goal Assist', outcome: 'Glow', cat: 'Passing' },
+        { label: '🎯 Shot on Target', tag: 'Shot on Target', outcome: 'Glow', cat: 'Finishing' },
+        { label: '🥅 Shot Off Target', tag: 'Shot Off Target', outcome: 'Grow', cat: 'Finishing' },
+        { label: '✨ Big Chance', tag: 'Big Chance Created', outcome: 'Glow', cat: 'Passing' },
+        { label: '💔 Big Ch. Missed', tag: 'Big Chance Missed', outcome: 'Grow', cat: 'Finishing' },
+        { label: '🔑 Key Pass', tag: 'Key Pass (Shot Assist)', outcome: 'Glow', cat: 'Passing' },
+        { label: '⚡ Line Break', tag: 'Line-Breaking Pass', outcome: 'Glow', cat: 'Passing' },
+        { label: '↗️ Prog Pass', tag: 'Progressive Pass', outcome: 'Glow', cat: 'Passing' },
+        { label: '📦 Box Entry', tag: 'Box Entry', outcome: 'Glow', cat: 'Carrying' },
+        { label: '🏃 Prog Carry', tag: 'Progressive Carry', outcome: 'Glow', cat: 'Carrying' },
+        { label: '🛑 Unforced TO', tag: 'Unforced Turnover Pass', outcome: 'Grow', cat: 'Passing' }
+      ],
+      defense: [
+        { label: '⚡ Press Regain', tag: 'Counter-press Regain', outcome: 'Glow', cat: 'Defending' },
+        { label: '🔥 Direct Press', tag: 'Direct Pressure', outcome: 'Glow', cat: 'Defending' },
+        { label: '🦵 Tackle', tag: 'Tackle', outcome: 'Glow', cat: 'Defending' },
+        { label: '✂️ Interception', tag: 'Interception', outcome: 'Glow', cat: 'Defending' },
+        { label: '⚔️ Duel Won', tag: 'Ground Duel Won', outcome: 'Glow', cat: 'Duel' },
+        { label: '🧱 Blocked Shot', tag: 'Blocked Shot', outcome: 'Glow', cat: 'Defending' },
+        { label: '🦶 Clearance', tag: 'Clearance', outcome: 'Glow', cat: 'Defending' },
+        { label: '🔻 Duel Lost', tag: 'Ground Duel Lost', outcome: 'Grow', cat: 'Duel' },
+        { label: '❌ Lost Mark', tag: 'Lost Mark / Recovery', outcome: 'Grow', cat: 'Defending' },
+        { label: '🛑 Foul Conceded', tag: 'Foul Conceded', outcome: 'Grow', cat: 'Duel' },
+        { label: '🧤 Save Held (GK)', tag: 'Save (Clean / Held)', outcome: 'Glow', cat: 'Goalkeeping' },
+        { label: '🥅 Goal Conceded', tag: 'Goal Conceded', outcome: 'Goal Conceded', cat: 'Goalkeeping' }
+      ],
+      setpieces: [
+        { label: '🚩 Corner Kick', actionType: 'corner', outcome: 'Glow' },
+        { label: '🎯 Free Kick', actionType: 'setPiece', outcome: 'Glow' },
+        { label: '🤝 Foul Won', tag: 'Foul Won', outcome: 'Glow', cat: 'Duel' },
+        { label: '🦅 Aerial Won', tag: 'Aerial Duel Won', outcome: 'Glow', cat: 'Duel' },
+        { label: '🟨 Yellow Card', tag: 'Yellow Card', outcome: 'Neutral', cat: 'Administrative' },
+        { label: '📌 Flag Moment', tag: 'Bookmark', outcome: 'Neutral', cat: 'Administrative' }
+      ]
+    };
+
+    let pamActiveGroup = null;
 
     function getHotBarActions(slot) {
       const activeSlot = slot !== undefined ? slot : (typeof pamCurrentSlot !== 'undefined' ? pamCurrentSlot : '');
@@ -2704,18 +2846,99 @@
         const isGrow = a.outcome === 'Grow' || a.outcome === 'Goal Conceded';
         const cls = isGrow
           ? 'border-rose-500/45 bg-rose-950/35 text-rose-200 hover:bg-rose-900/55'
-          : 'border-teal-500/45 bg-teal-950/35 text-teal-200 hover:bg-teal-900/55';
-        const pillCls = isGrow ? 'bg-rose-500/20 text-rose-300' : 'bg-teal-500/20 text-teal-300';
-        const badge = isGrow ? '-Grow' : '+Glow';
+          : 'border-teal-500/45 bg-teal-950/35 text-teal-100 hover:bg-teal-900/55';
         const safeTag = a.tag.replace(/'/g, "\\'");
         const safeOut = a.outcome.replace(/'/g, "\\'");
         const safeCat = a.category.replace(/'/g, "\\'");
-        return `<button type="button" onclick="logPamAction('${safeTag}', '${safeOut}', '${safeCat}')" class="pam-hot-btn min-h-[44px] px-2.5 py-2 rounded-xl border ${cls} flex items-center justify-between gap-1 text-xs font-bold active:scale-95 transition">
-          <span class="truncate">${a.icon || '⚡'} ${a.tag}</span>
-          <span class="text-[9px] mono px-1 py-0.5 rounded ${pillCls} shrink-0">${badge}</span>
+        const label = a.shortLabel || a.tag;
+        return `<button type="button" onclick="logPamAction('${safeTag}', '${safeOut}', '${safeCat}')" class="pam-hot-btn min-h-[48px] px-2.5 py-2 rounded-xl border ${cls} flex items-center justify-center gap-1.5 text-xs font-bold text-center active:scale-95 transition">
+          <span class="truncate">${a.icon || '⚡'} ${label}</span>
         </button>`;
       }).join('');
       return actions;
+    }
+
+    function togglePamGroup(group) {
+      const next = (group && pamActiveGroup !== group) ? group : null;
+      pamActiveGroup = next;
+      const groups = ['offense', 'defense', 'setpieces'];
+      const activeStyles = {
+        offense: 'min-h-[44px] px-3 py-2 rounded-xl border-2 border-emerald-400 bg-emerald-500/25 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow active:scale-95 transition',
+        defense: 'min-h-[44px] px-3 py-2 rounded-xl border-2 border-sky-400 bg-sky-500/25 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow active:scale-95 transition',
+        setpieces: 'min-h-[44px] px-3 py-2 rounded-xl border-2 border-amber-400 bg-amber-500/25 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow active:scale-95 transition'
+      };
+      const idleStyles = {
+        offense: 'min-h-[44px] px-3 py-2 rounded-xl border border-emerald-500/40 bg-emerald-950/25 text-emerald-200 hover:bg-emerald-900/40 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 active:scale-95 transition',
+        defense: 'min-h-[44px] px-3 py-2 rounded-xl border border-sky-500/40 bg-sky-950/25 text-sky-200 hover:bg-sky-900/40 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 active:scale-95 transition',
+        setpieces: 'min-h-[44px] px-3 py-2 rounded-xl border border-amber-500/40 bg-amber-950/25 text-amber-200 hover:bg-amber-900/40 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 active:scale-95 transition'
+      };
+      groups.forEach(g => {
+        const btn = document.getElementById(`pamGroupBtn-${g}`);
+        if (btn) btn.className = (g === pamActiveGroup) ? activeStyles[g] : idleStyles[g];
+      });
+
+      const wrap = document.getElementById('pamSubActionWrap');
+      const titleEl = document.getElementById('pamSubActionTitle');
+      const shotWrap = document.getElementById('pamShotLocWrap');
+      const grid = document.getElementById('pamFocusedGrid');
+      if (!wrap || !grid) return;
+
+      if (!pamActiveGroup || !PAM_GROUP_ACTIONS[pamActiveGroup]) {
+        wrap.classList.add('hidden');
+        if (shotWrap) shotWrap.classList.add('hidden');
+        return;
+      }
+
+      const titles = {
+        offense: '⚽ Offense Actions',
+        defense: '🛡️ Defense Actions',
+        setpieces: '🚩 Set Pieces & Discipline'
+      };
+      if (titleEl) titleEl.textContent = titles[pamActiveGroup] || 'Actions';
+      if (shotWrap) shotWrap.classList.toggle('hidden', pamActiveGroup !== 'offense');
+
+      const items = PAM_GROUP_ACTIONS[pamActiveGroup];
+      grid.innerHTML = items.map(item => {
+        const isGrow = item.outcome === 'Grow' || item.outcome === 'Goal Conceded';
+        const isNeutral = item.outcome === 'Neutral';
+        const cls = isGrow
+          ? 'border-rose-500/40 bg-rose-950/30 text-rose-200 hover:bg-rose-900/50'
+          : (isNeutral
+            ? 'border-amber-500/40 bg-amber-950/25 text-amber-200 hover:bg-amber-900/45'
+            : (pamActiveGroup === 'defense'
+              ? 'border-sky-500/40 bg-sky-950/30 text-sky-200 hover:bg-sky-900/50'
+              : 'border-emerald-500/40 bg-emerald-950/30 text-emerald-200 hover:bg-emerald-900/50'));
+        if (item.actionType) {
+          return `<button type="button" onclick="logPamSetPiece('${item.actionType}')" class="min-h-[44px] px-2.5 py-2 rounded-xl border ${cls} text-xs font-bold flex items-center justify-center text-center active:scale-95 transition">${item.label}</button>`;
+        }
+        const safeTag = item.tag.replace(/'/g, "\\'");
+        const safeOut = item.outcome.replace(/'/g, "\\'");
+        const safeCat = item.cat.replace(/'/g, "\\'");
+        return `<button type="button" onclick="logPamAction('${safeTag}', '${safeOut}', '${safeCat}')" class="min-h-[44px] px-2.5 py-2 rounded-xl border ${cls} text-xs font-bold flex items-center justify-center text-center active:scale-95 transition">${item.label}</button>`;
+      }).join('');
+      wrap.classList.remove('hidden');
+    }
+
+    function logPamSetPiece(kind) {
+      if (!pamCurrentSlot) return;
+      const jersey = onPitchPlayers[pamCurrentSlot];
+      if (!jersey || !playerStats[jersey]) {
+        showToast('Please sub a player into this position first.');
+        return;
+      }
+      selectedPlayerJersey = jersey;
+      selectedSlot = pamCurrentSlot;
+      closeTrackerPlayerActionModal();
+      logSelectedEvent(kind);
+    }
+
+    function togglePamFullCatalog(forceOpen) {
+      const wrap = document.getElementById('pamFullCatalogWrap');
+      const btn = document.getElementById('pamFullCatalogToggleBtn');
+      if (!wrap) return;
+      const show = (typeof forceOpen === 'boolean') ? forceOpen : wrap.classList.contains('hidden');
+      wrap.classList.toggle('hidden', !show);
+      if (btn) btn.textContent = show ? 'All 54 Tags ▴' : 'All 54 Tags ▾';
     }
 
     function setPamZone(zone, isManual = false) {
@@ -2971,7 +3194,9 @@
         ? pamPlayerZoneOverrides[stickyKey]
         : defaultZoneForSlot(slot);
       setPamZone(autoZone, false);
-      filterPamActionCategory(pamCurrentCategory || 'all');
+      togglePamGroup(null);
+      togglePamFullCatalog(false);
+      filterPamActionCategory(pamCurrentCategory || 'passing');
 
       if (!p) initialTab = 'sub';
       switchPamTab(initialTab);
@@ -7233,6 +7458,8 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
         halfLengthMinutes,
         matchSeconds,
         currentPeriod,
+        timerRunning,
+        lastTimerTickAtMs,
         onPitchPlayers,
         playerStats,
         matchEvents,
@@ -7268,6 +7495,25 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
         oppStats = Object.assign({ goals: 0, shots: 0, sot: 0, soff: 0, shotsOutside18: 0, bigChances: 0, subs: 0, corners: 0, fouls: 0, yellowCards: 0 }, state.oppStats || {});
         phaseStats = Object.assign({ pressWon: 0, pressLost: 0, highRegains: 0, goalKicksAttacking: 0, goalKicksKept: 0, goalKicksLost: 0, goalKicksDefending: 0, crossesLeft: 0, crossesRight: 0 }, state.phaseStats || {});
         absentPlayers = new Set(state.absentPlayers || []);
+
+        if (state.timerRunning && typeof state.lastTimerTickAtMs === 'number') {
+          const gapSec = Math.floor((Date.now() - state.lastTimerTickAtMs) / 1000);
+          if (gapSec > 0 && gapSec <= 55 * 60) {
+            timerRunning = true;
+            lastTimerTickAtMs = state.lastTimerTickAtMs;
+            syncWallClockElapsed(Date.now());
+            const toggleBtn = document.getElementById('timerToggleBtn');
+            if (toggleBtn) {
+              toggleBtn.textContent = '⏸';
+              toggleBtn.classList.remove('bg-teal-400', 'bg-teal-500');
+              toggleBtn.classList.add('bg-amber-400');
+            }
+            timerInterval = setInterval(tickSecond, 1000);
+          } else {
+            timerRunning = false;
+            lastTimerTickAtMs = null;
+          }
+        }
 
         document.getElementById('teamSelector').value = activeSquadKey;
         document.getElementById('formationSelect').value = currentFormation;

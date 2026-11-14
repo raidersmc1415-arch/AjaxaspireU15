@@ -1908,5 +1908,152 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
   assert.strictEqual(sentPayloads.length, 2, 'Edited events must automatically invalidate stale Halftime AI cache');
   assert.strictEqual(sentPayloads[1].pressWon, 3, 'Expected refreshed H1 pressWon === 3');
 }).then(() => {
+  check('18c. Streamlined PAM uses Top 8 pinned actions + 3 clean Offense/Defense/Set Pieces pills with collapsed catalog', () => {
+    const trk = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+    [
+      'id="pamPrimaryGroupPills"',
+      'id="pamGroupBtn-offense"',
+      'id="pamGroupBtn-defense"',
+      'id="pamGroupBtn-setpieces"',
+      'id="pamSubActionWrap"',
+      'id="pamFocusedGrid"',
+      'id="pamFullCatalogWrap"'
+    ].forEach(tok => assert(trk.includes(tok), `Expected ${tok} in ajax-match-tracker.html`));
+
+    const grpStart = trk.indexOf('let pamCurrentZone =');
+    const grpEnd = trk.indexOf('function filterPamActionCategory(', grpStart);
+    assert(grpStart > -1 && grpEnd > grpStart, 'Could not extract PAM group controller block');
+    const grpCode = trk.slice(grpStart, grpEnd);
+
+    const els = {};
+    const mk = (id) => {
+      if (!els[id]) {
+        els[id] = {
+          id,
+          className: '',
+          textContent: '',
+          innerHTML: '',
+          classList: {
+            _s: new Set(['hidden']),
+            add(c) { this._s.add(c); },
+            remove(c) { this._s.delete(c); },
+            toggle(c, force) {
+              const shouldAdd = typeof force === 'boolean' ? force : !this._s.has(c);
+              if (shouldAdd) this._s.add(c);
+              else this._s.delete(c);
+            },
+            contains(c) { return this._s.has(c); }
+          }
+        };
+      }
+      return els[id];
+    };
+    const sandbox = {
+      document: { getElementById: mk },
+      currentPeriod: 1,
+      onPitchPlayers: { CB: 36, ST: 23 },
+      matchEvents: [],
+      Set, Object, Array, String
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(grpCode, sandbox);
+
+    sandbox.renderPamHotBar();
+    assert(!els.pamHotBar.innerHTML.includes('+Glow') && !els.pamHotBar.innerHTML.includes('-Grow'), 'Top Hot Bar buttons should not render noisy +Glow/-Grow inner micro-pills');
+
+    // Selecting Offense opens ONLY Offense actions + Shot Loc
+    sandbox.togglePamGroup('offense');
+    assert(!els.pamSubActionWrap.classList.contains('hidden'), 'Offense tap must reveal sub-actions');
+    assert(!els.pamShotLocWrap.classList.contains('hidden'), 'Offense must reveal Shot Loc bar');
+    assert(els.pamFocusedGrid.innerHTML.includes('Goal Scored'), 'Offense sub-actions must include Goal Scored');
+    assert(!els.pamFocusedGrid.innerHTML.includes('Interception'), 'Offense sub-actions must exclude Defense Interception');
+
+    // Switching to Defense hides Shot Loc and reveals Defense actions only
+    sandbox.togglePamGroup('defense');
+    assert(els.pamShotLocWrap.classList.contains('hidden'), 'Defense must hide Shot Loc bar');
+    assert(els.pamFocusedGrid.innerHTML.includes('Interception'), 'Defense sub-actions must include Interception');
+    assert(!els.pamFocusedGrid.innerHTML.includes('Goal Scored'), 'Defense sub-actions must exclude Offense Goal Scored');
+
+    // Tapping Set Pieces reveals corners, free kicks & yellow card
+    sandbox.togglePamGroup('setpieces');
+    assert(els.pamFocusedGrid.innerHTML.includes('Corner Kick') && els.pamFocusedGrid.innerHTML.includes('Yellow Card'));
+
+    // Tapping Set Pieces again collapses panel cleanly
+    sandbox.togglePamGroup('setpieces');
+    assert(els.pamSubActionWrap.classList.contains('hidden'), 'Re-tapping active pill must collapse sub-actions');
+  });
+
+  check('18d. adjustClock (+1m/-1m) and wall-clock iPad wake catch-up accurately accrue player & bench minutes', () => {
+    const trk = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+    const ctrlStart = trk.indexOf('function updatePeriodUI()');
+    const ctrlEnd = trk.indexOf('/* =========================================================\n       PITCH VISUALIZER', ctrlStart);
+    assert(ctrlStart > -1 && ctrlEnd > ctrlStart, 'Could not extract timer/clock controller block');
+    const ctrlSrc = trk.slice(ctrlStart, ctrlEnd);
+
+    const els = {};
+    const mk = (id) => {
+      if (!els[id]) els[id] = { id, textContent: '', classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); } } };
+      return els[id];
+    };
+    const sandbox = {
+      currentPeriod: 2,
+      halfLengthMinutes: 40,
+      matchSeconds: 77 * 60, // stuck at 77:00
+      timerRunning: false,
+      timerInterval: null,
+      activeSquadKey: 'aspire',
+      SQUADS: { aspire: { roster: [{ jersey: 23 }, { jersey: 36 }, { jersey: 14 }] } },
+      onPitchPlayers: { ST: 23, CB: 36 },
+      absentPlayers: new Set(),
+      playerStats: {
+        23: { mins: 77, benchMins: 0, posMins: { CF: 77 } },
+        36: { mins: 77, benchMins: 0, posMins: { CB: 77 } },
+        14: { mins: 0, benchMins: 77, posMins: {} }
+      },
+      savedCount: 0,
+      minStreamCount: 0,
+      benchRenderCount: 0,
+      document: { getElementById: mk },
+      confirm: () => true,
+      setInterval: () => 1,
+      clearInterval: () => {},
+      saveState() { sandbox.savedCount++; },
+      renderMinutesStream() { sandbox.minStreamCount++; },
+      renderBench() { sandbox.benchRenderCount++; },
+      showToast() {},
+      Date, Set, Math, Number, String, Object, Array
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(ctrlSrc, sandbox);
+
+    // Scenario 1: Paused/behind at 77:00, coach taps +1m three times -> reaches 80:00 AND updates player mins 77 -> 80!
+    sandbox.adjustClock(60);
+    sandbox.adjustClock(60);
+    sandbox.adjustClock(60);
+    assert.strictEqual(sandbox.matchSeconds, 80 * 60);
+    assert.strictEqual(sandbox.playerStats[23].mins, 80, 'Expected +1m taps to advance on-pitch ST from 77 to 80 mins');
+    assert.strictEqual(sandbox.playerStats[23].posMins.CF, 80, 'Expected +1m taps to advance CF posMins to 80');
+    assert.strictEqual(sandbox.playerStats[36].mins, 80, 'Expected +1m taps to advance on-pitch CB to 80 mins');
+    assert.strictEqual(sandbox.playerStats[14].benchMins, 80, 'Expected +1m taps to advance active bench player benchMins to 80');
+    assert(sandbox.savedCount >= 3, 'Expected saveState called on clock adjustment');
+
+    // Pressing -1m rolls back 1 minute cleanly
+    sandbox.adjustClock(-60);
+    assert.strictEqual(sandbox.matchSeconds, 79 * 60);
+    assert.strictEqual(sandbox.playerStats[23].mins, 79);
+    assert.strictEqual(sandbox.playerStats[14].benchMins, 79);
+
+    // Scenario 2: Timer running, iPad sleeps for 120s (2 mins), wake-up syncs both clock (79->81) & player mins (79->81)!
+    sandbox.timerRunning = true;
+    const baseMs = 1700000000000;
+    sandbox.lastTimerTickAtMs = baseMs;
+    const recovered = sandbox.syncWallClockElapsed(baseMs + 120000);
+    assert.strictEqual(recovered, 120);
+    assert.strictEqual(sandbox.matchSeconds, 81 * 60);
+    assert.strictEqual(sandbox.playerStats[23].mins, 81, 'Expected wall-clock wake recovery to credit 2 mins to on-pitch players');
+    assert.strictEqual(sandbox.playerStats[23].posMins.CF, 81);
+    assert.strictEqual(sandbox.playerStats[14].benchMins, 81, 'Expected wall-clock wake recovery to credit 2 mins to bench players');
+  });
+
   if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
 });
