@@ -1676,4 +1676,237 @@ check('17f. match-hub.html removes dead #tab-tracker, consolidates to 5 tabs, ex
   assert.strictEqual(activeVar, 'tab-charts', 'Expected #tab-charts panel opened for tab-tactics alias');
 });
 
-console.log(`\nAll ${passed} regression checks passed.`);
+// ---------------------------------------------------------------------------
+// CHECK 18: Match Tracker Period State Machine & Halftime AI Telemetry Accuracy
+// ---------------------------------------------------------------------------
+check('18a. Period transitions, Full-Time deletion revert & Reopen 2H prevent tracker deadlock', () => {
+  const trk = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+  assert(trk.includes('id="advancePeriodBtn"'), 'Expected #advancePeriodBtn in ajax-match-tracker.html');
+  assert(!trk.includes('>⏭<') && !trk.includes('\n            ⏭\n'), 'Expected ambiguous ⏭ period button replaced by explicit End 1H / End Match button');
+
+  const ctrlStart = trk.indexOf('function updatePeriodUI()');
+  const ctrlEnd = trk.indexOf('/* =========================================================\n       PITCH VISUALIZER', ctrlStart);
+  assert(ctrlStart > -1 && ctrlEnd > ctrlStart, 'Could not extract timer/period controller block');
+  const ctrlSrc = trk.slice(ctrlStart, ctrlEnd);
+
+  const elements = {};
+  const makeEl = (id) => {
+    if (!elements[id]) {
+      elements[id] = {
+        id,
+        textContent: '',
+        title: '',
+        className: '',
+        classList: {
+          _set: new Set(['bg-teal-400']),
+          add(c) { this._set.add(c); },
+          remove(c) { this._set.delete(c); },
+          contains(c) { return this._set.has(c); }
+        }
+      };
+    }
+    return elements[id];
+  };
+
+  const sandbox = {
+    currentPeriod: 1,
+    halfLengthMinutes: 40,
+    matchSeconds: 0,
+    timerRunning: false,
+    timerInterval: null,
+    pamPlayerZoneOverrides: { old: 'A3' },
+    onPitchPlayers: {},
+    playerStats: {},
+    SQUADS: { aspire: { roster: [] } },
+    activeSquadKey: 'aspire',
+    absentPlayers: new Set(),
+    sysEvents: [],
+    savedCount: 0,
+    halftimeOpened: 0,
+    document: { getElementById: makeEl },
+    confirm: () => true,
+    setInterval: () => 99,
+    clearInterval: () => {},
+    showToast() {},
+    saveState() { sandbox.savedCount++; },
+    openHalftimeAIModal() { sandbox.halftimeOpened++; },
+    logMatchSystemEvent(desc, extra) { sandbox.sysEvents.push(Object.assign({ type: 'sys', desc }, extra || {})); },
+    Set, Math, Number, String, Object
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(ctrlSrc, sandbox);
+
+  sandbox.updatePeriodUI();
+  assert.strictEqual(elements.periodDisplay.textContent, '1ST HALF');
+  assert.strictEqual(elements.advancePeriodBtn.textContent, 'End 1H');
+
+  // 1 -> 2 (End 1H)
+  sandbox.advancePeriod();
+  assert.strictEqual(sandbox.currentPeriod, 2);
+  assert.strictEqual(sandbox.matchSeconds, 2400);
+  assert.strictEqual(elements.periodDisplay.textContent, '2ND HALF');
+  assert.strictEqual(elements.advancePeriodBtn.textContent, 'End Match');
+  assert.strictEqual(sandbox.sysEvents[0].sysAction, 'halftime');
+  assert.strictEqual(sandbox.halftimeOpened, 1);
+
+  // 2 -> 3 (Accidental Full Time)
+  sandbox.advancePeriod();
+  assert.strictEqual(sandbox.currentPeriod, 3);
+  assert.strictEqual(elements.periodDisplay.textContent, 'FULL TIME');
+  assert.strictEqual(elements.advancePeriodBtn.textContent, 'Reopen 2H');
+  assert.strictEqual(sandbox.sysEvents[1].sysAction, 'fulltime');
+
+  // Deleting Full Time Whistle reverts currentPeriod 3 -> 2
+  const reverted = sandbox.revertPeriodForDeletedSystemEvent(sandbox.sysEvents[1]);
+  assert.strictEqual(reverted, true, 'Deleting Full Time Whistle must revert period');
+  assert.strictEqual(sandbox.currentPeriod, 2);
+  assert.strictEqual(elements.periodDisplay.textContent, '2ND HALF');
+  assert.strictEqual(elements.advancePeriodBtn.textContent, 'End Match');
+
+  // Now coach can end the game properly again
+  sandbox.advancePeriod();
+  assert.strictEqual(sandbox.currentPeriod, 3);
+  assert.strictEqual(elements.periodDisplay.textContent, 'FULL TIME');
+
+  // Even without deleting Full Time event, Play or advancePeriod reopens 2H cleanly
+  sandbox.toggleTimer();
+  assert.strictEqual(sandbox.currentPeriod, 2, 'Tapping Play while FULL TIME must reopen 2ND HALF');
+  assert.strictEqual(sandbox.timerRunning, true);
+  sandbox.toggleTimer(); // pause again
+  sandbox.advancePeriod(); // end match again -> 3
+  assert.strictEqual(sandbox.currentPeriod, 3);
+  sandbox.advancePeriod(); // Reopen 2H button -> 2
+  assert.strictEqual(sandbox.currentPeriod, 2);
+  assert.strictEqual(elements.advancePeriodBtn.textContent, 'End Match');
+});
+
+async function runAsyncCheck(name, fn) {
+  try {
+    await fn();
+    console.log(`  PASS  ${name}`);
+    passed++;
+  } catch (err) {
+    console.error(`  FAIL  ${name}`);
+    console.error(`        ${err.message}`);
+    process.exitCode = 1;
+  }
+}
+
+runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telemetry, excludes H2, and refreshes stale cache', async () => {
+  const trk = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+  const aiFnCode = fs.readFileSync(path.join(ROOT, 'netlify/functions/halftime-ai.mjs'), 'utf8');
+
+  // Verify halftime-ai.mjs 1st-half prompt includes modern xG-lite, big chances, high regains, GK build-out & TOs
+  [
+    'telemetry.xgFor',
+    'telemetry.bigChancesCreated',
+    'telemetry.oppBigChances',
+    'telemetry.highRegains',
+    'telemetry.gkRetentionPct',
+    'telemetry.setPieceShots',
+    'telemetry.toD',
+    'telemetry.toM',
+    'telemetry.toA'
+  ].forEach(tok => {
+    assert(aiFnCode.includes(tok), `Expected ${tok} in netlify/functions/halftime-ai.mjs 1st-half prompt`);
+  });
+
+  const aiStart = trk.indexOf('let cachedHalftimeReport = null;');
+  const aiEnd = trk.indexOf('function renderHalftimeReport(', aiStart);
+  assert(aiStart > -1 && aiEnd > aiStart, 'Could not extract Halftime AI block');
+  const aiSrc = trk.slice(aiStart, aiEnd);
+
+  const elements = {};
+  const makeEl = (id) => {
+    if (!elements[id]) {
+      elements[id] = {
+        id,
+        textContent: '',
+        innerHTML: '',
+        classList: { _s: new Set(['hidden']), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); } }
+      };
+    }
+    return elements[id];
+  };
+
+  const sentPayloads = [];
+  const sandbox = {
+    currentPeriod: 2,
+    halfLengthMinutes: 40,
+    activeSquadKey: 'aspire',
+    SQUADS: { aspire: { label: 'AJAX ASPIRE U15' } },
+    opponentName: 'Marin FC',
+    oppStats: { goals: 2, shots: 7, bigChances: 2, fouls: 6 }, // includes H2 totals that H1 report must ignore!
+    phaseStats: { pressWon: 9, pressLost: 4, goalKicksKept: 5, goalKicksLost: 2, goalKicksDefending: 4, goalKicksAttacking: 7, crossesLeft: 2, crossesRight: 1 },
+    playerStats: {
+      23: { jersey: 23, name: 'Sophia Forward', yellowCards: 0 },
+      14: { jersey: 14, name: 'Carlee Mid', yellowCards: 1 }, // yellow in H2 shouldn't trigger H1 card alert!
+      8: { jersey: 8, name: 'Elena Six', yellowCards: 1 }
+    },
+    matchEvents: [
+      // H1 events
+      { half: 'H1', time: 6, type: 'goal', tag: 'Goal Scored', shotLocation: 'inside_6', shotQuality: 0.45, jersey: 23, desc: 'Goal' },
+      { half: 'H1', time: 11, type: 'pressWon', tag: 'Counter-press Regain', zone: 'A3', jersey: 23, desc: 'Press won' },
+      { half: 'H1', time: 14, type: 'pressWon', tag: 'Direct Pressure', zone: 'M3', jersey: 8, desc: 'Team press won' },
+      { half: 'H1', time: 16, type: 'pressLost', zone: 'M3', desc: 'Press lost' },
+      { half: 'H1', time: 19, type: 'turnover', zone: 'D3', jersey: 8, desc: 'D3 TO' },
+      { half: 'H1', time: 21, type: 'turnover', zone: 'D3', jersey: 8, desc: 'D3 TO 2' },
+      { half: 'H1', time: 23, type: 'turnover', zone: 'M3', jersey: 23, desc: 'M3 TO' },
+      { half: 'H1', time: 26, type: 'goal_kick_kept', zone: 'D3', desc: 'GK kept' },
+      { half: 'H1', time: 29, type: 'goal_kick_lost', zone: 'D3', desc: 'GK lost' },
+      { half: 'H1', time: 31, type: 'oppGoal', zone: 'D3', shotQuality: 0.35, desc: 'Opp goal H1' },
+      { half: 'H1', time: 33, type: 'oppBigChance', zone: 'D3', desc: 'Opp big chance H1' },
+      { half: 'H1', time: 35, type: 'yellowCard', jersey: 8, desc: 'Yellow #8 H1' },
+      // H2 events (MUST be excluded from Halftime H1 telemetry)
+      { half: 'H2', time: 45, type: 'goal', shotQuality: 0.30, jersey: 23, desc: 'H2 Goal' },
+      { half: 'H2', time: 52, type: 'oppGoal', shotQuality: 0.40, desc: 'H2 Opp Goal' },
+      { half: 'H2', time: 55, type: 'oppShot', desc: 'H2 Opp Shot' },
+      { half: 'H2', time: 60, type: 'yellowCard', jersey: 14, desc: 'H2 Yellow #14' },
+      { half: 'H2', time: 62, type: 'turnover', zone: 'D3', desc: 'H2 D3 TO' }
+    ],
+    renderedReports: [],
+    renderHalftimeReport(r) { sandbox.renderedReports.push(r); },
+    fetch: async (_url, opts) => {
+      const parsed = JSON.parse(opts.body);
+      sentPayloads.push(parsed.telemetry);
+      return { ok: false };
+    },
+    document: { getElementById: makeEl },
+    console: { warn() {} },
+    JSON, String, Number, Math, Array, Object, Set
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(aiSrc, sandbox);
+
+  await sandbox.generateHalftimeReport(false);
+  assert.strictEqual(sentPayloads.length, 1, 'Expected initial halftime fetch call');
+  const t1 = sentPayloads[0];
+  assert.strictEqual(t1.ajaxScore, 1, 'Expected 1 H1 Ajax goal (H2 goal excluded)');
+  assert.strictEqual(t1.oppScore, 1, 'Expected 1 H1 Opp goal (H2 Opp goal excluded)');
+  assert.strictEqual(t1.oppShots, 1, 'Expected 1 H1 Opp shot (from H1 oppGoal; H2 oppGoal/oppShot excluded)');
+  assert.strictEqual(t1.oppBigChances, 1, 'Expected 1 H1 Opp big chance');
+  assert.strictEqual(t1.pressWon, 2, 'Expected camelCase pressWon counted accurately (2 H1)');
+  assert.strictEqual(t1.pressLost, 1, 'Expected camelCase pressLost counted accurately (1 H1)');
+  assert.strictEqual(t1.highRegains, 2, 'Expected 2 H1 high regains');
+  assert.strictEqual(t1.toD, 2, 'Expected 2 H1 D3 turnovers');
+  assert.strictEqual(t1.toM, 1, 'Expected 1 H1 M3 turnover');
+  assert.strictEqual(t1.toA, 0, 'Expected 0 H1 A3 turnovers');
+  assert.strictEqual(t1.turnovers, 3, 'Expected 3 total H1 turnovers');
+  assert.strictEqual(t1.goalKicksKept, 1);
+  assert.strictEqual(t1.goalKicksLost, 1);
+  assert.strictEqual(t1.ajaxYellows, 1, 'Expected 1 H1 yellow card (H2 yellow excluded)');
+  assert(t1.cardedPlayers.includes('#8') && !t1.cardedPlayers.includes('#14'), 'Expected only H1 carded player #8, not H2 #14');
+  assert(elements.aiMetricCards.textContent.includes('3 TO (2/1/0)'), `Expected #aiMetricCards turnover breakdown, got ${elements.aiMetricCards.textContent}`);
+
+  // Calling again without edits uses cached report cleanly
+  await sandbox.generateHalftimeReport(false);
+  assert.strictEqual(sentPayloads.length, 1, 'Unchanged telemetry should reuse cached report');
+
+  // Modifying H1 events invalidates stale cache automatically even when forceRegen is false
+  sandbox.matchEvents.unshift({ half: 'H1', time: 39, type: 'pressWon', zone: 'A3', desc: 'Late H1 press' });
+  await sandbox.generateHalftimeReport(false);
+  assert.strictEqual(sentPayloads.length, 2, 'Edited events must automatically invalidate stale Halftime AI cache');
+  assert.strictEqual(sentPayloads[1].pressWon, 3, 'Expected refreshed H1 pressWon === 3');
+}).then(() => {
+  if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
+});

@@ -110,17 +110,17 @@
           <div class="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-wider text-teal-300 leading-tight" id="clockDisplay">00:00</div>
         </div>
         <!-- Clock Controls -->
-        <div class="flex items-center gap-1">
-          <button id="timerToggleBtn" onclick="toggleTimer()" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-black flex items-center justify-center text-xl transition active:scale-90 shadow-lg border border-teal-200" title="Play / Pause Clock">
+        <div class="flex items-center gap-1.5">
+          <button id="timerToggleBtn" onclick="toggleTimer()" class="w-11 h-11 sm:w-12 sm:h-12 min-h-[44px] rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-black flex items-center justify-center text-xl transition active:scale-90 shadow-lg border border-teal-200" title="Play / Pause Clock">
             ▶
-          </button>
-          <button onclick="advancePeriod()" title="Next Half / Finish" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-surface hover:bg-slate-700 text-slate-200 border-2 border-border flex items-center justify-center text-sm font-bold transition active:scale-90">
-            ⏭
           </button>
           <div class="flex flex-col gap-0.5">
             <button onclick="adjustClock(60)" class="px-1.5 py-0.5 rounded bg-surface border border-border text-[9px] font-mono hover:bg-slate-700 text-slate-300 active:scale-95 font-bold">+1m</button>
             <button onclick="adjustClock(-60)" class="px-1.5 py-0.5 rounded bg-surface border border-border text-[9px] font-mono hover:bg-slate-700 text-slate-300 active:scale-95 font-bold">-1m</button>
           </div>
+          <button id="advancePeriodBtn" onclick="advancePeriod()" title="End First Half & Open Halftime Report" class="min-h-[44px] px-2.5 sm:px-3 py-1.5 ml-1 rounded-xl bg-surface hover:bg-slate-700 text-slate-100 border-2 border-border flex items-center justify-center text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition active:scale-95">
+            End 1H
+          </button>
         </div>
 
         <div class="h-8 w-px bg-border/80"></div>
@@ -643,7 +643,7 @@
       <div class="flex items-start justify-between gap-3 border-b border-border/80 pb-3 pr-8">
         <div>
           <div class="flex items-center gap-2">
-            <span class="mono text-[10px] uppercase text-teal-400 font-black tracking-wider">HALFTIME AI ENGINE · GEMINI 2.5 FLASH</span>
+            <span class="mono text-[10px] uppercase text-teal-400 font-black tracking-wider">HALFTIME AI ENGINE · GEMINI 3.8 FLASH</span>
             <span id="aiSentimentBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/50">DOMINANT</span>
           </div>
           <h2 class="display text-2xl text-white mt-0.5">Tactical Halftime Assessment</h2>
@@ -1749,6 +1749,7 @@
       currentPeriod = 1;
       timerRunning = false;
       clearInterval(timerInterval);
+      if (typeof invalidateHalftimeCache === 'function') invalidateHalftimeCache();
 
       saveState();
       renderPitch();
@@ -1757,23 +1758,93 @@
       renderEventsFeed();
       updateScoreboard();
       updateClockDisplay();
+      updatePeriodUI();
       showToast(`Initialized lineup for ${sq.label}`);
     }
 
     /* =========================================================
        TIMER CONTROLLER
        ========================================================= */
+    function updatePeriodUI() {
+      const pEl = document.getElementById('periodDisplay');
+      const btn = document.getElementById('advancePeriodBtn');
+      const toggleBtn = document.getElementById('timerToggleBtn');
+      if (pEl) {
+        if (currentPeriod <= 1) {
+          pEl.textContent = '1ST HALF';
+          pEl.className = 'text-[9px] sm:text-[10px] mono uppercase text-teal-400 font-extrabold tracking-widest';
+        } else if (currentPeriod === 2) {
+          pEl.textContent = '2ND HALF';
+          pEl.className = 'text-[9px] sm:text-[10px] mono uppercase text-emerald-400 font-extrabold tracking-widest';
+        } else {
+          pEl.textContent = 'FULL TIME';
+          pEl.className = 'text-[9px] sm:text-[10px] mono uppercase text-amber-300 font-extrabold tracking-widest';
+        }
+      }
+      if (btn) {
+        if (currentPeriod <= 1) {
+          btn.textContent = 'End 1H';
+          btn.title = 'End First Half & Open Halftime Report';
+          btn.className = 'min-h-[44px] px-2.5 sm:px-3 py-1.5 ml-1 rounded-xl bg-surface hover:bg-slate-700 text-slate-100 border-2 border-border flex items-center justify-center text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition active:scale-95';
+        } else if (currentPeriod === 2) {
+          btn.textContent = 'End Match';
+          btn.title = 'Full-Time Whistle & Complete Match';
+          btn.className = 'min-h-[44px] px-2.5 sm:px-3 py-1.5 ml-1 rounded-xl bg-rose-950/70 hover:bg-rose-900 text-rose-200 border-2 border-rose-500/60 flex items-center justify-center text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition active:scale-95';
+        } else {
+          btn.textContent = 'Reopen 2H';
+          btn.title = 'Reopen 2nd Half (Resume or Re-End Match)';
+          btn.className = 'min-h-[44px] px-2.5 sm:px-3 py-1.5 ml-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border-2 border-amber-400/60 flex items-center justify-center text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition active:scale-95';
+        }
+      }
+      if (toggleBtn && !timerRunning) {
+        toggleBtn.textContent = '▶';
+        toggleBtn.classList.remove('bg-amber-400', 'bg-teal-500');
+        toggleBtn.classList.add('bg-teal-400');
+      }
+    }
+
+    function revertPeriodForDeletedSystemEvent(ev) {
+      if (!ev || ev.type !== 'sys') return false;
+      const desc = String(ev.desc || '').toLowerCase();
+      if ((ev.sysAction === 'fulltime' || desc.includes('full time whistle')) && currentPeriod >= 3) {
+        currentPeriod = 2;
+        updatePeriodUI();
+        return true;
+      }
+      if ((ev.sysAction === 'halftime' || desc.includes('half time reached')) && currentPeriod === 2) {
+        currentPeriod = 1;
+        updatePeriodUI();
+        return true;
+      }
+      return false;
+    }
+
     function toggleTimer() {
+      const btn = document.getElementById('timerToggleBtn');
       if (timerRunning) {
         clearInterval(timerInterval);
         timerRunning = false;
-        document.getElementById('timerToggleBtn').textContent = '▶';
-        document.getElementById('timerToggleBtn').classList.replace('bg-amber-400', 'bg-teal-500');
+        if (btn) {
+          btn.textContent = '▶';
+          btn.classList.remove('bg-amber-400');
+          btn.classList.add('bg-teal-400');
+        }
         showToast('Paused match clock.');
       } else {
+        if (currentPeriod >= 3) {
+          if (typeof confirm === 'function' && !confirm('Match is currently marked FULL TIME. Reopen 2nd Half and start the clock?')) {
+            return;
+          }
+          currentPeriod = 2;
+          updatePeriodUI();
+          saveState();
+        }
         timerRunning = true;
-        document.getElementById('timerToggleBtn').textContent = '⏸';
-        document.getElementById('timerToggleBtn').classList.replace('bg-teal-500', 'bg-amber-400');
+        if (btn) {
+          btn.textContent = '⏸';
+          btn.classList.remove('bg-teal-400', 'bg-teal-500');
+          btn.classList.add('bg-amber-400');
+        }
         timerInterval = setInterval(tickSecond, 1000);
         showToast('Match clock running.');
       }
@@ -1839,21 +1910,32 @@
         if (confirm('End First Half and begin Half-Time?')) {
           currentPeriod = 2;
           pamPlayerZoneOverrides = {};
-          document.getElementById('periodDisplay').textContent = '2ND HALF';
-          matchSeconds = halfLengthMinutes * 60;
+          const halfMins = Number(typeof halfLengthMinutes !== 'undefined' ? halfLengthMinutes : 40) || 40;
+          matchSeconds = halfMins * 60;
           if (timerRunning) toggleTimer();
           updateClockDisplay();
-          logMatchSystemEvent('Half Time Reached');
-          showToast('1st Half completed. Opening Halftime AI...');
+          updatePeriodUI();
+          logMatchSystemEvent('Half Time Reached', { sysAction: 'halftime', half: 'H1' });
+          saveState();
+          showToast('1st Half completed. Tap ▶ when 2nd Half starts.');
           openHalftimeAIModal();
         }
       } else if (currentPeriod === 2) {
         if (confirm('Full-Time whistle! Complete match?')) {
           currentPeriod = 3;
-          document.getElementById('periodDisplay').textContent = 'FULL TIME';
           if (timerRunning) toggleTimer();
-          logMatchSystemEvent('Full Time Whistle');
-          showToast('Match Completed! Ready to export.');
+          updatePeriodUI();
+          logMatchSystemEvent('Full Time Whistle', { sysAction: 'fulltime', half: 'H2' });
+          saveState();
+          showToast('Match Completed! Ready to export or Commit to Hub.');
+        }
+      } else {
+        if (confirm('Reopen 2nd Half? You can keep tracking and tap "End Match" again when finished.')) {
+          currentPeriod = 2;
+          updatePeriodUI();
+          logMatchSystemEvent('2nd Half Reopened', { sysAction: 'reopen_h2', half: 'H2' });
+          saveState();
+          showToast('2nd Half reopened. Tap ▶ to run clock or "End Match" when finished.');
         }
       }
     }
@@ -2803,7 +2885,7 @@
       const desc = `${tag.toUpperCase()} (${outcome}): #${j} ${p.name.split(' ')[0]} in ${zone} (${curMins}')`;
       const newEv = {
         time: curMins,
-        half: (currentPeriod === 2 || curMins > getHalfLengthMinutes()) ? 'H2' : 'H1',
+        half: currentPeriod >= 2 ? 'H2' : 'H1',
         type: mappedType,
         desc: desc,
         jersey: j,
@@ -3102,79 +3184,80 @@
       const curMins = Math.floor(matchSeconds / 60);
       const slot = selectedSlot || p.currentPos || 'Field';
 
+      const evHalf = currentPeriod <= 1 ? 'H1' : 'H2';
       if (eventType === 'goal') {
         p.goals++;
         p.shots++;
         p.sot++;
         updateScoreboard();
-        logMatchEvent({ time: curMins, type: 'goal', desc: `GOAL! #${j} ${p.name.split(' ')[0]} scores at ${curMins}'`, jersey: j, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'goal', desc: `GOAL! #${j} ${p.name.split(' ')[0]} scores at ${curMins}'`, jersey: j, zone: 'A3' });
         showToast(`⚽ GOAL logged for #${j} ${p.name}!`);
       } else if (eventType === 'assist') {
         p.assists++;
-        logMatchEvent({ time: curMins, type: 'assist', desc: `ASSIST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'assist', desc: `ASSIST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
         showToast(`🅰️ Assist logged for #${j}`);
       } else if (eventType === 'sot') {
         p.shots++;
         p.sot++;
-        logMatchEvent({ time: curMins, type: 'shot', desc: `SHOT ON TARGET: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'shot', desc: `SHOT ON TARGET: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
         showToast(`🎯 Shot on target logged for #${j}`);
       } else if (eventType === 'soff') {
         p.shots++;
         p.soff++;
-        logMatchEvent({ time: curMins, type: 'shot', desc: `SHOT OFF TARGET: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'shot', desc: `SHOT OFF TARGET: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
         showToast(`🥅 Shot off logged for #${j}`);
       } else if (eventType === 'corner') {
         p.corners++;
-        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'corner', desc: `CORNER KICK: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'corner', desc: `CORNER KICK: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
         if (typeof showSetPieceOutcomeBar === 'function' && matchEvents[0]) showSetPieceOutcomeBar(matchEvents[0].id, `🚩 Corner (#${j}) → Shot?`);
         showToast(`🚩 Corner kick logged`);
       } else if (eventType === 'cross') {
         p.crosses++;
-        logMatchEvent({ time: curMins, type: 'cross', desc: `CROSS: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'cross', desc: `CROSS: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
         showToast(`👟 Cross logged`);
       } else if (eventType === 'keyPass') {
         p.keyPasses = (p.keyPasses || 0) + 1;
-        logMatchEvent({ time: curMins, type: 'keyPass', desc: `🔑 KEY PASS (Glow): #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'keyPass', desc: `🔑 KEY PASS (Glow): #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
         showToast(`🔑 Key Pass logged for #${j} ${p.name.split(' ')[0]}`);
       } else if (eventType === 'duelWon') {
         p.duelsWon = (p.duelsWon || 0) + 1;
-        logMatchEvent({ time: curMins, type: 'duelWon', desc: `💪 DUEL WON (Glow): #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'duelWon', desc: `💪 DUEL WON (Glow): #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
         showToast(`💪 Duel Won logged for #${j} ${p.name.split(' ')[0]}`);
       } else if (eventType === 'duelLost') {
         p.duelsLost = (p.duelsLost || 0) + 1;
-        logMatchEvent({ time: curMins, type: 'duelLost', desc: `❌ DUEL LOST (Grow): #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'D3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'duelLost', desc: `❌ DUEL LOST (Grow): #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'D3' });
         showToast(`❌ Duel Lost logged for #${j} ${p.name.split(' ')[0]}`);
       } else if (eventType === 'save') {
         p.saves++;
-        logMatchEvent({ time: curMins, type: 'save', desc: `SAVE: #${j} ${p.name.split(' ')[0]} (GK) at ${curMins}'`, jersey: j, zone: 'D3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'save', desc: `SAVE: #${j} ${p.name.split(' ')[0]} (GK) at ${curMins}'`, jersey: j, zone: 'D3' });
         showToast(`🧤 Save logged for goalkeeper!`);
       } else if (eventType === 'foul') {
         p.fouls = (p.fouls || 0) + 1;
-        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'foul', desc: `🛑 FOUL COMMITTED: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'foul', desc: `🛑 FOUL COMMITTED: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
         showToast(`🛑 Foul logged for #${j}`);
       } else if (eventType === 'yellow') {
         p.yellowCards = (p.yellowCards || 0) + 1;
         p.hasYellow = true;
         if (p.yellowCards >= 2) {
           p.hasRed = true;
-          logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'redCard', desc: `🟥 2ND YELLOW / RED CARD: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+          logMatchEvent({ time: curMins, half: evHalf, type: 'redCard', desc: `🟥 2ND YELLOW / RED CARD: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
           alert(`🟥 RED CARD! 2nd Yellow Card for #${j} ${p.name}! Player is sent off.`);
           showToast(`🟥 Red card logged for #${j}`);
         } else {
-          logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'yellowCard', desc: `🟨 YELLOW CARD: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+          logMatchEvent({ time: curMins, half: evHalf, type: 'yellowCard', desc: `🟨 YELLOW CARD: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
           showToast(`🟨 Yellow card logged for #${j}`);
         }
       } else if (eventType === 'pressWon') {
         p.pressWon = (p.pressWon || 0) + 1;
-        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'pressWon', desc: `⚡ PRESS WON: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'pressWon', desc: `⚡ PRESS WON: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'A3' });
         showToast(`⚡ Press won logged for #${j}`);
       } else if (eventType === 'pressLost') {
         p.pressLost = (p.pressLost || 0) + 1;
-        logMatchEvent({ time: curMins, half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'pressLost', desc: `💨 PRESS LOST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'pressLost', desc: `💨 PRESS LOST: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: 'M3' });
         showToast(`💨 Press lost logged for #${j}`);
       } else if (eventType === 'setPiece') {
         p.setPieces = (p.setPieces || 0) + 1;
-        logMatchEvent({ time: curMins, type: 'setPiece', desc: `🎯 FREE KICK / SET PIECE: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: slot.includes('A') ? 'A3' : (slot.includes('D') ? 'D3' : 'M3') });
+        logMatchEvent({ time: curMins, half: evHalf, type: 'setPiece', desc: `🎯 FREE KICK / SET PIECE: #${j} ${p.name.split(' ')[0]} at ${curMins}'`, jersey: j, zone: slot.includes('A') ? 'A3' : (slot.includes('D') ? 'D3' : 'M3') });
         showToast(`🎯 Free kick logged for #${j}`);
       }
 
@@ -3209,6 +3292,7 @@
 
       logMatchEvent({
         time: curMins,
+        half: currentPeriod <= 1 ? 'H1' : 'H2',
         type: 'turnover',
         desc: `TURNOVER in ${zone}: #${j} ${p.name.split(' ')[0]} at ${curMins}'`,
         jersey: j,
@@ -3435,7 +3519,7 @@
       oppStats.subs = (oppStats.subs || 0) + 1;
       const el = document.getElementById('oppSubsCount');
       if (el) el.textContent = oppStats.subs;
-      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppSub', desc: `OPPONENT SUB #${oppStats.subs} made (${Math.floor(matchSeconds / 60)}')`, zone: 'M3' });
+      logMatchEvent({ time: Math.floor(matchSeconds / 60), half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'oppSub', desc: `OPPONENT SUB #${oppStats.subs} made (${Math.floor(matchSeconds / 60)}')`, zone: 'M3' });
       showToast(`Opponent substitution #${oppStats.subs} logged`);
       saveState();
     }
@@ -3443,7 +3527,7 @@
       oppStats.corners = (oppStats.corners || 0) + 1;
       const el = document.getElementById('oppCornersCount');
       if (el) el.textContent = oppStats.corners;
-      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppCorner', desc: `OPPONENT CORNER #${oppStats.corners} (${Math.floor(matchSeconds / 60)}')`, zone: 'D3' });
+      logMatchEvent({ time: Math.floor(matchSeconds / 60), half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'oppCorner', desc: `OPPONENT CORNER #${oppStats.corners} (${Math.floor(matchSeconds / 60)}')`, zone: 'D3' });
       showToast(`Opponent corner logged (Total: ${oppStats.corners})`);
       saveState();
     }
@@ -3451,7 +3535,7 @@
       oppStats.fouls = (oppStats.fouls || 0) + 1;
       const el = document.getElementById('oppFoulsCount');
       if (el) el.textContent = oppStats.fouls;
-      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'oppFoul', desc: `OPPONENT FOUL #${oppStats.fouls} (${Math.floor(matchSeconds / 60)}')`, zone: 'M3' });
+      logMatchEvent({ time: Math.floor(matchSeconds / 60), half: currentPeriod <= 1 ? 'H1' : 'H2', type: 'oppFoul', desc: `OPPONENT FOUL #${oppStats.fouls} (${Math.floor(matchSeconds / 60)}')`, zone: 'M3' });
       showToast(`Opponent foul logged (Total: ${oppStats.fouls})`);
       updateSummaryHud();
       saveState();
@@ -3486,25 +3570,38 @@
       syncOppAdjustModalUI();
       updateScoreboard();
       if (typeof updateSummaryHud === 'function') updateSummaryHud();
+      if (typeof invalidateHalftimeCache === 'function') invalidateHalftimeCache();
       saveState();
     }
 
     function logMatchEvent(ev) {
       if (!ev.id) ev.id = 'ev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      if (!ev.half && ev.type !== 'sys') ev.half = (typeof currentPeriod !== 'undefined' && currentPeriod <= 1) ? 'H1' : 'H2';
       if (!ev.matchDate) ev.matchDate = matchDate;
       if (!ev.match) ev.match = canonicalMatch || opponentName;
       matchEvents.unshift(ev);
+      if (typeof invalidateHalftimeCache === 'function') invalidateHalftimeCache();
       renderEventsFeed();
     }
 
-    function logMatchSystemEvent(desc) {
-      logMatchEvent({ time: Math.floor(matchSeconds / 60), type: 'sys', desc, zone: '' });
+    function logMatchSystemEvent(desc, extra = {}) {
+      logMatchEvent(Object.assign({
+        time: Math.floor(matchSeconds / 60),
+        half: extra.half || ((typeof currentPeriod !== 'undefined' && currentPeriod <= 1) ? 'H1' : 'H2'),
+        type: 'sys',
+        desc,
+        zone: ''
+      }, extra));
     }
 
     function undoLastEvent() {
       if (!matchEvents.length) return;
       const ev = matchEvents.shift();
       reverseEventStats(ev);
+      const revertedPeriod = (typeof revertPeriodForDeletedSystemEvent === 'function')
+        ? revertPeriodForDeletedSystemEvent(ev)
+        : false;
+      if (typeof invalidateHalftimeCache === 'function') invalidateHalftimeCache();
       updateScoreboard();
       updateSummaryHud();
       renderPamHotBar();
@@ -3512,7 +3609,7 @@
       renderBench();
       renderEventsFeed();
       saveState();
-      showToast(`Undid: ${ev.desc}`);
+      showToast(revertedPeriod ? `Undid ${ev.desc} — period restored to ${currentPeriod <= 1 ? '1ST HALF' : '2ND HALF'}` : `Undid: ${ev.desc}`);
     }
 
 
@@ -4274,6 +4371,10 @@
       }
 
       matchEvents.splice(idx, 1);
+      const revertedPeriod = (typeof revertPeriodForDeletedSystemEvent === 'function')
+        ? revertPeriodForDeletedSystemEvent(ev)
+        : false;
+      if (typeof invalidateHalftimeCache === 'function') invalidateHalftimeCache();
 
       updateScoreboard();
       renderPitch();
@@ -4283,7 +4384,9 @@
       saveState();
 
       closeEditEventModal();
-      showToast('🗑️ Event deleted and minutes/stats reversed cleanly.');
+      showToast(revertedPeriod
+        ? `🗑️ Deleted ${ev.desc} — period restored to ${currentPeriod <= 1 ? '1ST HALF' : '2ND HALF'}.`
+        : '🗑️ Event deleted and minutes/stats reversed cleanly.');
     }
 
     function saveEventEdits() {
@@ -4316,7 +4419,7 @@
         }
 
         ev.time = newTime;
-        ev.half = newTime <= 40 ? 'H1' : 'H2';
+        ev.half = newTime <= (typeof getHalfLengthMinutes === 'function' ? getHalfLengthMinutes() : 40) ? 'H1' : 'H2';
         ev.inJersey = sub.inJersey;
         ev.outJersey = sub.outJersey;
         ev.slot = sub.slot;
@@ -4327,6 +4430,7 @@
           ? `SUB (${newTime}'): #${sub.inJersey} ${inName.split(' ')[0]} ON for #${sub.outJersey} ${outName.split(' ')[0]}${sub.slot ? ' at ' + sub.slot : ''}`
           : `SUB OUT (${newTime}'): #${sub.inJersey} to Bench`;
 
+        if (typeof invalidateHalftimeCache === 'function') invalidateHalftimeCache();
         updateScoreboard();
         renderPitch();
         renderBench();
@@ -4343,7 +4447,7 @@
 
       // 2. Update properties
       ev.time = editMinute;
-      ev.half = editMinute <= 40 ? 'H1' : 'H2';
+      ev.half = editMinute <= (typeof getHalfLengthMinutes === 'function' ? getHalfLengthMinutes() : 40) ? 'H1' : 'H2';
       ev.jersey = editJersey;
       ev.type = editType === 'yellow' ? 'yellowCard' : editType;
       ev.zone = editZone;
@@ -4357,6 +4461,7 @@
       applyEventStats(ev);
 
       // 5. Re-render UI & save
+      if (typeof invalidateHalftimeCache === 'function') invalidateHalftimeCache();
       updateScoreboard();
       renderPitch();
       renderBench();
@@ -4652,6 +4757,12 @@
        HALFTIME AI ENGINE (GEMINI 2.5 FLASH + LOCAL RULE ENGINE)
        ========================================================= */
     let cachedHalftimeReport = null;
+    let cachedHalftimeSig = null;
+
+    function invalidateHalftimeCache() {
+      cachedHalftimeReport = null;
+      cachedHalftimeSig = null;
+    }
 
     async function openHalftimeAIModal() {
       document.getElementById('halftimeAiModal').classList.replace('hidden', 'flex');
@@ -4705,99 +4816,155 @@
     }
 
     async function generateHalftimeReport(forceRegen = false) {
-      if (cachedHalftimeReport && !forceRegen) {
-        renderHalftimeReport(cachedHalftimeReport);
-        return;
-      }
+      // Compile 1st-Half telemetry strictly from H1-filtered matchEvents (with H1-only counter fallbacks when matchEvents has 0 events of that kind)
+      const allEvents = Array.isArray(matchEvents) ? matchEvents : [];
+      const h1Events = allEvents.filter(isH1Event);
+      const isInH1 = (typeof currentPeriod === 'undefined' || Number(currentPeriod) <= 1);
+      const isTurnEv = (e) => e && (
+        e.type === 'turnover' ||
+        (e.type === 'soff' && e.tag === 'Poor Shot Selection') ||
+        (e.type === 'shot_outside_18' && e.subType === 'poor_selection') ||
+        (e.outcome === 'Grow' && e.category === 'Carrying')
+      );
+      const isPressWonEv = (e) => e && (e.type === 'pressWon' || e.type === 'press_won' || e.type === 'press');
+      const isPressLostEv = (e) => e && (e.type === 'pressLost' || e.type === 'press_lost');
+      const isFoulEv = (e) => e && (e.type === 'foul' || (e.action && String(e.action).toLowerCase().includes('foul') && e.type !== 'oppFoul' && e.tag !== 'Foul Won'));
+      const isCardEv = (e) => e && (e.type === 'yellowCard' || e.type === 'yellow' || e.type === 'redCard' || (e.action && String(e.action).toLowerCase().includes('yellow')));
 
-      document.getElementById('aiLoadingSpinner').classList.remove('hidden');
-      document.getElementById('aiReportContent').classList.add('hidden');
-
-      // Compile 1st-Half telemetry from H1-filtered matchEvents (with playerStats fallback if matchEvents has 0 shot events)
-      const h1Events = (matchEvents || []).filter(isH1Event);
       let ajaxGoals = h1Events.filter(e => e.type === 'goal').length;
       let ajaxShots = h1Events.filter(isAjaxShotEvent).length;
       let ajaxSot = h1Events.filter(isAjaxSotEvent).length;
       let ajaxSoff = Math.max(0, ajaxShots - ajaxSot);
       let ajaxOut18 = h1Events.filter(isAjaxOut18Event).length;
-      let ajaxFouls = h1Events.filter(e => e.type === 'foul' || (e.action && String(e.action).toLowerCase().includes('foul') && e.type !== 'oppFoul')).length;
-      let ajaxYellows = h1Events.filter(e => e.type === 'yellow' || (e.action && String(e.action).toLowerCase().includes('yellow'))).length;
-      let playerPressWon = h1Events.filter(e => e.type === 'press_won' || e.type === 'press').length;
-      let playerPressLost = h1Events.filter(e => e.type === 'press_lost').length;
-      let cardedPlayers = [];
+      let ajaxFouls = h1Events.filter(isFoulEv).length;
 
-      if (ajaxShots === 0) {
-        let psGoals = 0, psShots = 0, psSot = 0, psSoff = 0, psOut18 = 0, psFouls = 0, psYellows = 0, psPressWon = 0, psPressLost = 0;
-        Object.values(playerStats).forEach(p => {
-          psGoals += (p.goals || 0);
-          psShots += (p.shots || 0);
-          psSot += (p.sot || 0);
-          psSoff += (p.soff || 0);
-          psOut18 += (p.shotsOutside18 || 0);
-          psFouls += (p.fouls || 0);
-          psYellows += (p.yellowCards || 0);
-          psPressWon += (p.pressWon || 0);
-          psPressLost += (p.pressLost || 0);
-        });
-        if (psShots > 0 || psGoals > 0) {
+      const h1CardEvents = h1Events.filter(isCardEv);
+      let ajaxYellows = h1CardEvents.length;
+      let cardedPlayers = [];
+      const seenCarded = new Set();
+      h1CardEvents.forEach(e => {
+        if (e.jersey && !seenCarded.has(String(e.jersey))) {
+          seenCarded.add(String(e.jersey));
+          const ps = (typeof playerStats !== 'undefined' && playerStats[e.jersey]) ? playerStats[e.jersey] : null;
+          const shortName = ps && ps.name ? ps.name.split(' ')[0] : '';
+          cardedPlayers.push(shortName ? `#${e.jersey} ${shortName}` : `#${e.jersey}`);
+        }
+      });
+
+      const hasAnyPressEv = allEvents.some(e => isPressWonEv(e) || isPressLostEv(e));
+      let totalPressWon = h1Events.filter(isPressWonEv).length;
+      let totalPressLost = h1Events.filter(isPressLostEv).length;
+
+      const hasAnyTurnEv = allEvents.some(isTurnEv);
+      let toD = 0, toM = 0, toA = 0;
+      h1Events.filter(isTurnEv).forEach(e => {
+        if (e.zone === 'D3') toD++;
+        else if (e.zone === 'A3') toA++;
+        else toM++;
+      });
+
+      let psGoals = 0, psShots = 0, psSot = 0, psSoff = 0, psOut18 = 0, psFouls = 0, psYellows = 0, psPressWon = 0, psPressLost = 0, psToD = 0, psToM = 0, psToA = 0;
+      const psCarded = [];
+      Object.values(playerStats || {}).forEach(p => {
+        if (!p) return;
+        psGoals += (p.goals || 0);
+        psShots += (p.shots || 0);
+        psSot += (p.sot || 0);
+        psSoff += (p.soff || 0);
+        psOut18 += (p.shotsOutside18 || 0);
+        psFouls += (p.fouls || 0);
+        psYellows += (p.yellowCards || 0);
+        psPressWon += (p.pressWon || 0);
+        psPressLost += (p.pressLost || 0);
+        psToD += (p.toD || 0);
+        psToM += (p.toM || 0);
+        psToA += (p.toA || 0);
+        if (p.yellowCards > 0) psCarded.push(`#${p.jersey} ${String(p.name || '').split(' ')[0]}`);
+      });
+
+      if (isInH1) {
+        if (ajaxShots === 0 && !allEvents.some(isAjaxShotEvent) && (psShots > 0 || psGoals > 0)) {
           ajaxGoals = psGoals;
           ajaxShots = psShots;
           ajaxSot = psSot;
           ajaxSoff = psSoff;
           ajaxOut18 = psOut18;
-          ajaxFouls = psFouls;
+        }
+        if (ajaxFouls === 0 && !allEvents.some(isFoulEv) && psFouls > 0) ajaxFouls = psFouls;
+        if (ajaxYellows === 0 && !allEvents.some(isCardEv) && psYellows > 0) {
           ajaxYellows = psYellows;
-          playerPressWon = psPressWon;
-          playerPressLost = psPressLost;
+          cardedPlayers = psCarded;
+        }
+        if (!hasAnyPressEv && (psPressWon > 0 || psPressLost > 0 || (phaseStats.pressWon || 0) > 0 || (phaseStats.pressLost || 0) > 0)) {
+          totalPressWon = (phaseStats.pressWon || 0) + psPressWon;
+          totalPressLost = (phaseStats.pressLost || 0) + psPressLost;
+        }
+        if (!hasAnyTurnEv && (psToD + psToM + psToA) > 0) {
+          toD = psToD;
+          toM = psToM;
+          toA = psToA;
         }
       }
 
-      Object.values(playerStats).forEach(p => {
-        if (p.yellowCards > 0) cardedPlayers.push(`#${p.jersey} ${p.name.split(' ')[0]}`);
-      });
-
-      const totalPressWon = (phaseStats.pressWon || 0) + playerPressWon;
-      const totalPressLost = (phaseStats.pressLost || 0) + playerPressLost;
       const totalPress = totalPressWon + totalPressLost;
       const pressEfficiency = totalPress > 0 ? Math.round((totalPressWon / totalPress) * 100) + '%' : '0%';
+      const h1Turnovers = toD + toM + toA;
 
       let h1XgFor = 0, h1XgAgainst = 0, h1BigChFor = 0, h1BigChMissed = 0, h1HighRegains = 0, h1SpTotal = 0, h1SpShots = 0;
+      const qVal = (loc, hdr) => (typeof getShotQualityValue === 'function' ? getShotQualityValue(loc, hdr) : 0);
       h1Events.forEach(e => {
         if (!e) return;
         const isOpp = typeof e.type === 'string' && e.type.startsWith('opp');
-        const q = Number(e.shotQuality) || (e.shotLocation ? getShotQualityValue(e.shotLocation, e.isHeader) : 0);
+        const q = Number(e.shotQuality) || (e.shotLocation ? qVal(e.shotLocation, e.isHeader) : 0);
         if (q > 0) { if (isOpp) h1XgAgainst += q; else h1XgFor += q; }
         if (e.tag === 'Big Chance Created') h1BigChFor++;
         if (e.tag === 'Big Chance Missed') h1BigChMissed++;
-        if (!isOpp && (e.tag === 'Counter-press Regain' || ((e.type === 'pressWon' || e.tag === 'Direct Pressure') && (e.zone === 'A3' || e.zone === 'M3')))) h1HighRegains++;
+        if (!isOpp && (e.tag === 'Counter-press Regain' || ((isPressWonEv(e) || e.tag === 'Direct Pressure') && (e.zone === 'A3' || e.zone === 'M3')))) h1HighRegains++;
         if (e.type === 'corner' || e.type === 'setPiece' || e.tag === 'Foul Won') {
           h1SpTotal++;
           if (e.setPieceOutcome === 'Shot') h1SpShots++;
         }
       });
 
-      const gkKept = phaseStats.goalKicksKept || 0;
-      const gkLost = phaseStats.goalKicksLost || 0;
+      const hasAnyGkEv = allEvents.some(e => e && String(e.type || '').startsWith('goal_kick_'));
+      const gkKept = hasAnyGkEv ? h1Events.filter(e => e.type === 'goal_kick_kept').length : (isInH1 ? (phaseStats.goalKicksKept || 0) : 0);
+      const gkLost = hasAnyGkEv ? h1Events.filter(e => e.type === 'goal_kick_lost').length : (isInH1 ? (phaseStats.goalKicksLost || 0) : 0);
       const gkSplitTotal = gkKept + gkLost;
       const gkRetentionPct = gkSplitTotal > 0 ? Math.round((gkKept / gkSplitTotal) * 100) + '%' : '--';
 
-      const defGk = phaseStats.goalKicksDefending || 0;
-      const attGk = gkSplitTotal > 0 ? gkSplitTotal : (phaseStats.goalKicksAttacking || 0);
+      const defGk = hasAnyGkEv ? h1Events.filter(e => e.type === 'goal_kick_def').length : (isInH1 ? (phaseStats.goalKicksDefending || 0) : 0);
+      const attGk = gkSplitTotal > 0 ? gkSplitTotal : (hasAnyGkEv ? h1Events.filter(e => e.type === 'goal_kick_att').length : (isInH1 ? (phaseStats.goalKicksAttacking || 0) : 0));
       const totalGk = defGk + attGk;
       const territoryTilt = totalGk > 0 ? Math.round((defGk / totalGk) * 100) + '% in Opponent Half' : 'Balanced (50/50)';
 
-      const recentEventsSummary = h1Events.slice(0, 8).map(e => `${e.time}': ${e.desc}`).join('; ');
+      const hasOppGoalsEv = allEvents.some(e => e && e.type === 'oppGoal');
+      const hasOppShotsEv = allEvents.some(e => e && (e.type === 'oppShot' || e.type === 'oppGoal'));
+      const hasOppBigChEv = allEvents.some(e => e && e.type === 'oppBigChance');
+      const hasOppFoulsEv = allEvents.some(e => e && e.type === 'oppFoul');
+      const hasCrossEv = allEvents.some(e => e && e.type === 'cross');
+
+      const h1OppScore = hasOppGoalsEv ? h1Events.filter(e => e.type === 'oppGoal').length : (isInH1 ? (oppStats.goals || 0) : 0);
+      const h1OppShots = hasOppShotsEv ? h1Events.filter(e => e.type === 'oppShot' || e.type === 'oppGoal').length : (isInH1 ? (oppStats.shots || 0) : 0);
+      const h1OppBigCh = hasOppBigChEv ? h1Events.filter(e => e.type === 'oppBigChance').length : (isInH1 ? (oppStats.bigChances || 0) : 0);
+      const h1OppFouls = hasOppFoulsEv ? h1Events.filter(e => e.type === 'oppFoul').length : (isInH1 ? (oppStats.fouls || 0) : 0);
+      const h1Crosses = hasCrossEv ? h1Events.filter(e => e.type === 'cross').length : (isInH1 ? ((phaseStats.crossesLeft || 0) + (phaseStats.crossesRight || 0)) : 0);
+
+      const recentEventsSummary = h1Events.filter(e => e.type !== 'sys').slice(0, 10).map(e => `${e.time}': ${e.desc}`).join('; ');
+      const squadLabel = (typeof SQUADS !== 'undefined' && typeof activeSquadKey !== 'undefined' && SQUADS[activeSquadKey])
+        ? SQUADS[activeSquadKey].label
+        : 'AJAX ASPIRE U15';
 
       const telemetry = {
+        squadName: squadLabel,
         opponent: opponentName,
         ajaxScore: ajaxGoals,
-        oppScore: oppStats.goals || 0,
+        oppScore: h1OppScore,
         ajaxShots,
         ajaxSot,
         ajaxSoff,
         shotsOutside18: ajaxOut18,
-        oppShots: oppStats.shots || 0,
-        oppBigChances: oppStats.bigChances || 0,
+        oppShots: h1OppShots,
+        oppBigChances: h1OppBigCh,
         bigChancesCreated: h1BigChFor,
         bigChancesMissed: h1BigChMissed,
         xgFor: Number(h1XgFor.toFixed(2)),
@@ -4814,27 +4981,42 @@
         setPieceAttempts: h1SpTotal,
         setPieceShots: h1SpShots,
         territoryTilt,
-        crosses: (phaseStats.crossesLeft || 0) + (phaseStats.crossesRight || 0),
+        crosses: h1Crosses,
+        toD,
+        toM,
+        toA,
+        turnovers: h1Turnovers,
         ajaxFouls,
         ajaxYellows,
         cardedPlayers: cardedPlayers.join(', ') || 'None',
-        oppFouls: oppStats.fouls || 0,
+        oppFouls: h1OppFouls,
         recentEventsSummary
       };
 
-      // Update metric strips on modal
-      if (document.getElementById('aiMetricShots')) document.getElementById('aiMetricShots').textContent = `${ajaxShots} - ${oppStats.shots || 0}`;
+      // Always update metric strips on modal from live H1 telemetry
+      if (document.getElementById('aiMetricShots')) document.getElementById('aiMetricShots').textContent = `${ajaxShots} - ${h1OppShots}`;
       if (document.getElementById('aiMetricSot')) document.getElementById('aiMetricSot').textContent = `${ajaxSot} SOT · ${ajaxOut18} Out 18 · xG-lite ${h1XgFor.toFixed(2)}-${h1XgAgainst.toFixed(2)}`;
       if (document.getElementById('aiMetricPress')) document.getElementById('aiMetricPress').textContent = `${h1HighRegains} High Regains (${pressEfficiency})`;
-      if (document.getElementById('aiMetricPressWon')) document.getElementById('aiMetricPressWon').textContent = `${totalPressWon} Won / ${totalPress} Total · BigCh ${h1BigChFor}-${oppStats.bigChances || 0}`;
+      if (document.getElementById('aiMetricPressWon')) document.getElementById('aiMetricPressWon').textContent = `${totalPressWon} Won / ${totalPress} Total · BigCh ${h1BigChFor}-${h1OppBigCh}`;
       if (document.getElementById('aiMetricTerritory')) document.getElementById('aiMetricTerritory').textContent = gkSplitTotal > 0 ? `${gkRetentionPct} GK Kept` : territoryTilt;
       if (document.getElementById('aiMetricGks')) document.getElementById('aiMetricGks').textContent = `${gkKept}/${gkSplitTotal} Kept · SP Shot ${h1SpShots}/${h1SpTotal}`;
-      if (document.getElementById('aiMetricFouls')) document.getElementById('aiMetricFouls').textContent = `${ajaxFouls} Ajax · ${oppStats.fouls || 0} Opp`;
-      if (document.getElementById('aiMetricCards')) document.getElementById('aiMetricCards').textContent = `${ajaxYellows} Yellows`;
+      if (document.getElementById('aiMetricFouls')) document.getElementById('aiMetricFouls').textContent = `${ajaxFouls}F Ajax · ${h1OppFouls}F Opp`;
+      if (document.getElementById('aiMetricCards')) document.getElementById('aiMetricCards').textContent = `${ajaxYellows}Y · ${h1Turnovers} TO (${toD}/${toM}/${toA})`;
+
+      const telemetrySig = JSON.stringify(telemetry);
+      if (cachedHalftimeReport && cachedHalftimeSig === telemetrySig && !forceRegen) {
+        renderHalftimeReport(cachedHalftimeReport);
+        return;
+      }
+
+      const spinnerEl = document.getElementById('aiLoadingSpinner');
+      const contentEl = document.getElementById('aiReportContent');
+      if (spinnerEl) spinnerEl.classList.remove('hidden');
+      if (contentEl) contentEl.classList.add('hidden');
 
       let reportData = null;
 
-      // 1. Try Asynchronous Call to Netlify Halftime AI Function (Gemini 2.5 Flash)
+      // 1. Try Asynchronous Call to Netlify Halftime AI Function (Gemini 3.8 Flash)
       try {
         const resp = await fetch('/.netlify/functions/halftime-ai', {
           method: 'POST',
@@ -4855,39 +5037,51 @@
       }
 
       cachedHalftimeReport = reportData;
+      cachedHalftimeSig = telemetrySig;
       renderHalftimeReport(reportData);
     }
 
     function runLocalHalftimeRuleEngine(t) {
       let sentiment = 'Contested';
-      const goalDiff = t.ajaxScore - t.oppScore;
-      const shotDiff = t.ajaxShots - t.oppShots;
+      const goalDiff = (t.ajaxScore || 0) - (t.oppScore || 0);
+      const shotDiff = (t.ajaxShots || 0) - (t.oppShots || 0);
       const pressRate = parseInt(t.pressEfficiency, 10) || 0;
+      const teamLabel = t.squadName || 'Ajax';
+      const toD = Number(t.toD) || 0;
+      const toM = Number(t.toM) || 0;
+      const toA = Number(t.toA) || 0;
+      const totalTo = Number(t.turnovers ?? (toD + toM + toA)) || 0;
 
-      if (goalDiff >= 2 || (shotDiff >= 4 && t.goalKicksDefending >= t.goalKicksAttacking)) {
+      if (goalDiff >= 2 || (shotDiff >= 4 && (t.goalKicksDefending || 0) >= (t.goalKicksAttacking || 0))) {
         sentiment = 'Dominant';
       } else if (goalDiff <= -2 || (shotDiff <= -4 && pressRate < 40)) {
         sentiment = 'Under Pressure';
       }
 
-      const xgLine = (t.xgFor > 0 || t.xgAgainst > 0) ? ` Shot Quality (xG-lite approx.) reads ${Number(t.xgFor).toFixed(2)} - ${Number(t.xgAgainst).toFixed(2)}.` : '';
-      const gameFlowSummary = `Ajax established a ${t.territoryTilt} field tilt against ${t.opponent}, registering ${t.ajaxShots} total shots (${t.ajaxSot} on target), ${t.bigChancesCreated || 0} big chances created vs ${t.oppBigChances || 0} conceded.${xgLine} Counter-pressing logged ${t.highRegains || 0} High Regains in A3/M3 (${t.pressEfficiency}).`;
+      const xgLine = ((t.xgFor || 0) > 0 || (t.xgAgainst || 0) > 0)
+        ? ` Shot Quality (xG-lite approx.) reads ${Number(t.xgFor || 0).toFixed(2)} - ${Number(t.xgAgainst || 0).toFixed(2)}.`
+        : '';
+      const toLine = totalTo > 0
+        ? ` Logged ${totalTo} turnovers (D3: ${toD}, M3: ${toM}, A3: ${toA}).`
+        : '';
+      const scoreVerb = goalDiff > 0 ? 'lead' : (goalDiff < 0 ? 'trail' : 'are level');
+      const gameFlowSummary = `${teamLabel} ${scoreVerb} ${t.ajaxScore || 0}-${t.oppScore || 0} vs ${t.opponent} with ${t.territoryTilt} tilt, registering ${t.ajaxShots || 0} shots (${t.ajaxSot || 0} on target vs ${t.oppShots || 0} conceded) and ${t.bigChancesCreated || 0} big chances created vs ${t.oppBigChances || 0} conceded.${xgLine} Counter-pressing logged ${t.highRegains || 0} High Regains in A3/M3 (${t.pressEfficiency || '0%'}).${toLine}`;
 
       const tacticalInsights = [];
       if ((t.goalKicksKept || 0) + (t.goalKicksLost || 0) > 0) {
         tacticalInsights.push(`Build-out retention: Retained ${t.goalKicksKept}/${(t.goalKicksKept || 0) + (t.goalKicksLost || 0)} goal kicks (${t.gkRetentionPct}).`);
       }
-      if (t.goalKicksDefending > t.goalKicksAttacking) {
+      if ((t.goalKicksDefending || 0) > (t.goalKicksAttacking || 0)) {
         tacticalInsights.push(`Territorial dominance: Forced ${t.goalKicksDefending} opponent defending goal kicks, pinning ${t.opponent} into low-block build-out territory.`);
-      } else if (t.goalKicksAttacking > t.goalKicksDefending) {
+      } else if ((t.goalKicksAttacking || 0) > (t.goalKicksDefending || 0)) {
         tacticalInsights.push(`Build-out under pressure: Required ${t.goalKicksAttacking} defensive goal kicks; need quicker central pivot outlets to escape opponent high press.`);
       } else {
-        tacticalInsights.push(`Balanced territorial tilt: Neutral exchange of territory in middle third with even set-piece volume.`);
+        tacticalInsights.push(`Balanced territorial tilt: Neutral exchange of territory in middle third with ${t.ajaxShots || 0}-${t.oppShots || 0} shot split.`);
       }
 
-      if (t.shotsOutside18 > 0 && t.shotsOutside18 >= t.ajaxShots * 0.4) {
+      if ((t.shotsOutside18 || 0) > 0 && t.shotsOutside18 >= (t.ajaxShots || 0) * 0.4) {
         tacticalInsights.push(`Shot selection: ${t.shotsOutside18} shots taken outside 18 box indicates opponent low block density; work third-man combinations inside the box.`);
-      } else if (t.ajaxSot >= 3) {
+      } else if ((t.ajaxSot || 0) >= 3) {
         tacticalInsights.push(`Effective penetration: Created high-quality chances inside the box with ${t.ajaxSot} shots testing the goalkeeper.`);
       }
       if ((t.setPieceAttempts || 0) > 0) {
@@ -4895,16 +5089,21 @@
       }
 
       if (pressRate >= 60) {
-        tacticalInsights.push(`High press execution: ${t.pressEfficiency} press win rate successfully suffocated opponent forward progression.`);
-      } else if (t.pressLost >= 3) {
+        tacticalInsights.push(`High press execution: ${t.pressEfficiency} press win rate (${t.pressWon} won / ${t.pressLost} lost) suppressed opponent progression.`);
+      } else if ((t.pressLost || 0) >= 3) {
         tacticalInsights.push(`Transition vulnerability: ${t.pressLost} counter-press breakdowns opened space behind the fullbacks.`);
       }
 
       const riskAlerts = [];
-      if (t.ajaxYellows > 0) {
+      if ((t.ajaxYellows || 0) > 0) {
         riskAlerts.push(`Yellow card discipline: ${t.cardedPlayers} on yellow; instruct them to avoid diving into secondary challenges.`);
       }
-      if (t.pressLost >= 2) {
+      if (toD >= 2) {
+        riskAlerts.push(`D3 build-out turnovers: ${toD} turnovers in the defensive third created high-danger transitions.`);
+      } else if (totalTo >= 6) {
+        riskAlerts.push(`Ball security: ${totalTo} 1st-half turnovers (D3:${toD} M3:${toM} A3:${toA}); tighten first touch and support angles.`);
+      }
+      if ((t.pressLost || 0) >= 2) {
         riskAlerts.push(`Rest defense exposure: Maintain central midfield balance to prevent ${t.opponent} direct counter-attacks.`);
       }
       if (!riskAlerts.length) {
@@ -4912,13 +5111,16 @@
       }
 
       const adjustments = [];
-      if (t.shotsOutside18 >= 2) {
+      if (toD >= 2) {
+        adjustments.push(`Build-out security: Give the center backs earlier check-to angles from the #6 and #8 or clip into wide channels rather than forcing central D3 passes.`);
+      }
+      if ((t.shotsOutside18 || 0) >= 2) {
         adjustments.push(`Patient box penetration: When reaching the 18 box, look for cutbacks to trailing midfielders rather than contested long shots.`);
       }
-      if (t.goalKicksDefending >= 2) {
+      if ((t.goalKicksDefending || 0) >= 2) {
         adjustments.push(`Defending goal kicks: Lock down the opponent's short passing options and position the #6 and #8 to win second balls at the midfield stripe.`);
       }
-      if (t.ajaxScore <= t.oppScore) {
+      if ((t.ajaxScore || 0) <= (t.oppScore || 0)) {
         adjustments.push(`Width & Overloads: Accelerate ball movement from side to side; isolate wide wingers in 1v1 situations.`);
       } else {
         adjustments.push(`Game Management: Control tempo with possession sequences in the middle third; make opponent chase.`);
@@ -4962,7 +5164,10 @@
 
     function copyHalftimeTalk() {
       if (!cachedHalftimeReport) return;
-      const text = `AJAX ASPIRE U15 · HALFTIME TACTICAL TALK (${opponentName})
+      const squadLabel = (typeof SQUADS !== 'undefined' && typeof activeSquadKey !== 'undefined' && SQUADS[activeSquadKey])
+        ? SQUADS[activeSquadKey].label
+        : 'AJAX ASPIRE U15';
+      const text = `${squadLabel} · HALFTIME TACTICAL TALK (${opponentName})
 --------------------------------------------------
 SENTIMENT: ${cachedHalftimeReport.sentiment}
 
@@ -5139,6 +5344,7 @@ ${(cachedHalftimeReport.recommendedHalfTimeAdjustments || []).map(b => '• ' + 
 
       const matchMins = getHalfLengthMinutes() * 2;
       const fullTelemetry = {
+        squadName: (typeof SQUADS !== 'undefined' && typeof activeSquadKey !== 'undefined' && SQUADS[activeSquadKey]) ? SQUADS[activeSquadKey].label : 'AJAX ASPIRE U15',
         opponent: opponentName,
         matchMins,
         ajaxScore: totalAjaxGoals,
@@ -7066,6 +7272,7 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
         document.getElementById('teamSelector').value = activeSquadKey;
         document.getElementById('formationSelect').value = currentFormation;
         updateClockDisplay();
+        updatePeriodUI();
         updateScoreboard();
       } catch (e) {
         initSquadMatch();

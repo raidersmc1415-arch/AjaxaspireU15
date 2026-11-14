@@ -57,21 +57,22 @@ Respond strictly in valid JSON matching this schema:
 
     const userPrompt = isFullMatch
       ? `Match Telemetry (Full Match · ${telemetry.matchMins || 80} mins):
-- Opponent: ${telemetry.opponent || 'Opponent'}
-- Final Score: Ajax Aspire ${telemetry.ajaxScore || 0} - ${telemetry.oppScore || 0} ${telemetry.opponent || 'Opponent'}
+- Squad: ${telemetry.squadName || 'Ajax Aspire U15'} vs ${telemetry.opponent || 'Opponent'}
+- Final Score: ${telemetry.squadName || 'Ajax'} ${telemetry.ajaxScore || 0} - ${telemetry.oppScore || 0} ${telemetry.opponent || 'Opponent'}
 - 1st Half: ${telemetry.goalsH1 || 0} Goals, ${telemetry.shotsH1 || 0} Shots (${telemetry.sotH1 || 0} SOT), ${telemetry.pressRateH1 || 0}% Press/Duel Win, ${telemetry.toH1 || 0} Turnovers, ${telemetry.foulsH1 || 0} Fouls
 - 2nd Half: ${telemetry.goalsH2 || 0} Goals, ${telemetry.shotsH2 || 0} Shots (${telemetry.sotH2 || 0} SOT), ${telemetry.pressRateH2 || 0}% Press/Duel Win, ${telemetry.toH2 || 0} Turnovers, ${telemetry.foulsH2 || 0} Fouls
-- Total Shots: Ajax ${(telemetry.shotsH1 || 0) + (telemetry.shotsH2 || 0)} (${(telemetry.sotH1 || 0) + (telemetry.sotH2 || 0)} SOT) vs Opponent ${telemetry.oppShots || 0}
+- Total Shots & Quality: Ajax ${(telemetry.shotsH1 || 0) + (telemetry.shotsH2 || 0)} (${(telemetry.sotH1 || 0) + (telemetry.sotH2 || 0)} SOT, xG-lite ${Number(telemetry.xgFor || 0).toFixed(2)}, ${telemetry.bigChancesFor || 0} Big Chances) vs Opponent ${telemetry.oppShots || 0} (xG-lite ${Number(telemetry.xgAgainst || 0).toFixed(2)}, ${telemetry.bigChancesAgainst || 0} Big Chances)
+- Build-Out & Set Pieces: Goal Kicks Kept ${telemetry.goalKicksKept || 0}/${(telemetry.goalKicksKept || 0) + (telemetry.goalKicksLost || 0)} (${telemetry.gkRetentionPct ?? '--'}%), Set-Piece Shots ${telemetry.setPieceShots || 0}/${telemetry.setPieceAttempts || 0}
 - Opponent Corners: ${telemetry.oppCorners || 0}, Opponent Fouls: ${telemetry.oppFouls || 0}, Opponent Subs: ${telemetry.oppSubs || 0}
 - Standouts: ${(telemetry.standouts || []).map(s => String(s).replace(/<[^>]*>/g, '')).join('; ') || 'Balanced team effort'}`
       : `Match Telemetry (1st Half):
-- Opponent: ${telemetry.opponent || 'Opponent'}
-- Score: Ajax Aspire ${telemetry.ajaxScore || 0} - ${telemetry.oppScore || 0} ${telemetry.opponent || 'Opponent'}
-- Total Shots: Ajax ${telemetry.ajaxShots || 0} (On Target: ${telemetry.ajaxSot || 0}, Off Target: ${telemetry.ajaxSoff || 0}, Outside 18: ${telemetry.shotsOutside18 || 0}) vs Opponent ${telemetry.oppShots || 0}
-- Pressing: ${telemetry.pressWon || 0} Won, ${telemetry.pressLost || 0} Lost (Efficiency: ${telemetry.pressEfficiency || '0%'})
-- Territory: ${telemetry.goalKicksDefending || 0} Defending Goal Kicks (Opponent pinned deep) vs ${telemetry.goalKicksAttacking || 0} Attacking Goal Kicks (Ajax build-out)
-- Crosses: ${telemetry.crosses || 0}
-- Turnovers by Third: Defending ${telemetry.toD || 0}, Middle ${telemetry.toM || 0}, Attacking ${telemetry.toA || 0}
+- Squad: ${telemetry.squadName || 'Ajax Aspire U15'} vs ${telemetry.opponent || 'Opponent'}
+- Score: ${telemetry.squadName || 'Ajax'} ${telemetry.ajaxScore || 0} - ${telemetry.oppScore || 0} ${telemetry.opponent || 'Opponent'}
+- Shots & Quality: Ajax ${telemetry.ajaxShots || 0} Shots (${telemetry.ajaxSot || 0} On Target, ${telemetry.ajaxSoff || 0} Off Target, ${telemetry.shotsOutside18 || 0} Outside 18, xG-lite ${Number(telemetry.xgFor || 0).toFixed(2)}, ${telemetry.bigChancesCreated || 0} Big Chances Created, ${telemetry.bigChancesMissed || 0} Missed) vs Opponent ${telemetry.oppShots || 0} Shots (xG-lite ${Number(telemetry.xgAgainst || 0).toFixed(2)}, ${telemetry.oppBigChances || 0} Big Chances Conceded)
+- Pressing & High Regains: ${telemetry.pressWon || 0} Won, ${telemetry.pressLost || 0} Lost (Efficiency: ${telemetry.pressEfficiency || '0%'}), ${telemetry.highRegains || 0} High Regains (A3/M3)
+- Build-Out & Territory: ${telemetry.goalKicksDefending || 0} Defending Goal Kicks (Opponent pinned deep) vs ${telemetry.goalKicksAttacking || 0} Ajax Build-Out Goal Kicks (${telemetry.goalKicksKept || 0} Kept, ${telemetry.goalKicksLost || 0} Lost, Retention: ${telemetry.gkRetentionPct || '--'}) · Tilt: ${telemetry.territoryTilt || 'Balanced (50/50)'}
+- Set Pieces & Crosses: ${telemetry.setPieceShots || 0} shots from ${telemetry.setPieceAttempts || 0} corners/free kicks · Crosses: ${telemetry.crosses || 0}
+- Turnovers by Third: Defending ${telemetry.toD || 0}, Middle ${telemetry.toM || 0}, Attacking ${telemetry.toA || 0} (Total: ${telemetry.turnovers ?? ((telemetry.toD || 0) + (telemetry.toM || 0) + (telemetry.toA || 0))})
 - Fouls & Discipline: Ajax Fouls ${telemetry.ajaxFouls || 0}, Ajax Yellows ${telemetry.ajaxYellows || 0} (Carded: ${telemetry.cardedPlayers || 'None'}), Opponent Fouls ${telemetry.oppFouls || 0}
 - Key Events / Highlights: ${telemetry.recentEventsSummary || 'None'}`;
 
