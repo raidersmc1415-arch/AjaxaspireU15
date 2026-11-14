@@ -654,10 +654,10 @@
         <!-- Quick Film Study Actions (Direct Modal + Dedicated Smart Logger) -->
         <div class="bg-card p-3.5 rounded-2xl border border-teal-500/40 flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-300 border border-teal-500/40 flex items-center justify-center font-black text-base shrink-0">🎙️</div>
+            <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-300 border border-teal-500/40 flex items-center justify-center font-black text-base shrink-0">🎬</div>
             <div>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-white">Veo Film Study &amp; Clip Tagging</h3>
-              <p class="text-[11px] text-slate-400">Tag moments live in the Voice &amp; Fast Logger or add a single timestamped clip directly to the Sheet.</p>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-white">Veo Film Review &amp; Clip Tagging</h3>
+              <p class="text-[11px] text-slate-400">Open Film Review (Voice or Touch) to refine committed pitchside moments, or add a single timestamped clip directly to the Sheet.</p>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2">
@@ -665,7 +665,7 @@
               <span>➕ Add Single Moment</span>
             </button>
             <a href="film-moment-logger.html" target="_blank" class="min-h-[40px] px-3.5 py-2 rounded-xl bg-pitch hover:bg-surface text-teal-300 hover:text-white border border-teal-500/40 font-bold text-xs transition flex items-center gap-1.5">
-              <span>🎙️ Open Voice &amp; Fast Logger</span> ↗
+              <span>🎬 Open Film Review</span> ↗
             </a>
           </div>
           <!-- Hidden legacy anchors retained for backwards-compatible helper calls -->
@@ -726,7 +726,7 @@
                 <input type="file" accept=".json" class="hidden" onchange="restoreFullSeasonBackupFile(event)">
               </label>
               <a href="film-moment-logger.html" target="_blank" class="text-[11px] bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1.5">
-                <span>🎙️ Voice &amp; Fast Logger</span> ↗
+                <span>🎬 Film Review</span> ↗
               </a>
               <button type="button" onclick="resetFilmFilters()" class="text-[11px] text-slate-400 hover:text-white underline">Reset Filters</button>
             </div>
@@ -2796,18 +2796,32 @@
       // Ensure filmEvents & filmSummary are cleanly scoped (All-Competitions vs. GA & Aspire League)
       const TOURNEY_MATCHES = new Set(['Manchester Pat', 'Ventura Surf', 'AVS FC', 'Manchester Ventura Surf', 'Manchester AVS FC']);
       const baseFilmAll = DEFAULT_DATA['AJAX ASPIRE U15']?.filmEvents || [];
-
+      const baseMatchSet = new Set(baseFilmAll.map(e => e.match).filter(Boolean));
       const maxBaselineId = baseFilmAll.reduce((m, e) => Math.max(m, Number(e.id) || 0), 0);
 
-      // Collect only genuine UI-created custom moments with IDs beyond baseline
+      // Collect genuine UI/Sheet-created moments (IDs beyond baseline, string event IDs, or new committed matches)
       const aspireKeys = ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)'];
       let customAddedMoments = [];
+      let nextSyntheticId = maxBaselineId + 1;
+      const seenCustomKeys = new Set();
       aspireKeys.forEach(k => {
         if (DATA[k] && Array.isArray(DATA[k].filmEvents) && DATA[k].filmEvents.length) {
           DATA[k].filmEvents.forEach(e => {
             if (/rocklin.*(11|nov|26)/i.test(e.match || '')) e.match = 'Rocklin (Nov 1)';
-            if (Number(e.id) > maxBaselineId && !customAddedMoments.some(c => c.id === e.id)) {
-              customAddedMoments.push(e);
+            const numId = Number(e.id);
+            const isNewMatch = Boolean(e.match && !baseMatchSet.has(e.match));
+            const isCustomId = (Number.isFinite(numId) && numId > maxBaselineId) || (e.id != null && isNaN(numId)) || isNewMatch;
+            if (!isCustomId) return;
+            const cKey = e.id != null ? `id:${e.id}` : `sig:${e.match}::${e.time}::${e.tag || ''}::${(e.note || e.notes || '').slice(0, 30)}`;
+            if (!seenCustomKeys.has(cKey)) {
+              seenCustomKeys.add(cKey);
+              const copy = Object.assign({}, e);
+              if (!Number.isFinite(numId) || numId <= 0) {
+                copy.id = nextSyntheticId++;
+              } else {
+                nextSyntheticId = Math.max(nextSyntheticId, numId + 1);
+              }
+              customAddedMoments.push(copy);
             }
           });
         }
@@ -2906,10 +2920,12 @@
             const savedGames = v?.totals?.games || 0;
             if (v && v.totals && Array.isArray(v.players)) {
               if (savedGames >= defaultGames) {
-                // If saved filmEvents has been bloated beyond baseline, reset filmEvents to canonical baseline
-                const baseLen = DEFAULT_DATA[k]?.filmEvents?.length || 0;
-                if (baseLen > 0 && Array.isArray(v.filmEvents) && v.filmEvents.length > baseLen + 20) {
-                  console.warn(`[Auto-Heal] Resetting bloated local filmEvents for ${k} (${v.filmEvents.length} -> ${baseLen}).`);
+                // Auto-heal only genuine legacy Rocklin duplicate bloat without discarding newly reviewed matches
+                const rocklinCount = Array.isArray(v.filmEvents)
+                  ? v.filmEvents.filter(ev => ev && ev.match === 'Rocklin (Nov 1)').length
+                  : 0;
+                if (rocklinCount > 110) {
+                  console.warn(`[Auto-Heal] Resetting duplicate Rocklin baseline filmEvents for ${k} (Rocklin count=${rocklinCount}).`);
                   v.filmEvents = JSON.parse(JSON.stringify(DEFAULT_DATA[k].filmEvents));
                 }
                 DATA[k] = v;
@@ -3092,7 +3108,7 @@
       if (LINKS.veo) links.push(`<a href="${esc(LINKS.veo)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-border px-2.5 py-1.5 rounded-lg text-slate-200">Watch on Veo →</a>`);
       if (LINKS.film) links.push(`<a href="${esc(LINKS.film)}" target="_blank" rel="noopener" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-border px-2.5 py-1.5 rounded-lg text-slate-200">Film Room →</a>`);
       if (hasFilm) links.push(`<button type="button" onclick="switchTab('tab-film')" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-brand-500/40 px-2.5 py-1.5 rounded-lg text-brand-400">Open Film Log (${totals.filmEventsCount}) →</button>`);
-      links.push(`<a href="film-moment-logger.html" target="_blank" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-teal-500/40 px-2.5 py-1.5 rounded-lg text-teal-300">🎙️ Voice Logger ↗</a>`);
+      links.push(`<a href="film-moment-logger.html" target="_blank" class="text-[11px] font-semibold bg-pitch hover:bg-surface border border-teal-500/40 px-2.5 py-1.5 rounded-lg text-teal-300">🎬 Film Review ↗</a>`);
       $('filmLinks').innerHTML = links.join('');
 
       const toDef = totals.toD || 0;
@@ -7029,7 +7045,10 @@
       try {
         const pin = getCoachSessionPin();
         if (!pin) return;
-        const res = await fetch(`${API_URL}?action=matchHub&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null);
+        const [res, actionsRes] = await Promise.all([
+          fetch(`${API_URL}?action=matchHub&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null),
+          fetch(`${API_URL}?action=getMatchActions&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null)
+        ]);
         if (res && res.success && res.notes && typeof res.notes === 'object') {
           let updatedReport = false;
           let updatedFilmOverrides = false;
@@ -7080,6 +7099,12 @@
           renderRoster();
         }
 
+        if (res && res.success && res.latestDraft && typeof res.latestDraft === 'object') {
+          try {
+            checkAndRenderPitchsideDraftBanner(res.latestDraft);
+          } catch (e) {}
+        }
+
         // Hydrate cross-device datasets from Google Sheets
         if (res && res.success && res.datasets && typeof res.datasets === 'object') {
           let updatedDatasets = false;
@@ -7101,6 +7126,80 @@
             sanitizeAndHealData();
             renderTeamSwitch();
             renderAll();
+            renderFilmLogList();
+          }
+        }
+
+        // Hydrate authoritative Match_Action_Log rows (from Film Review & Pitchside Tracker)
+        if (actionsRes && actionsRes.success && Array.isArray(actionsRes.moments) && actionsRes.moments.length) {
+          const baseMatchSet = new Set((DEFAULT_DATA['AJAX ASPIRE U15']?.filmEvents || []).map(e => e.match).filter(Boolean));
+          const TOURNEY_MATCHES = new Set(['Manchester Pat', 'Ventura Surf', 'AVS FC', 'Manchester Ventura Surf', 'Manchester AVS FC']);
+          const sheetByMatch = {};
+          actionsRes.moments.forEach(rm => {
+            const mt = /rocklin.*(11|nov|26)/i.test(rm.match || '') ? 'Rocklin (Nov 1)' : String(rm.match || '').trim();
+            if (!mt) return;
+            if (!sheetByMatch[mt]) sheetByMatch[mt] = [];
+            sheetByMatch[mt].push({ ...rm, match: mt, notes: rm.note || rm.notes || '' });
+          });
+
+          let mergedAnySheetFilm = false;
+          ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)'].forEach(k => {
+            if (!DATA[k]) return;
+            let list = Array.isArray(DATA[k].filmEvents) ? DATA[k].filmEvents.slice() : [];
+            let nextId = Math.max(list.reduce((m, e) => Math.max(m, Number(e.id) || 0), 837), 837) + 1;
+
+            Object.entries(sheetByMatch).forEach(([mt, rows]) => {
+              if (k.includes('(LEAGUE)') && TOURNEY_MATCHES.has(mt)) return;
+              if (!baseMatchSet.has(mt)) {
+                // Newly committed/reviewed match: replace with authoritative Sheet rows so edits & deletes mirror cleanly
+                list = list.filter(e => e.match !== mt);
+                rows.forEach(r => {
+                  const nId = Number(r.id);
+                  const assignedId = (Number.isFinite(nId) && nId > 837) ? nId : (nextId++);
+                  list.push({ ...r, id: assignedId });
+                });
+                mergedAnySheetFilm = true;
+              } else {
+                // Historical baseline match: overlay edits & append genuinely new clips
+                const seenSigs = new Set(list.filter(e => e.match === mt).map(e => `${e.time}::${e.tag || ''}::${(e.note || '').slice(0, 30)}`));
+                rows.forEach(r => {
+                  const nId = Number(r.id);
+                  const existingIdx = Number.isFinite(nId) ? list.findIndex(e => Number(e.id) === nId) : -1;
+                  if (existingIdx !== -1) {
+                    list[existingIdx] = { ...list[existingIdx], ...r, id: nId };
+                    mergedAnySheetFilm = true;
+                  } else {
+                    const sig = `${r.time}::${r.tag || ''}::${(r.note || '').slice(0, 30)}`;
+                    if (!seenSigs.has(sig)) {
+                      const assignedId = (Number.isFinite(nId) && nId > 837) ? nId : (nextId++);
+                      list.push({ ...r, id: assignedId });
+                      seenSigs.add(sig);
+                      mergedAnySheetFilm = true;
+                    }
+                  }
+                });
+              }
+            });
+
+            if (mergedAnySheetFilm) {
+              DATA[k].filmEvents = list;
+              applyFilmEventsToTeam(DATA[k], list);
+            }
+          });
+
+          if (mergedAnySheetFilm) {
+            sanitizeAndHealData();
+            safeSaveStorage('matchhub_custom_data', JSON.stringify(DATA));
+            renderAll();
+            renderFilmLogList();
+          }
+        }
+
+        if (window.__REQUESTED_HUB_MATCH && $('filmMatchFilter')) {
+          const optExists = Array.from($('filmMatchFilter').options).some(o => o.value === window.__REQUESTED_HUB_MATCH);
+          if (optExists) {
+            $('filmMatchFilter').value = window.__REQUESTED_HUB_MATCH;
+            window.__REQUESTED_HUB_MATCH = '';
             renderFilmLogList();
           }
         }
@@ -8197,12 +8296,28 @@
     window.addEventListener('DOMContentLoaded', () => {
       checkAuthOnLoad();
       try { aspireScope = localStorage.getItem('matchhub_aspire_scope') || 'league'; } catch (e) {}
+      const urlParams = new URLSearchParams(location.search || '');
+      const reqMatch = urlParams.get('match');
+      if (reqMatch) window.__REQUESTED_HUB_MATCH = reqMatch;
       let start = location.hash.slice(1);
+      if (start && start.startsWith('tab-') && $(start)) {
+        activeTab = start;
+        start = '';
+      }
       try {
         if (!TEAMS.some(t => t.id === start)) start = localStorage.getItem('matchhub_team') || 'aspire';
-        const tab = localStorage.getItem('matchhub_tab'); if (tab && $(tab)) activeTab = tab;
+        if (!location.hash.startsWith('#tab-')) {
+          const tab = localStorage.getItem('matchhub_tab'); if (tab && $(tab)) activeTab = tab;
+        }
       } catch (e) { start = start || 'aspire'; }
       selectTeam(start);
+      if (window.__REQUESTED_HUB_MATCH && $('filmMatchFilter')) {
+        const optExists = Array.from($('filmMatchFilter').options).some(o => o.value === window.__REQUESTED_HUB_MATCH);
+        if (optExists) {
+          $('filmMatchFilter').value = window.__REQUESTED_HUB_MATCH;
+          renderFilmLogList();
+        }
+      }
       loadCloudMatchHubNotes();
     });
   </script>

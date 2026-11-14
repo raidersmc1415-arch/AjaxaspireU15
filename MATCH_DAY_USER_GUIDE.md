@@ -135,10 +135,15 @@ If a test commit was sent to your Google Sheet:
 
 ## 6. Post-Match Veo Film Review Workflow
 
-When you sit down with your laptop or iPad to watch the Veo match replay:
-1. Open **Match Hub** (`match-hub.html#film`).
-2. Review any **Sideline Bookmarks** staged from your iPad in the Pitchside Draft Banner or Film Room.
-3. Jump to that minute on Veo.
-4. Add or edit moments using the **Film Moment Logger** (`film-moment-logger.html`) or the inline **Edit Clip Modal** (`✏️ Edit` / `➕ Add Moment`) inside Match Hub.
-5. Check **`📌 Assign to Player Film Review`** (`Film_Review = TRUE`) on moments where you want your coaching note shown to the player in her portal.
-6. Every edit or **`☁️ Publish Match Film to Sheet`** syncs directly into the **`Match_Action_Log`** Google Sheet tab and immediately updates the authenticated Player Portal.
+1. **Commit Pitchside Match (`ajax-match-tracker.html`):**
+   - At Full Time, tap **`⚡ COMMIT MATCH TO HUB`** (or tap **`🎬 Open Film Review ↗`** directly from the confirmation receipt).
+   - This updates Google Sheets (`Player_IDP`) and stages the match—even if 0 film moments were logged pitchside—as a holding record in **`Match_Action_Log` / `match_history` / `pitchside_drafts`**.
+2. **Open Film Review (`film-moment-logger.html`) on iPad or Desktop:**
+   - Enter your Coach Token (if opening on another browser/device) and tap **`☁️ Sync Sheet`** so all committed matches appear at the top of the **Match Name** dropdown.
+   - Select the committed match in either **🎙️ Voice Review** or **⚡ Touch Review**.
+   - Any existing committed pitchside moments load automatically into both the inline **Existing & Fine-Tuned Match Moments** panel and **📋 Review Timeline**.
+3. **Fine-Tune, Edit & Add Moments While Watching Veo:**
+   - Tap **`✏️ Edit`** on any existing moment to refine timestamp, zone, player(s), tag, quality, shot location, internal note, **`Note_To_Player`**, or **`👁️ Review`** player-portal flag.
+   - Speak/paste transcripts in **🎙️ Voice Review** or tap quick actions in **⚡ Touch Review** to add new moments to the match.
+4. **Push Final Review to Match Hub:**
+   - Tap **`✅ Push Final Review to Match Hub`**. All finalized moments sync to **`Match_Action_Log`** in Google Sheets, update the authenticated Player Portal, and open **Match Hub** (`match-hub.html#tab-film`) filtered to that match.

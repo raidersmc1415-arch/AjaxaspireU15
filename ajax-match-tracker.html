@@ -927,9 +927,9 @@
         ⚡
       </div>
       <div>
-        <div class="mono text-[10px] uppercase text-emerald-400 font-bold tracking-wider">Match Committed Successfully</div>
+        <div class="mono text-[10px] uppercase text-emerald-400 font-bold tracking-wider">Match Committed &amp; Staged</div>
         <h3 class="display text-2xl text-white mt-1" id="commitConfirmTitle">Match vs. Opponent Saved</h3>
-        <p class="text-xs text-slate-400 mt-1" id="commitConfirmSubtitle">Stats, cumulative minutes, and film moments committed to Match Hub and Google Sheets.</p>
+        <p class="text-xs text-slate-400 mt-1" id="commitConfirmSubtitle">Stats, cumulative minutes, and a holding record for Film Review are staged in Match Hub &amp; Google Sheets.</p>
       </div>
 
       <div class="bg-pitch/90 p-3.5 rounded-xl border border-border/80 text-left text-xs space-y-1.5">
@@ -956,8 +956,11 @@
       </div>
 
       <div class="pt-1 flex items-center justify-center gap-2">
-        <button onclick="closeModal('commitConfirmModal')" class="flex-1 py-2.5 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border text-xs font-semibold">
+        <button onclick="closeModal('commitConfirmModal')" class="py-2.5 px-3 rounded-xl bg-surface hover:bg-slate-700 text-slate-300 border border-border text-xs font-semibold">
           Dismiss
+        </button>
+        <button onclick="goToFilmReview()" class="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-lg active:scale-95">
+          🎬 Open Film Review ↗
         </button>
         <button onclick="goToMatchHub()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg active:scale-95">
           View in Match Hub ↗
@@ -6864,6 +6867,10 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
         return;
       }
       const matchDateKey = (typeof matchDate !== 'undefined' && matchDate) ? matchDate : new Date().toISOString().slice(0, 10);
+      const canonicalMatchTitle = /rocklin.*(11|nov|26)/i.test(opponentName)
+        ? 'Rocklin (Nov 1)'
+        : (opponentName.includes('(') ? opponentName : `${opponentName} (${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`);
+      window.LAST_COMMITTED_MATCH_TITLE = canonicalMatchTitle;
       const matchId = `${targetTeam}_${opponentName.replace(/[^a-zA-Z0-9]/g, '_')}_${matchDateKey}`;
       const matchTotals = {
         shots: matchEvents.filter(e => e.type === 'shot' || e.type === 'sot' || e.type === 'shot_outside_18' || e.type === 'goal').length,
@@ -6873,7 +6880,9 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
       };
       const matchSummary = {
         matchId: matchId,
+        match: canonicalMatchTitle,
         date: new Date().toISOString(),
+        matchDate: matchDateKey,
         team: targetTeam,
         opponent: opponentName,
         ajaxScore: ajaxGoals,
@@ -6883,32 +6892,37 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
         oppSubs: oppStats.subs || 0,
         oppCorners: oppStats.corners || 0,
         oppFouls: oppStats.fouls || 0,
-        eventCount: matchEvents.length
+        eventCount: matchEvents.length,
+        status: 'Pitchside Committed'
       };
 
-      // Stage Pitchside Draft & Sync In-Game Logged Moments to Cloud for Desktop Film Study + Master Sheet
+      // Stage Pitchside Draft & Sync In-Game Logged Moments to Cloud for Desktop Film Review + Master Sheet
       try {
-        const canonicalMatchTitle = /rocklin.*(11|nov|26)/i.test(opponentName)
-          ? 'Rocklin (Nov 1)'
-          : (opponentName.includes('(') ? opponentName : `${opponentName} (${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`);
         const allTeamFilm = (customData[targetTeam] && customData[targetTeam].filmEvents) || [];
         const matchFilmOnly = allTeamFilm.filter(e => e.match === canonicalMatchTitle);
         const draftPayload = {
           match: canonicalMatchTitle,
+          matchId: matchId,
+          team: targetTeam,
           opponent: opponentName,
-          matchDate: new Date().toISOString().slice(0, 10),
+          matchDate: matchDateKey,
           score: `${ajaxGoals} - ${oppGoals}`,
           matchMins: matchMins,
           moments: matchFilmOnly,
+          momentCount: matchFilmOnly.length,
+          status: 'Pitchside Draft',
           savedAt: new Date().toISOString()
         };
         localStorage.setItem('ajax_pitchside_draft_latest', JSON.stringify(draftPayload));
+        try {
+          const allDrafts = JSON.parse(localStorage.getItem('ajax_pitchside_drafts') || '{}') || {};
+          allDrafts[canonicalMatchTitle] = draftPayload;
+          localStorage.setItem('ajax_pitchside_drafts', JSON.stringify(allDrafts));
+        } catch (e) {}
 
-        // 1. Save pitchside draft to kv['notes'] (works on live deployment) & savePitchsideDraft
+        // 1. Save pitchside draft to kv['notes'] & kv['pitchside_drafts'] (holds record in Film Review dropdown even with 0 clips)
         fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'saveMatchHubNote',
             pin: coachPin,
@@ -6919,8 +6933,6 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
 
         fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'savePitchsideDraft',
             pin: coachPin,
@@ -6932,8 +6944,6 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
         if (matchFilmOnly.length > 0) {
           fetch(API_URL, {
             method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
               action: 'saveFilmMoments',
               pin: coachPin,
@@ -6946,8 +6956,6 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
         // 3. Save multi-device datasets permanently to Google Sheets KV store
         fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'saveMatchHubData',
             pin: coachPin,
@@ -7003,6 +7011,11 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
 
     function goToMatchHub() {
       window.location.href = `match-hub.html#${activeSquadKey}`;
+    }
+
+    function goToFilmReview() {
+      const m = window.LAST_COMMITTED_MATCH_TITLE || '';
+      window.location.href = m ? `film-moment-logger.html?match=${encodeURIComponent(m)}` : 'film-moment-logger.html';
     }
 
     function resetCurrentMatch() {

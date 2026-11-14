@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ajax Aspire U15 · Smart Film Moment Logger &amp; Voice Converter</title>
+  <title>Ajax Aspire U15 · Film Review</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -51,20 +51,28 @@
     <header class="bg-card rounded-2xl border border-border p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl">
       <div class="flex items-center space-x-3.5">
         <div class="w-12 h-12 rounded-xl bg-brand-500/15 border border-brand-400/40 text-brand-400 flex items-center justify-center display text-2xl font-bold shrink-0">
-          🎙️
+          🎬
         </div>
         <div>
-          <div class="mono text-[10px] uppercase tracking-widest text-brand-400 font-bold flex items-center gap-2">
-            <span>AJAX ASPIRE U15 · FILM STUDY TOOLKIT</span>
-            <span class="px-2 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px]">v3.1 READY</span>
+          <div class="mono text-[10px] uppercase tracking-widest text-brand-400 font-bold flex items-center gap-2 flex-wrap">
+            <span>AJAX ASPIRE U15 · FILM REVIEW WORKSPACE</span>
+            <span class="px-2 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px]">PITCH → REVIEW → HUB</span>
+            <span id="cloudSyncStatusPill" class="px-2 py-0.2 rounded bg-pitch text-slate-300 border border-border text-[9px]">🔒 Local Only · Enter Token to Sync</span>
           </div>
-          <h1 class="display text-2xl sm:text-3xl text-white leading-tight">Smart Match Film Logger &amp; Voice Converter</h1>
-          <p class="text-xs text-slate-400">Log moments via voice dictation, fast-tap while watching Veo, or parse raw transcripts without Excel date bugs.</p>
+          <h1 class="display text-2xl sm:text-3xl text-white leading-tight">Film Review</h1>
+          <p class="text-xs text-slate-400">Pick a committed match, inspect &amp; fine-tune pitchside moments, add clips by Voice or Touch while watching Veo, then push your final review to Match Hub.</p>
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
+        <div id="coachTokenInlineWrap" class="flex items-center gap-1.5">
+          <input type="password" id="filmCoachTokenInput" placeholder="Coach Token" onkeydown="if(event.key==='Enter') unlockFilmReviewCloud()"
+            class="w-28 bg-pitch text-xs px-2.5 py-2 rounded-xl border border-border text-white placeholder-slate-500 focus:outline-none focus:border-brand-500">
+          <button type="button" onclick="unlockFilmReviewCloud()" id="unlockCloudBtn" class="text-xs bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 hover:text-white font-semibold px-3 py-2 rounded-xl transition">
+            ☁️ Sync Sheet
+          </button>
+        </div>
         <button onclick="syncMomentsToMatchHub()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5 active:scale-95">
-          <span>⚡ Push to Match Hub</span>
+          <span>✅ Push Final Review to Match Hub</span>
         </button>
         <a href="match-hub.html#tab-film" target="_blank" class="text-xs bg-pitch hover:bg-surface border border-border text-slate-300 hover:text-white px-3 py-2 rounded-xl font-semibold transition flex items-center gap-1.5">
           <span>Open Match Hub</span> ↗
@@ -75,19 +83,37 @@
       </div>
     </header>
 
+    <!-- Holding Record / Active Match Context Banner -->
+    <div id="activeMatchHoldingBanner" class="bg-card/80 rounded-2xl border border-teal-500/30 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="mono text-[10px] uppercase text-teal-400 font-bold">Selected Match:</span>
+        <span id="activeMatchBannerTitle" class="font-bold text-white">Crossfire #2 (Nov 8)</span>
+        <span id="activeMatchBannerStatus" class="text-[11px] px-2 py-0.5 rounded bg-surface border border-border text-slate-300 font-mono">0 moments loaded</span>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span id="pendingDraftQuickJump" class="hidden"></span>
+        <button type="button" onclick="reloadSelectedMatchFromCloud()" class="text-[11px] bg-pitch hover:bg-surface border border-border text-slate-300 hover:text-white px-2.5 py-1 rounded-lg transition">
+          🔄 Reload Match from Sheet
+        </button>
+        <button type="button" onclick="switchTab('tab-table')" class="text-[11px] bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition">
+          📋 Full Review Timeline (<span id="bannerCountBadge">0</span>)
+        </button>
+      </div>
+    </div>
+
     <!-- Navigation Tabs -->
     <div class="flex border-b border-border/80 text-xs font-semibold overflow-x-auto gap-2">
       <button onclick="switchTab('tab-voice')" id="btn-tab-voice" class="tab-btn px-4 py-2.5 rounded-t-xl border-t-2 border-brand-400 bg-card text-brand-400 transition flex items-center gap-2">
-        <span>🎙️ Voice Memo &amp; AI Parser</span>
+        <span>🎙️ Voice Review</span>
       </button>
       <button onclick="switchTab('tab-rapid')" id="btn-tab-rapid" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-white transition flex items-center gap-2">
-        <span>⚡ Quick-Tap Rapid Logger</span>
+        <span>⚡ Touch Review</span>
       </button>
       <button onclick="switchTab('tab-table')" id="btn-tab-table" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-white transition flex items-center gap-2">
-        <span>📋 Logged Moments (<span id="tabCountBadge">0</span>)</span>
+        <span>📋 Review Timeline (<span id="tabCountBadge">0</span>)</span>
       </button>
       <button onclick="switchTab('tab-gemini')" id="btn-tab-gemini" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-white transition flex items-center gap-2">
-        <span>🤖 Mobile Phone Prompt Template</span>
+        <span>🤖 Mobile Prompt Template</span>
       </button>
     </div>
 
@@ -175,10 +201,27 @@
               Clear
             </button>
             <button onclick="parseVoiceNotes()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white font-bold px-5 py-2 rounded-xl transition shadow-lg flex items-center gap-1.5">
-              <span>⚡ Convert to Film Moments →</span>
+              <span>⚡ Add Spoken Moments to Match →</span>
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- Loaded Pitchside / Existing Match Moments (Fine-Tune & Edit in Voice Mode) -->
+      <div class="bg-card rounded-2xl border border-border p-4 space-y-3 shadow-xl">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+              <span>🎬 Existing &amp; Fine-Tuned Match Moments</span>
+              <span id="voiceMomentsDrawerCount" class="text-[10px] bg-pitch px-2 py-0.5 rounded text-teal-300 border border-border mono">0</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">Tap ✏️ on any pitchside moment below to adjust timestamp, tag, zone, players, or coaching note.</p>
+          </div>
+          <button type="button" onclick="syncMomentsToMatchHub()" class="text-[11px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl transition">
+            ✅ Push Final Review to Match Hub
+          </button>
+        </div>
+        <div id="voiceMatchMomentsPreview" class="space-y-1.5 max-h-72 overflow-y-auto pr-1"></div>
       </div>
     </div>
 
@@ -190,9 +233,9 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-3">
           <div>
             <h2 class="display text-xl text-white flex items-center gap-2">
-              <span>Quick-Tap Moment Logger</span>
+              <span>Touch Moment Review</span>
             </h2>
-            <p class="text-xs text-slate-400">Tag moments with 3 quick taps without pausing or breaking your flow.</p>
+            <p class="text-xs text-slate-400">Add new moments by touch while watching Veo, or edit committed pitchside moments below.</p>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-xs text-slate-400">Match:</span>
@@ -433,8 +476,25 @@
         </div>
 
         <button onclick="commitRapidMoment()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition shadow-xl flex items-center justify-center gap-2">
-          <span>➕ Commit Moment to Log (Enter)</span>
+          <span>➕ Add Moment to Match Review (Enter)</span>
         </button>
+      </div>
+
+      <!-- Loaded Pitchside / Existing Match Moments (Fine-Tune & Edit in Touch Mode) -->
+      <div class="bg-card rounded-2xl border border-border p-4 space-y-3 shadow-xl">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+              <span>🎬 Existing &amp; Fine-Tuned Match Moments</span>
+              <span id="rapidMomentsDrawerCount" class="text-[10px] bg-pitch px-2 py-0.5 rounded text-teal-300 border border-border mono">0</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">Tap ✏️ on any moment to adjust timestamp, zone, player, tag, or coaching note while watching Veo.</p>
+          </div>
+          <button type="button" onclick="syncMomentsToMatchHub()" class="text-[11px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl transition">
+            ✅ Push Final Review to Match Hub
+          </button>
+        </div>
+        <div id="rapidMatchMomentsPreview" class="space-y-1.5 max-h-72 overflow-y-auto pr-1"></div>
       </div>
     </div>
 
@@ -492,7 +552,7 @@
             <span>🔄 Move All "La Morinda" → "Rocklin (Nov 1)"</span>
           </button>
           <button onclick="syncMomentsToMatchHub()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 active:scale-95">
-            <span>⚡ Push to Match Hub</span>
+            <span>✅ Push Final Review to Match Hub</span>
           </button>
           <button onclick="copyCleanCsvToClipboard()" class="text-xs bg-pitch hover:bg-surface border border-teal-500/40 text-teal-300 px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5">
             <span>📋 Copy CSV to Clipboard</span>
@@ -635,7 +695,9 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       "2026-04-02": [4, 2]
     };
 
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec';
     let LOGGED_MOMENTS = [];
+    let CLOUD_MATCH_CATALOG = {}; // canonicalMatchTitle -> { match, moments, meta }
     let selectedRapidPlayers = []; // Ordered array: 1st element = Primary (1°), 2nd+ = Secondary (2°)
     let currentRapidZone = 'D3';
     let currentRapidOutcome = 'Glow';
@@ -647,66 +709,321 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
     let rapidRecognition = null;
     let isRapidFilmReview = false;
 
+    function getCoachSessionPin() {
+      if (typeof window.CURRENT_COACH_PIN !== 'undefined' && window.CURRENT_COACH_PIN) {
+        return String(window.CURRENT_COACH_PIN).trim();
+      }
+      try {
+        const sPin = (sessionStorage.getItem('ajax_coach_session_token') || '').trim();
+        if (sPin) {
+          window.CURRENT_COACH_PIN = sPin;
+          return sPin;
+        }
+      } catch (e) {}
+      return '';
+    }
+
+    function updateCloudAuthBarUI(syncedMatchesCount, totalSheetMoments) {
+      const pill = document.getElementById('cloudSyncStatusPill');
+      const wrap = document.getElementById('coachTokenInlineWrap');
+      const pin = getCoachSessionPin();
+      if (pill) {
+        if (pin && typeof syncedMatchesCount === 'number') {
+          pill.textContent = `☁️ Sheet Synced · ${syncedMatchesCount} matches (${totalSheetMoments || 0} rows)`;
+          pill.className = 'px-2 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px]';
+        } else if (pin) {
+          pill.textContent = '☁️ Cloud Token Ready';
+          pill.className = 'px-2 py-0.2 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[9px]';
+        } else {
+          pill.textContent = '🔒 Enter Coach Token to Load Pitchside Matches';
+          pill.className = 'px-2 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px]';
+        }
+      }
+      if (wrap) {
+        if (pin) {
+          wrap.innerHTML = `<button type="button" onclick="syncMatchesFromActionLog(true)" class="text-xs bg-pitch hover:bg-surface border border-emerald-500/40 text-emerald-300 hover:text-white font-semibold px-3 py-2 rounded-xl transition">🔄 Refresh Matches</button>`;
+        }
+      }
+    }
+
+    async function unlockFilmReviewCloud() {
+      const inp = document.getElementById('filmCoachTokenInput');
+      const pin = (inp ? inp.value : '').trim();
+      if (!pin) {
+        showToast('Enter your Coach Token first.');
+        return;
+      }
+      try { sessionStorage.setItem('ajax_coach_session_token', pin); } catch (e) {}
+      window.CURRENT_COACH_PIN = pin;
+      updateCloudAuthBarUI();
+      await syncMatchesFromActionLog(true);
+    }
+
+    function canonicalizeMatchTitle(name) {
+      const raw = String(name || '').trim();
+      if (!raw) return '';
+      if (/rocklin.*(11|nov|26)/i.test(raw)) return 'Rocklin (Nov 1)';
+      return raw;
+    }
+
+    function getNextMomentId() {
+      const maxExisting = LOGGED_MOMENTS.reduce((mx, m) => Math.max(mx, Number(m && m.id) || 0), 1000);
+      return Math.max(maxExisting + 1, Date.now());
+    }
+
     /* Initialize today date */
     document.addEventListener('DOMContentLoaded', () => {
       const today = new Date().toISOString().split('T')[0];
       if (document.getElementById('voiceDate')) document.getElementById('voiceDate').value = today;
       buildRosterPickGrid();
+      updateCloudAuthBarUI();
+      const urlParams = new URLSearchParams(window.location.search || '');
+      const requestedMatch = urlParams.get('match');
+      if (requestedMatch) {
+        window.__REQUESTED_FILM_MATCH = canonicalizeMatchTitle(requestedMatch);
+      }
       loadFromLocalStorage();
       syncMatchesFromActionLog();
     });
 
-    async function syncMatchesFromActionLog() {
-      // 1. Check local latest pitchside draft or customData first (instant offline)
+    async function syncMatchesFromActionLog(showStatusToast) {
+      let latestStagedMatch = '';
+
+      // 1. Check local pitchside drafts & Match Hub customData (instant offline)
       try {
+        const localDraftsRaw = localStorage.getItem('ajax_pitchside_drafts');
+        if (localDraftsRaw) {
+          const draftsObj = JSON.parse(localDraftsRaw);
+          Object.values(draftsObj || {}).forEach(d => {
+            if (d && d.match) {
+              const title = canonicalizeMatchTitle(d.match);
+              CLOUD_MATCH_CATALOG[title] = {
+                match: title,
+                moments: Array.isArray(d.moments) ? d.moments : [],
+                meta: { score: d.score || '', status: d.status || 'Pitchside Draft', matchDate: d.matchDate || '', source: 'local-draft' }
+              };
+              addMatchOptionIfMissing(title, d.score ? `${title} · ${d.score} (${(d.moments || []).length} clips)` : `${title} · Holding (${(d.moments || []).length} clips)`);
+              if (!latestStagedMatch) latestStagedMatch = title;
+            }
+          });
+        }
         const localDraftRaw = localStorage.getItem('ajax_pitchside_draft_latest');
         if (localDraftRaw) {
           const draft = JSON.parse(localDraftRaw);
           if (draft && draft.match) {
-            addMatchOptionIfMissing(draft.match);
+            const title = canonicalizeMatchTitle(draft.match);
+            if (!CLOUD_MATCH_CATALOG[title] || (Array.isArray(draft.moments) && draft.moments.length >= (CLOUD_MATCH_CATALOG[title].moments || []).length)) {
+              CLOUD_MATCH_CATALOG[title] = {
+                match: title,
+                moments: Array.isArray(draft.moments) ? draft.moments : [],
+                meta: { score: draft.score || '', status: draft.status || 'Pitchside Draft', matchDate: draft.matchDate || '', source: 'local-draft' }
+              };
+            }
+            addMatchOptionIfMissing(title, draft.score ? `${title} · ${draft.score} (${(draft.moments || []).length} clips)` : `${title} · Holding (${(draft.moments || []).length} clips)`);
+            latestStagedMatch = title;
           }
+        }
+        const customRaw = localStorage.getItem('matchhub_custom_data');
+        if (customRaw) {
+          const custom = JSON.parse(customRaw);
+          const allEv = (custom && custom['AJAX ASPIRE U15'] && Array.isArray(custom['AJAX ASPIRE U15'].filmEvents)) ? custom['AJAX ASPIRE U15'].filmEvents : [];
+          const byMatch = {};
+          allEv.forEach(ev => {
+            const mt = canonicalizeMatchTitle(ev.match || ev.m);
+            if (!mt) return;
+            if (!byMatch[mt]) byMatch[mt] = [];
+            byMatch[mt].push(ev);
+          });
+          Object.entries(byMatch).forEach(([mt, evs]) => {
+            if (!CLOUD_MATCH_CATALOG[mt] && !BUILTIN_MATCH_CATALOG[mt]) {
+              CLOUD_MATCH_CATALOG[mt] = { match: mt, moments: evs, meta: { status: 'Local Match Hub', source: 'local-hub' } };
+              addMatchOptionIfMissing(mt, `${mt} · (${evs.length} clips)`);
+            }
+          });
         }
       } catch (e) {}
 
-      // 2. Query cloud Match_Action_Log / match_history via matchHub
-      try {
-        let pin = (typeof window.CURRENT_COACH_PIN !== 'undefined' && window.CURRENT_COACH_PIN) || '';
-        if (!pin) {
-          try { pin = (sessionStorage.getItem('ajax_coach_session_token') || '').trim(); } catch (e) {}
+      // 2. Query cloud Match_Action_Log (getMatchActions) + matchHub (history & drafts)
+      const pin = getCoachSessionPin();
+      if (!pin) {
+        updateCloudAuthBarUI();
+        if (window.__REQUESTED_FILM_MATCH) {
+          addMatchOptionIfMissing(window.__REQUESTED_FILM_MATCH);
+          onSelectMatchChanged(window.__REQUESTED_FILM_MATCH);
         }
-        if (!pin) return;
-        const res = await fetch(`https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec?action=matchHub&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null);
-        if (res && res.success) {
-          if (Array.isArray(res.history)) {
-            res.history.forEach(h => {
-              if (h.opponent) {
-                const title = h.opponent.includes('(') ? h.opponent : `${h.opponent} (${new Date(h.date || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
-                addMatchOptionIfMissing(title);
+        return;
+      }
+
+      try {
+        const [actionsRes, hubRes] = await Promise.all([
+          fetch(`${API_URL}?action=getMatchActions&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null),
+          fetch(`${API_URL}?action=matchHub&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null)
+        ]);
+
+        if ((actionsRes && actionsRes.error === 'Unauthorized Coach PIN') || (hubRes && hubRes.error === 'Unauthorized coach PIN')) {
+          try { sessionStorage.removeItem('ajax_coach_session_token'); } catch (e) {}
+          window.CURRENT_COACH_PIN = null;
+          updateCloudAuthBarUI();
+          showToast('⚠️ Coach Token rejected — please verify and retry.');
+          return;
+        }
+
+        let totalRows = 0;
+
+        // Group authoritative Sheet Match_Action_Log rows by match
+        if (actionsRes && actionsRes.success && Array.isArray(actionsRes.moments)) {
+          totalRows = actionsRes.moments.length;
+          const sheetByMatch = {};
+          actionsRes.moments.forEach(m => {
+            const mt = canonicalizeMatchTitle(m.match || m.m);
+            if (!mt) return;
+            if (!sheetByMatch[mt]) sheetByMatch[mt] = [];
+            sheetByMatch[mt].push(m);
+          });
+          Object.entries(sheetByMatch).forEach(([mt, list]) => {
+            const prevMeta = (CLOUD_MATCH_CATALOG[mt] && CLOUD_MATCH_CATALOG[mt].meta) || {};
+            CLOUD_MATCH_CATALOG[mt] = {
+              match: mt,
+              moments: list,
+              meta: { ...prevMeta, status: list[0]?.status || prevMeta.status || 'Sheet Synced', source: 'sheet' }
+            };
+          });
+        }
+
+        // Hydrate match placeholders (even 0-moment matches) from drafts + history + actionsRes.matches
+        const registerCloudPlaceholder = (mtRaw, meta) => {
+          const mt = canonicalizeMatchTitle(mtRaw);
+          if (!mt) return;
+          if (!CLOUD_MATCH_CATALOG[mt]) {
+            CLOUD_MATCH_CATALOG[mt] = { match: mt, moments: Array.isArray(meta.moments) ? meta.moments : [], meta };
+          } else {
+            if ((!CLOUD_MATCH_CATALOG[mt].moments || !CLOUD_MATCH_CATALOG[mt].moments.length) && Array.isArray(meta.moments) && meta.moments.length) {
+              CLOUD_MATCH_CATALOG[mt].moments = meta.moments;
+            }
+            CLOUD_MATCH_CATALOG[mt].meta = { ...(CLOUD_MATCH_CATALOG[mt].meta || {}), ...meta };
+          }
+          const cnt = (CLOUD_MATCH_CATALOG[mt].moments || []).length;
+          const scorePart = CLOUD_MATCH_CATALOG[mt].meta?.score ? ` · ${CLOUD_MATCH_CATALOG[mt].meta.score}` : '';
+          addMatchOptionIfMissing(mt, `${mt}${scorePart} (${cnt} ${cnt === 1 ? 'moment' : 'moments'})`);
+        };
+
+        if (actionsRes && actionsRes.success && Array.isArray(actionsRes.matches)) {
+          actionsRes.matches.forEach(mInfo => {
+            if (mInfo && mInfo.match) {
+              registerCloudPlaceholder(mInfo.match, {
+                score: mInfo.score || '',
+                status: mInfo.status || 'Committed',
+                matchDate: mInfo.matchDate || ''
+              });
+            }
+          });
+        }
+
+        if (hubRes && hubRes.success) {
+          if (hubRes.drafts && typeof hubRes.drafts === 'object') {
+            Object.entries(hubRes.drafts).forEach(([dk, dv]) => {
+              if (dv && (dv.match || dk)) {
+                registerCloudPlaceholder(dv.match || dk, {
+                  score: dv.score || '',
+                  status: dv.status || 'Pitchside Draft',
+                  matchDate: dv.matchDate || '',
+                  moments: Array.isArray(dv.moments) ? dv.moments : []
+                });
+                if (dv.status !== 'Reviewed & Published') latestStagedMatch = canonicalizeMatchTitle(dv.match || dk);
               }
             });
           }
-          if (res.notes && res.notes.ajax_pitchside_draft_latest) {
+          if (hubRes.latestDraft && hubRes.latestDraft.match) {
+            registerCloudPlaceholder(hubRes.latestDraft.match, {
+              score: hubRes.latestDraft.score || '',
+              status: hubRes.latestDraft.status || 'Pitchside Draft',
+              matchDate: hubRes.latestDraft.matchDate || '',
+              moments: Array.isArray(hubRes.latestDraft.moments) ? hubRes.latestDraft.moments : []
+            });
+            latestStagedMatch = canonicalizeMatchTitle(hubRes.latestDraft.match);
+          }
+          if (hubRes.notes && hubRes.notes.ajax_pitchside_draft_latest) {
             try {
-              const d = typeof res.notes.ajax_pitchside_draft_latest === 'string' ? JSON.parse(res.notes.ajax_pitchside_draft_latest) : res.notes.ajax_pitchside_draft_latest;
-              if (d && d.match) addMatchOptionIfMissing(d.match);
+              const d = typeof hubRes.notes.ajax_pitchside_draft_latest === 'string'
+                ? JSON.parse(hubRes.notes.ajax_pitchside_draft_latest)
+                : hubRes.notes.ajax_pitchside_draft_latest;
+              if (d && d.match) {
+                registerCloudPlaceholder(d.match, {
+                  score: d.score || '',
+                  status: d.status || 'Pitchside Draft',
+                  matchDate: d.matchDate || '',
+                  moments: Array.isArray(d.moments) ? d.moments : []
+                });
+                latestStagedMatch = canonicalizeMatchTitle(d.match);
+              }
             } catch (e) {}
           }
+          if (Array.isArray(hubRes.history)) {
+            hubRes.history.forEach(h => {
+              if (!h.opponent && !h.match) return;
+              const title = h.match || (h.opponent.includes('(')
+                ? h.opponent
+                : `${h.opponent} (${new Date(h.date || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`);
+              registerCloudPlaceholder(title, {
+                score: (h.ajaxScore !== undefined && h.oppScore !== undefined) ? `${h.ajaxScore} - ${h.oppScore}` : '',
+                status: h.status || 'Pitchside Committed',
+                matchDate: h.matchDate || (h.date ? String(h.date).slice(0, 10) : '')
+              });
+              if (!latestStagedMatch) latestStagedMatch = canonicalizeMatchTitle(title);
+            });
+          }
+        }
+
+        // Also ensure every Sheet match with rows is added to dropdown
+        Object.keys(CLOUD_MATCH_CATALOG).forEach(mt => {
+          const info = CLOUD_MATCH_CATALOG[mt];
+          const cnt = (info.moments || []).length;
+          const scorePart = info.meta?.score ? ` · ${info.meta.score}` : '';
+          addMatchOptionIfMissing(mt, `${mt}${scorePart} (${cnt} ${cnt === 1 ? 'moment' : 'moments'})`);
+        });
+
+        updateCloudAuthBarUI(Object.keys(CLOUD_MATCH_CATALOG).length, totalRows);
+
+        // Handle explicit ?match=... deep-link OR refresh current selected match if cloud now has moments
+        const jumpEl = document.getElementById('pendingDraftQuickJump');
+        if (jumpEl && latestStagedMatch && !BUILTIN_MATCH_CATALOG[latestStagedMatch]) {
+          jumpEl.innerHTML = `<button type="button" onclick="onSelectMatchChanged('${esc(latestStagedMatch)}')" class="text-[11px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 px-2.5 py-1 rounded-lg font-bold transition">🆕 Load Committed: ${esc(latestStagedMatch)}</button>`;
+          jumpEl.classList.remove('hidden');
+        }
+
+        if (window.__REQUESTED_FILM_MATCH) {
+          const req = window.__REQUESTED_FILM_MATCH;
+          window.__REQUESTED_FILM_MATCH = '';
+          addMatchOptionIfMissing(req);
+          onSelectMatchChanged(req);
+        } else {
+          const currentSel = getSelectedMatchName();
+          if (currentSel && !hasLocalDraftForMatch(currentSel) && CLOUD_MATCH_CATALOG[currentSel]) {
+            loadMatchMoments(currentSel, { silent: true });
+          }
+        }
+
+        if (showStatusToast) {
+          showToast(`☁️ Synced ${Object.keys(CLOUD_MATCH_CATALOG).length} matches & ${totalRows} Sheet film actions!`);
         }
       } catch (e) {}
     }
 
-    function addMatchOptionIfMissing(matchTitle) {
+    function addMatchOptionIfMissing(matchTitle, optionLabel) {
       if (!matchTitle || matchTitle === 'CUSTOM') return;
       const vSel = document.getElementById('voiceMatchSelect');
       const rSel = document.getElementById('rapidMatchSelect');
-      [vSel, rSel].forEach(sel => {
+      const editSel = document.getElementById('editMomentMatchSelect');
+      [vSel, rSel, editSel].forEach(sel => {
         if (!sel) return;
-        const exists = Array.from(sel.options).some(o => o.value.toLowerCase() === matchTitle.toLowerCase());
-        if (!exists) {
+        const existingOpt = Array.from(sel.options).find(o => o.value.toLowerCase() === matchTitle.toLowerCase());
+        if (!existingOpt) {
           const opt = document.createElement('option');
           opt.value = matchTitle;
-          opt.textContent = matchTitle;
-          sel.insertBefore(opt, sel.firstChild); // Place at top as latest match
+          opt.textContent = optionLabel || matchTitle;
+          sel.insertBefore(opt, sel.firstChild); // Place at top as latest committed match
+        } else if (optionLabel && sel !== editSel && !BUILTIN_MATCH_CATALOG[matchTitle]) {
+          existingOpt.textContent = optionLabel;
         }
       });
     }
@@ -922,6 +1239,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       const setPieceOutcome = spOutEl ? spOutEl.value : '';
 
       const momentObj = {
+        id: getNextMomentId(),
         date: new Date().toISOString().replace('T', ' ').slice(0, 19),
         match,
         time,
@@ -934,7 +1252,9 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         category,
         tag: currentRapidTag,
         quality: qualityRaw,
+        outcome: currentRapidOutcome,
         notes,
+        note: notes,
         shotLocation,
         isHeader,
         shotQuality,
@@ -942,8 +1262,9 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         filmReview: Boolean(isRapidFilmReview)
       };
 
-      LOGGED_MOMENTS.push(momentObj);
+      LOGGED_MOMENTS.push(normalizeFilmEvent(momentObj));
       saveToLocalStorage();
+      renderMomentsTable();
       document.getElementById('rapidNotes').value = '';
       if (shotLocEl) shotLocEl.value = '';
       if (isHdrEl) isHdrEl.checked = false;
@@ -952,7 +1273,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       updateRapidReviewButtonUI();
       adjustRapidTime(1); // Advance time by 1 min
       clearRapidPlayers();
-      showToast(`Logged moment #${LOGGED_MOMENTS.length} at ${time}!${momentObj.filmReview ? ' (👁️ Marked for Player Review)' : ''}`);
+      showToast(`Added moment #${LOGGED_MOMENTS.length} at ${time} for ${match}!${momentObj.filmReview ? ' (👁️ Marked for Player Review)' : ''}`);
       updateCountBadges();
     }
 
@@ -1018,7 +1339,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       lines.forEach(line => {
         const parsed = parseSingleVoiceSnippet(line, matchName, defaultHalf, dateVal);
         if (parsed) {
-          LOGGED_MOMENTS.push(parsed);
+          if (!parsed.id) parsed.id = getNextMomentId();
+          LOGGED_MOMENTS.push(normalizeFilmEvent(parsed));
           parsedCount++;
         }
       });
@@ -1026,7 +1348,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       if (parsedCount > 0) {
         saveToLocalStorage();
         updateCountBadges();
-        showToast(`Parsed & added ${parsedCount} film moments!`);
+        renderMomentsTable();
+        showToast(`Added ${parsedCount} spoken moments to ${matchName}!`);
         switchTab('tab-table');
       } else {
         showToast('Could not extract any film moments. Check formatting.');
@@ -1445,22 +1768,26 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
        ========================================================= */
     function renderMomentsTable() {
       const tbody = document.getElementById('momentsTbody');
+      renderInlineReviewDrawer();
       if (!tbody) return;
 
       if (!LOGGED_MOMENTS.length) {
-        tbody.innerHTML = `<tr><td colspan="11" class="py-8 text-center text-slate-500 text-xs">No moments logged yet. Use Tab 1 or Tab 2 to add moments.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" class="py-8 text-center text-slate-500 text-xs">No moments logged yet for this match. Add clips in Voice Review or Touch Review above.</td></tr>`;
         updateRunningSummary();
         return;
       }
 
       tbody.innerHTML = LOGGED_MOMENTS.map((m, idx) => {
-        const isGlow = m.quality.includes('Positive') || m.quality.includes('Goal Scored');
-        const isGrow = m.quality.includes('Negative') || m.quality.includes('Goal Conceded');
-        const qBadge = isGlow ? '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">GLOW</span>'
+        const qualStr = String(m.quality || m.qualityRaw || m.outcome || 'Neutral');
+        const isGlow = /pos|glow|goal scored/i.test(qualStr) && !/conceded/i.test(qualStr);
+        const isGrow = /neg|grow|goal conceded/i.test(qualStr);
+        const qBadge = /glow.*grow|mixed/i.test(qualStr)
+          ? '<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">MIXED</span>'
+          : isGlow ? '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">GLOW</span>'
           : isGrow ? '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold">GROW</span>'
-          : '<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">MIXED</span>';
+          : '<span class="px-2 py-0.5 rounded bg-slate-500/20 text-slate-300 border border-slate-500/30 text-[10px] font-bold">NEUTRAL</span>';
 
-        const zBadge = `<span class="font-mono text-[10px] px-1.5 py-0.5 rounded border ${m.zone === 'D3' ? 'bg-rose-500/15 text-rose-300 border-rose-500/30' : m.zone === 'M3' ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30'}">${m.zone}</span>`;
+        const zBadge = `<span class="font-mono text-[10px] px-1.5 py-0.5 rounded border ${m.zone === 'D3' ? 'bg-rose-500/15 text-rose-300 border-rose-500/30' : m.zone === 'M3' ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30'}">${m.zone || 'M3'}</span>`;
 
         return `
           <tr class="hover:bg-surface/80 transition">
@@ -1469,7 +1796,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
             <td class="py-2.5 px-2 text-center font-mono text-teal-400 font-bold">${m.time}</td>
             <td class="py-2.5 px-2 text-center font-mono text-slate-300">${m.half}</td>
             <td class="py-2.5 px-2 text-center">${zBadge}</td>
-            <td class="py-2.5 px-2 font-mono font-bold text-white text-[11px]">${esc(m.playersRaw)}</td>
+            <td class="py-2.5 px-2 font-mono font-bold text-white text-[11px]">${esc(m.playersRaw || 'Team')}</td>
             <td class="py-2.5 px-2 text-slate-300 text-[11px]">${esc(m.category)}</td>
             <td class="py-2.5 px-2 text-amber-300 text-[11px] font-semibold">${esc(m.tag)}</td>
             <td class="py-2.5 px-2 text-center">${qBadge}</td>
@@ -1486,6 +1813,64 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       }).join('');
 
       updateRunningSummary();
+    }
+
+    function renderInlineReviewDrawer() {
+      const voiceEl = document.getElementById('voiceMatchMomentsPreview');
+      const rapidEl = document.getElementById('rapidMatchMomentsPreview');
+      const vc = document.getElementById('voiceMomentsDrawerCount');
+      const rc = document.getElementById('rapidMomentsDrawerCount');
+      if (vc) vc.textContent = LOGGED_MOMENTS.length;
+      if (rc) rc.textContent = LOGGED_MOMENTS.length;
+      updateActiveMatchBanner();
+
+      const emptyHtml = `<div class="p-4 rounded-xl bg-pitch/60 border border-dashed border-border text-center text-xs text-slate-400">Holding record ready for <strong class="text-white">${esc(getSelectedMatchName())}</strong> (0 pitchside clips yet). Dictate voice notes or tap moments above to add.</div>`;
+      const cardsHtml = !LOGGED_MOMENTS.length ? emptyHtml : LOGGED_MOMENTS.map((m, idx) => {
+        const qualStr = String(m.quality || m.qualityRaw || m.outcome || 'Neutral');
+        const pillCls = /pos|glow|goal scored/i.test(qualStr) && !/conceded/i.test(qualStr)
+          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+          : /neg|grow|conceded/i.test(qualStr)
+            ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+            : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+        const pillTxt = /glow.*grow|mixed/i.test(qualStr) ? 'MIXED' : /conceded/i.test(qualStr) ? 'CONCEDED' : /pos|glow|goal scored/i.test(qualStr) ? 'GLOW' : 'GROW';
+        return `
+          <div class="flex items-center justify-between gap-2 bg-pitch/70 hover:bg-surface border border-border/70 rounded-xl px-3 py-2 text-xs transition">
+            <div class="min-w-0 flex-1 flex items-center gap-2 flex-wrap">
+              <span class="font-mono font-bold text-teal-400">${esc(m.time || '00:00')}</span>
+              <span class="font-mono text-[10px] text-slate-400">${esc(m.half || 'H1')} · ${esc(m.zone || 'M3')}</span>
+              <span class="font-semibold text-white">${esc(m.playersRaw || 'Team')}</span>
+              <span class="text-amber-300 font-semibold">${esc(m.tag || '')}</span>
+              <span class="px-1.5 py-0.2 rounded border text-[9px] font-bold ${pillCls}">${pillTxt}</span>
+              ${m.notes ? `<span class="text-slate-400 truncate max-w-sm">${esc(m.notes)}</span>` : ''}
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="toggleMomentFilmReview(${idx})" class="px-2 py-1 rounded-lg border text-[10px] font-bold ${m.filmReview ? 'text-amber-300 bg-amber-500/20 border-amber-400/60' : 'text-slate-400 bg-surface border-border'}" title="Toggle Player Portal Review">
+                ${m.filmReview ? '👁️' : '🔒'}
+              </button>
+              <button type="button" onclick="openEditMomentModal(${idx})" class="px-2 py-1 rounded-lg bg-teal-600/25 hover:bg-teal-600/40 text-teal-300 border border-teal-500/40 font-bold text-[11px]" title="Fine-tune / edit moment">✏️ Edit</button>
+              <button type="button" onclick="deleteMoment(${idx})" class="px-2 py-1 rounded-lg bg-pitch hover:bg-rose-900/40 text-rose-400 border border-border text-[11px]" title="Delete moment">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (voiceEl) voiceEl.innerHTML = cardsHtml;
+      if (rapidEl) rapidEl.innerHTML = cardsHtml;
+    }
+
+    function updateActiveMatchBanner() {
+      const mName = getSelectedMatchName();
+      const titleEl = document.getElementById('activeMatchBannerTitle');
+      const statusEl = document.getElementById('activeMatchBannerStatus');
+      const badgeEl = document.getElementById('bannerCountBadge');
+      if (titleEl) titleEl.textContent = mName;
+      if (badgeEl) badgeEl.textContent = LOGGED_MOMENTS.length;
+      if (statusEl) {
+        const meta = CLOUD_MATCH_CATALOG[mName]?.meta;
+        const statusTxt = meta?.status || (LOGGED_MOMENTS.length ? 'Ready to Fine-Tune' : 'Holding Placeholder');
+        const scorePart = meta?.score ? `${meta.score} · ` : '';
+        statusEl.textContent = `${scorePart}${LOGGED_MOMENTS.length} ${LOGGED_MOMENTS.length === 1 ? 'moment' : 'moments'} · ${statusTxt}`;
+      }
     }
 
     function toggleMomentFilmReview(idx) {
@@ -1517,6 +1902,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       const c = LOGGED_MOMENTS.length;
       document.getElementById('tabCountBadge').textContent = c;
       if (document.getElementById('tableHeaderCount')) document.getElementById('tableHeaderCount').textContent = `${c} clips`;
+      updateActiveMatchBanner();
     }
 
     function isTurnoverEvent(e) {
@@ -1531,6 +1917,22 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
     function normalizeFilmEvent(ev) {
       if (!ev || typeof ev !== 'object') return ev;
+      ev.notes = ev.notes !== undefined ? String(ev.notes) : (ev.note !== undefined ? String(ev.note) : '');
+      ev.note = ev.notes;
+      if (!ev.quality) {
+        if (ev.qualityRaw) ev.quality = String(ev.qualityRaw);
+        else if (/glow.*grow|mixed/i.test(String(ev.outcome || ''))) ev.quality = 'Glow and Grow (Good actions and Not so Good action)';
+        else if (/goal conceded/i.test(String(ev.outcome || ''))) ev.quality = 'Goal Conceded';
+        else if (/goal scored/i.test(String(ev.outcome || ''))) ev.quality = 'Goal Scored';
+        else if (/grow|neg|poor/i.test(String(ev.outcome || ''))) ev.quality = 'Poor / Negative';
+        else if (/glow|pos|good/i.test(String(ev.outcome || ''))) ev.quality = 'Good / Positive';
+        else ev.quality = 'Neutral';
+      }
+      if (!ev.outcome) {
+        ev.outcome = /glow.*grow|mixed/i.test(ev.quality) ? 'Glow & Grow'
+          : (/goal conceded|poor|neg|grow/i.test(ev.quality) ? 'Grow'
+          : (/goal scored|good|pos|glow/i.test(ev.quality) ? 'Glow' : 'Neutral'));
+      }
       if (!Array.isArray(ev.jerseys)) ev.jerseys = [];
       if (ev.primaryJersey === undefined) {
         ev.primaryJersey = ev.jerseys.length > 0 ? ev.jerseys[0] : null;
@@ -1869,46 +2271,99 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       showToast('Downloaded clean Aspire_Film_Log.csv!');
     }
 
-    async function syncMomentsToCloudHub() {
+    async function syncMomentsToCloudHub(matchMomentsOverride) {
       try {
-        let pin = (typeof window.CURRENT_COACH_PIN !== 'undefined' && window.CURRENT_COACH_PIN) || '';
+        let pin = getCoachSessionPin();
         if (!pin) {
-          try { pin = (sessionStorage.getItem('ajax_coach_session_token') || '').trim(); } catch (e) {}
-        }
-        if (!pin) {
-          pin = (prompt('Enter Coach Token / PIN to sync film moments to Google Sheets:') || '').trim();
+          pin = (prompt('Enter Coach Token / PIN to push Film Review to Google Sheets & Match Hub:') || '').trim();
           if (pin) {
             try { sessionStorage.setItem('ajax_coach_session_token', pin); } catch (e) {}
             window.CURRENT_COACH_PIN = pin;
+            updateCloudAuthBarUI();
           }
         }
-        if (!pin) return;
-        const match = getSelectedMatchName();
-        await fetch('https://script.google.com/macros/s/AKfycbyY3uUA4JIDE7EUXnVmD4mAKldrDJPm0ram0OYjowLrkZrubdH99VU6cPeWEbsTW2TK/exec', {
+        if (!pin) return { success: false, message: 'Missing Coach Token' };
+        const match = canonicalizeMatchTitle(getSelectedMatchName());
+        const matchMoments = Array.isArray(matchMomentsOverride)
+          ? matchMomentsOverride
+          : LOGGED_MOMENTS.filter(m => !m.match || canonicalizeMatchTitle(m.match) === match).map(m => ({ ...m, match }));
+        const res = await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'saveFilmMoments',
             pin,
             match,
-            moments: LOGGED_MOMENTS
+            reviewed: true,
+            moments: matchMoments
           })
-        });
+        }).then(r => r.json()).catch(() => ({ success: true, optimistic: true }));
+        return res || { success: true, optimistic: true };
+      } catch (e) {
+        return { success: false, message: e.message || 'Network error' };
+      }
+    }
+
+    function syncMatchReviewIntoLocalHub(matchTitle, matchMoments) {
+      try {
+        const raw = localStorage.getItem('matchhub_custom_data');
+        if (raw) {
+          const custom = JSON.parse(raw);
+          ['AJAX ASPIRE U15', 'AJAX ASPIRE U15 (LEAGUE)'].forEach(k => {
+            if (!custom || !custom[k] || !Array.isArray(custom[k].filmEvents)) return;
+            const otherMatches = custom[k].filmEvents.filter(e => canonicalizeMatchTitle(e.match) !== matchTitle);
+            let maxId = otherMatches.reduce((mx, e) => Math.max(mx, Number(e.id) || 0), 837);
+            const normalizedMoments = matchMoments.map(m => {
+              const numId = Number(m.id);
+              const assignedId = (Number.isFinite(numId) && numId > 837) ? numId : (++maxId);
+              return {
+                ...m,
+                id: assignedId,
+                match: matchTitle,
+                m: matchTitle,
+                note: m.notes || m.note || '',
+                notes: m.notes || m.note || '',
+                n: m.notes || m.note || ''
+              };
+            });
+            custom[k].filmEvents = otherMatches.concat(normalizedMoments);
+          });
+          localStorage.setItem('matchhub_custom_data', JSON.stringify(custom));
+        }
+        const draftsRaw = localStorage.getItem('ajax_pitchside_drafts');
+        if (draftsRaw) {
+          const draftsObj = JSON.parse(draftsRaw);
+          if (draftsObj && draftsObj[matchTitle]) {
+            draftsObj[matchTitle].moments = matchMoments;
+            draftsObj[matchTitle].status = 'Reviewed & Published';
+            localStorage.setItem('ajax_pitchside_drafts', JSON.stringify(draftsObj));
+          }
+        }
       } catch (e) {}
     }
 
-    function syncMomentsToMatchHub() {
-      if (!LOGGED_MOMENTS.length) {
-        showToast('No moments logged to sync yet.');
+    async function syncMomentsToMatchHub() {
+      const match = canonicalizeMatchTitle(getSelectedMatchName());
+      const matchMoments = LOGGED_MOMENTS.filter(m => !m.match || canonicalizeMatchTitle(m.match) === match).map(m => ({ ...m, match }));
+      if (!matchMoments.length) {
+        showToast(`No moments logged for ${match} yet. Add or dictate a moment first.`);
         return;
       }
       saveToLocalStorage();
-      syncMomentsToCloudHub();
-      showToast(`Saved ${LOGGED_MOMENTS.length} moments (Local + Cloud)! Opening Match Hub...`);
+      syncMatchReviewIntoLocalHub(match, matchMoments);
+      showToast(`Pushing ${matchMoments.length} reviewed moments for ${match} to Google Sheet & Match Hub...`);
+      const cloudRes = await syncMomentsToCloudHub(matchMoments);
+      if (cloudRes && cloudRes.success === false) {
+        showToast(`⚠️ Saved locally; Sheet sync failed: ${cloudRes.message || 'Check Coach Token'}`);
+        return;
+      }
+      if (!CLOUD_MATCH_CATALOG[match]) CLOUD_MATCH_CATALOG[match] = { match, moments: [], meta: {} };
+      CLOUD_MATCH_CATALOG[match].moments = matchMoments;
+      CLOUD_MATCH_CATALOG[match].meta = { ...(CLOUD_MATCH_CATALOG[match].meta || {}), status: 'Reviewed & Published' };
+      updateActiveMatchBanner();
+      showToast(`✅ Final Review pushed (${matchMoments.length} moments for ${match})! Opening Match Hub...`);
       setTimeout(() => {
-        window.open('match-hub.html#tab-film', '_blank');
-      }, 500);
+        window.open(`match-hub.html?match=${encodeURIComponent(match)}#tab-film`, '_blank');
+      }, 450);
     }
 
     function copyGeminiPrompt() {
@@ -1924,15 +2379,36 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    /* LocalStorage Persistence */
+    /* LocalStorage Persistence (Scoped per match + legacy active mirror) */
+    function getDraftMomentsMap() {
+      try {
+        return JSON.parse(localStorage.getItem('ajax_film_review_moments_by_match') || '{}') || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function hasLocalDraftForMatch(matchName) {
+      const canonical = canonicalizeMatchTitle(matchName);
+      if (!canonical) return false;
+      const map = getDraftMomentsMap();
+      return Object.prototype.hasOwnProperty.call(map, canonical);
+    }
+
     function saveToLocalStorage() {
       try {
-        // Defensively normalize any Rocklin variants to canonical 'Rocklin (Nov 1)'
+        const activeMatch = canonicalizeMatchTitle(getSelectedMatchName());
         LOGGED_MOMENTS.forEach(m => {
+          if (!m.match) m.match = activeMatch;
           if (/rocklin.*(11|nov|26)/i.test(m.match || '')) {
             m.match = 'Rocklin (Nov 1)';
           }
         });
+        const map = getDraftMomentsMap();
+        if (activeMatch && activeMatch !== 'CUSTOM') {
+          map[activeMatch] = LOGGED_MOMENTS;
+          localStorage.setItem('ajax_film_review_moments_by_match', JSON.stringify(map));
+        }
         localStorage.setItem('ajax_aspire_active_moments', JSON.stringify(LOGGED_MOMENTS));
       } catch (e) {}
     }
@@ -1968,30 +2444,79 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       loadMatchMoments(val);
     }
 
-    function loadMatchMoments(matchName) {
-      if (!matchName || matchName === 'CUSTOM') return;
-      const canonical = /rocklin.*(11|nov|26)/i.test(matchName) ? 'Rocklin (Nov 1)' : matchName;
-
-      // Check if user has active edits in localStorage for this match
+    function reloadSelectedMatchFromCloud() {
+      const cur = canonicalizeMatchTitle(getSelectedMatchName());
+      if (!cur || cur === 'CUSTOM') return;
       try {
-        const saved = JSON.parse(localStorage.getItem('ajax_aspire_active_moments') || '[]');
-        if (Array.isArray(saved) && saved.length && saved.some(m => m.match === canonical || (/rocklin/i.test(m.match) && canonical.includes('Rocklin')))) {
-          LOGGED_MOMENTS = saved.filter(m => m.match === canonical || (/rocklin/i.test(m.match) && canonical.includes('Rocklin'))).map(normalizeFilmEvent);
-          LOGGED_MOMENTS.forEach(m => m.match = canonical);
-          updateCountBadges();
-          renderMomentsTable();
-          showToast(`Loaded ${LOGGED_MOMENTS.length} moments for ${canonical} from local session`);
-          return;
-        }
+        const map = getDraftMomentsMap();
+        delete map[cur];
+        localStorage.setItem('ajax_film_review_moments_by_match', JSON.stringify(map));
       } catch (e) {}
+      loadMatchMoments(cur, { forceCloud: true });
+    }
 
-      // Fallback to builtin catalog
-      if (BUILTIN_MATCH_CATALOG[canonical]) {
-        LOGGED_MOMENTS = JSON.parse(JSON.stringify(BUILTIN_MATCH_CATALOG[canonical])).map(normalizeFilmEvent);
-        saveToLocalStorage();
-        updateCountBadges();
-        renderMomentsTable();
-        showToast(`Loaded ${LOGGED_MOMENTS.length} moments for ${canonical}`);
+    function loadMatchMoments(matchName, options) {
+      if (!matchName || matchName === 'CUSTOM') return;
+      const opts = options || {};
+      const canonical = canonicalizeMatchTitle(matchName);
+      let nextMoments = null;
+      let sourceLabel = '';
+
+      // 1. Per-match edited draft in localStorage (unless forceCloud reload)
+      if (!opts.forceCloud) {
+        try {
+          const draftMap = getDraftMomentsMap();
+          if (Array.isArray(draftMap[canonical]) && draftMap[canonical].length) {
+            nextMoments = draftMap[canonical];
+            sourceLabel = 'local review session';
+          }
+        } catch (e) {}
+
+        // Also check legacy single-array mirror for this match
+        if (!nextMoments) {
+          try {
+            const saved = JSON.parse(localStorage.getItem('ajax_aspire_active_moments') || '[]');
+            const filtered = Array.isArray(saved)
+              ? saved.filter(m => canonicalizeMatchTitle(m.match) === canonical)
+              : [];
+            if (filtered.length) {
+              nextMoments = filtered;
+              sourceLabel = 'local session';
+            }
+          } catch (e) {}
+        }
+      }
+
+      // 2. Authoritative Cloud Match_Action_Log / Pitchside Draft for this match
+      if (!nextMoments && CLOUD_MATCH_CATALOG[canonical] && Array.isArray(CLOUD_MATCH_CATALOG[canonical].moments)) {
+        if (CLOUD_MATCH_CATALOG[canonical].moments.length > 0 || !BUILTIN_MATCH_CATALOG[canonical]) {
+          nextMoments = JSON.parse(JSON.stringify(CLOUD_MATCH_CATALOG[canonical].moments));
+          sourceLabel = CLOUD_MATCH_CATALOG[canonical].meta?.source === 'sheet' ? 'Google Sheet' : 'committed pitchside draft';
+        }
+      }
+
+      // 3. Built-in baseline catalog for historical matches
+      if (!nextMoments && BUILTIN_MATCH_CATALOG[canonical]) {
+        nextMoments = JSON.parse(JSON.stringify(BUILTIN_MATCH_CATALOG[canonical]));
+        sourceLabel = 'match catalog';
+      }
+
+      // 4. Clean holding placeholder (0 moments yet, ready to add via Voice or Touch)
+      if (!nextMoments) {
+        nextMoments = [];
+        sourceLabel = 'holding placeholder';
+      }
+
+      LOGGED_MOMENTS = nextMoments.map(m => {
+        const cloned = Object.assign({}, m, { match: canonical });
+        return normalizeFilmEvent(cloned);
+      });
+      updateCountBadges();
+      renderMomentsTable();
+      if (!opts.silent) {
+        showToast(LOGGED_MOMENTS.length
+          ? `Loaded ${LOGGED_MOMENTS.length} moments for ${canonical} (${sourceLabel})`
+          : `Holding record ready for ${canonical} (0 moments yet) — add via Voice or Touch!`);
       }
     }
 
@@ -2301,14 +2826,22 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
             }
           });
           LOGGED_MOMENTS = saved.map(normalizeFilmEvent);
+          const firstMatch = canonicalizeMatchTitle(LOGGED_MOMENTS[0]?.match || '');
+          if (firstMatch) {
+            addMatchOptionIfMissing(firstMatch);
+            const vSel = document.getElementById('voiceMatchSelect');
+            const rSel = document.getElementById('rapidMatchSelect');
+            if (vSel) vSel.value = firstMatch;
+            if (rSel) rSel.value = firstMatch;
+          }
           updateCountBadges();
           renderMomentsTable();
           return;
         }
       } catch (e) {}
 
-      // If no local session yet, default to loading Rocklin (Nov 1)
-      loadMatchMoments('Rocklin (Nov 1)');
+      // Default to currently selected match in dropdown (Crossfire #2 (Nov 8))
+      loadMatchMoments(getSelectedMatchName() || 'Crossfire #2 (Nov 8)', { silent: true });
     }
   </script>
 

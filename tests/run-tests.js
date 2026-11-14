@@ -2055,5 +2055,178 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
     assert.strictEqual(sandbox.playerStats[14].benchMins, 81, 'Expected wall-clock wake recovery to credit 2 mins to bench players');
   });
 
-  if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
+  // ---------------------------------------------------------------------------
+  // Check 19: Pitchside Commit -> Film Review Dropdown/Edit -> Match Hub Pipeline
+  // ---------------------------------------------------------------------------
+  runAsyncCheck('19. Pitch-to-Film-Review-to-Match-Hub workflow, holding placeholders & UI rename', async () => {
+    const filmHtml = fs.readFileSync(path.join(ROOT, 'film-moment-logger.html'), 'utf8');
+    const hubHtml = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+    const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+    const codeGs = fs.readFileSync(path.join(ROOT, 'Code.gs'), 'utf8');
+
+    // 1. UI renamed to Film Review while preserving core dropdown/action identifiers
+    assert(filmHtml.includes('<title>Ajax Aspire U15 · Film Review</title>'), 'film-moment-logger.html title not renamed to Film Review');
+    assert(filmHtml.includes('>Film Review</h1>'), 'film-moment-logger.html heading not renamed to Film Review');
+    assert(filmHtml.includes('🎙️ Voice Review') && filmHtml.includes('⚡ Touch Review'), 'Expected Voice Review & Touch Review tabs');
+    assert(filmHtml.includes('Push Final Review to Match Hub'), 'Expected Push Final Review CTA');
+    assert(!hubHtml.includes('Open Voice &amp; Fast Logger') && !hubHtml.includes('🎙️ Voice Logger'), 'Legacy logger link labels remain in match-hub.html');
+    assert(hubHtml.includes('Open Film Review') && hubHtml.includes('🎬 Film Review'), 'Expected Film Review links in match-hub.html');
+    assert(trackerHtml.includes('goToFilmReview()'), 'Expected Film Review shortcut in ajax-match-tracker.html commit receipt');
+
+    // 2. Match Hub hydrates Match_Action_Log & does not truncate >20 new moments
+    assert(hubHtml.includes('action=getMatchActions&pin='), 'Expected match-hub.html to hydrate Match_Action_Log via getMatchActions');
+    assert(!hubHtml.includes('v.filmEvents.length > baseLen + 20'), 'Buggy > baseLen + 20 localStorage truncation guard still present');
+    assert(codeGs.includes("kv['pitchside_drafts']"), 'Expected Code.gs to persist per-match pitchside_drafts placeholders');
+
+    // 3. Runtime simulation of Film Review cloud placeholder loading + per-match editing
+    const scriptMatches = filmHtml.match(/<script[\s\S]*?<\/script>/gi);
+    assert(scriptMatches && scriptMatches.length >= 2, 'Expected script tag in film-moment-logger.html');
+    const scriptContent = scriptMatches[scriptMatches.length - 1].replace(/<\/?script[^>]*>/gi, '');
+
+    const makeOption = (value, text, selected) => ({ value, textContent: text || value, selected: !!selected });
+    const createSelect = () => {
+      const opts = [
+        makeOption('Crossfire #2 (Nov 8)', 'Crossfire #2 (Nov 8)', true),
+        makeOption('Rocklin (Nov 1)', 'Rocklin (Nov 1)', false),
+        makeOption('CUSTOM', '+ Custom...', false)
+      ];
+      return {
+        options: opts,
+        _val: 'Crossfire #2 (Nov 8)',
+        get firstChild() { return this.options[0] || null; },
+        get value() { return this._val; },
+        set value(v) { this._val = v; },
+        insertBefore(node, ref) {
+          const i = ref ? this.options.indexOf(ref) : 0;
+          this.options.splice(i === -1 ? 0 : i, 0, node);
+        }
+      };
+    };
+
+    const domEls = {
+      voiceMatchSelect: createSelect(),
+      rapidMatchSelect: createSelect(),
+      editMomentMatchSelect: createSelect()
+    };
+    const mkEl = id => {
+      if (!domEls[id]) {
+        domEls[id] = {
+          id,
+          value: '',
+          textContent: '',
+          innerHTML: '',
+          className: '',
+          checked: false,
+          options: [],
+          classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); }, toggle() {} },
+          appendChild() {},
+          insertBefore() {}
+        };
+      }
+      return domEls[id];
+    };
+
+    const localStore = {};
+    const postedPayloads = [];
+    const sandbox = {
+      document: {
+        createElement: tag => makeOption('', ''),
+        getElementById: mkEl,
+        querySelectorAll: () => [],
+        addEventListener: () => {}
+      },
+      window: { location: { search: '' }, open: () => {} },
+      URLSearchParams: URLSearchParams,
+      localStorage: {
+        getItem: k => (k in localStore ? localStore[k] : null),
+        setItem: (k, v) => { localStore[k] = String(v); },
+        removeItem: k => { delete localStore[k]; }
+      },
+      sessionStorage: {
+        _s: { ajax_coach_session_token: 'TEST_COACH_TOKEN' },
+        getItem: k => sandbox.sessionStorage._s[k] || null,
+        setItem: (k, v) => { sandbox.sessionStorage._s[k] = String(v); },
+        removeItem: k => { delete sandbox.sessionStorage._s[k]; }
+      },
+      fetch: async (url, init) => {
+        if (init && init.method === 'POST') {
+          postedPayloads.push(JSON.parse(init.body));
+          return { ok: true, json: async () => ({ success: true, matchCount: JSON.parse(init.body).moments?.length || 0 }) };
+        }
+        if (String(url).includes('action=getMatchActions')) {
+          return {
+            ok: true,
+            json: async () => ({
+              success: true,
+              moments: [
+                { id: 901, match: 'Davis Legacy (Nov 14)', time: '18:00', half: 'H1', zone: 'A3', playersRaw: '#23 Sophia Culver', jerseys: [23], category: 'Finishing', tag: 'Shot on Target', qualityRaw: 'Good / Positive', outcome: 'Glow', note: 'Sideline shot on target' },
+                { id: 902, match: 'Davis Legacy (Nov 14)', time: '44:00', half: 'H2', zone: 'D3', playersRaw: '#36 Alex Marigorda', jerseys: [36], category: 'Defending', tag: 'Tackle', qualityRaw: 'Good / Positive', outcome: 'Glow', note: 'Sideline sliding block' }
+              ],
+              matches: [
+                { match: 'Davis Legacy (Nov 14)', momentCount: 2, score: '3 - 1', status: 'Pitchside Draft' },
+                { match: 'Placer United (Nov 15)', momentCount: 0, score: '2 - 0', status: 'Pitchside Committed' }
+              ]
+            })
+          };
+        }
+        if (String(url).includes('action=matchHub')) {
+          return {
+            ok: true,
+            json: async () => ({
+              success: true,
+              history: [{ opponent: 'Placer United (Nov 15)', ajaxScore: 2, oppScore: 0, status: 'Pitchside Committed' }],
+              drafts: {
+                'Davis Legacy (Nov 14)': { match: 'Davis Legacy (Nov 14)', score: '3 - 1', status: 'Pitchside Draft', momentCount: 2 }
+              },
+              notes: {}
+            })
+          };
+        }
+        return { ok: true, json: async () => ({ success: false }) };
+      },
+      setTimeout: () => {},
+      clearTimeout: () => {},
+      alert: () => {},
+      confirm: () => true,
+      prompt: () => 'TEST_COACH_TOKEN',
+      console, Date, Math, Object, Array, Set, Number, String, Promise, URL
+    };
+
+    vm.createContext(sandbox);
+    vm.runInContext(scriptContent, sandbox);
+
+    await sandbox.syncMatchesFromActionLog();
+
+    // Both committed matches sit in Voice Review & Touch Review Match Name dropdowns
+    const vVals = domEls.voiceMatchSelect.options.map(o => o.value);
+    const rVals = domEls.rapidMatchSelect.options.map(o => o.value);
+    assert(vVals.includes('Davis Legacy (Nov 14)') && rVals.includes('Davis Legacy (Nov 14)'), 'Expected Davis Legacy (Nov 14) in both dropdowns');
+    assert(vVals.includes('Placer United (Nov 15)') && rVals.includes('Placer United (Nov 15)'), 'Expected 0-moment holding placeholder Placer United (Nov 15) in both dropdowns');
+
+    // Selecting Davis Legacy loads its 2 committed pitchside moments into editable Voice & Touch drawers
+    sandbox.onSelectMatchChanged('Davis Legacy (Nov 14)');
+    const davisMoments = vm.runInContext('LOGGED_MOMENTS', sandbox);
+    assert.strictEqual(davisMoments.length, 2, 'Expected 2 pitchside moments loaded for Davis Legacy (Nov 14)');
+    assert(domEls.voiceMatchMomentsPreview.innerHTML.includes('Sideline shot on target'), 'Expected editable moment drawer in Voice Review');
+    assert(domEls.rapidMatchMomentsPreview.innerHTML.includes('Sideline sliding block'), 'Expected editable moment drawer in Touch Review');
+
+    // Switching to 0-moment holding match clears previous match cleanly instead of leaking clips
+    sandbox.onSelectMatchChanged('Placer United (Nov 15)');
+    assert.strictEqual(vm.runInContext('LOGGED_MOMENTS.length', sandbox), 0, 'Expected clean 0-moment placeholder when selecting Placer United (Nov 15)');
+
+    // Switching back to Davis Legacy, adding a new spoken/reviewed moment, and pushing final review
+    sandbox.onSelectMatchChanged('Davis Legacy (Nov 14)');
+    mkEl('voiceInputText').value = '62:15 second half, A3. Sophia Culver combines with Scarlet, clean finish! Goal scored! Glow.';
+    sandbox.parseVoiceNotes();
+    assert.strictEqual(vm.runInContext('LOGGED_MOMENTS.length', sandbox), 3, 'Expected newly added review moment appended to Davis Legacy (2 -> 3)');
+
+    await sandbox.syncMomentsToMatchHub();
+    const saveCall = postedPayloads.find(p => p.action === 'saveFilmMoments');
+    assert(saveCall, 'Expected saveFilmMoments POST when pushing final review');
+    assert.strictEqual(saveCall.match, 'Davis Legacy (Nov 14)');
+    assert.strictEqual(saveCall.reviewed, true);
+    assert.strictEqual(saveCall.moments.length, 3, 'Expected all 3 fine-tuned/added moments pushed for Davis Legacy');
+  }).then(() => {
+    if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
+  });
 });

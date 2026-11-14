@@ -1213,11 +1213,13 @@ function getMatchHubData(pin) {
     if (kv['datasets_ga']) datasets['AJAX GA U15'] = kv['datasets_ga'];
 
     return jsonOut({
-      success:   true,
-      notes:     kv['notes']     || {},
-      takeaways: kv['takeaways'] || {},
-      datasets:  datasets,
-      history:   kv['match_history'] || []
+      success:     true,
+      notes:       kv['notes']     || {},
+      takeaways:   kv['takeaways'] || {},
+      datasets:    datasets,
+      history:     kv['match_history'] || [],
+      drafts:      kv['pitchside_drafts'] || {},
+      latestDraft: kv['pitchside_draft_latest'] || null
     });
   } catch (err) {
     return jsonOut({ success: false, error: err.toString() });
@@ -2306,7 +2308,8 @@ function handleSaveFilmMoments(payload) {
       return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
     }
     var moments = Array.isArray(payload.moments) ? payload.moments : [];
-    if (!moments.length) {
+    var targetMatch = String(payload.match || (moments[0] && (moments[0].match || moments[0].m)) || '').trim();
+    if (!moments.length && !payload.allowEmpty) {
       return jsonOut({ success: false, message: 'No moments provided' });
     }
 
@@ -2318,7 +2321,6 @@ function handleSaveFilmMoments(payload) {
     // 2. Keep recent match moments in KV (capped to avoid 50KB cell limit)
     var kv = getMatchHubKVMap();
     var existing = kv['all_film_moments'] || [];
-    var targetMatch = payload.match || (moments[0] && (moments[0].match || moments[0].m));
     var filtered = existing.filter(function(m) {
       var mName = m.match || m.m || '';
       return targetMatch ? mName !== targetMatch : true;
@@ -2329,7 +2331,40 @@ function handleSaveFilmMoments(payload) {
     }
     setMatchHubKV('all_film_moments', merged);
 
-    return jsonOut({ success: true, count: merged.length, match: targetMatch });
+    // 3. Update pitchside draft placeholder record to reflect reviewed state
+    if (targetMatch) {
+      try {
+        var drafts = kv['pitchside_drafts'] || {};
+        var prevDraft = drafts[targetMatch] || {};
+        drafts[targetMatch] = {
+          match: targetMatch,
+          matchId: prevDraft.matchId || '',
+          opponent: prevDraft.opponent || targetMatch,
+          matchDate: prevDraft.matchDate || (moments[0] && moments[0].matchDate) || '',
+          score: prevDraft.score || '',
+          matchMins: prevDraft.matchMins || 80,
+          moments: moments,
+          momentCount: moments.length,
+          status: payload.reviewed ? 'Reviewed & Published' : (prevDraft.status || 'Pitchside Draft'),
+          savedAt: new Date().toISOString()
+        };
+        if (JSON.stringify(drafts).length > 44000) {
+          var slimDrafts = {};
+          var keys = Object.keys(drafts);
+          for (var kIdx = Math.max(0, keys.length - 8); kIdx < keys.length; kIdx++) {
+            var dk = keys[kIdx];
+            var entry = drafts[dk];
+            slimDrafts[dk] = (dk === targetMatch)
+              ? entry
+              : { match: entry.match, matchDate: entry.matchDate, score: entry.score, momentCount: entry.momentCount || (entry.moments ? entry.moments.length : 0), status: entry.status, savedAt: entry.savedAt };
+          }
+          drafts = slimDrafts;
+        }
+        setMatchHubKV('pitchside_drafts', drafts);
+      } catch (draftUpdateErr) {}
+    }
+
+    return jsonOut({ success: true, count: merged.length, matchCount: moments.length, match: targetMatch });
   } catch(err) {
     return jsonOut({ success: false, message: err.toString() });
   }
@@ -2342,7 +2377,33 @@ function handleSavePitchsideDraft(payload) {
     }
     var draft = payload.draft || payload;
     setMatchHubKV('pitchside_draft_latest', draft);
-    return jsonOut({ success: true, savedAt: new Date().toISOString() });
+    var matchKey = String((draft && (draft.match || draft.opponent)) || '').trim();
+    if (matchKey) {
+      var kv = getMatchHubKVMap();
+      var drafts = kv['pitchside_drafts'] || {};
+      drafts[matchKey] = {
+        match: matchKey,
+        matchId: draft.matchId || '',
+        team: draft.team || '',
+        opponent: draft.opponent || matchKey,
+        matchDate: draft.matchDate || '',
+        score: draft.score || '',
+        matchMins: draft.matchMins || 80,
+        moments: Array.isArray(draft.moments) ? draft.moments : [],
+        momentCount: Array.isArray(draft.moments) ? draft.moments.length : (draft.momentCount || 0),
+        status: draft.status || 'Pitchside Draft',
+        savedAt: draft.savedAt || new Date().toISOString()
+      };
+      if (JSON.stringify(drafts).length > 44000) {
+        var keys = Object.keys(drafts);
+        while (keys.length > 1 && JSON.stringify(drafts).length > 44000) {
+          var oldest = keys.shift();
+          if (oldest !== matchKey) delete drafts[oldest];
+        }
+      }
+      setMatchHubKV('pitchside_drafts', drafts);
+    }
+    return jsonOut({ success: true, match: matchKey, savedAt: new Date().toISOString() });
   } catch (err) {
     return jsonOut({ success: false, message: err.toString() });
   }
@@ -2406,12 +2467,65 @@ function getMatchActions(params) {
     if (!isValidCoachPin(pin)) {
       return jsonOut({ success: false, moments: [], error: 'Unauthorized Coach PIN' });
     }
-    var rows = readAllMatchActionLogRows();
+    var allRows = readAllMatchActionLogRows();
     var kv = getMatchHubKVMap();
     var overrides = kv['film_moment_overrides'] || {};
+    var history = Array.isArray(kv['match_history']) ? kv['match_history'] : [];
+    var drafts = kv['pitchside_drafts'] || {};
+    var latestDraft = kv['pitchside_draft_latest'] || null;
+    if (latestDraft && latestDraft.match && !drafts[latestDraft.match]) {
+      drafts[latestDraft.match] = latestDraft;
+    }
+
+    // Build distinct committed/logged match placeholders across Match_Action_Log, pitchside_drafts, and match_history
+    var matchMap = {};
+    for (var i = 0; i < allRows.length; i++) {
+      var rMatch = String(allRows[i].match || '').trim();
+      if (!rMatch) continue;
+      if (!matchMap[rMatch]) {
+        matchMap[rMatch] = { match: rMatch, momentCount: 0, status: allRows[i].status || 'Published', matchDate: allRows[i].matchDate || '' };
+      }
+      matchMap[rMatch].momentCount++;
+    }
+    for (var dKey in drafts) {
+      if (!Object.prototype.hasOwnProperty.call(drafts, dKey)) continue;
+      var dObj = drafts[dKey] || {};
+      var dMatch = String(dObj.match || dKey || '').trim();
+      if (!dMatch) continue;
+      if (!matchMap[dMatch]) {
+        matchMap[dMatch] = {
+          match: dMatch,
+          momentCount: Array.isArray(dObj.moments) ? dObj.moments.length : (dObj.momentCount || 0),
+          status: dObj.status || 'Pitchside Draft',
+          score: dObj.score || '',
+          matchDate: dObj.matchDate || ''
+        };
+      } else {
+        if (dObj.score) matchMap[dMatch].score = dObj.score;
+        if (dObj.status) matchMap[dMatch].status = dObj.status;
+      }
+    }
+    for (var hIdx = 0; hIdx < history.length; hIdx++) {
+      var h = history[hIdx] || {};
+      if (!h.opponent && !h.match) continue;
+      var hTitle = h.match || (String(h.opponent).indexOf('(') !== -1
+        ? String(h.opponent)
+        : (String(h.opponent) + ' (' + Utilities.formatDate(new Date(h.date || Date.now()), Session.getScriptTimeZone() || 'America/Los_Angeles', 'MMM d') + ')'));
+      if (!matchMap[hTitle]) {
+        matchMap[hTitle] = {
+          match: hTitle,
+          momentCount: 0,
+          status: h.status || 'Pitchside Committed',
+          score: (h.ajaxScore !== undefined && h.oppScore !== undefined) ? (h.ajaxScore + ' - ' + h.oppScore) : '',
+          matchDate: h.matchDate || (h.date ? String(h.date).slice(0, 10) : '')
+        };
+      }
+    }
+
+    var rows = allRows;
     var filterMatch = params && params.match ? String(params.match).trim().toLowerCase() : '';
     if (filterMatch) {
-      rows = rows.filter(function(r) {
+      rows = allRows.filter(function(r) {
         return String(r.match || '').toLowerCase().indexOf(filterMatch) !== -1;
       });
     }
@@ -2419,7 +2533,10 @@ function getMatchActions(params) {
       success: true,
       count: rows.length,
       moments: rows,
-      overrides: overrides
+      overrides: overrides,
+      matches: Object.keys(matchMap).map(function(k) { return matchMap[k]; }),
+      history: history,
+      drafts: drafts
     });
   } catch (err) {
     return jsonOut({ success: false, moments: [], error: err.toString() });
