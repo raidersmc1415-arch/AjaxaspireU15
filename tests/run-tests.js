@@ -1376,4 +1376,182 @@ check('16b. computeGameFilmMetrics scores matches/halves accurately & ignores fr
   assert.strictEqual(mutatedPair.overall.index, cleanPair.overall.index, 'Changing free-text .note must not affect overall.index');
 });
 
+// ---------------------------------------------------------------------------
+// CHECK 17: Phase 1 Scoring v4 + Sub-Scores & Phase 3 Match Tracker UI
+// ---------------------------------------------------------------------------
+function loadMatchHubScoringSandbox() {
+  const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+  const ddLine = mh.split('\n').find(l => l.includes('const DEFAULT_DATA ='));
+  assert(ddLine, 'DEFAULT_DATA line not found in match-hub.html');
+  const defaultData = JSON.parse(ddLine.replace(/^\s*const\s+DEFAULT_DATA\s*=\s*/, '').replace(/;\s*$/, ''));
+
+  const sMap = mh.slice(mh.indexOf('const ASPIRE_JERSEY_MAP ='), mh.indexOf('/* Practice & Attendance Scorecard'));
+  const sWeights = mh.slice(mh.indexOf('const EVENT_WEIGHTS ='), mh.indexOf('function fmtNet('));
+  const sApply = mh.slice(mh.indexOf('const V31_TURNOVER_TAGS ='), mh.indexOf('function setFceOutcome('));
+
+  const sandbox = {
+    Math, Number, Array, Object, String, Boolean, Set, Map,
+    fmtNet: val => (Number(val) > 0 ? '+' : '') + (Number(val) || 0).toFixed(1),
+    normKey: s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/,/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase(),
+    pct: (a, b) => (b > 0 ? Math.round((a * 100) / b) : 0)
+  };
+  vm.createContext(sandbox);
+  vm.runInContext([sMap, sWeights, sApply].join('\n;\n'), sandbox);
+  const cfg = vm.runInContext('({ INDEX_CONFIG, EVENT_WEIGHTS })', sandbox);
+  return { mh, defaultData, sandbox, cfg };
+}
+
+check('17a. Scoring v4 uses scale 4.0, A3 Glow=1.50/D3 Glow=1.25, and achieves >=20 pt squad spread', () => {
+  const { mh, defaultData, sandbox, cfg } = loadMatchHubScoringSandbox();
+  assert.strictEqual(cfg.INDEX_CONFIG.scale, 4.0, 'Expected INDEX_CONFIG.scale === 4.0');
+  assert.strictEqual(cfg.EVENT_WEIGHTS.Glow.A3, 1.50, 'Expected Glow A3 weight 1.50');
+  assert.strictEqual(cfg.EVENT_WEIGHTS.Glow.D3, 1.25, 'Expected Glow D3 weight 1.25');
+
+  const legendStart = mh.indexOf('id="filmLegendModal"');
+  const legendEnd = mh.indexOf('<!-- Section 5:', legendStart);
+  const legendHtml = mh.slice(legendStart, legendEnd);
+  assert(legendHtml.includes('Scale Factor = 4.0'), 'Expected #filmLegendModal to display Scale Factor = 4.0');
+  assert(!legendHtml.includes('Scale Factor = 2.0'), '#filmLegendModal must not contain stale Scale Factor = 2.0');
+
+  const rosterSortBlock = mh.slice(mh.indexOf('function renderRoster('), mh.indexOf('const list = players.filter(', mh.indexOf('function renderRoster(')));
+  assert(rosterSortBlock.includes("activeSortProp === 'netPer80'") && rosterSortBlock.includes('Number(p.filmIndex)'), 'Expected renderRoster() valOf to sort Film Index by p.filmIndex');
+
+  const leagueTeam = defaultData['AJAX ASPIRE U15 (LEAGUE)'];
+  sandbox.applyFilmEventsToTeam(leagueTeam, leagueTeam.filmEvents);
+  sandbox.applyNetMetrics(leagueTeam);
+
+  const regulars = leagueTeam.players.filter(p => (p.mins || 0) >= 120 && typeof p.filmIndex === 'number');
+  assert(regulars.length >= 10, `Expected >=10 indexed regulars, got ${regulars.length}`);
+  const indices = regulars.map(p => p.filmIndex);
+  const spread = Math.max(...indices) - Math.min(...indices);
+  assert(spread >= 20, `Expected squad Film Index spread >= 20, got ${spread} (${Math.min(...indices)}..${Math.max(...indices)})`);
+});
+
+check('17b. computePlayerSubScores populates [0,100] T/S/D sub-scores, outputSummary & focus without changing netPts or reading .note', () => {
+  const { mh, defaultData, sandbox } = loadMatchHubScoringSandbox();
+  const scoringBlock = mh.slice(mh.indexOf('function eventWeight('), mh.indexOf('function fmtNet('));
+  assert(!/\.note\b/.test(scoringBlock), 'computePlayerSubScores block must not reference .note');
+
+  const leagueTeam = defaultData['AJAX ASPIRE U15 (LEAGUE)'];
+  sandbox.applyFilmEventsToTeam(leagueTeam, leagueTeam.filmEvents);
+  sandbox.applyNetMetrics(leagueTeam);
+
+  const sophia = leagueTeam.players.find(p => p.jersey === 23);
+  const netBefore = sophia.netPts;
+  sandbox.computePlayerSubScores(leagueTeam);
+  assert.strictEqual(sophia.netPts, netBefore, 'computePlayerSubScores must not modify player netPts');
+
+  assert(sophia.outputSummary && sophia.outputSummary.includes('4G'), `Expected Sophia outputSummary with 4G, got ${sophia.outputSummary}`);
+  assert(sophia.subScores && typeof sophia.subScores.threat === 'number', 'Expected sophia.subScores.threat');
+  assert(sophia.subScoreFocus && sophia.subScoreFocus.length > 5, 'Expected sophia.subScoreFocus prescription');
+
+  leagueTeam.players.filter(p => p.subScores).forEach(p => {
+    ['threat', 'security', 'defensive'].forEach(k => {
+      const v = p.subScores[k];
+      assert(v >= 0 && v <= 100, `Expected ${p.name} subScore ${k}=${v} in [0, 100]`);
+    });
+  });
+});
+
+check('17c. eventWeight applies v4 A3 risk-taking rules while keeping D3=−1.50 and Goal Conceded=−2.50', () => {
+  const { sandbox } = loadMatchHubScoringSandbox();
+  assert.strictEqual(sandbox.eventWeight({ category: 'Passing', tag: 'Forced Turnover Pass', outcome: 'Grow', zone: 'A3' }), -0.50);
+  assert.strictEqual(sandbox.eventWeight({ category: 'Carrying', tag: 'Turned into Pressure', outcome: 'Grow', zone: 'A3' }), -0.50);
+  assert.strictEqual(sandbox.eventWeight({ category: 'Passing', tag: 'Unforced Turnover Pass', outcome: 'Grow', zone: 'A3' }), -0.75);
+  assert.strictEqual(sandbox.eventWeight({ category: 'Passing', tag: 'Unforced Turnover Pass', outcome: 'Grow', zone: 'D3' }), -1.50);
+  assert.strictEqual(sandbox.eventWeight({ category: 'Defending', tag: 'Goal Conceded', outcome: 'Goal Conceded', zone: 'D3' }), -2.50);
+});
+
+check('17d. ajax-match-tracker.html enforces 44px HUD targets, 8-tag Hot Bar & clean slot auto-zone', () => {
+  const trk = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+  const hudStart = trk.indexOf('id="summaryDashboardHud"');
+  const hudEnd = trk.indexOf('</header>', hudStart);
+  assert(hudStart !== -1 && hudEnd > hudStart, 'Could not locate summaryDashboardHud block');
+  const hudHtml = trk.slice(hudStart, hudEnd);
+  const hudButtons = hudHtml.match(/<button\b[^>]*>/g) || [];
+  assert(hudButtons.length >= 10, `Expected >=10 HUD buttons, got ${hudButtons.length}`);
+  hudButtons.forEach(btn => {
+    assert(btn.includes('min-h-[44px]'), `Expected min-h-[44px] on HUD button: ${btn}`);
+  });
+
+  assert(trk.includes('id="pamHotBar"'), 'Expected id="pamHotBar" in ajax-match-tracker.html');
+
+  const rpStart = trk.indexOf('function renderPitch(');
+  const rpEnd = trk.indexOf('function onTapPitchNode(', rpStart);
+  const rpCode = trk.slice(rpStart, rpEnd);
+  assert(!rpCode.includes('setPamZone('), 'renderPitch() must not call setPamZone() inside its loop');
+
+  const hzStart = trk.indexOf('let pamCurrentZone =');
+  const hzEnd = trk.indexOf('function filterPamActionCategory(');
+  const hzCode = trk.slice(hzStart, hzEnd);
+
+  let renderedHtml = '';
+  const fakeDoc = {
+    getElementById(id) {
+      if (id === 'pamHotBar') return { set innerHTML(v) { renderedHtml = v; }, get innerHTML() { return renderedHtml; } };
+      return null;
+    }
+  };
+  const sandbox = {
+    document: fakeDoc,
+    currentPeriod: 1,
+    onPitchPlayers: { CB: 36, CM: 14, ST: 23 },
+    matchEvents: [
+      { tag: 'Goal Scored' },
+      { tag: 'Goal Scored' },
+      { tag: 'Blocked Shot' }
+    ],
+    Set, Object, Array, String
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(hzCode, sandbox);
+
+  assert.strictEqual(sandbox.defaultZoneForSlot('CB'), 'D3');
+  assert.strictEqual(sandbox.defaultZoneForSlot('CM'), 'M3');
+  assert.strictEqual(sandbox.defaultZoneForSlot('ST'), 'A3');
+
+  const acts = sandbox.renderPamHotBar();
+  assert(acts.length <= 8 && acts.length === 8, `Expected 8 Hot Bar actions, got ${acts.length}`);
+  assert.strictEqual(acts[0].tag, 'Goal Scored', 'Expected most frequent match event promoted to #1 in Hot Bar');
+  const btnMatches = renderedHtml.match(/class="pam-hot-btn /g) || [];
+  assert.strictEqual(btnMatches.length, 8, `Expected 8 rendered .pam-hot-btn buttons, got ${btnMatches.length}`);
+
+  const lookup = vm.runInContext('HOT_BAR_LOOKUP', sandbox);
+  assert(lookup['Save (Clean / Held)'], 'Expected HOT_BAR_LOOKUP to include Save (Clean / Held)');
+  const gkActs = sandbox.getHotBarActions('GK');
+  assert.strictEqual(gkActs.length, 8, `Expected 8 GK Hot Bar actions, got ${gkActs.length}`);
+  assert.strictEqual(gkActs[0].tag, 'Save (Clean / Held)', 'Expected GK Hot Bar to default to GK saves/distribution');
+
+  const revStart = trk.indexOf('function reverseEventStats(');
+  const revEnd = trk.indexOf('function buildEventDesc(', revStart);
+  assert(revStart !== -1 && revEnd > revStart, 'Could not locate reverseEventStats / applyEventStats block');
+  const revCode = trk.slice(revStart, revEnd);
+  const revSandbox = {
+    Math,
+    playerStats: { 23: { assists: 0, keyPasses: 0, shots: 0, soff: 0, turnovers: 0, toD: 0, toM: 0, toA: 0 } },
+    oppStats: { goals: 0, shots: 0, subs: 0, corners: 0, fouls: 0 },
+    phaseStats: { crossesLeft: 0, crossesRight: 0, pressWon: 0, pressLost: 0, goalKicksAttacking: 0, goalKicksDefending: 0 }
+  };
+  vm.createContext(revSandbox);
+  vm.runInContext(revCode, revSandbox);
+
+  const assistEv = { jersey: 23, type: 'assist', tag: 'Goal Assist', zone: 'A3' };
+  const poorShotEv = { jersey: 23, type: 'soff', tag: 'Poor Shot Selection', zone: 'A3' };
+  revSandbox.applyEventStats(assistEv);
+  revSandbox.applyEventStats(poorShotEv);
+  assert.strictEqual(revSandbox.playerStats[23].assists, 1);
+  assert.strictEqual(revSandbox.playerStats[23].keyPasses, 1, 'Expected applyEventStats to increment keyPasses on Goal Assist');
+  assert.strictEqual(revSandbox.playerStats[23].turnovers, 1, 'Expected applyEventStats to increment turnovers on Poor Shot Selection');
+  assert.strictEqual(revSandbox.playerStats[23].toA, 1);
+
+  revSandbox.reverseEventStats(assistEv);
+  revSandbox.reverseEventStats(poorShotEv);
+  assert.strictEqual(revSandbox.playerStats[23].assists, 0);
+  assert.strictEqual(revSandbox.playerStats[23].keyPasses, 0, 'Expected reverseEventStats to decrement keyPasses on Goal Assist');
+  assert.strictEqual(revSandbox.playerStats[23].shots, 0);
+  assert.strictEqual(revSandbox.playerStats[23].soff, 0);
+  assert.strictEqual(revSandbox.playerStats[23].turnovers, 0, 'Expected reverseEventStats to decrement turnovers on Poor Shot Selection');
+  assert.strictEqual(revSandbox.playerStats[23].toA, 0);
+});
+
 console.log(`\nAll ${passed} regression checks passed.`);

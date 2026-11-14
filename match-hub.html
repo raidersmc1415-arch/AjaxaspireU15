@@ -555,7 +555,7 @@
               <div>
                 <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
                   <span>Player Film Impact Index (0–100) · Calculation Engine &amp; Legend</span>
-                  <span class="text-[9px] px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/40 font-mono font-bold">v3.1 EVENT-LEVEL</span>
+                  <span class="text-[9px] px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/40 font-mono font-bold">v4.0 EVENT-LEVEL + SUB-SCORES</span>
                 </h3>
                 <p class="text-[11px] text-slate-400 mt-0.5">
                   Single-charge matrix · 1° Primary (1.0x) / 2° Secondary (0.5x) attribution · Bayesian regression · Role par (80 = Par)
@@ -599,8 +599,8 @@
           </div>
 
           <div class="p-2.5 rounded-xl bg-pitch/80 border border-border/70 text-[11px] text-slate-300 flex flex-wrap items-center justify-between gap-2">
-            <span><strong class="text-teal-400">Single-Charge Matrix:</strong> D3 Glow <code class="text-emerald-400">+1.50</code> · M3/A3 Glow <code class="text-emerald-400">+1.25</code> · Goal <code class="text-emerald-400">+2.50</code> · Assist <code class="text-teal-300">+2.25</code> · Line-Break <code class="text-sky-300">+0.50 bonus</code></span>
-            <span><strong class="text-rose-400">Penalties:</strong> D3 Grow <code class="text-rose-400">-0.75 to -1.50</code> · M3 Grow <code class="text-rose-400">-1.00</code> · Goal Conceded <code class="text-rose-400">-2.50</code> · <strong class="text-amber-300">Attribution:</strong> <code>1°=1.0x / 2°=0.5x</code></span>
+            <span><strong class="text-teal-400">Single-Charge Matrix (v4.0):</strong> A3 Glow <code class="text-emerald-400">+1.50</code> · D3/M3 Glow <code class="text-emerald-400">+1.25</code> · Goal <code class="text-emerald-400">+2.50</code> · Assist <code class="text-teal-300">+2.25</code> · Scale <code class="text-sky-300">4.0&times; vs Par</code></span>
+            <span><strong class="text-rose-400">Penalties:</strong> D3 Grow <code class="text-rose-400">-0.75 to -1.50</code> · M3 Grow <code class="text-rose-400">-1.00</code> · A3 Risk-Taking <code class="text-amber-300">-0.50</code> / Unforced <code class="text-rose-400">-0.75</code> · Goal Conceded <code class="text-rose-400">-2.50</code> · <strong class="text-amber-300">Attribution:</strong> <code>1°=1.0x / 2°=0.5x</code></span>
           </div>
         </div>
 
@@ -634,6 +634,7 @@
                     </div>
                     <span class="text-[9px] text-slate-400 font-normal">80 = Role Par</span>
                   </th>
+                  <th class="py-2.5 px-2 text-center">Sub-Scores (T/S/D)</th>
                   <th class="py-2.5 px-2 text-center">TOs (D3/M3/A3)</th>
                   <th class="py-2.5 px-2 text-center">TO / 80'</th>
                   <th class="py-2.5 px-2 text-center">Mins / TO</th>
@@ -2437,7 +2438,7 @@
         <div class="w-12 h-12 rounded-xl accent-chip flex items-center justify-center font-black text-xl border shrink-0 text-brand-400">📐</div>
         <div>
           <div class="mono text-[10px] uppercase text-brand-400 font-bold flex items-center gap-2">
-            <span>DEVELOPMENTAL NET / 80' · v3.1 CALCULATION ENGINE</span>
+            <span>DEVELOPMENTAL NET / 80' · v4.0 CALCULATION ENGINE</span>
             <span class="px-1.5 py-0.2 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[9px]">OFFICIAL MODEL</span>
           </div>
           <h2 id="filmLegendModalTitle" class="display text-2xl sm:text-3xl text-white mt-0.5 leading-tight">Player Film Impact Index (0–100) &amp; Calculation Legend</h2>
@@ -2449,10 +2450,10 @@
       <div class="p-3.5 rounded-xl bg-pitch/80 border border-teal-500/30 space-y-2">
         <div class="flex items-center justify-between text-xs flex-wrap gap-2">
           <span class="font-bold text-teal-400 uppercase tracking-wider mono text-[11px]">The Film Index Formula</span>
-          <span class="text-[10px] text-slate-400 font-mono">Scale Factor = 2.0 pts per 1.0 Net/80'</span>
+          <span class="text-[10px] text-slate-400 font-mono">Scale Factor = 4.0 pts per 1.0 Net/80'</span>
         </div>
         <div class="bg-surface/80 p-2.5 rounded-lg border border-border/80 font-mono text-xs sm:text-sm text-center text-slate-100 overflow-x-auto">
-          <code>Film Index = 80 + ( Player Net/80' &minus; Blended Role Par ) &times; 2.0</code>
+          <code>Film Index = 80 + ( Player Net/80' &minus; Blended Role Par ) &times; 4.0</code>
         </div>
         <p class="text-[11px] text-slate-300 leading-snug">
           Where <strong class="text-teal-300">80 is Role Par</strong> for the player's position. Players exceeding their role par score in the 80s and 90s; players facing heavy turnovers score in the 60s and 70s to guide developmental training.
@@ -2513,7 +2514,7 @@
           <span class="text-[10px] mono text-teal-400">1 Event = 1 Charge · 1°=1.0x / 2°=0.5x</span>
         </div>
         <p class="text-xs text-slate-400 leading-relaxed">
-          The v3.1 engine scores every event once from the matrix below, weighting Primary Actors at <strong>1.0x</strong> and Secondary Contributors at <strong>0.5x</strong>:
+          The v4.0 engine scores every event once from the matrix below, weighting Primary Actors at <strong>1.0x</strong> and Secondary Contributors at <strong>0.5x</strong>:
         </p>
         <div class="overflow-x-auto rounded-xl border border-border/80">
           <table class="w-full text-xs text-left">
@@ -2529,24 +2530,24 @@
             <tbody class="divide-y divide-border/50 font-mono text-xs">
               <tr class="bg-surface/60">
                 <td class="py-2 px-3 font-bold text-white">D3 (Defending)</td>
-                <td class="py-2 px-3 text-center text-emerald-400 font-bold">+1.50</td>
+                <td class="py-2 px-3 text-center text-emerald-400 font-bold">+1.25</td>
                 <td class="py-2 px-3 text-center text-rose-400 font-bold">-0.75 / -1.00 / -1.50</td>
                 <td class="py-2 px-3 text-center text-amber-300">+0.25</td>
-                <td class="py-2 px-3 font-sans text-[11px] text-slate-300">Off-Ball Spacing Fault (-0.75), Forced Turnover Pass (-1.00), Unforced Turnover Pass / Miscontrol (-1.50). Line-Break Glow = +2.00.</td>
+                <td class="py-2 px-3 font-sans text-[11px] text-slate-300">Off-Ball Spacing Fault (-0.75), Forced Turnover Pass (-1.00), Unforced Turnover Pass / Miscontrol (-1.50). Build-out security is paramount in D3.</td>
               </tr>
               <tr class="bg-surface/40">
                 <td class="py-2 px-3 font-bold text-white">M3 (Middle)</td>
                 <td class="py-2 px-3 text-center text-emerald-400 font-bold">+1.25</td>
                 <td class="py-2 px-3 text-center text-rose-400 font-bold">-1.00</td>
                 <td class="py-2 px-3 text-center text-amber-300">+0.25</td>
-                <td class="py-2 px-3 font-sans text-[11px] text-slate-300">Line-Breaking Pass Glow = +1.75 (+0.50 bonus). Midfield turnovers (-1.00) expose the backline in transition.</td>
+                <td class="py-2 px-3 font-sans text-[11px] text-slate-300">Progression &amp; combination hub (+1.25 Glow). Midfield turnovers (-1.00) expose the backline in transition.</td>
               </tr>
               <tr class="bg-surface/60">
                 <td class="py-2 px-3 font-bold text-white">A3 (Attacking)</td>
-                <td class="py-2 px-3 text-center text-emerald-400 font-bold">+1.25</td>
+                <td class="py-2 px-3 text-center text-emerald-400 font-bold">+1.50</td>
                 <td class="py-2 px-3 text-center text-rose-300 font-bold">-0.25 to -1.25</td>
                 <td class="py-2 px-3 text-center text-amber-300">+0.25 / -0.50</td>
-                <td class="py-2 px-3 font-sans text-[11px] text-slate-300">Shot Off Target inside box (-0.25, no TO), Brave 1v1 Dispossessed/Duel Lost (-0.50), Execution Waste (-1.00), Poor Shot Selection / Cross Out of Bounds (-1.25 + A3 TO).</td>
+                <td class="py-2 px-3 font-sans text-[11px] text-slate-300">Final-third creation (+1.50 Glow). Shot Off Target inside box (-0.25, no TO), Brave 1v1 / Forced Pass / Turned into Pressure (-0.50), Unforced Turnover Pass / Miscontrol (-0.75), Poor Shot Selection / Cross Out of Bounds (-1.25 + A3 TO).</td>
               </tr>
             </tbody>
           </table>
@@ -2565,7 +2566,7 @@
           <div class="p-3 rounded-xl bg-pitch/60 border border-teal-500/30">
             <div class="mono text-[10px] text-teal-400 uppercase font-bold">Goal Assist / Key Pass</div>
             <div class="text-xl font-black text-teal-400 mt-0.5">+2.25 / +1.25</div>
-            <p class="text-[10px] text-slate-400 mt-1 leading-snug">Goal Assist (+2.25) and Key Pass / Shot Assist (+1.25); Line-Breaking Pass adds +0.50 to Zone Glow.</p>
+            <p class="text-[10px] text-slate-400 mt-1 leading-snug">Goal Assist (+2.25) and Key Pass / Shot Assist / Line-Breaking Pass in A3 (+1.50).</p>
           </div>
           <div class="p-3 rounded-xl bg-pitch/60 border border-rose-500/30">
             <div class="mono text-[10px] text-rose-400 uppercase font-bold">Conceded Goal Error</div>
@@ -2624,7 +2625,7 @@
           <div class="p-2 rounded-lg bg-surface border border-border/60 font-mono text-[11px] text-slate-200">
             <div>Blended Par = (0.52 &times; -4.07) + (0.48 &times; -1.20) = <strong>-2.28 Net/80'</strong></div>
             <div>Alexa Net/80' = <strong>+1.88</strong> &nbsp;&rarr;&nbsp; Exceeds Blended Par by <strong>+4.16</strong></div>
-            <div class="text-emerald-400 font-bold mt-0.5">Film Index = 80 + (+4.16 &times; 2.0) = 88 / 100</div>
+            <div class="text-emerald-400 font-bold mt-0.5">Film Index = 80 + (+4.16 &times; 4.0) = 97 / 100</div>
           </div>
         </div>
       </div>
@@ -2992,7 +2993,7 @@
        DEVELOPMENTAL NET / 80' · v3.1 (Event-Level, 1°/2° Attribution & Bayesian Regression)
        ============================================================================ */
     const EVENT_WEIGHTS = {
-      'Glow':        { D3:  1.50, M3:  1.25, A3:  1.25, '':  1.25 },
+      'Glow':        { D3:  1.25, M3:  1.25, A3:  1.50, '':  1.25 },
       'Grow':        { D3: -1.50, M3: -1.00, A3: -1.00, '': -1.00 },
       'Glow & Grow': { D3:  0.25, M3:  0.25, A3:  0.25, '':  0.25 },
       'Neutral':     { D3:  0,    M3:  0,    A3:  0,    '':  0    }
@@ -3002,7 +3003,7 @@
 
     const INDEX_CONFIG = {
       par:         80,
-      scale:       2.0,   // index points per 1.0 of net/80 away from player's blended par
+      scale:       4.0,   // v4: 1.0 net/80 above par = +4 index pts (spreads squad ~63–93)
       floor:       50,
       ceiling:     99,
       minEvents:   10,    // sample gate (10+ events for 120'+ players)
@@ -3116,7 +3117,7 @@
           return -1.50;
         }
         if (z === 'A3') {
-          if (tag === 'Dispossessed' || tag === 'Ground Duel Lost' || tag === '1v1 Dribble Lost' || tag === 'Defensive Duel Lost') return -0.50;
+          if (tag === 'Dispossessed' || tag === 'Ground Duel Lost' || tag === '1v1 Dribble Lost' || tag === 'Defensive Duel Lost' || tag === 'Forced Turnover Pass' || tag === 'Turned into Pressure') return -0.50;
           if (tag === 'Shot Off Target' || tag === 'Shot Off Target - Inside Box') return -0.25;
           if (tag === 'Poor Shot Selection' || tag === 'Cross Out of Bounds' || tag === 'Shot Outside 18 (Off Target)') return -1.25;
           return -0.75;
@@ -3148,6 +3149,158 @@
       p.filmIndex = null;
       p.indexNote = null;
       p.confidence = null;
+    }
+
+    const SUBSCORE_THREAT_TAGS = [
+      'Line-Breaking Pass', 'Key Pass / Line Break', 'Key Pass / Line Breaker',
+      'Progressive Pass', 'Key Pass (Shot Assist)', 'Goal Assist', 'Assist',
+      'Switch Point of Attack', 'Combination Play', 'Progressive Carry',
+      '1v1 Dribble Won', 'Quality Shot', 'Shot on Target', 'Goal Scored', 'Goal'
+    ];
+    const SUBSCORE_DEF_TAGS = [
+      'Tackle', 'Interception', 'Direct Pressure', 'Recovery Run',
+      'Blocked Shot', 'Clearance', 'Ground Duel Won', 'Aerial Duel Won',
+      'Lost Mark / Recovery', 'Poor Clearance', 'Stabbed at the Ball',
+      'Ground Duel Lost', 'No Challenge on 50/50'
+    ];
+    const SUBSCORE_TO_TAGS = [
+      'Forced Turnover Pass', 'Unforced Turnover Pass', 'Miscontrol',
+      'Dispossessed', 'Turned into Pressure', 'Poor Clearance',
+      'Poor Shot Selection', 'Cross Out of Bounds'
+    ];
+
+    function computePlayerSubScores(teamObj) {
+      if (!teamObj || !Array.isArray(teamObj.players)) return;
+      const events = Array.isArray(teamObj.filmEvents) ? teamObj.filmEvents : [];
+      const byId = {};
+      for (let i = 0; i < events.length; i++) {
+        if (events[i] && events[i].id != null) byId[events[i].id] = events[i];
+      }
+
+      const rawList = [];
+      for (let idx = 0; idx < teamObj.players.length; idx++) {
+        const p = teamObj.players[idx];
+        if (!p) continue;
+        const mins = Number(p.mins) || 0;
+        const goals = Number(p.goals) || 0;
+        const assists = Number(p.assists) || 0;
+        p.gaTotal = goals + assists;
+        p.gaPer80 = mins > 0 ? Number(((goals + assists) * 80 / mins).toFixed(2)) : 0;
+        p.outputSummary = goals + 'G · ' + assists + 'A (' + p.gaPer80.toFixed(1) + '/80\')';
+
+        const ids = Array.isArray(p.filmEventIds) ? p.filmEventIds : [];
+        let threatPts = 0;
+        let defPts = 0;
+        let onBallCount = 0;
+        let toWeighted = 0;
+        const growTagCounts = {};
+
+        for (let k = 0; k < ids.length; k++) {
+          const e = byId[ids[k]];
+          if (!e) continue;
+          const tag = ('' + (e.tag || '')).trim();
+          const cat = ('' + (e.category || '')).trim();
+          const zone = ('' + (e.zone || '')).slice(0, 2).toUpperCase();
+          const outcome = ('' + (e.outcome || e.qualityRaw || '')).trim();
+          const isCrit = Boolean(e.isCritical || e.qualityRaw === 'Goal Conceded' || e.outcome === 'Goal Conceded' || e.tag === 'Goal Conceded');
+          const w = eventWeight(e, isCrit);
+          const prim = e.primaryJersey != null ? Number(e.primaryJersey) : (Array.isArray(e.jerseys) && e.jerseys.length ? Number(e.jerseys[0]) : null);
+          const mult = (prim === null || Number(p.jersey) === prim) ? 1.0 : 0.5;
+
+          if (w > 0 && (SUBSCORE_THREAT_TAGS.indexOf(tag) !== -1 || cat === 'Finishing' || cat === 'Passing' || cat === 'Carrying')) {
+            threatPts += w * mult;
+          }
+          if (SUBSCORE_DEF_TAGS.indexOf(tag) !== -1 || cat === 'Defending' || cat === 'Goalkeeping' || isCrit) {
+            defPts += w * mult;
+          }
+          const isTO = (cat === 'Turnover' || SUBSCORE_TO_TAGS.indexOf(tag) !== -1);
+          if (cat === 'Passing' || cat === 'Carrying' || cat === 'Finishing' || isTO) {
+            onBallCount += 1;
+          }
+          if (isTO) {
+            const zMult = zone === 'D3' ? 1.35 : (zone === 'A3' ? 0.75 : 1.0);
+            toWeighted += zMult * mult;
+          }
+          if ((outcome === 'Grow' || outcome === 'Goal Conceded' || outcome === 'Glow & Grow' || isCrit) && tag) {
+            const gKey = tag + (zone ? ' (' + zone + ')' : '');
+            growTagCounts[gKey] = (growTagCounts[gKey] || 0) + 1;
+          }
+        }
+
+        let topGrowTag = '';
+        let topGrowCnt = 0;
+        const gKeys = Object.keys(growTagCounts);
+        for (let gk = 0; gk < gKeys.length; gk++) {
+          if (growTagCounts[gKeys[gk]] > topGrowCnt) {
+            topGrowCnt = growTagCounts[gKeys[gk]];
+            topGrowTag = gKeys[gk];
+          }
+        }
+
+        const threatRaw80 = mins > 0 ? ((threatPts + goals * 1.5 + assists * 1.0) * 80 / mins) : 0;
+        const securityRaw = 1 - (toWeighted / Math.max(4, onBallCount + 2));
+        const defRaw80 = mins > 0 ? (defPts * 80 / mins) : 0;
+
+        rawList.push({
+          p: p,
+          eligible: mins >= INDEX_CONFIG.regMinutes && (ids.length > 0 || (Number(p.filmEventsCount) || 0) > 0),
+          threatRaw80: threatRaw80,
+          securityRaw: securityRaw,
+          defRaw80: defRaw80,
+          topGrowTag: topGrowTag
+        });
+      }
+
+      const elig = [];
+      for (let i = 0; i < rawList.length; i++) {
+        if (rawList[i].eligible) elig.push(rawList[i]);
+      }
+
+      function normalizeDim(key, floorStd) {
+        if (!elig.length) return {};
+        let sum = 0;
+        for (let i = 0; i < elig.length; i++) sum += elig[i][key];
+        const mean = sum / elig.length;
+        let sq = 0;
+        for (let i = 0; i < elig.length; i++) {
+          const d = elig[i][key] - mean;
+          sq += d * d;
+        }
+        const std = Math.max(floorStd, Math.sqrt(sq / elig.length));
+        const map = {};
+        for (let i = 0; i < elig.length; i++) {
+          const z = (elig[i][key] - mean) / std;
+          const val = elig.length === 1 ? 78 : Math.max(50, Math.min(98, Math.round(78 + z * 10)));
+          map[elig[i].p.jersey != null ? elig[i].p.jersey : elig[i].p.name] = val;
+        }
+        return map;
+      }
+
+      const tMap = normalizeDim('threatRaw80', 0.35);
+      const sMap = normalizeDim('securityRaw', 0.06);
+      const dMap = normalizeDim('defRaw80', 0.35);
+
+      for (let i = 0; i < rawList.length; i++) {
+        const item = rawList[i];
+        const p = item.p;
+        if (!item.eligible) {
+          p.subScores = null;
+          p.subScoreFocus = 'Insufficient film minutes (<45\') for sub-score profile';
+          continue;
+        }
+        const idKey = p.jersey != null ? p.jersey : p.name;
+        const threat = tMap[idKey] != null ? tMap[idKey] : 78;
+        const security = sMap[idKey] != null ? sMap[idKey] : 78;
+        const defensive = dMap[idKey] != null ? dMap[idKey] : 78;
+        p.subScores = { threat: threat, security: security, defensive: defensive };
+
+        const lowest = (security <= threat && security <= defensive) ? 'Ball Security'
+                     : (defensive <= threat && defensive <= security) ? 'Defensive Work'
+                     : 'Attacking Threat';
+        p.subScoreFocus = item.topGrowTag
+          ? 'Priority focus: tighten ' + item.topGrowTag + ' (' + lowest + ': ' + p.subScores[lowest === 'Ball Security' ? 'security' : (lowest === 'Defensive Work' ? 'defensive' : 'threat')] + ')'
+          : (lowest + ' below squad median — maintain positive execution tempo');
+      }
     }
 
     function applyNetMetrics(teamObj) {
@@ -3201,6 +3354,7 @@
 
       if (!eligible.length) {
         players.forEach(p => { p.filmIndex = null; p.indexNote = 'No film'; });
+        computePlayerSubScores(teamObj);
         return null;
       }
 
@@ -3277,6 +3431,7 @@
                      : 'thin';
       });
 
+      computePlayerSubScores(teamObj);
       teamObj.positionPar = par;
       return par;
     }
@@ -4156,7 +4311,7 @@
       const cols = ['Player', 'Roles (Mins)'].concat(
         season ? ['GP'] : [],
         ['Min (Sub)', isPer80 ? 'G/80' : 'G', isPer80 ? 'A/80' : 'A', isPer80 ? 'KP/80' : 'KP', isPer80 ? 'Sh/80' : 'Shots (SOT)', 'SOT%', 'Cor/Cr', 'TO (D3/M3/A3)'],
-        filmOn ? ['TO/80\'', 'Film Index', 'Glow / Grow'] : [],
+        filmOn ? ['TO/80\'', 'Film Index', 'Sub-Scores (T/S/D)', 'Glow / Grow'] : [],
         ['Fouls', '+/-']
       );
       $('rosterHead').innerHTML = '<tr>' + cols.map((c, i) => `<th class="py-3 ${i === 0 ? 'px-3 sticky left-0 bg-pitch z-10' : 'px-2' + (i > 1 ? ' text-center' : '')}">${c}</th>`).join('') + '</tr>';
@@ -4171,7 +4326,10 @@
       };
 
       const valOf = p => {
-        if (activeSortProp === 'netPer80' && p.mins === 0) return sortAscending ? 999 : -999;
+        if (activeSortProp === 'netPer80') {
+          if (p.mins === 0 || p.filmIndex == null) return sortAscending ? 99999 : -99999;
+          return (Number(p.filmIndex) * 100) + (Number(p.netPer80) || 0);
+        }
         const raw = Number(p[activeSortProp]) || 0;
         if (isPer80 && ['goals', 'assists', 'keyPasses', 'shots', 'turnovers', 'glow', 'grow'].includes(activeSortProp)) {
           return p.mins > 0 ? (raw / p.mins * 80) : -1;
@@ -4199,8 +4357,12 @@
           ? `<span class="text-emerald-400 font-bold">${p.glow}</span> <span class="text-slate-500">/</span> <span class="text-amber-400 font-bold">${p.grow}</span> <span class="text-[10px] ${p.glowPct >= 50 ? 'text-emerald-300' : 'text-slate-400'}">(${p.glowPct}%)</span>`
           : '<span class="text-slate-500">–</span>';
         const n80 = Number(p.netPer80) || 0;
-        const fIdx = p.filmIndex ?? (p.mins >= 45 ? Math.max(50, Math.min(99, Math.round(80 + (n80 * 1.25)))) : null);
+        const fIdx = p.filmIndex ?? (p.mins >= 45 ? Math.max(50, Math.min(99, Math.round(80 + (n80 * 4.0)))) : null);
         const netCls = (p.mins < 45 || fIdx === null) ? 'text-slate-500' : (fIdx >= 80 ? 'text-emerald-400 font-bold' : fIdx < 70 ? 'text-rose-400 font-bold' : 'text-amber-300 font-semibold');
+        const subCls = v => v >= 82 ? 'text-emerald-400' : v < 72 ? 'text-amber-300' : 'text-slate-300';
+        const subHtml = p.subScores
+          ? `<span class="font-mono text-[10px] font-bold"><span class="${subCls(p.subScores.threat)}">T:${p.subScores.threat}</span> <span class="text-slate-500">·</span> <span class="${subCls(p.subScores.security)}">S:${p.subScores.security}</span> <span class="text-slate-500">·</span> <span class="${subCls(p.subScores.defensive)}">D:${p.subScores.defensive}</span></span>`
+          : '<span class="text-slate-500">–</span>';
 
         return `<tr onclick="openPlayerModal(${players.indexOf(p)})" class="hover:bg-surface/80 active:bg-surface cursor-pointer transition ${p.mins === 0 ? 'opacity-55' : ''}">
             <td class="py-2.5 px-3 font-semibold text-white sticky left-0 bg-card z-10 border-r border-border/40">
@@ -4223,6 +4385,7 @@
             <td class="py-2.5 px-2 text-center">${isPer80 ? fmtRate(p.turnovers, p.mins) : toDetail}</td>
             ${filmOn ? `<td class="py-2.5 px-2 text-center font-mono ${(p.toPer80 || 0) >= 8.5 ? 'text-rose-400 font-bold' : (p.toPer80 || 0) <= 4.0 && p.mins > 0 ? 'text-emerald-400 font-bold' : 'text-slate-300'}">${p.mins > 0 ? (p.toPer80 || 0).toFixed(1) : '–'}</td>` : ''}
             ${filmOn ? `<td class="py-2.5 px-2 text-center font-mono ${netCls}" title="Net / 80': ${fmtNet(n80)}">${fIdx !== null && p.filmEventsCount ? `${fIdx}${p.confidence === 'regressed' ? '<span class="text-[8px] text-purple-300 ml-0.5">R</span>' : ''}` : '–'}</td>` : ''}
+            ${filmOn ? `<td class="py-2.5 px-2 text-center whitespace-nowrap" title="${esc(p.subScoreFocus || '')}">${subHtml}</td>` : ''}
             ${filmOn ? `<td class="py-2.5 px-2 text-center">${glowGrowHtml}</td>` : ''}
             <td class="py-2.5 px-2 text-center ${p.fouls >= 3 ? 'text-amber-300 font-semibold' : ''}">${p.fouls}</td>
             <td class="py-2.5 px-2 text-center ${gdCls}">${p.mins > 0 ? gdStr : '–'}</td>
@@ -4409,6 +4572,10 @@
           : fIdx >= 80 ? 'text-emerald-400 font-bold'
           : fIdx >= 70 ? 'text-amber-300 font-semibold'
           : 'text-rose-400 font-bold');
+        const subCls = v => v >= 82 ? 'text-emerald-400' : v < 72 ? 'text-amber-300' : 'text-slate-300';
+        const subHtml = p.subScores
+          ? `<span class="font-mono text-[10px] font-bold"><span class="${subCls(p.subScores.threat)}">T:${p.subScores.threat}</span> <span class="text-slate-500">·</span> <span class="${subCls(p.subScores.security)}">S:${p.subScores.security}</span> <span class="text-slate-500">·</span> <span class="${subCls(p.subScores.defensive)}">D:${p.subScores.defensive}</span></span>`
+          : '<span class="text-slate-500">–</span>';
         return `<tr onclick="openPlayerModal(${players.indexOf(p)})" class="hover:bg-surface/80 cursor-pointer transition">
           <td class="py-2.5 px-3 font-semibold text-white">
             <div class="flex items-center gap-2">
@@ -4434,6 +4601,7 @@
               </div>
             `}
           </td>
+          <td class="py-2.5 px-2 text-center whitespace-nowrap" title="${esc(p.subScoreFocus || '')}">${subHtml}</td>
           <td class="py-2.5 px-2 text-center">
             <span class="font-bold text-white">${p.turnovers || 0}</span>
             <span class="text-[10px] text-slate-400 ml-1">(${p.toD||0}/${p.toM||0}/${p.toA||0})</span>
@@ -5031,7 +5199,7 @@
           ],
           [
             `Film Impact Index (0–100) & Ball Security`,
-            `On our 0–100 Film Impact Index (where 80 is par, derived from <code>(Glow × 1.25 - Grow × 1.0 - D3 TO × 0.75) / 80'</code>), ${leaderStr || 'our positive-net contributors'} lead the squad. High-volume playmakers ${midStr || 'in central midfield'} carry the heaviest on-ball touch volume.`
+            `On our 0–100 Film Impact Index (where 80 is par, derived from our v4.0 Single-Charge Zone &times; Outcome matrix (<code>Scale 4.0&times; vs. Blended Role Par</code>)), ${leaderStr || 'our positive-net contributors'} lead the squad. High-volume playmakers ${midStr || 'in central midfield'} carry the heaviest on-ball touch volume.`
           ],
           [
             `Attacking Finishers & Midfield Playmaking`,
@@ -5497,7 +5665,38 @@
           </div>
         ` : '';
 
-        $('modalFilmSummary').innerHTML = `
+        const ss = p.subScores;
+        const barColor = v => v >= 82 ? '#15803D' : v < 72 ? '#B45309' : '#008496';
+        const subPanelHtml = `
+          <div class="p-2.5 rounded-xl bg-pitch/90 border border-border/80 space-y-2 mb-2">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <span class="mono text-[10px] uppercase font-bold text-teal-400">Output &amp; Sub-Score Profile (0–98 · 78 = Squad Avg)</span>
+              <span class="text-[11px] font-bold text-white">Output: <span class="accent-text">${esc(p.outputSummary || `${p.goals || 0}G · ${p.assists || 0}A`)}</span></span>
+            </div>
+            ${ss ? `
+              <div class="grid grid-cols-3 gap-2 text-xs">
+                ${[
+                  ['Threat', ss.threat],
+                  ['Ball Security', ss.security],
+                  ['Defensive', ss.defensive]
+                ].map(([label, val]) => `
+                  <div class="bg-surface p-2 rounded-lg border border-border/60 space-y-1">
+                    <div class="flex items-center justify-between text-[10px]">
+                      <span class="text-slate-400 font-semibold">${label}</span>
+                      <span class="font-mono font-bold ${val >= 82 ? 'text-emerald-400' : val < 72 ? 'text-amber-300' : 'text-white'}">${val}</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-pitch rounded-full overflow-hidden">
+                      <div class="h-full rounded-full" style="width:${val}%; background:${barColor(val)}"></div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+            ${p.subScoreFocus ? `<div class="text-[10px] text-slate-300"><strong class="text-teal-300">Coaching Focus:</strong> ${esc(p.subScoreFocus)}</div>` : ''}
+          </div>
+        `;
+
+        $('modalFilmSummary').innerHTML = subPanelHtml + `
           <div class="space-y-1">
             <div class="flex items-center justify-between text-[11px]">
               <span class="text-emerald-400 font-bold">${p.glow || 0} Glow Actions (${gPct}%)</span>
