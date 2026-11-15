@@ -6897,11 +6897,13 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
         status: 'Pitchside Committed'
       };
 
-      // Stage Pitchside Draft & Sync In-Game Logged Moments to Cloud for Desktop Film Review + Master Sheet
+      // Stage Pitchside Draft & Sync In-Game Logged Moments sequentially so LockService never collides
+      let draftPayload = null;
+      let slimDraftMeta = null;
       try {
         const allTeamFilm = (customData[targetTeam] && customData[targetTeam].filmEvents) || [];
         const matchFilmOnly = allTeamFilm.filter(e => e.match === canonicalMatchTitle);
-        const slimDraftMeta = {
+        slimDraftMeta = {
           match: canonicalMatchTitle,
           matchId: matchId,
           team: targetTeam,
@@ -6913,7 +6915,7 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           status: 'Pitchside Draft',
           savedAt: new Date().toISOString()
         };
-        const draftPayload = {
+        draftPayload = {
           ...slimDraftMeta,
           moments: matchFilmOnly
         };
@@ -6923,70 +6925,84 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           allDrafts[canonicalMatchTitle] = draftPayload;
           localStorage.setItem('ajax_pitchside_drafts', JSON.stringify(allDrafts));
         } catch (e) {}
-
-        // 1. Store slim metadata pointer in match_hub notes; write row-based holding record + action rows via savePitchsideDraft
-        fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'saveMatchHubNote',
-            pin: coachPin,
-            noteKey: 'ajax_pitchside_draft_latest',
-            noteText: JSON.stringify(slimDraftMeta)
-          })
-        }).catch(() => {});
-
-        fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'savePitchsideDraft',
-            pin: coachPin,
-            draft: draftPayload
-          })
-        }).catch(() => {});
-
-        // 2. Save multi-device datasets permanently to Google Sheets KV store (moments stay Pitchside Draft until Film Review)
-        fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'saveMatchHubData',
-            pin: coachPin,
-            datasets: customData
-          })
-        }).catch(() => {});
       } catch (draftErr) {}
 
-      // Background POST directly into Google Sheets (Player_IDP)
-      // IMPORTANT: Omit Content-Type header to avoid CORS OPTIONS preflight blockage
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'updateSeasonStats',
-          pin: coachPin,
-          matchId: matchId,
-          isIncremental: true,
-          playerStats: statsPayload,
-          matchSummary: matchSummary,
-          matchTotals: matchTotals
-        })
-      }).then(r => r.json()).then(res => {
-        if (res && res.success) {
-          if (res.alreadyCommitted) {
-            showToast(`ℹ️ Match (${matchId}) was already committed to Google Sheets.`);
-          } else {
-            showToast(`☁️ Google Sheets (Player_IDP) synced: ${res.updated || 0} players updated!`);
+      const sheetStatusEl = document.getElementById('commitSheetStatus');
+      if (sheetStatusEl) sheetStatusEl.textContent = '⏳ Syncing match & draft to Sheet...';
+
+      (async () => {
+        let draftSynced = false;
+        let statsSynced = false;
+        const postJson = async (bodyObj) => {
+          const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify(bodyObj) });
+          return r.json();
+        };
+
+        try {
+          if (draftPayload) {
+            const draftRes = await postJson({ action: 'savePitchsideDraft', pin: coachPin, draft: draftPayload });
+            if (draftRes && draftRes.success) draftSynced = true;
           }
-          if (Array.isArray(res.unmatchedPlayers) && res.unmatchedPlayers.length > 0) {
-            showToast(`⚠️ Unmatched player names skipped (verify in Player_IDP): ${res.unmatchedPlayers.join(', ')}`);
+        } catch (e) {}
+
+        try {
+          // IMPORTANT: Omit Content-Type header to avoid CORS OPTIONS preflight blockage
+          const res = await postJson({
+            action: 'updateSeasonStats',
+            pin: coachPin,
+            matchId: matchId,
+            isIncremental: true,
+            playerStats: statsPayload,
+            matchSummary: matchSummary,
+            matchTotals: matchTotals
+          });
+          if (res && res.success) {
+            statsSynced = true;
+            if (res.alreadyCommitted) {
+              showToast(`ℹ️ Match (${matchId}) was already committed to Google Sheets.`);
+            } else {
+              showToast(`☁️ Google Sheets (Player_IDP) synced: ${res.updated || 0} players updated!`);
+            }
+            if (Array.isArray(res.unmatchedPlayers) && res.unmatchedPlayers.length > 0) {
+              showToast(`⚠️ Unmatched player names skipped (verify in Player_IDP): ${res.unmatchedPlayers.join(', ')}`);
+            }
+            if (sheetStatusEl) {
+              const draftBadge = draftSynced ? ' + Match_Log ✓' : '';
+              sheetStatusEl.textContent = res.alreadyCommitted
+                ? `Already Committed${draftBadge} ☁️`
+                : `Synced (${res.updated || 0} rows${draftBadge}) ☁️`;
+            }
           }
-          if (document.getElementById('commitSheetStatus')) {
-            document.getElementById('commitSheetStatus').textContent = res.alreadyCommitted
-              ? `Already Committed ☁️`
-              : `Synced (${res.updated || 0} rows) ☁️`;
+        } catch (err) {
+          console.warn('Google Sheet background sync notice:', err);
+        }
+
+        if (slimDraftMeta) {
+          try {
+            await postJson({
+              action: 'saveMatchHubNote',
+              pin: coachPin,
+              noteKey: 'ajax_pitchside_draft_latest',
+              noteText: JSON.stringify(slimDraftMeta)
+            });
+          } catch (e) {}
+        }
+
+        try {
+          await postJson({ action: 'saveMatchHubData', pin: coachPin, datasets: customData });
+        } catch (e) {}
+
+        if (!draftSynced || !statsSynced) {
+          try {
+            const q = JSON.parse(localStorage.getItem('ajax_offline_commit_queue') || '[]') || [];
+            q.push({ matchId, match: canonicalMatchTitle, queuedAt: new Date().toISOString(), draftPayload, statsPayload: { action: 'updateSeasonStats', matchId, isIncremental: true, playerStats: statsPayload, matchSummary, matchTotals } });
+            localStorage.setItem('ajax_offline_commit_queue', JSON.stringify(q.slice(-10)));
+          } catch (e) {}
+          if (sheetStatusEl && !statsSynced) {
+            sheetStatusEl.textContent = '⚠️ Offline / Queued locally — stay on Wi-Fi & retry';
           }
         }
-      }).catch(err => {
-        console.warn('Google Sheet background sync notice:', err);
-      });
+      })();
 
       // Show Confirmation Modal Receipt
       if (document.getElementById('commitConfirmTitle')) {

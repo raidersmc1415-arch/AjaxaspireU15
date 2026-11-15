@@ -276,7 +276,7 @@ function createCodeGsSandbox() {
       getActiveSpreadsheet: () => ({
         getSheetByName: (name) => sheets[name] || null,
         insertSheet: (name) => {
-          sheets[name] = makeSheet([[]]);
+          sheets[name] = makeSheet([]);
           return sheets[name];
         }
       })
@@ -2501,6 +2501,48 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       const localMerged = idxCtx.mergeMomentsWithLocalAndCloudEdits([], 'Camila Deleon', 9, [], null);
       assert(!localMerged.some(m => m.id === 951), 'index.html local merge must skip Pitchside Draft moments');
       assert(localMerged.some(m => m.id === 952), 'index.html local merge must preserve Reviewed & Published moments');
+    });
+
+    await runAsyncCheck('22. Legacy committed_match_ids fallback recovers Seattle Reign & Albion San Diego for Film Review + Match_Log backfill', async () => {
+      const { sandbox } = createCodeGsSandbox();
+      sandbox.setMatchHubKV('committed_match_ids', {
+        'AJAX ASPIRE U15_Seattle_Reign_2026-11-09': '2026-11-09T23:15:00.000Z',
+        'AJAX ASPIRE U15_Albion_San_Diego_2026-11-14': '2026-11-14T22:45:00.000Z'
+      });
+
+      const actionsRes = JSON.parse(sandbox.doGet({ parameter: { action: 'getMatchActions', pin: 'TEST_SERVER_COACH_SECRET' } }).getContent());
+      assert(actionsRes.matches.some(m => m.match === 'Seattle Reign (Nov 9)'), 'Expected getMatchActions to recover Seattle Reign (Nov 9) from committed_match_ids');
+      assert(actionsRes.matches.some(m => m.match === 'Albion San Diego (Nov 14)'), 'Expected getMatchActions to recover Albion San Diego (Nov 14) from committed_match_ids');
+
+      const hubRes = JSON.parse(sandbox.doGet({ parameter: { action: 'matchHub', pin: 'TEST_SERVER_COACH_SECRET' } }).getContent());
+      assert(hubRes.history.some(h => h.match === 'Seattle Reign (Nov 9)'), 'Expected getMatchHubData history to include Seattle Reign (Nov 9)');
+      assert(hubRes.drafts['Albion San Diego (Nov 14)'], 'Expected getMatchHubData drafts to include Albion San Diego (Nov 14)');
+
+      // Re-submitting an alreadyCommitted match still backfills missing Match_Log row without re-adding Player_IDP stats
+      const dupCommitRes = JSON.parse(sandbox.handleUpdateSeasonStats({
+        pin: 'TEST_SERVER_COACH_SECRET',
+        matchId: 'AJAX ASPIRE U15_Seattle_Reign_2026-11-09',
+        isIncremental: true,
+        playerStats: { 'camila deleon': { name: 'Camila Deleon', gp: 1, mins: 80, goals: 1 } },
+        matchSummary: {
+          matchId: 'AJAX ASPIRE U15_Seattle_Reign_2026-11-09',
+          match: 'Seattle Reign (Nov 9)',
+          matchDate: '2026-11-09',
+          opponent: 'Seattle Reign',
+          ajaxScore: 3,
+          oppScore: 1,
+          matchMins: 80
+        }
+      }).getContent());
+      assert.strictEqual(dupCommitRes.alreadyCommitted, true);
+      assert.strictEqual(dupCommitRes.updated, 0);
+      const matchLogRows = sandbox.readAllMatchLogRows_();
+      assert(matchLogRows.some(r => r.match === 'Seattle Reign (Nov 9)'), 'Expected Match_Log holding row backfilled even on alreadyCommitted match');
+
+      const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+      assert(trackerHtml.includes('ajax_offline_commit_queue') && trackerHtml.includes("sheetStatusEl.textContent = '⏳ Syncing match & draft to Sheet...'"), 'Expected sequential commit queue & status feedback in ajax-match-tracker.html');
+      const loggerHtml = fs.readFileSync(path.join(ROOT, 'film-moment-logger.html'), 'utf8');
+      assert(loggerHtml.includes('function onCustomMatchInput('), 'Expected onCustomMatchInput handler in film-moment-logger.html');
     });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);

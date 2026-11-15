@@ -154,7 +154,7 @@
               <option value="Rocklin (Sept 16)">Rocklin (Sept 16) · (58 moments)</option>
               <option value="CUSTOM">+ New / Custom Match...</option>
             </select>
-            <input type="text" id="voiceMatchCustom" placeholder="Enter custom match name" class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white mt-1.5 hidden focus:outline-none focus:border-brand-500">
+            <input type="text" id="voiceMatchCustom" placeholder="Enter custom match name" oninput="onCustomMatchInput(this.value)" onchange="loadMatchMoments(getSelectedMatchName())" class="w-full bg-pitch text-xs p-2.5 rounded-xl border border-border text-white mt-1.5 hidden focus:outline-none focus:border-brand-500">
           </div>
           <div>
             <label class="block text-[10px] mono uppercase text-slate-400 font-bold mb-1">Default Half</label>
@@ -249,7 +249,7 @@
               <option value="Rocklin (Sept 16)">Rocklin (Sept 16)</option>
               <option value="CUSTOM">+ Custom...</option>
             </select>
-            <input type="text" id="rapidMatchCustom" placeholder="Match Name" class="bg-pitch text-xs px-2.5 py-1 rounded-lg border border-border text-white w-28 hidden">
+            <input type="text" id="rapidMatchCustom" placeholder="Match Name" oninput="onCustomMatchInput(this.value)" onchange="loadMatchMoments(getSelectedMatchName())" class="bg-pitch text-xs px-2.5 py-1 rounded-lg border border-border text-white w-36 hidden">
             <select id="rapidHalf" class="bg-pitch text-xs px-2 py-1 rounded-lg border border-border text-slate-200">
               <option value="H1">H1</option>
               <option value="H2" selected>H2</option>
@@ -860,7 +860,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
           fetch(`${API_URL}?action=matchHub&pin=${encodeURIComponent(pin)}`).then(r => r.json()).catch(() => null)
         ]);
 
-        if ((actionsRes && actionsRes.error === 'Unauthorized Coach PIN') || (hubRes && hubRes.error === 'Unauthorized coach PIN')) {
+        const isAuthErr = (r) => r && typeof r.error === 'string' && r.error.toLowerCase().includes('unauthorized');
+        if (isAuthErr(actionsRes) || isAuthErr(hubRes)) {
           try { sessionStorage.removeItem('ajax_coach_session_token'); } catch (e) {}
           window.CURRENT_COACH_PIN = null;
           updateCloudAuthBarUI();
@@ -2431,9 +2432,22 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
     function getSelectedMatchName() {
       const vSel = document.getElementById('voiceMatchSelect');
+      const rSel = document.getElementById('rapidMatchSelect');
       const vCust = document.getElementById('voiceMatchCustom');
-      if (vSel && vSel.value === 'CUSTOM') return (vCust?.value || 'League Match').trim();
-      return vSel ? vSel.value : 'Crossfire #2 (Nov 8)';
+      const rCust = document.getElementById('rapidMatchCustom');
+      const activeSel = (vSel && vSel.value) || (rSel && rSel.value) || 'Crossfire #2 (Nov 8)';
+      if (activeSel === 'CUSTOM') {
+        return ((vCust?.value || rCust?.value || '').trim() || 'New Match');
+      }
+      return activeSel;
+    }
+
+    function onCustomMatchInput(val) {
+      const vCust = document.getElementById('voiceMatchCustom');
+      const rCust = document.getElementById('rapidMatchCustom');
+      if (vCust && vCust.value !== val) vCust.value = val;
+      if (rCust && rCust.value !== val) rCust.value = val;
+      updateActiveMatchBanner();
     }
 
     function onSelectMatchChanged(val) {
@@ -2446,8 +2460,9 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       if (rSel) rSel.value = val;
 
       if (val === 'CUSTOM') {
-        if (vCust) vCust.classList.remove('hidden');
+        if (vCust) { vCust.classList.remove('hidden'); vCust.focus(); }
         if (rCust) rCust.classList.remove('hidden');
+        loadMatchMoments(getSelectedMatchName());
         return;
       } else {
         if (vCust) vCust.classList.add('hidden');

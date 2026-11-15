@@ -1164,7 +1164,7 @@ function isValidCoachPin(pin) {
 
 function getOrCreateMatchHubSheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName('match_hub');
+  var sheet = ss.getSheetByName('match_hub') || ss.getSheetByName('Match_Hub');
   if (!sheet) {
     sheet = ss.insertSheet('match_hub');
     sheet.appendRow(['key', 'value', 'updated_at']);
@@ -1218,8 +1218,8 @@ function getOrCreateMatchLogSheet() {
       .setBackground('#0D1B2A')
       .setFontColor('#FFFFFF');
     sheet.setFrozenRows(1);
-  } else if (sheet.getLastRow() === 0) {
-    sheet.appendRow(MATCH_LOG_HEADERS);
+  } else if (sheet.getLastRow() === 0 || (sheet.getLastRow() === 1 && !String(sheet.getRange(1, 1).getValue() || '').trim())) {
+    sheet.getRange(1, 1, 1, MATCH_LOG_HEADERS.length).setValues([MATCH_LOG_HEADERS]);
     sheet.getRange(1, 1, 1, MATCH_LOG_HEADERS.length)
       .setFontWeight('bold')
       .setBackground('#0D1B2A')
@@ -1351,6 +1351,58 @@ function readAllMatchLogRows_() {
   return out;
 }
 
+function extractCommittedMatchesFallback_(kv, existingLowerMap) {
+  var committedMap = (kv && kv['committed_match_ids']) || {};
+  var out = [];
+  var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  for (var cid in committedMap) {
+    if (!Object.prototype.hasOwnProperty.call(committedMap, cid) || !cid) continue;
+    var s = String(cid).trim();
+    var mDate = '';
+    var dateMatch = s.match(/(\d{4})[-_](\d{2})[-_](\d{2})$/);
+    if (dateMatch) {
+      mDate = dateMatch[1] + '-' + dateMatch[2] + '-' + dateMatch[3];
+      s = s.slice(0, dateMatch.index).replace(/[_-]+$/, '');
+    }
+    s = s.replace(/^(AJAX[_ ]ASPIRE[_ ]U15[_ ]*\(?LEAGUE\)?[_ ]*|AJAX[_ ]ASPIRE[_ ]U15[_ ]*|AJAX[_ ]GA[_ ]U15[_ ]*|ASPIRE[_ ]*|GA[_ ]*)/i, '');
+    var opp = s.replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!opp) continue;
+    var title = opp;
+    if (opp.indexOf('(') === -1 && mDate) {
+      var parts = mDate.split('-');
+      var mIdx = parseInt(parts[1], 10) - 1;
+      var dNum = parseInt(parts[2], 10);
+      if (mIdx >= 0 && mIdx < 12 && !isNaN(dNum)) {
+        title = opp + ' (' + monthNames[mIdx] + ' ' + dNum + ')';
+      }
+    }
+    var lowTitle = title.toLowerCase();
+    var lowOpp = opp.toLowerCase();
+    if (existingLowerMap && (existingLowerMap[lowTitle] || existingLowerMap[lowOpp])) continue;
+    var alreadyKnown = false;
+    if (existingLowerMap) {
+      for (var ek in existingLowerMap) {
+        if (existingLowerMap[ek] && ek.indexOf(lowOpp) === 0) {
+          alreadyKnown = true;
+          break;
+        }
+      }
+    }
+    if (alreadyKnown) continue;
+    if (existingLowerMap) existingLowerMap[lowTitle] = true;
+    out.push({
+      matchId: String(cid),
+      match: title,
+      opponent: opp,
+      matchDate: mDate,
+      date: committedMap[cid] || mDate || '',
+      momentCount: 0,
+      status: 'Pitchside Committed'
+    });
+  }
+  return out;
+}
+
 function getMatchHubData(pin) {
   try {
     if (!isValidCoachPin(pin)) {
@@ -1379,8 +1431,27 @@ function getMatchHubData(pin) {
         seenMatchNames[khTitle] = true;
       }
     }
+    var committedFallback = extractCommittedMatchesFallback_(kv, seenMatchNames);
+    for (var cf = 0; cf < committedFallback.length; cf++) {
+      mergedHistory.push(committedFallback[cf]);
+    }
 
     var drafts = kv['pitchside_drafts'] || {};
+    for (var cfD = 0; cfD < committedFallback.length; cfD++) {
+      var cfb = committedFallback[cfD];
+      if (cfb.match && !drafts[cfb.match]) {
+        drafts[cfb.match] = {
+          match: cfb.match,
+          matchId: cfb.matchId,
+          opponent: cfb.opponent,
+          matchDate: cfb.matchDate,
+          score: '',
+          momentCount: 0,
+          status: cfb.status,
+          savedAt: cfb.date || ''
+        };
+      }
+    }
     for (var dl = 0; dl < matchLogRows.length; dl++) {
       var mlRow = matchLogRows[dl];
       if (mlRow.match && !drafts[mlRow.match]) {
@@ -1508,6 +1579,21 @@ function handleUpdateSeasonStats(payload) {
       var kvCheck = getMatchHubKVMap();
       var committedIds = kvCheck['committed_match_ids'] || {};
       if (committedIds[matchId]) {
+        // Ensure a Match_Log holding row exists even if committed before Match_Log existed
+        if (payload.matchSummary) {
+          try {
+            var existingLog = readAllMatchLogRows_();
+            var hasLogRow = existingLog.some(function(r) {
+              return (r.matchId && r.matchId === matchId) ||
+                (payload.matchSummary.match && r.match && r.match.toLowerCase() === String(payload.matchSummary.match).trim().toLowerCase());
+            });
+            if (!hasLogRow) {
+              upsertMatchLogRow_(Object.assign({}, payload.matchSummary, {
+                status: payload.matchSummary.status || 'Pitchside Committed'
+              }));
+            }
+          } catch (e) {}
+        }
         return jsonOut({
           success: true,
           alreadyCommitted: true,
@@ -2870,6 +2956,24 @@ function getMatchActions(params) {
           score: h.score || ((h.ajaxScore !== undefined && h.oppScore !== undefined) ? (h.ajaxScore + ' - ' + h.oppScore) : ''),
           matchDate: h.matchDate || (h.date ? String(h.date).slice(0, 10) : '')
         };
+      }
+    }
+    var matchMapLower = {};
+    for (var mmK in matchMap) {
+      if (Object.prototype.hasOwnProperty.call(matchMap, mmK)) matchMapLower[mmK.toLowerCase()] = true;
+    }
+    var committedFallbackA = extractCommittedMatchesFallback_(kv, matchMapLower);
+    for (var cfa = 0; cfa < committedFallbackA.length; cfa++) {
+      var itemA = committedFallbackA[cfa];
+      if (itemA.match && !matchMap[itemA.match]) {
+        matchMap[itemA.match] = {
+          match: itemA.match,
+          momentCount: 0,
+          status: itemA.status,
+          score: '',
+          matchDate: itemA.matchDate || ''
+        };
+        history.push(itemA);
       }
     }
 
