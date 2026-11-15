@@ -2284,9 +2284,13 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         }
         if (!pin) return { success: false, message: 'Missing Coach Token' };
         const match = canonicalizeMatchTitle(getSelectedMatchName());
-        const matchMoments = Array.isArray(matchMomentsOverride)
+        const matchMoments = (Array.isArray(matchMomentsOverride)
           ? matchMomentsOverride
-          : LOGGED_MOMENTS.filter(m => !m.match || canonicalizeMatchTitle(m.match) === match).map(m => ({ ...m, match }));
+          : LOGGED_MOMENTS.filter(m => !m.match || canonicalizeMatchTitle(m.match) === match)).map(m => ({
+            ...m,
+            match,
+            status: 'Reviewed & Published'
+          }));
         const res = await fetch(API_URL, {
           method: 'POST',
           body: JSON.stringify({
@@ -2322,7 +2326,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
                 m: matchTitle,
                 note: m.notes || m.note || '',
                 notes: m.notes || m.note || '',
-                n: m.notes || m.note || ''
+                n: m.notes || m.note || '',
+                status: 'Reviewed & Published'
               };
             });
             custom[k].filmEvents = otherMatches.concat(normalizedMoments);
@@ -2333,9 +2338,17 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         if (draftsRaw) {
           const draftsObj = JSON.parse(draftsRaw);
           if (draftsObj && draftsObj[matchTitle]) {
-            draftsObj[matchTitle].moments = matchMoments;
+            draftsObj[matchTitle].moments = matchMoments.map(m => ({ ...m, status: 'Reviewed & Published' }));
             draftsObj[matchTitle].status = 'Reviewed & Published';
             localStorage.setItem('ajax_pitchside_drafts', JSON.stringify(draftsObj));
+          }
+        }
+        const latestRaw = localStorage.getItem('ajax_pitchside_draft_latest');
+        if (latestRaw) {
+          const latestObj = JSON.parse(latestRaw);
+          if (latestObj && canonicalizeMatchTitle(latestObj.match || latestObj.opponent) === matchTitle) {
+            latestObj.status = 'Reviewed & Published';
+            localStorage.setItem('ajax_pitchside_draft_latest', JSON.stringify(latestObj));
           }
         }
       } catch (e) {}

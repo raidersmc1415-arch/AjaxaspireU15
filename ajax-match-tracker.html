@@ -6834,7 +6834,8 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
             isHeader,
             shotQuality,
             setPieceOutcome,
-            filmReview: !!ev.isBookmark
+            filmReview: !!ev.isBookmark,
+            status: 'Pitchside Draft'
           });
         });
 
@@ -6943,20 +6944,7 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           })
         }).catch(() => {});
 
-        // 2. Sync match moments to Match_Action_Log & all_film_moments
-        if (matchFilmOnly.length > 0) {
-          fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-              action: 'saveFilmMoments',
-              pin: coachPin,
-              match: canonicalMatchTitle,
-              moments: matchFilmOnly
-            })
-          }).catch(() => {});
-        }
-
-        // 3. Save multi-device datasets permanently to Google Sheets KV store
+        // 2. Save multi-device datasets permanently to Google Sheets KV store (moments stay Pitchside Draft until Film Review)
         fetch(API_URL, {
           method: 'POST',
           body: JSON.stringify({

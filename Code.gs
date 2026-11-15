@@ -2164,7 +2164,7 @@ function harmonizeMatchActionLogToV31() {
   }
 }
 
-function buildActionRowFromMoment(m, nowStr) {
+function buildActionRowFromMoment(m, nowStr, forcedStatus) {
   var jList = Array.isArray(m.jerseys) ? m.jerseys : (Array.isArray(m.j) ? m.j : []);
   if (!jList.length && m.jersey) jList = [parseInt(m.jersey, 10)];
   var primaryJersey = jList.length ? jList[0] : '';
@@ -2194,7 +2194,7 @@ function buildActionRowFromMoment(m, nowStr) {
   var note = String(m.note !== undefined ? m.note : (m.notes !== undefined ? m.notes : (m.n || ''))).trim();
   var noteToPlayer = String(m.noteToPlayer !== undefined ? m.noteToPlayer : (m.playerNote || '')).trim();
   var filmReview = Boolean(m.filmReview || m.isBookmark);
-  var status = String(m.status || 'Published').trim();
+  var status = String(forcedStatus || m.status || 'Published').trim();
   var eventId = String(m.eventId || m.id || (matchName.replace(/[^a-zA-Z0-9]/g, '') + '_' + half + '_' + clock.replace(':', '') + '_' + (primaryJersey || 'T')));
 
   var norm = normalizeActionRowV31_(category, tag, outcome, note, matchName, eventId);
@@ -2393,8 +2393,11 @@ function saveMatchActionRowsInternal_(payload) {
     sheet.getRange(1, 1, 1, targetCols).setValues([MATCH_ACTION_LOG_HEADERS]);
   }
 
+  var forcedRowStatus = payload.reviewed === true
+    ? 'Reviewed & Published'
+    : (payload.reviewed === false ? 'Pitchside Draft' : String(payload.status || '').trim());
   var newRows = moments.map(function(m) {
-    var built = buildActionRowFromMoment(m, nowStr).slice(0, targetCols);
+    var built = buildActionRowFromMoment(m, nowStr, forcedRowStatus).slice(0, targetCols);
     while (built.length < targetCols) built.push('');
     return built;
   });
@@ -2947,6 +2950,31 @@ function getPlayerFilmMoments(playerName, playerPin) {
       } catch (e) {}
     }
 
+    var isStatusPublishedForPlayer_ = function(rawStatus) {
+      var s = String(rawStatus || '').trim().toLowerCase();
+      if (!s) return true;
+      if (s.indexOf('reviewed') !== -1 || s.indexOf('published') !== -1) return true;
+      if (s.indexOf('draft') !== -1 || s.indexOf('pending') !== -1 || s.indexOf('holding') !== -1 || s.indexOf('committed') !== -1 || s.indexOf('unreviewed') !== -1) return false;
+      return true;
+    };
+    var matchStatusMap = {};
+    var matchLogRows = readAllMatchLogRows_();
+    for (var mlI = 0; mlI < matchLogRows.length; mlI++) {
+      var mlItem = matchLogRows[mlI];
+      if (mlItem && mlItem.match) {
+        matchStatusMap[String(mlItem.match).trim().toLowerCase()] = String(mlItem.status || '').trim();
+      }
+    }
+    var draftsKv = kv['pitchside_drafts'] || {};
+    for (var dK in draftsKv) {
+      if (Object.prototype.hasOwnProperty.call(draftsKv, dK) && draftsKv[dK]) {
+        var dmKey = String(draftsKv[dK].match || dK || '').trim().toLowerCase();
+        if (dmKey && draftsKv[dK].status && !matchStatusMap[dmKey]) {
+          matchStatusMap[dmKey] = String(draftsKv[dK].status).trim();
+        }
+      }
+    }
+
     var combined = sheetMoments.length > 0 ? sheetMoments : kvMoments;
     var playerMoments = [];
 
@@ -2962,6 +2990,15 @@ function getPlayerFilmMoments(playerName, playerPin) {
         item.outcome = ov.outcome || item.outcome;
         item.tag = ov.tag || item.tag;
         item.category = ov.category || item.category;
+        if (ov.status) item.status = ov.status;
+      }
+
+      // Gate player portal delivery: never release Pitchside Draft / uncommitted / unreviewed matches until final film review
+      if (!isCoach) {
+        if (!isStatusPublishedForPlayer_(item.status)) continue;
+        var itemMatchKey = String(item.match || item.m || '').trim().toLowerCase();
+        var matchLogStatus = itemMatchKey ? (matchStatusMap[itemMatchKey] || '') : '';
+        if (matchLogStatus && !isStatusPublishedForPlayer_(matchLogStatus)) continue;
       }
 
       var rawP = normName(item.playersRaw || item.players || '');

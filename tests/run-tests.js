@@ -2369,6 +2369,139 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       const pubMatch = matchHubHtml.match(/async function publishMatchFilmToSheet\(\)[\s\S]*?\n    \}/);
       assert(pubMatch && !pubMatch[0].includes("mode: 'no-cors'"), 'Expected publishMatchFilmToSheet to verify real CORS JSON response without no-cors');
     });
+
+    await runAsyncCheck('21. Player Portal gates Pitchside Draft / unreviewed moments until Final Film Review (Reviewed & Published)', async () => {
+      // A. Code.gs backend gating in getPlayerFilmMoments
+      const { sandbox } = createCodeGsSandbox();
+      sandbox.handleSavePitchsideDraft({
+        pin: 'TEST_SERVER_COACH_SECRET',
+        draft: {
+          match: 'Albion San Diego (Nov 14)',
+          matchId: 'ASPIRE_Albion_2026_11_14',
+          opponent: 'Albion San Diego',
+          matchDate: '2026-11-14',
+          score: '2 - 1',
+          matchMins: 80,
+          status: 'Pitchside Draft',
+          moments: [
+            {
+              id: '951',
+              match: 'Albion San Diego (Nov 14)',
+              matchDate: '2026-11-14',
+              half: 'H1',
+              time: '19:10',
+              zone: 'A3',
+              outcome: 'Glow',
+              category: 'Finishing',
+              tag: 'Shot on Target',
+              jerseys: [9],
+              players: ['#9 Camila Deleon'],
+              note: 'Pitchside unreviewed raw note',
+              noteToPlayer: 'Should stay hidden until coach reviews',
+              filmReview: true,
+              status: 'Pitchside Draft'
+            }
+          ]
+        }
+      });
+
+      // Player MUST NOT receive Pitchside Draft moments yet; only previously published moments (#601, #602)
+      const beforeReviewPlayer = JSON.parse(sandbox.doGet({ parameter: { action: 'playerFilmMoments', name: 'Camila Deleon', pin: '9999' } }).getContent());
+      assert.strictEqual(beforeReviewPlayer.success, true);
+      assert(!beforeReviewPlayer.moments.some(m => String(m.id) === '951'), 'Player Portal must NOT receive Pitchside Draft moment #951 before Final Film Review');
+      assert(beforeReviewPlayer.moments.some(m => String(m.id) === '601'), 'Player Portal should retain previously published moment #601');
+
+      // Saving draft edit with reviewed:false must STILL keep it hidden from Player Portal
+      sandbox.handleSaveFilmMoments({
+        pin: 'TEST_SERVER_COACH_SECRET',
+        match: 'Albion San Diego (Nov 14)',
+        reviewed: false,
+        moments: [
+          {
+            id: '951',
+            match: 'Albion San Diego (Nov 14)',
+            half: 'H1',
+            time: '19:10',
+            zone: 'A3',
+            outcome: 'Glow',
+            category: 'Finishing',
+            tag: 'Goal Scored',
+            jerseys: [9],
+            players: ['#9 Camila Deleon'],
+            note: 'Still editing draft note',
+            noteToPlayer: 'Draft note to player',
+            filmReview: true
+          }
+        ]
+      });
+      const midEditPlayer = JSON.parse(sandbox.doGet({ parameter: { action: 'playerFilmMoments', name: 'Camila Deleon', pin: '9999' } }).getContent());
+      assert(!midEditPlayer.moments.some(m => String(m.id) === '951'), 'Player Portal must stay gated while reviewed !== true');
+
+      // Coach pushes Final Film Review (reviewed: true) -> now released to Player Portal cleanly with note redacted
+      sandbox.handleSaveFilmMoments({
+        pin: 'TEST_SERVER_COACH_SECRET',
+        match: 'Albion San Diego (Nov 14)',
+        reviewed: true,
+        moments: [
+          {
+            id: '951',
+            match: 'Albion San Diego (Nov 14)',
+            half: 'H1',
+            time: '19:10',
+            zone: 'A3',
+            outcome: 'Glow',
+            category: 'Finishing',
+            tag: 'Goal Scored',
+            jerseys: [9],
+            players: ['#9 Camila Deleon'],
+            note: 'Internal staff note stays hidden',
+            noteToPlayer: 'Great back-post run to finish!',
+            filmReview: true
+          }
+        ]
+      });
+      const afterReviewPlayer = JSON.parse(sandbox.doGet({ parameter: { action: 'playerFilmMoments', name: 'Camila Deleon', pin: '9999' } }).getContent());
+      const released951 = afterReviewPlayer.moments.find(m => String(m.id) === '951');
+      assert(released951, 'Expected finalized match moment #951 to appear in Player Portal after Final Film Review');
+      assert.strictEqual(released951.note, '', 'Internal coach note must still be redacted for players');
+      assert.strictEqual(released951.noteToPlayer, 'Great back-post run to finish!');
+
+      // B. ajax-match-tracker.html must tag pitchside filmMoments as Pitchside Draft & NOT send saveFilmMoments directly on commit
+      const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+      const commitBlock = trackerHtml.match(/function commitMatchToHub\(\)[\s\S]*?\n    \}/);
+      assert(commitBlock && commitBlock[0].includes("status: 'Pitchside Draft'") && !commitBlock[0].includes("action: 'saveFilmMoments'"), 'commitMatchToHub should keep moments as Pitchside Draft without premature saveFilmMoments publish');
+
+      // C. index.html client mergeMomentsWithLocalAndCloudEdits must also filter out local Pitchside Draft moments
+      const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+      const mFn = indexHtml.match(/function mergeMomentsWithLocalAndCloudEdits[\s\S]*?\n    \}/);
+      assert(mFn, 'Expected mergeMomentsWithLocalAndCloudEdits in index.html');
+      const idxCtx = {
+        localStorage: {
+          getItem: (k) => {
+            if (k === 'matchhub_custom_data') {
+              return JSON.stringify({
+                'AJAX ASPIRE U15': {
+                  filmEvents: [
+                    { id: 951, match: 'Albion San Diego (Nov 14)', half: 'H1', time: '19:10', zone: 'A3', outcome: 'Glow', category: 'Finishing', tag: 'Goal Scored', jerseys: [9], players: ['#9 Camila Deleon'], status: 'Pitchside Draft' },
+                    { id: 952, match: 'Crossfire #2 (Nov 8)', half: 'H1', time: '10:00', zone: 'A3', outcome: 'Glow', category: 'Finishing', tag: 'Shot on Target', jerseys: [9], players: ['#9 Camila Deleon'], status: 'Reviewed & Published' }
+                  ]
+                }
+              });
+            }
+            return null;
+          }
+        },
+        normNameJS: (s) => String(s || '').toLowerCase().trim(),
+        getPlayerJersey: () => 9,
+        doesMomentMatchPlayer: (m) => Array.isArray(m.jerseys) && m.jerseys.includes(9),
+        normalizeMomentItem: (m, i) => ({ ...m, id: m.id || i })
+      };
+      vm.createContext(idxCtx);
+      vm.runInContext(mFn[0], idxCtx);
+      const localMerged = idxCtx.mergeMomentsWithLocalAndCloudEdits([], 'Camila Deleon', 9, [], null);
+      assert(!localMerged.some(m => m.id === 951), 'index.html local merge must skip Pitchside Draft moments');
+      assert(localMerged.some(m => m.id === 952), 'index.html local merge must preserve Reviewed & Published moments');
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });

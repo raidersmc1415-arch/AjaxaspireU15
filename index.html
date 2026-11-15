@@ -3368,6 +3368,7 @@
         outcome: m.o || m.outcome || 'Glow',
         tag: m.tag || 'Action',
         category: m.cat || m.category || 'General',
+        status: m.status || '',
         note: noteVal,
         noteToPlayer: String(noteToPlayerVal || '').trim(),
         jerseys: Array.isArray(m.j) ? m.j : (Array.isArray(m.jerseys) ? m.jerseys : []),
@@ -3390,11 +3391,45 @@
         sigToId.set(getSig(normM), key);
       });
 
-      const applyIncomingItem = (rawItem) => {
+      const isPublishedStatusForPortal = (rawStatus) => {
+        const s = String(rawStatus || '').trim().toLowerCase();
+        if (!s) return true;
+        if (s.indexOf('reviewed') !== -1 || s.indexOf('published') !== -1) return true;
+        if (s.indexOf('draft') !== -1 || s.indexOf('pending') !== -1 || s.indexOf('holding') !== -1 || s.indexOf('committed') !== -1) return false;
+        return true;
+      };
+      const pendingDraftMatches = new Set();
+      try {
+        const draftsRaw = localStorage.getItem('ajax_pitchside_drafts');
+        if (draftsRaw) {
+          Object.values(JSON.parse(draftsRaw) || {}).forEach(d => {
+            if (d && d.match && !isPublishedStatusForPortal(d.status)) {
+              pendingDraftMatches.add(String(d.match).trim().toLowerCase());
+            }
+          });
+        }
+        const latestDraftRaw = localStorage.getItem('ajax_pitchside_draft_latest');
+        if (latestDraftRaw) {
+          const ld = JSON.parse(latestDraftRaw);
+          if (ld && ld.match && !isPublishedStatusForPortal(ld.status)) {
+            pendingDraftMatches.add(String(ld.match).trim().toLowerCase());
+          }
+        }
+      } catch (e) {}
+
+      const applyIncomingItem = (rawItem, fromLocalDraftSource) => {
         if (!rawItem) return;
         const idStr = String(rawItem.id || rawItem.eventId || '');
         if (rawItem.deleted) {
           if (idStr && mapById.has(idStr)) mapById.delete(idStr);
+          return;
+        }
+        if (!isPublishedStatusForPortal(rawItem.status)) {
+          if (idStr && mapById.has(idStr)) mapById.delete(idStr);
+          return;
+        }
+        const itemMatchLower = String(rawItem.match || rawItem.m || '').trim().toLowerCase();
+        if (fromLocalDraftSource && itemMatchLower && pendingDraftMatches.has(itemMatchLower) && !rawItem.status) {
           return;
         }
         const matchesPlayer = doesMomentMatchPlayer(rawItem, playerName, jerseyNum);
@@ -3434,13 +3469,13 @@
         }
       };
 
-      // A. Apply same-browser Match Hub custom data if present
+      // A. Apply same-browser Match Hub custom data if present (skip unreviewed draft matches)
       try {
         const customRaw = localStorage.getItem('matchhub_custom_data');
         if (customRaw) {
           const customParsed = JSON.parse(customRaw);
           const customEvents = customParsed?.['AJAX ASPIRE U15']?.filmEvents || [];
-          customEvents.forEach(ev => applyIncomingItem(ev));
+          customEvents.forEach(ev => applyIncomingItem(ev, true));
         }
       } catch (e) {}
 
