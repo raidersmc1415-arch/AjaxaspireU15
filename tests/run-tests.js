@@ -2226,6 +2226,149 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
     assert.strictEqual(saveCall.match, 'Davis Legacy (Nov 14)');
     assert.strictEqual(saveCall.reviewed, true);
     assert.strictEqual(saveCall.moments.length, 3, 'Expected all 3 fine-tuned/added moments pushed for Davis Legacy');
+  }).then(async () => {
+    await runAsyncCheck('20. Row-based Match_Log / ragged-column-safe Match_Action_Log & Match Hub holding cards', async () => {
+      // A. Code.gs backend: ragged 21-column Match_Action_Log + row-based Match_Log + no moment arrays in match_hub KV cells
+      const headers21 = [
+        'Event_ID', 'Match_Date', 'Match_Name', 'Opponent', 'Half',
+        'Match_Clock', 'Zone', 'Outcome', 'Category', 'Tag',
+        'Player_Name', 'Jersey_Num', 'Coach_Notes', 'Note_To_Player', 'Film_Review',
+        'Status', 'Last_Updated', 'Shot_Location', 'Set_Piece_Outcome', 'Legacy_Extra_1', 'Legacy_Extra_2'
+      ];
+      const existingActionRows = [
+        headers21,
+        ['590', '2026-11-01', 'Rocklin (Nov 1)', 'Rocklin', 'H1', '38:00', 'D3', 'Grow', 'Passing', 'Unforced Turnover Pass', '#24 Evelyn Lopez', '24', 'Note', '', 'TRUE', 'Published', '2026-11-13', '', '', 'extraA', 'extraB']
+      ];
+      const matchHubRows = [['key', 'value', 'updated_at']];
+      const matchLogRows = [];
+      function mkSheet(rowsRef, sheetName) {
+        return {
+          getName: () => sheetName,
+          getLastRow: () => rowsRef.length,
+          getLastColumn: () => rowsRef.reduce((mx, r) => Math.max(mx, r.length), 0),
+          appendRow: (r) => rowsRef.push(r.slice()),
+          getDataRange: () => ({ getValues: () => rowsRef.map(r => r.slice()) }),
+          setFrozenRows: () => {},
+          getRange: (row, col, numRows = 1, numCols = 1) => {
+            const self = {
+              setFontWeight: () => self,
+              setBackground: () => self,
+              setFontColor: () => self,
+              clearContent: () => {
+                for (let r = row - 1; r < row - 1 + numRows; r++) {
+                  if (rowsRef[r]) {
+                    for (let c = col - 1; c < col - 1 + numCols; c++) rowsRef[r][c] = '';
+                  }
+                }
+                return self;
+              },
+              getValues: () => {
+                const out = [];
+                for (let r = row - 1; r < row - 1 + numRows; r++) {
+                  const src = rowsRef[r] || [];
+                  const rowOut = [];
+                  for (let c = col - 1; c < col - 1 + numCols; c++) rowOut.push(src[c] !== undefined ? src[c] : '');
+                  out.push(rowOut);
+                }
+                return out;
+              },
+              setValues: (vals) => {
+                vals.forEach((vRow, ri) => {
+                  const targetRow = row - 1 + ri;
+                  if (!rowsRef[targetRow]) rowsRef[targetRow] = [];
+                  vRow.forEach((cellVal, ci) => {
+                    rowsRef[targetRow][col - 1 + ci] = cellVal;
+                  });
+                });
+                return self;
+              }
+            };
+            return self;
+          }
+        };
+      }
+      const sheetsByName = {
+        Match_Action_Log: mkSheet(existingActionRows, 'Match_Action_Log'),
+        match_hub: mkSheet(matchHubRows, 'match_hub'),
+        Match_Log: mkSheet(matchLogRows, 'Match_Log')
+      };
+      const codeSandbox = {
+        SpreadsheetApp: {
+          getActiveSpreadsheet: () => ({
+            getSheetByName: (n) => sheetsByName[n] || null,
+            insertSheet: (n) => {
+              const rows = [];
+              sheetsByName[n] = mkSheet(rows, n);
+              return sheetsByName[n];
+            }
+          }),
+          getUi: () => ({ alert: () => {} })
+        },
+        PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => k === 'COACH_TOKEN' ? 'TEST_COACH_TOKEN' : '' }) },
+        CacheService: { getScriptCache: () => ({ get: () => null, put: () => {} }) },
+        LockService: { getScriptLock: () => ({ waitLock: () => {}, releaseLock: () => {} }) },
+        Session: { getScriptTimeZone: () => 'America/Los_Angeles' },
+        Utilities: { formatDate: (d, tz, fmt) => 'Nov 14' },
+        ContentService: {
+          MimeType: { JSON: 'application/json' },
+          createTextOutput: (txt) => ({ _raw: txt, setMimeType() { return this; }, getContent: () => txt })
+        },
+        console, Date, Math, Object, Array, Set, JSON, RegExp, Number, String
+      };
+      vm.createContext(codeSandbox);
+      vm.runInContext(fs.readFileSync(path.join(ROOT, 'Code.gs'), 'utf8'), codeSandbox);
+
+      // 1. Commit 0-moment match -> 1 row in Match_Log, NO moments array in match_hub cells
+      const draftRes = JSON.parse(codeSandbox.handleSavePitchsideDraft({
+        pin: 'TEST_COACH_TOKEN',
+        draft: {
+          match: 'Albion San Diego (Nov 14)',
+          matchId: 'ASPIRE_Albion_2026_11_14',
+          opponent: 'Albion San Diego',
+          matchDate: '2026-11-14',
+          score: '2 - 1',
+          matchMins: 80,
+          moments: [],
+          status: 'Pitchside Draft'
+        }
+      })._raw);
+      assert.strictEqual(draftRes.success, true);
+      assert.strictEqual(matchLogRows.length, 2, 'Expected header + 1 clean row in Match_Log for Albion San Diego');
+      assert.strictEqual(matchLogRows[1][2], 'Albion San Diego (Nov 14)');
+      const hubMapAfterDraft = codeSandbox.getMatchHubKVMap();
+      assert(!('moments' in (hubMapAfterDraft.pitchside_draft_latest || {})), 'Expected NO moments array packed inside match_hub KV cell');
+      assert(!('moments' in ((hubMapAfterDraft.pitchside_drafts || {})['Albion San Diego (Nov 14)'] || {})), 'Expected NO moments array packed in pitchside_drafts cell');
+
+      // 2. Push film review over ragged 21-col Match_Action_Log -> must succeed, preserve #590, and update Match_Log
+      const saveRes = JSON.parse(codeSandbox.handleSaveFilmMoments({
+        pin: 'TEST_COACH_TOKEN',
+        match: 'Albion San Diego (Nov 14)',
+        reviewed: true,
+        moments: [
+          { id: 901, match: 'Albion San Diego (Nov 14)', matchDate: '2026-11-14', half: 'H1', time: '14:20', zone: 'A3', outcome: 'Glow', category: 'Finishing', tag: 'Goal Scored', jerseys: [23], players: ['#23 Sophia Culver'], note: 'Clinical finish' },
+          { id: 902, match: 'Albion San Diego (Nov 14)', matchDate: '2026-11-14', half: 'H2', time: '55:10', zone: 'D3', outcome: 'Glow', category: 'Defending', tag: 'Direct Pressure', jerseys: [14], players: ['#14 Kendall Blair'], note: 'Strong step' }
+        ]
+      })._raw);
+      assert.strictEqual(saveRes.success, true, 'Expected saveFilmMoments to handle ragged 21-column existing Match_Action_Log rows without throwing');
+      assert.strictEqual(saveRes.totalRowsInSheet, 3, 'Expected #590 + 2 new Albion rows (3 data rows) in Match_Action_Log');
+      assert(!saveRes.sheetError, 'Expected no sheetError when saving to Match_Action_Log');
+      assert.strictEqual(existingActionRows.length, 4, 'Expected header + 3 action rows in Match_Action_Log');
+      assert.strictEqual(existingActionRows[1][0], '590', 'Expected existing Event_ID 590 preserved');
+      assert.strictEqual(matchLogRows[1][8], 'Reviewed & Published', 'Expected Match_Log status updated on final review push');
+      assert.strictEqual(matchLogRows[1][9], 2, 'Expected Match_Log Moment_Count updated to 2');
+      const hubMapAfterSave = codeSandbox.getMatchHubKVMap();
+      assert(!hubMapAfterSave.all_film_moments, 'Expected Code.gs not to duplicate film rows into all_film_moments KV blob');
+
+      const actionsGet = JSON.parse(codeSandbox.getMatchActions({ pin: 'TEST_COACH_TOKEN' })._raw);
+      assert(actionsGet.matches.some(m => m.match === 'Albion San Diego (Nov 14)' && m.momentCount === 2), 'Expected getMatchActions to unify Match_Log and Match_Action_Log');
+
+      // B. match-hub.html holding cards & batch publish check
+      const matchHubHtml = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+      assert(matchHubHtml.includes('id="filmHoldingMatchCardsWrap"') && matchHubHtml.includes('id="filmHoldingMatchCards"'), 'Expected holding cards container in match-hub.html');
+      assert(/function mergeHoldingMatchesFromSources[\s\S]*function renderHoldingMatchCards/.test(matchHubHtml), 'Expected holding card state & renderer in match-hub.html');
+      const pubMatch = matchHubHtml.match(/async function publishMatchFilmToSheet\(\)[\s\S]*?\n    \}/);
+      assert(pubMatch && !pubMatch[0].includes("mode: 'no-cors'"), 'Expected publishMatchFilmToSheet to verify real CORS JSON response without no-cors');
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });

@@ -1201,6 +1201,156 @@ function getMatchHubKVMap() {
   return map;
 }
 
+var MATCH_LOG_HEADERS = [
+  'Match_ID', 'Match_Date', 'Match_Name', 'Team', 'Opponent',
+  'Ajax_Score', 'Opp_Score', 'Match_Mins', 'Status', 'Moment_Count',
+  'Opp_Shots', 'Opp_Corners', 'Opp_Fouls', 'Updated_At'
+];
+
+function getOrCreateMatchLogSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Match_Log');
+  if (!sheet) {
+    sheet = ss.insertSheet('Match_Log');
+    sheet.appendRow(MATCH_LOG_HEADERS);
+    sheet.getRange(1, 1, 1, MATCH_LOG_HEADERS.length)
+      .setFontWeight('bold')
+      .setBackground('#0D1B2A')
+      .setFontColor('#FFFFFF');
+    sheet.setFrozenRows(1);
+  } else if (sheet.getLastRow() === 0) {
+    sheet.appendRow(MATCH_LOG_HEADERS);
+    sheet.getRange(1, 1, 1, MATCH_LOG_HEADERS.length)
+      .setFontWeight('bold')
+      .setBackground('#0D1B2A')
+      .setFontColor('#FFFFFF');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function upsertMatchLogRow_(rec) {
+  if (!rec || (!rec.match && !rec.opponent && !rec.matchId)) return null;
+  var sheet = getOrCreateMatchLogSheet();
+  var nowStr = new Date().toISOString();
+  var matchName = String(rec.match || rec.opponent || '').trim();
+  var matchId = String(rec.matchId || '').trim();
+  var matchDate = String(rec.matchDate || (rec.date ? String(rec.date).slice(0, 10) : '')).trim();
+  var teamName = String(rec.team || 'AJAX ASPIRE U15').trim();
+  var oppName = String(rec.opponent || matchName.replace(/\s*\(.*?\)\s*/g, '')).trim();
+  var ajaxScore = (rec.ajaxScore !== undefined && rec.ajaxScore !== '') ? Number(rec.ajaxScore) : '';
+  var oppScore = (rec.oppScore !== undefined && rec.oppScore !== '') ? Number(rec.oppScore) : '';
+  if ((ajaxScore === '' || oppScore === '') && rec.score && String(rec.score).indexOf('-') !== -1) {
+    var sParts = String(rec.score).split('-');
+    if (sParts.length >= 2) {
+      ajaxScore = isNaN(parseInt(sParts[0], 10)) ? '' : parseInt(sParts[0], 10);
+      oppScore = isNaN(parseInt(sParts[1], 10)) ? '' : parseInt(sParts[1], 10);
+    }
+  }
+  var matchMins = rec.matchMins !== undefined && rec.matchMins !== '' ? Number(rec.matchMins) : '';
+  var status = String(rec.status || 'Pitchside Committed').trim();
+  var momentCount = rec.momentCount !== undefined && rec.momentCount !== '' ? Number(rec.momentCount) : 0;
+  var oppShots = rec.oppShots !== undefined && rec.oppShots !== '' ? Number(rec.oppShots) : '';
+  var oppCorners = rec.oppCorners !== undefined && rec.oppCorners !== '' ? Number(rec.oppCorners) : '';
+  var oppFouls = rec.oppFouls !== undefined && rec.oppFouls !== '' ? Number(rec.oppFouls) : '';
+
+  var data = sheet.getDataRange().getValues();
+  var headers = (data[0] || []).map(function(h) { return String(h || '').trim().toLowerCase().replace(/\s+/g, '_'); });
+  var iId = headers.indexOf('match_id');
+  var iName = headers.indexOf('match_name');
+  var foundRow = -1;
+  for (var r = 1; r < data.length; r++) {
+    var rId = iId !== -1 ? String(data[r][iId] || '').trim() : '';
+    var rName = iName !== -1 ? String(data[r][iName] || '').trim() : '';
+    if ((matchId && rId && rId === matchId) || (matchName && rName && rName.toLowerCase() === matchName.toLowerCase())) {
+      foundRow = r + 1;
+      // Preserve existing non-empty fields if incoming is blank
+      if (ajaxScore === '' && data[r][5] !== '') ajaxScore = data[r][5];
+      if (oppScore === '' && data[r][6] !== '') oppScore = data[r][6];
+      if (matchMins === '' && data[r][7] !== '') matchMins = data[r][7];
+      if (!matchDate && data[r][1]) matchDate = String(data[r][1]).trim();
+      if (!matchId && rId) matchId = rId;
+      break;
+    }
+  }
+
+  var rowVals = [
+    matchId,
+    matchDate,
+    matchName,
+    teamName,
+    oppName,
+    ajaxScore,
+    oppScore,
+    matchMins,
+    status,
+    momentCount,
+    oppShots,
+    oppCorners,
+    oppFouls,
+    nowStr
+  ];
+  if (foundRow !== -1) {
+    sheet.getRange(foundRow, 1, 1, MATCH_LOG_HEADERS.length).setValues([rowVals]);
+  } else {
+    sheet.appendRow(rowVals);
+  }
+  return { matchId: matchId, match: matchName, status: status, momentCount: momentCount };
+}
+
+function readAllMatchLogRows_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Match_Log');
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  var data = sheet.getDataRange().getValues();
+  var headers = (data[0] || []).map(function(h) { return String(h || '').trim().toLowerCase().replace(/\s+/g, '_'); });
+  var idx = function(name) { return headers.indexOf(name.toLowerCase()); };
+  var iId = idx('match_id');
+  var iDate = idx('match_date');
+  var iMatch = idx('match_name');
+  var iTeam = idx('team');
+  var iOpp = idx('opponent');
+  var iAjax = idx('ajax_score');
+  var iOppS = idx('opp_score');
+  var iMins = idx('match_mins');
+  var iStat = idx('status');
+  var iCnt = idx('moment_count');
+  var iOShots = idx('opp_shots');
+  var iOCorn = idx('opp_corners');
+  var iOFouls = idx('opp_fouls');
+  var iUpd = idx('updated_at');
+
+  var out = [];
+  for (var r = 1; r < data.length; r++) {
+    var row = data[r];
+    var mName = iMatch !== -1 ? String(row[iMatch] || '').trim() : '';
+    var opp = iOpp !== -1 ? String(row[iOpp] || '').trim() : '';
+    if (!mName && !opp) continue;
+    var aSc = (iAjax !== -1 && row[iAjax] !== '' && row[iAjax] !== null) ? Number(row[iAjax]) : undefined;
+    var oSc = (iOppS !== -1 && row[iOppS] !== '' && row[iOppS] !== null) ? Number(row[iOppS]) : undefined;
+    var scoreStr = (aSc !== undefined && !isNaN(aSc) && oSc !== undefined && !isNaN(oSc)) ? (aSc + ' - ' + oSc) : '';
+    out.push({
+      matchId: iId !== -1 ? String(row[iId] || '').trim() : '',
+      matchDate: iDate !== -1 ? String(row[iDate] || '').trim() : '',
+      date: iDate !== -1 ? String(row[iDate] || '').trim() : '',
+      match: mName || opp,
+      team: iTeam !== -1 ? String(row[iTeam] || 'AJAX ASPIRE U15').trim() : 'AJAX ASPIRE U15',
+      opponent: opp || mName,
+      ajaxScore: aSc,
+      oppScore: oSc,
+      score: scoreStr,
+      matchMins: iMins !== -1 && row[iMins] !== '' ? Number(row[iMins]) : 80,
+      status: iStat !== -1 ? String(row[iStat] || 'Pitchside Committed').trim() : 'Pitchside Committed',
+      momentCount: iCnt !== -1 && row[iCnt] !== '' ? Number(row[iCnt]) : 0,
+      oppShots: iOShots !== -1 && row[iOShots] !== '' ? Number(row[iOShots]) : 0,
+      oppCorners: iOCorn !== -1 && row[iOCorn] !== '' ? Number(row[iOCorn]) : 0,
+      oppFouls: iOFouls !== -1 && row[iOFouls] !== '' ? Number(row[iOFouls]) : 0,
+      updatedAt: iUpd !== -1 ? String(row[iUpd] || '').trim() : ''
+    });
+  }
+  return out;
+}
+
 function getMatchHubData(pin) {
   try {
     if (!isValidCoachPin(pin)) {
@@ -1212,13 +1362,49 @@ function getMatchHubData(pin) {
     if (kv['datasets_league']) datasets['AJAX ASPIRE U15 (LEAGUE)'] = kv['datasets_league'];
     if (kv['datasets_ga']) datasets['AJAX GA U15'] = kv['datasets_ga'];
 
+    var matchLogRows = readAllMatchLogRows_();
+    var kvHistory = Array.isArray(kv['match_history']) ? kv['match_history'] : [];
+    var mergedHistory = [];
+    var seenMatchNames = {};
+    for (var ml = matchLogRows.length - 1; ml >= 0; ml--) {
+      var lr = matchLogRows[ml];
+      mergedHistory.push(lr);
+      if (lr.match) seenMatchNames[lr.match.toLowerCase()] = true;
+    }
+    for (var kh = 0; kh < kvHistory.length; kh++) {
+      var khItem = kvHistory[kh] || {};
+      var khTitle = String(khItem.match || khItem.opponent || '').trim().toLowerCase();
+      if (khTitle && !seenMatchNames[khTitle]) {
+        mergedHistory.push(khItem);
+        seenMatchNames[khTitle] = true;
+      }
+    }
+
+    var drafts = kv['pitchside_drafts'] || {};
+    for (var dl = 0; dl < matchLogRows.length; dl++) {
+      var mlRow = matchLogRows[dl];
+      if (mlRow.match && !drafts[mlRow.match]) {
+        drafts[mlRow.match] = {
+          match: mlRow.match,
+          matchId: mlRow.matchId,
+          opponent: mlRow.opponent,
+          matchDate: mlRow.matchDate,
+          score: mlRow.score,
+          matchMins: mlRow.matchMins,
+          momentCount: mlRow.momentCount,
+          status: mlRow.status,
+          savedAt: mlRow.updatedAt
+        };
+      }
+    }
+
     return jsonOut({
       success:     true,
       notes:       kv['notes']     || {},
       takeaways:   kv['takeaways'] || {},
       datasets:    datasets,
-      history:     kv['match_history'] || [],
-      drafts:      kv['pitchside_drafts'] || {},
+      history:     mergedHistory,
+      drafts:      drafts,
       latestDraft: kv['pitchside_draft_latest'] || null
     });
   } catch (err) {
@@ -1228,44 +1414,68 @@ function getMatchHubData(pin) {
 
 function handleSaveMatchHubNote(payload) {
   if (!isValidCoachPin(payload.pin)) return jsonOut({ success: false, message: 'Unauthorized' });
-  var kv = getMatchHubKVMap();
-  var notes = kv['notes'] || {};
-  if (payload.noteKey) {
-    notes[payload.noteKey] = String(payload.noteText || '');
-    setMatchHubKV('notes', notes);
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var kv = getMatchHubKVMap();
+    var notes = kv['notes'] || {};
+    if (payload.noteKey) {
+      notes[payload.noteKey] = String(payload.noteText || '');
+      setMatchHubKV('notes', notes);
+    }
+    return jsonOut({ success: true });
+  } catch (err) {
+    return jsonOut({ success: false, message: err.toString() });
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
   }
-  return jsonOut({ success: true });
 }
 
 function handleSaveMatchHubTakeaways(payload) {
   if (!isValidCoachPin(payload.pin)) return jsonOut({ success: false, message: 'Unauthorized' });
-  var kv = getMatchHubKVMap();
-  var takeaways = kv['takeaways'] || {};
-  if (payload.teamId && Array.isArray(payload.takeaways)) {
-    takeaways[payload.teamId] = payload.takeaways;
-    setMatchHubKV('takeaways', takeaways);
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var kv = getMatchHubKVMap();
+    var takeaways = kv['takeaways'] || {};
+    if (payload.teamId && Array.isArray(payload.takeaways)) {
+      takeaways[payload.teamId] = payload.takeaways;
+      setMatchHubKV('takeaways', takeaways);
+    }
+    return jsonOut({ success: true });
+  } catch (err) {
+    return jsonOut({ success: false, message: err.toString() });
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
   }
-  return jsonOut({ success: true });
 }
 
 function handleSaveMatchHubData(payload) {
   if (!isValidCoachPin(payload.pin)) return jsonOut({ success: false, message: 'Unauthorized' });
-  var kv = getMatchHubKVMap();
-  if (payload.datasets && typeof payload.datasets === 'object') {
-    if (payload.datasets['AJAX ASPIRE U15']) {
-      var dAsp = payload.datasets['AJAX ASPIRE U15'];
-      setMatchHubKV('datasets_aspire', { totals: dAsp.totals, players: dAsp.players, filmSummary: dAsp.filmSummary });
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var kv = getMatchHubKVMap();
+    if (payload.datasets && typeof payload.datasets === 'object') {
+      if (payload.datasets['AJAX ASPIRE U15']) {
+        var dAsp = payload.datasets['AJAX ASPIRE U15'];
+        setMatchHubKV('datasets_aspire', { totals: dAsp.totals, players: dAsp.players, filmSummary: dAsp.filmSummary });
+      }
+      if (payload.datasets['AJAX ASPIRE U15 (LEAGUE)']) {
+        var dLea = payload.datasets['AJAX ASPIRE U15 (LEAGUE)'];
+        setMatchHubKV('datasets_league', { totals: dLea.totals, players: dLea.players, filmSummary: dLea.filmSummary });
+      }
+      if (payload.datasets['AJAX GA U15']) {
+        var dGa = payload.datasets['AJAX GA U15'];
+        setMatchHubKV('datasets_ga', { totals: dGa.totals, players: dGa.players, filmSummary: dGa.filmSummary });
+      }
     }
-    if (payload.datasets['AJAX ASPIRE U15 (LEAGUE)']) {
-      var dLea = payload.datasets['AJAX ASPIRE U15 (LEAGUE)'];
-      setMatchHubKV('datasets_league', { totals: dLea.totals, players: dLea.players, filmSummary: dLea.filmSummary });
-    }
-    if (payload.datasets['AJAX GA U15']) {
-      var dGa = payload.datasets['AJAX GA U15'];
-      setMatchHubKV('datasets_ga', { totals: dGa.totals, players: dGa.players, filmSummary: dGa.filmSummary });
-    }
+    return jsonOut({ success: true });
+  } catch (err) {
+    return jsonOut({ success: false, message: err.toString() });
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
   }
-  return jsonOut({ success: true });
 }
 
 // --- PART 14: RESTORE & SYNC PLAYER_IDP FROM RAW_MATCH_STATS ---
@@ -1436,9 +1646,28 @@ function handleUpdateSeasonStats(payload) {
 
     if (payload.matchSummary) {
       try {
+        upsertMatchLogRow_(Object.assign({}, payload.matchSummary, {
+          status: payload.matchSummary.status || 'Pitchside Committed'
+        }));
+      } catch(e) {}
+
+      try {
         var kv = getMatchHubKVMap();
-        var history = kv['match_history'] || [];
-        history.unshift(payload.matchSummary);
+        var history = Array.isArray(kv['match_history']) ? kv['match_history'] : [];
+        var slimSummary = {
+          matchId: payload.matchSummary.matchId || matchId || '',
+          match: payload.matchSummary.match || '',
+          date: payload.matchSummary.date || new Date().toISOString(),
+          matchDate: payload.matchSummary.matchDate || '',
+          team: payload.matchSummary.team || '',
+          opponent: payload.matchSummary.opponent || '',
+          ajaxScore: payload.matchSummary.ajaxScore,
+          oppScore: payload.matchSummary.oppScore,
+          matchMins: payload.matchSummary.matchMins,
+          status: payload.matchSummary.status || 'Pitchside Committed'
+        };
+        history.unshift(slimSummary);
+        if (history.length > 20) history = history.slice(0, 20);
         setMatchHubKV('match_history', history);
       } catch(e) {}
 
@@ -2104,6 +2333,89 @@ function readAllMatchActionLogRows() {
   return results;
 }
 
+function saveMatchActionRowsInternal_(payload) {
+  var moments = Array.isArray(payload.moments) ? payload.moments : [];
+  if (!moments.length && !payload.allowEmpty) {
+    return { success: false, message: 'No moments provided' };
+  }
+  var sheet = getOrCreateMatchActionLogSheet();
+  var nowStr = new Date().toISOString();
+  var targetMatch = String(payload.match || (moments[0] && (moments[0].match || moments[0].m)) || '').trim();
+  var replaceMatch = payload.replaceMatch !== false;
+  var targetCols = MATCH_ACTION_LOG_HEADERS.length;
+  var canonicalLower = MATCH_ACTION_LOG_HEADERS.map(function(h) { return h.toLowerCase(); });
+
+  var existingData = sheet.getDataRange().getValues();
+  var headerRow = existingData[0] || [];
+  var headers = headerRow.map(function(h) { return String(h || '').trim().toLowerCase().replace(/\s+/g, '_'); });
+  var needsHeaderWrite = headerRow.length < targetCols;
+  for (var hc = 0; hc < targetCols && !needsHeaderWrite; hc++) {
+    if (headers[hc] !== canonicalLower[hc]) needsHeaderWrite = true;
+  }
+
+  var keptRows = [];
+  if (existingData.length > 1) {
+    var iMatch = headers.indexOf('match_name');
+    var iId = headers.indexOf('event_id');
+    var colIndexMap = canonicalLower.map(function(cn) { return headers.indexOf(cn); });
+    var incomingIds = {};
+    for (var m = 0; m < moments.length; m++) {
+      var cid = String(moments[m].eventId || moments[m].id || '');
+      if (cid) incomingIds[cid] = true;
+    }
+    for (var r = 1; r < existingData.length; r++) {
+      var srcRow = existingData[r];
+      var rowMatch = iMatch !== -1 ? String(srcRow[iMatch] || '').trim() : '';
+      var rowId = iId !== -1 ? String(srcRow[iId] || '').trim() : '';
+      if (replaceMatch && targetMatch && rowMatch.toLowerCase() === targetMatch.toLowerCase()) {
+        continue;
+      }
+      if (rowId && incomingIds[rowId]) {
+        continue;
+      }
+      if (!rowMatch && !rowId) continue;
+      var alignedRow = [];
+      for (var cIdx = 0; cIdx < targetCols; cIdx++) {
+        var mappedIdx = colIndexMap[cIdx];
+        if (mappedIdx !== -1 && mappedIdx < srcRow.length) {
+          alignedRow.push(srcRow[mappedIdx]);
+        } else if (mappedIdx === -1 && headers.length === targetCols && cIdx < srcRow.length) {
+          alignedRow.push(srcRow[cIdx]);
+        } else {
+          alignedRow.push('');
+        }
+      }
+      keptRows.push(alignedRow);
+    }
+  }
+
+  if (needsHeaderWrite) {
+    sheet.getRange(1, 1, 1, targetCols).setValues([MATCH_ACTION_LOG_HEADERS]);
+  }
+
+  var newRows = moments.map(function(m) {
+    var built = buildActionRowFromMoment(m, nowStr).slice(0, targetCols);
+    while (built.length < targetCols) built.push('');
+    return built;
+  });
+  var finalRows = keptRows.concat(newRows);
+
+  var clearCols = Math.max(headerRow.length || 0, targetCols, sheet.getLastColumn() || targetCols);
+  if (sheet.getLastRow() > 1) {
+    sheet.getRange(2, 1, sheet.getLastRow() - 1, clearCols).clearContent();
+  }
+  if (finalRows.length > 0) {
+    sheet.getRange(2, 1, finalRows.length, targetCols).setValues(finalRows);
+  }
+
+  return {
+    success: true,
+    match: targetMatch,
+    matchRowsWritten: newRows.length,
+    totalRowsInSheet: finalRows.length
+  };
+}
+
 function handleSaveMatchActionRows(payload) {
   var lock = LockService.getScriptLock();
   try {
@@ -2111,65 +2423,7 @@ function handleSaveMatchActionRows(payload) {
     if (!isValidCoachPin(payload.pin)) {
       return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
     }
-    var moments = Array.isArray(payload.moments) ? payload.moments : [];
-    if (!moments.length) {
-      return jsonOut({ success: false, message: 'No moments provided' });
-    }
-    var sheet = getOrCreateMatchActionLogSheet();
-    var nowStr = new Date().toISOString();
-    var targetMatch = String(payload.match || (moments[0] && (moments[0].match || moments[0].m)) || '').trim();
-    var replaceMatch = payload.replaceMatch !== false;
-
-    var existingData = sheet.getDataRange().getValues();
-    var headerRow = existingData[0];
-    var keptRows = [];
-    if (existingData.length > 1) {
-      var headers = headerRow.map(function(h) { return String(h || '').trim().toLowerCase(); });
-      var iMatch = headers.indexOf('match_name');
-      var iId = headers.indexOf('event_id');
-      var incomingIds = {};
-      for (var m = 0; m < moments.length; m++) {
-        var cid = String(moments[m].eventId || moments[m].id || '');
-        if (cid) incomingIds[cid] = true;
-      }
-      for (var r = 1; r < existingData.length; r++) {
-        var rowMatch = iMatch !== -1 ? String(existingData[r][iMatch] || '').trim() : '';
-        var rowId = iId !== -1 ? String(existingData[r][iId] || '').trim() : '';
-        if (replaceMatch && targetMatch && rowMatch.toLowerCase() === targetMatch.toLowerCase()) {
-          continue;
-        }
-        if (rowId && incomingIds[rowId]) {
-          continue;
-        }
-        var paddedRow = existingData[r].slice();
-        while (paddedRow.length < MATCH_ACTION_LOG_HEADERS.length) paddedRow.push('');
-        keptRows.push(paddedRow);
-      }
-    }
-
-    var targetCols = MATCH_ACTION_LOG_HEADERS.length;
-    if (headerRow.length < targetCols) {
-      sheet.getRange(1, 1, 1, targetCols).setValues([MATCH_ACTION_LOG_HEADERS]);
-    }
-
-    var newRows = moments.map(function(m) {
-      return buildActionRowFromMoment(m, nowStr);
-    });
-    var finalRows = keptRows.concat(newRows);
-
-    if (sheet.getLastRow() > 1) {
-      sheet.getRange(2, 1, sheet.getLastRow() - 1, Math.max(headerRow.length, targetCols)).clearContent();
-    }
-    if (finalRows.length > 0) {
-      sheet.getRange(2, 1, finalRows.length, targetCols).setValues(finalRows);
-    }
-
-    return jsonOut({
-      success: true,
-      match: targetMatch,
-      matchRowsWritten: newRows.length,
-      totalRowsInSheet: finalRows.length
-    });
+    return jsonOut(saveMatchActionRowsInternal_(payload));
   } catch (err) {
     return jsonOut({ success: false, message: err.toString() });
   } finally {
@@ -2303,7 +2557,9 @@ function handleDeleteSingleMatchAction(payload) {
 }
 
 function handleSaveFilmMoments(payload) {
+  var lock = LockService.getScriptLock();
   try {
+    lock.waitLock(10000);
     if (!isValidCoachPin(payload.pin)) {
       return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
     }
@@ -2313,25 +2569,24 @@ function handleSaveFilmMoments(payload) {
       return jsonOut({ success: false, message: 'No moments provided' });
     }
 
-    // 1. Write rows to Match_Action_Log sheet tab
-    try {
-      handleSaveMatchActionRows(payload);
-    } catch (sheetErr) {}
+    // 1. Write rows directly to Match_Action_Log sheet tab (1 row per moment; no KV JSON blobs)
+    var sheetRes = saveMatchActionRowsInternal_(payload);
 
-    // 2. Keep recent match moments in KV (capped to avoid 50KB cell limit)
-    var kv = getMatchHubKVMap();
-    var existing = kv['all_film_moments'] || [];
-    var filtered = existing.filter(function(m) {
-      var mName = m.match || m.m || '';
-      return targetMatch ? mName !== targetMatch : true;
-    });
-    var merged = filtered.concat(moments);
-    if (JSON.stringify(merged).length > 44000) {
-      merged = moments;
+    // 2. Upsert 1 flat row in Match_Log sheet tab
+    var nextStatus = payload.reviewed ? 'Reviewed & Published' : 'Pitchside Draft';
+    if (targetMatch) {
+      try {
+        upsertMatchLogRow_({
+          match: targetMatch,
+          matchDate: (moments[0] && moments[0].matchDate) || '',
+          momentCount: moments.length,
+          status: nextStatus
+        });
+      } catch (logErr) {}
     }
-    setMatchHubKV('all_film_moments', merged);
 
-    // 3. Update pitchside draft placeholder record to reflect reviewed state
+    // 3. Keep tiny metadata-only pointer in pitchside_drafts KV (never store full moments array inside a cell)
+    var kv = getMatchHubKVMap();
     if (targetMatch) {
       try {
         var drafts = kv['pitchside_drafts'] || {};
@@ -2343,69 +2598,113 @@ function handleSaveFilmMoments(payload) {
           matchDate: prevDraft.matchDate || (moments[0] && moments[0].matchDate) || '',
           score: prevDraft.score || '',
           matchMins: prevDraft.matchMins || 80,
-          moments: moments,
           momentCount: moments.length,
           status: payload.reviewed ? 'Reviewed & Published' : (prevDraft.status || 'Pitchside Draft'),
           savedAt: new Date().toISOString()
         };
-        if (JSON.stringify(drafts).length > 44000) {
-          var slimDrafts = {};
-          var keys = Object.keys(drafts);
-          for (var kIdx = Math.max(0, keys.length - 8); kIdx < keys.length; kIdx++) {
-            var dk = keys[kIdx];
-            var entry = drafts[dk];
-            slimDrafts[dk] = (dk === targetMatch)
-              ? entry
-              : { match: entry.match, matchDate: entry.matchDate, score: entry.score, momentCount: entry.momentCount || (entry.moments ? entry.moments.length : 0), status: entry.status, savedAt: entry.savedAt };
+        var draftKeys = Object.keys(drafts);
+        if (draftKeys.length > 12) {
+          for (var kIdx = 0; kIdx < draftKeys.length - 12; kIdx++) {
+            if (draftKeys[kIdx] !== targetMatch) delete drafts[draftKeys[kIdx]];
           }
-          drafts = slimDrafts;
         }
         setMatchHubKV('pitchside_drafts', drafts);
       } catch (draftUpdateErr) {}
     }
 
-    return jsonOut({ success: true, count: merged.length, matchCount: moments.length, match: targetMatch });
+    return jsonOut({
+      success: sheetRes && sheetRes.success !== false,
+      count: sheetRes && sheetRes.totalRowsInSheet ? sheetRes.totalRowsInSheet : moments.length,
+      matchCount: moments.length,
+      matchRowsWritten: sheetRes && sheetRes.matchRowsWritten ? sheetRes.matchRowsWritten : 0,
+      totalRowsInSheet: sheetRes && sheetRes.totalRowsInSheet ? sheetRes.totalRowsInSheet : 0,
+      sheetError: (sheetRes && sheetRes.success === false) ? sheetRes.message : undefined,
+      match: targetMatch
+    });
   } catch(err) {
     return jsonOut({ success: false, message: err.toString() });
+  } finally {
+    try { lock.releaseLock(); } catch(e) {}
   }
 }
 
 function handleSavePitchsideDraft(payload) {
+  var lock = LockService.getScriptLock();
   try {
+    lock.waitLock(10000);
     if (!isValidCoachPin(payload.pin)) {
       return jsonOut({ success: false, message: 'Unauthorized Coach PIN' });
     }
     var draft = payload.draft || payload;
-    setMatchHubKV('pitchside_draft_latest', draft);
     var matchKey = String((draft && (draft.match || draft.opponent)) || '').trim();
+    var draftMoments = Array.isArray(draft && draft.moments) ? draft.moments : [];
+    var draftStatus = (draft && draft.status) || 'Pitchside Draft';
+
+    // 1. Write any pitched sideline moments into Match_Action_Log rows (1 row per moment)
+    if (matchKey && draftMoments.length > 0) {
+      var preparedMoments = draftMoments.map(function(dm) {
+        var copy = {};
+        for (var k in dm) {
+          if (Object.prototype.hasOwnProperty.call(dm, k)) copy[k] = dm[k];
+        }
+        if (!copy.match) copy.match = matchKey;
+        if (!copy.status) copy.status = draftStatus;
+        return copy;
+      });
+      saveMatchActionRowsInternal_({
+        pin: payload.pin,
+        match: matchKey,
+        replaceMatch: true,
+        moments: preparedMoments
+      });
+    }
+
+    // 2. Upsert 1 flat row in Match_Log sheet tab
+    if (matchKey) {
+      upsertMatchLogRow_({
+        matchId: draft.matchId || '',
+        matchDate: draft.matchDate || '',
+        match: matchKey,
+        team: draft.team || 'AJAX ASPIRE U15',
+        opponent: draft.opponent || matchKey,
+        score: draft.score || '',
+        matchMins: draft.matchMins || 80,
+        status: draftStatus,
+        momentCount: draftMoments.length
+      });
+    }
+
+    // 3. Keep tiny metadata-only summary in match_hub KV (never pack moments array inside a cell)
+    var slimDraft = {
+      match: matchKey,
+      matchId: draft.matchId || '',
+      team: draft.team || '',
+      opponent: draft.opponent || matchKey,
+      matchDate: draft.matchDate || '',
+      score: draft.score || '',
+      matchMins: draft.matchMins || 80,
+      momentCount: draftMoments.length,
+      status: draftStatus,
+      savedAt: draft.savedAt || new Date().toISOString()
+    };
+    setMatchHubKV('pitchside_draft_latest', slimDraft);
     if (matchKey) {
       var kv = getMatchHubKVMap();
       var drafts = kv['pitchside_drafts'] || {};
-      drafts[matchKey] = {
-        match: matchKey,
-        matchId: draft.matchId || '',
-        team: draft.team || '',
-        opponent: draft.opponent || matchKey,
-        matchDate: draft.matchDate || '',
-        score: draft.score || '',
-        matchMins: draft.matchMins || 80,
-        moments: Array.isArray(draft.moments) ? draft.moments : [],
-        momentCount: Array.isArray(draft.moments) ? draft.moments.length : (draft.momentCount || 0),
-        status: draft.status || 'Pitchside Draft',
-        savedAt: draft.savedAt || new Date().toISOString()
-      };
-      if (JSON.stringify(drafts).length > 44000) {
-        var keys = Object.keys(drafts);
-        while (keys.length > 1 && JSON.stringify(drafts).length > 44000) {
-          var oldest = keys.shift();
-          if (oldest !== matchKey) delete drafts[oldest];
+      drafts[matchKey] = slimDraft;
+      var keys = Object.keys(drafts);
+      if (keys.length > 12) {
+        for (var kIdx = 0; kIdx < keys.length - 12; kIdx++) {
+          if (keys[kIdx] !== matchKey) delete drafts[keys[kIdx]];
         }
       }
       setMatchHubKV('pitchside_drafts', drafts);
     }
-    return jsonOut({ success: true, match: matchKey, savedAt: new Date().toISOString() });
+    return jsonOut({ success: true, match: matchKey, momentCount: draftMoments.length, savedAt: slimDraft.savedAt });
   } catch (err) {
     return jsonOut({ success: false, message: err.toString() });
+  } finally {
+    try { lock.releaseLock(); } catch(e) {}
   }
 }
 
@@ -2430,6 +2729,13 @@ function getPitchsideDraft(pin) {
     var draft = kv['pitchside_draft_latest'] || (kv['notes'] && kv['notes']['ajax_pitchside_draft_latest']) || null;
     if (typeof draft === 'string' && draft.trim().indexOf('{') === 0) {
       try { draft = JSON.parse(draft); } catch (e) {}
+    }
+    if (draft && draft.match && (!Array.isArray(draft.moments) || !draft.moments.length)) {
+      var rows = readAllMatchActionLogRows();
+      draft.moments = rows.filter(function(r) {
+        return String(r.match || '').trim().toLowerCase() === String(draft.match || '').trim().toLowerCase();
+      });
+      draft.momentCount = draft.moments.length;
     }
     return jsonOut({ success: true, draft: draft });
   } catch (err) {
@@ -2468,30 +2774,72 @@ function getMatchActions(params) {
       return jsonOut({ success: false, moments: [], error: 'Unauthorized Coach PIN' });
     }
     var allRows = readAllMatchActionLogRows();
+    var matchLogRows = readAllMatchLogRows_();
     var kv = getMatchHubKVMap();
     var overrides = kv['film_moment_overrides'] || {};
-    var history = Array.isArray(kv['match_history']) ? kv['match_history'] : [];
+    var kvHistory = Array.isArray(kv['match_history']) ? kv['match_history'] : [];
+    var history = matchLogRows.slice().reverse();
+    var seenHist = {};
+    for (var hi = 0; hi < history.length; hi++) {
+      if (history[hi].match) seenHist[history[hi].match.toLowerCase()] = true;
+    }
+    for (var ki = 0; ki < kvHistory.length; ki++) {
+      var kh = kvHistory[ki] || {};
+      var khName = String(kh.match || kh.opponent || '').trim().toLowerCase();
+      if (khName && !seenHist[khName]) {
+        history.push(kh);
+        seenHist[khName] = true;
+      }
+    }
+
     var drafts = kv['pitchside_drafts'] || {};
     var latestDraft = kv['pitchside_draft_latest'] || null;
     if (latestDraft && latestDraft.match && !drafts[latestDraft.match]) {
       drafts[latestDraft.match] = latestDraft;
     }
 
-    // Build distinct committed/logged match placeholders across Match_Action_Log, pitchside_drafts, and match_history
+    // Group Match_Action_Log rows by lowercase match name for enriching drafts cleanly
+    var rowsByMatchLower = {};
     var matchMap = {};
     for (var i = 0; i < allRows.length; i++) {
       var rMatch = String(allRows[i].match || '').trim();
       if (!rMatch) continue;
+      var rLower = rMatch.toLowerCase();
+      if (!rowsByMatchLower[rLower]) rowsByMatchLower[rLower] = [];
+      rowsByMatchLower[rLower].push(allRows[i]);
       if (!matchMap[rMatch]) {
         matchMap[rMatch] = { match: rMatch, momentCount: 0, status: allRows[i].status || 'Published', matchDate: allRows[i].matchDate || '' };
       }
       matchMap[rMatch].momentCount++;
     }
+
+    for (var mlIdx = 0; mlIdx < matchLogRows.length; mlIdx++) {
+      var ml = matchLogRows[mlIdx];
+      if (!ml.match) continue;
+      if (!matchMap[ml.match]) {
+        matchMap[ml.match] = {
+          match: ml.match,
+          momentCount: ml.momentCount || 0,
+          status: ml.status || 'Pitchside Committed',
+          score: ml.score || '',
+          matchDate: ml.matchDate || ''
+        };
+      } else {
+        if (ml.score) matchMap[ml.match].score = ml.score;
+        if (ml.status) matchMap[ml.match].status = ml.status;
+        if (ml.matchDate && !matchMap[ml.match].matchDate) matchMap[ml.match].matchDate = ml.matchDate;
+      }
+    }
+
     for (var dKey in drafts) {
       if (!Object.prototype.hasOwnProperty.call(drafts, dKey)) continue;
       var dObj = drafts[dKey] || {};
       var dMatch = String(dObj.match || dKey || '').trim();
       if (!dMatch) continue;
+      if ((!Array.isArray(dObj.moments) || !dObj.moments.length) && rowsByMatchLower[dMatch.toLowerCase()]) {
+        dObj.moments = rowsByMatchLower[dMatch.toLowerCase()];
+        dObj.momentCount = dObj.moments.length;
+      }
       if (!matchMap[dMatch]) {
         matchMap[dMatch] = {
           match: dMatch,
@@ -2516,7 +2864,7 @@ function getMatchActions(params) {
           match: hTitle,
           momentCount: 0,
           status: h.status || 'Pitchside Committed',
-          score: (h.ajaxScore !== undefined && h.oppScore !== undefined) ? (h.ajaxScore + ' - ' + h.oppScore) : '',
+          score: h.score || ((h.ajaxScore !== undefined && h.oppScore !== undefined) ? (h.ajaxScore + ' - ' + h.oppScore) : ''),
           matchDate: h.matchDate || (h.date ? String(h.date).slice(0, 10) : '')
         };
       }

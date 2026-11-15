@@ -137,7 +137,7 @@ If a test commit was sent to your Google Sheet:
 
 1. **Commit Pitchside Match (`ajax-match-tracker.html`):**
    - At Full Time, tap **`⚡ COMMIT MATCH TO HUB`** (or tap **`🎬 Open Film Review ↗`** directly from the confirmation receipt).
-   - This updates Google Sheets (`Player_IDP`) and stages the match—even if 0 film moments were logged pitchside—as a holding record in **`Match_Action_Log` / `match_history` / `pitchside_drafts`**.
+   - This updates Google Sheets (`Player_IDP`), writes a clean 1-row match holding record to **`Match_Log`** (and each sideline clip as its own row in **`Match_Action_Log`** without stuffing moment arrays into single KV cells), and displays a **Pending Film Review** holding card in **Match Hub** even if 0 film moments were logged pitchside.
 2. **Open Film Review (`film-moment-logger.html`) on iPad or Desktop:**
    - Enter your Coach Token (if opening on another browser/device) and tap **`☁️ Sync Sheet`** so all committed matches appear at the top of the **Match Name** dropdown.
    - Select the committed match in either **🎙️ Voice Review** or **⚡ Touch Review**.

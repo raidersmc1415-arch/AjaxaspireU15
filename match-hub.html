@@ -682,6 +682,13 @@
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Film Breakdown by Match (Click to Filter Log or Inspect Game Charts)</h3>
             <span id="filmMatchesHeaderCount" class="text-[10px] text-slate-400 mono"></span>
           </div>
+          <div id="filmHoldingMatchCardsWrap" class="hidden space-y-2 pb-2 border-b border-border/60">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[10px] mono uppercase tracking-wider font-bold text-amber-300">⏳ Pitchside Holding Records (Awaiting Film Review / Clips)</span>
+              <span id="filmHoldingCountBadge" class="text-[10px] font-mono text-amber-300"></span>
+            </div>
+            <div id="filmHoldingMatchCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+          </div>
           <div id="filmMatchCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
         </div>
 
@@ -3719,7 +3726,79 @@
       pf.innerHTML = '<option value="ALL">All Players</option>' + sortedByJersey.map(p => `<option value="${esc(p.name)}">#${p.jersey || '?'} ${esc(p.name)} (${p.filmEventsCount || 0})</option>`).join('');
       pf.value = curP;
 
+      renderHoldingMatchCards();
       renderFilmLogList();
+    }
+
+    let CLOUD_HOLDING_MATCHES = [];
+    function mergeHoldingMatchesFromSources(entries) {
+      const byKey = {};
+      CLOUD_HOLDING_MATCHES.forEach(item => {
+        if (item && item.match) byKey[item.match.toLowerCase()] = item;
+      });
+      (entries || []).forEach(raw => {
+        if (!raw) return;
+        const mName = String(raw.match || (raw.opponent ? (String(raw.opponent).includes('(') ? raw.opponent : `${raw.opponent} (${new Date(raw.date || raw.matchDate || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`) : '')).trim();
+        if (!mName) return;
+        const key = mName.toLowerCase();
+        const prev = byKey[key] || {};
+        const scoreVal = raw.score || ((raw.ajaxScore !== undefined && raw.ajaxScore !== '' && raw.oppScore !== undefined && raw.oppScore !== '') ? `${raw.ajaxScore} - ${raw.oppScore}` : prev.score || '');
+        byKey[key] = {
+          match: mName,
+          matchDate: raw.matchDate || (raw.date ? String(raw.date).slice(0, 10) : '') || prev.matchDate || '',
+          score: scoreVal,
+          status: raw.status || prev.status || 'Pitchside Committed',
+          momentCount: (typeof raw.momentCount === 'number' ? raw.momentCount : (Array.isArray(raw.moments) ? raw.moments.length : (prev.momentCount || 0)))
+        };
+      });
+      CLOUD_HOLDING_MATCHES = Object.values(byKey);
+    }
+
+    function renderHoldingMatchCards() {
+      const wrap = $('filmHoldingMatchCardsWrap');
+      const grid = $('filmHoldingMatchCards');
+      const badge = $('filmHoldingCountBadge');
+      if (!wrap || !grid) return;
+
+      // Seed any local pitchside drafts as holding cards too
+      try {
+        const localDraftsRaw = localStorage.getItem('ajax_pitchside_drafts');
+        if (localDraftsRaw) mergeHoldingMatchesFromSources(Object.values(JSON.parse(localDraftsRaw) || {}));
+        const latestLocal = localStorage.getItem('ajax_pitchside_draft_latest');
+        if (latestLocal) mergeHoldingMatchesFromSources([JSON.parse(latestLocal)]);
+      } catch (e) {}
+
+      const activeKey = activeExportKey(team);
+      const events = DATA[activeKey]?.filmEvents || [];
+      const reviewedSet = new Set(events.map(e => String(e.match || '').trim().toLowerCase()).filter(Boolean));
+      const pending = CLOUD_HOLDING_MATCHES.filter(h => h.match && !reviewedSet.has(h.match.toLowerCase()));
+
+      if (!pending.length) {
+        wrap.classList.add('hidden');
+        grid.innerHTML = '';
+        if (badge) badge.textContent = '';
+        return;
+      }
+
+      wrap.classList.remove('hidden');
+      if (badge) badge.textContent = `${pending.length} pending`;
+      grid.innerHTML = pending.map(h => `
+        <div class="bg-amber-950/30 border border-amber-500/40 p-3 rounded-xl flex flex-col justify-between gap-2">
+          <div class="space-y-1">
+            <div class="flex items-center justify-between gap-1.5">
+              <span class="font-bold text-xs text-white truncate">${esc(h.match)}</span>
+              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">${h.score ? esc(h.score) : 'Holding'}</span>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400">
+              <span>${esc(h.status || 'Awaiting Film Review')}</span>
+              <span class="font-mono">${h.momentCount || 0} clips${h.matchDate ? ' · ' + esc(h.matchDate) : ''}</span>
+            </div>
+          </div>
+          <a href="film-moment-logger.html?match=${encodeURIComponent(h.match)}" target="_blank" class="min-h-[36px] text-center text-[11px] bg-teal-600 hover:bg-teal-500 text-white font-bold px-2.5 py-1.5 rounded-lg transition flex items-center justify-center gap-1.5">
+            <span>🎬 Open Film Review</span> ↗
+          </a>
+        </div>
+      `).join('');
     }
 
     function renderFilmMatrix() {
@@ -6457,18 +6536,18 @@
       });
       if (!matchMoments.length) return;
       const pin = getCoachSessionPin();
-      if (!pin) return;
-      await fetch(API_URL, {
+      if (!pin) return { success: false, message: 'Missing Coach PIN' };
+      const res = await fetch(API_URL, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           action: 'saveFilmMoments',
           pin,
           match: matchName,
+          reviewed: true,
           moments: matchMoments
         })
-      });
+      }).then(r => r.json()).catch(() => null);
+      return res || { success: false, message: 'Network error saving film moments' };
     }
 
     async function publishMatchFilmToSheet() {
@@ -6478,44 +6557,53 @@
       showToast('☁️ Publishing finalized match actions to Master Google Sheet & Player Portal...');
 
       try {
-        const allEv = DATA['AJAX ASPIRE U15']?.filmEvents || [];
-        const matchesToPublish = selectedMatch !== 'ALL'
-          ? [selectedMatch]
-          : Array.from(new Set(allEv.map(e => e.match).filter(Boolean)));
-
-        for (const mName of matchesToPublish) {
-          await syncMatchMomentsArrayToCloud(mName);
-        }
-
-        // Also push complete rows to Match_Action_Log tab
         const pin = getCoachSessionPin();
         if (!pin) {
           showToast('⚠️ Coach PIN required to publish to Sheet.');
+          if (badge) badge.textContent = '🔒 Enter Coach PIN to Publish';
           return;
         }
+        const allEv = DATA['AJAX ASPIRE U15']?.filmEvents || [];
         const rawTargetEvents = selectedMatch !== 'ALL'
           ? allEv.filter(e => e.match === selectedMatch)
           : allEv;
         const targetEvents = rawTargetEvents.map(e => ({
           ...e,
-          noteToPlayer: e.noteToPlayer || ''
+          note: e.note || e.notes || '',
+          notes: e.note || e.notes || '',
+          noteToPlayer: e.noteToPlayer || '',
+          status: 'Reviewed & Published'
         }));
+        if (!targetEvents.length) {
+          showToast('⚠️ No film moments found to publish for this filter.');
+          return;
+        }
 
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'saveMatchActionRows',
-            pin,
-            match: selectedMatch !== 'ALL' ? selectedMatch : '',
-            replaceMatch: selectedMatch !== 'ALL',
-            moments: targetEvents
-          })
-        });
+        let res = null;
+        if (selectedMatch !== 'ALL') {
+          res = await syncMatchMomentsArrayToCloud(selectedMatch);
+        } else {
+          res = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'saveMatchActionRows',
+              pin,
+              match: '',
+              replaceMatch: false,
+              moments: targetEvents
+            })
+          }).then(r => r.json()).catch(() => null);
+        }
 
-        if (badge) badge.textContent = `☁️ Published (${targetEvents.length} actions synced) ✓`;
-        showToast(`✅ Published ${targetEvents.length} film actions to Master Google Sheet & Player Portal!`);
+        if (res && res.success) {
+          const sheetTotal = res.totalRowsInSheet || res.matchRowsWritten || targetEvents.length;
+          if (badge) badge.textContent = `☁️ Published (${sheetTotal} rows in Match_Action_Log) ✓`;
+          showToast(`✅ Published ${targetEvents.length} film actions to Master Google Sheet (${sheetTotal} total rows in Match_Action_Log)!`);
+        } else {
+          const errMsg = (res && (res.sheetError || res.message)) || 'Check Apps Script New Version deploy';
+          if (badge) badge.textContent = `⚠️ Sheet Sync Issue: ${errMsg}`;
+          showToast(`⚠️ Could not verify Sheet write: ${errMsg}`);
+        }
       } catch (err) {
         if (badge) badge.textContent = '⚠️ Publish Notice — Saved Locally';
         showToast('Saved locally; cloud sync will retry.');
@@ -7099,10 +7187,19 @@
           renderRoster();
         }
 
-        if (res && res.success && res.latestDraft && typeof res.latestDraft === 'object') {
-          try {
-            checkAndRenderPitchsideDraftBanner(res.latestDraft);
-          } catch (e) {}
+        if (res && res.success) {
+          if (res.latestDraft && typeof res.latestDraft === 'object') {
+            try {
+              checkAndRenderPitchsideDraftBanner(res.latestDraft);
+              mergeHoldingMatchesFromSources([res.latestDraft]);
+            } catch (e) {}
+          }
+          if (res.drafts && typeof res.drafts === 'object') {
+            mergeHoldingMatchesFromSources(Object.values(res.drafts));
+          }
+          if (Array.isArray(res.history)) {
+            mergeHoldingMatchesFromSources(res.history);
+          }
         }
 
         // Hydrate cross-device datasets from Google Sheets
@@ -7127,6 +7224,14 @@
             renderTeamSwitch();
             renderAll();
             renderFilmLogList();
+          }
+        }
+
+        if (actionsRes && actionsRes.success) {
+          if (Array.isArray(actionsRes.matches)) mergeHoldingMatchesFromSources(actionsRes.matches);
+          if (Array.isArray(actionsRes.history)) mergeHoldingMatchesFromSources(actionsRes.history);
+          if (actionsRes.drafts && typeof actionsRes.drafts === 'object') {
+            mergeHoldingMatchesFromSources(Object.values(actionsRes.drafts));
           }
         }
 
@@ -7194,6 +7299,7 @@
             renderFilmLogList();
           }
         }
+        renderHoldingMatchCards();
 
         if (window.__REQUESTED_HUB_MATCH && $('filmMatchFilter')) {
           const optExists = Array.from($('filmMatchFilter').options).some(o => o.value === window.__REQUESTED_HUB_MATCH);

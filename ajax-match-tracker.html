@@ -6900,7 +6900,7 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
       try {
         const allTeamFilm = (customData[targetTeam] && customData[targetTeam].filmEvents) || [];
         const matchFilmOnly = allTeamFilm.filter(e => e.match === canonicalMatchTitle);
-        const draftPayload = {
+        const slimDraftMeta = {
           match: canonicalMatchTitle,
           matchId: matchId,
           team: targetTeam,
@@ -6908,10 +6908,13 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           matchDate: matchDateKey,
           score: `${ajaxGoals} - ${oppGoals}`,
           matchMins: matchMins,
-          moments: matchFilmOnly,
           momentCount: matchFilmOnly.length,
           status: 'Pitchside Draft',
           savedAt: new Date().toISOString()
+        };
+        const draftPayload = {
+          ...slimDraftMeta,
+          moments: matchFilmOnly
         };
         localStorage.setItem('ajax_pitchside_draft_latest', JSON.stringify(draftPayload));
         try {
@@ -6920,14 +6923,14 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           localStorage.setItem('ajax_pitchside_drafts', JSON.stringify(allDrafts));
         } catch (e) {}
 
-        // 1. Save pitchside draft to kv['notes'] & kv['pitchside_drafts'] (holds record in Film Review dropdown even with 0 clips)
+        // 1. Store slim metadata pointer in match_hub notes; write row-based holding record + action rows via savePitchsideDraft
         fetch(API_URL, {
           method: 'POST',
           body: JSON.stringify({
             action: 'saveMatchHubNote',
             pin: coachPin,
             noteKey: 'ajax_pitchside_draft_latest',
-            noteText: JSON.stringify(draftPayload)
+            noteText: JSON.stringify(slimDraftMeta)
           })
         }).catch(() => {});
 
