@@ -987,9 +987,20 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
 
         // Handle explicit ?match=... deep-link OR refresh current selected match if cloud now has moments
         const jumpEl = document.getElementById('pendingDraftQuickJump');
-        if (jumpEl && latestStagedMatch && !BUILTIN_MATCH_CATALOG[latestStagedMatch]) {
-          jumpEl.innerHTML = `<button type="button" onclick="onSelectMatchChanged('${esc(latestStagedMatch)}')" class="text-[11px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 px-2.5 py-1 rounded-lg font-bold transition">🆕 Load Committed: ${esc(latestStagedMatch)}</button>`;
-          jumpEl.classList.remove('hidden');
+        if (jumpEl) {
+          const pendingMatches = Object.keys(CLOUD_MATCH_CATALOG).filter(mt => {
+            if (BUILTIN_MATCH_CATALOG[mt]) return false;
+            const st = String(CLOUD_MATCH_CATALOG[mt]?.meta?.status || '').toLowerCase();
+            return !st.includes('reviewed');
+          });
+          const pillTargets = pendingMatches.length ? pendingMatches : (latestStagedMatch && !BUILTIN_MATCH_CATALOG[latestStagedMatch] ? [latestStagedMatch] : []);
+          if (pillTargets.length) {
+            jumpEl.innerHTML = pillTargets.map(mt => {
+              const cnt = (CLOUD_MATCH_CATALOG[mt]?.moments || []).length;
+              return `<button type="button" onclick="onSelectMatchChanged('${esc(mt)}')" class="text-[11px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 px-2.5 py-1 rounded-lg font-bold transition mr-1 mb-1">🆕 ${esc(mt)} (${cnt})</button>`;
+            }).join('');
+            jumpEl.classList.remove('hidden');
+          }
         }
 
         if (window.__REQUESTED_FILM_MATCH) {

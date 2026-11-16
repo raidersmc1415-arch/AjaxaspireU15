@@ -6977,17 +6977,6 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           console.warn('Google Sheet background sync notice:', err);
         }
 
-        if (slimDraftMeta) {
-          try {
-            await postJson({
-              action: 'saveMatchHubNote',
-              pin: coachPin,
-              noteKey: 'ajax_pitchside_draft_latest',
-              noteText: JSON.stringify(slimDraftMeta)
-            });
-          } catch (e) {}
-        }
-
         try {
           await postJson({ action: 'saveMatchHubData', pin: coachPin, datasets: customData });
         } catch (e) {}

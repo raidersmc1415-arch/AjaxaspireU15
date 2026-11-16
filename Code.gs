@@ -1737,26 +1737,6 @@ function handleUpdateSeasonStats(payload) {
         }));
       } catch(e) {}
 
-      try {
-        var kv = getMatchHubKVMap();
-        var history = Array.isArray(kv['match_history']) ? kv['match_history'] : [];
-        var slimSummary = {
-          matchId: payload.matchSummary.matchId || matchId || '',
-          match: payload.matchSummary.match || '',
-          date: payload.matchSummary.date || new Date().toISOString(),
-          matchDate: payload.matchSummary.matchDate || '',
-          team: payload.matchSummary.team || '',
-          opponent: payload.matchSummary.opponent || '',
-          ajaxScore: payload.matchSummary.ajaxScore,
-          oppScore: payload.matchSummary.oppScore,
-          matchMins: payload.matchSummary.matchMins,
-          status: payload.matchSummary.status || 'Pitchside Committed'
-        };
-        history.unshift(slimSummary);
-        if (history.length > 20) history = history.slice(0, 20);
-        setMatchHubKV('match_history', history);
-      } catch(e) {}
-
       // Automatically update the team aggregate line in Raw_Match_Stats
       try {
         updateTeamAggregateInRawMatchStats(payload.matchSummary, payload.matchTotals || null);
@@ -2661,7 +2641,7 @@ function handleSaveFilmMoments(payload) {
     // 1. Write rows directly to Match_Action_Log sheet tab (1 row per moment; no KV JSON blobs)
     var sheetRes = saveMatchActionRowsInternal_(payload);
 
-    // 2. Upsert 1 flat row in Match_Log sheet tab
+    // 2. Upsert 1 flat row in Match_Log sheet tab (no single-cell JSON blobs in match_hub)
     var nextStatus = payload.reviewed ? 'Reviewed & Published' : 'Pitchside Draft';
     if (targetMatch) {
       try {
@@ -2672,33 +2652,6 @@ function handleSaveFilmMoments(payload) {
           status: nextStatus
         });
       } catch (logErr) {}
-    }
-
-    // 3. Keep tiny metadata-only pointer in pitchside_drafts KV (never store full moments array inside a cell)
-    var kv = getMatchHubKVMap();
-    if (targetMatch) {
-      try {
-        var drafts = kv['pitchside_drafts'] || {};
-        var prevDraft = drafts[targetMatch] || {};
-        drafts[targetMatch] = {
-          match: targetMatch,
-          matchId: prevDraft.matchId || '',
-          opponent: prevDraft.opponent || targetMatch,
-          matchDate: prevDraft.matchDate || (moments[0] && moments[0].matchDate) || '',
-          score: prevDraft.score || '',
-          matchMins: prevDraft.matchMins || 80,
-          momentCount: moments.length,
-          status: payload.reviewed ? 'Reviewed & Published' : (prevDraft.status || 'Pitchside Draft'),
-          savedAt: new Date().toISOString()
-        };
-        var draftKeys = Object.keys(drafts);
-        if (draftKeys.length > 12) {
-          for (var kIdx = 0; kIdx < draftKeys.length - 12; kIdx++) {
-            if (draftKeys[kIdx] !== targetMatch) delete drafts[draftKeys[kIdx]];
-          }
-        }
-        setMatchHubKV('pitchside_drafts', drafts);
-      } catch (draftUpdateErr) {}
     }
 
     return jsonOut({
@@ -2748,7 +2701,8 @@ function handleSavePitchsideDraft(payload) {
       });
     }
 
-    // 2. Upsert 1 flat row in Match_Log sheet tab
+    // 2. Upsert 1 flat row in Match_Log sheet tab (no single-cell JSON blobs in match_hub)
+    var savedAtIso = (draft && draft.savedAt) || new Date().toISOString();
     if (matchKey) {
       upsertMatchLogRow_({
         matchId: draft.matchId || '',
@@ -2762,34 +2716,7 @@ function handleSavePitchsideDraft(payload) {
         momentCount: draftMoments.length
       });
     }
-
-    // 3. Keep tiny metadata-only summary in match_hub KV (never pack moments array inside a cell)
-    var slimDraft = {
-      match: matchKey,
-      matchId: draft.matchId || '',
-      team: draft.team || '',
-      opponent: draft.opponent || matchKey,
-      matchDate: draft.matchDate || '',
-      score: draft.score || '',
-      matchMins: draft.matchMins || 80,
-      momentCount: draftMoments.length,
-      status: draftStatus,
-      savedAt: draft.savedAt || new Date().toISOString()
-    };
-    setMatchHubKV('pitchside_draft_latest', slimDraft);
-    if (matchKey) {
-      var kv = getMatchHubKVMap();
-      var drafts = kv['pitchside_drafts'] || {};
-      drafts[matchKey] = slimDraft;
-      var keys = Object.keys(drafts);
-      if (keys.length > 12) {
-        for (var kIdx = 0; kIdx < keys.length - 12; kIdx++) {
-          if (keys[kIdx] !== matchKey) delete drafts[keys[kIdx]];
-        }
-      }
-      setMatchHubKV('pitchside_drafts', drafts);
-    }
-    return jsonOut({ success: true, match: matchKey, momentCount: draftMoments.length, savedAt: slimDraft.savedAt });
+    return jsonOut({ success: true, match: matchKey, momentCount: draftMoments.length, savedAt: savedAtIso });
   } catch (err) {
     return jsonOut({ success: false, message: err.toString() });
   } finally {
@@ -3312,8 +3239,9 @@ function healTeamAggregate() {
 
     function num(v) { var n = parseFloat(String(v).replace('%','')); return isNaN(n) ? 0 : n; }
 
+    var matchLogRows = readAllMatchLogRows_();
     var kv = getMatchHubKVMap();
-    var history = Array.isArray(kv['match_history']) ? kv['match_history'] : [];
+    var history = matchLogRows.length > 0 ? matchLogRows : (Array.isArray(kv['match_history']) ? kv['match_history'] : []);
     var aspireHistory = history.filter(function(m) {
       return !m.team || String(m.team).toLowerCase().indexOf('aspire') !== -1;
     });
