@@ -229,17 +229,19 @@
     <!-- TAB 2: QUICK-TAP RAPID LOGGER (WHILE WATCHING VEO) -->
     <!-- ======================================================== -->
     <div id="tab-rapid" class="tab-pane hidden space-y-4">
-      <div class="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-xl">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-3">
+      <!-- Loaded Pitchside / Existing Match Moments (Top & Accessible in Touch Mode) -->
+      <div class="bg-card rounded-2xl border border-border p-4 space-y-3 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-3">
           <div>
-            <h2 class="display text-xl text-white flex items-center gap-2">
-              <span>Touch Moment Review</span>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+              <span>🎬 Existing &amp; Fine-Tuned Match Moments</span>
+              <span id="rapidMomentsDrawerCount" class="text-[10px] bg-pitch px-2 py-0.5 rounded text-teal-300 border border-border mono">0</span>
             </h2>
-            <p class="text-xs text-slate-400">Add new moments by touch while watching Veo, or edit committed pitchside moments below.</p>
+            <p class="text-[11px] text-slate-400">Chronological order (1' → 80'). Tap ✏️ on any moment to adjust timestamp, zone, player, tag, or note while watching Veo.</p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center flex-wrap gap-2">
             <span class="text-xs text-slate-400">Match:</span>
-            <select id="rapidMatchSelect" onchange="onSelectMatchChanged(this.value)" class="bg-pitch text-xs px-2.5 py-1 rounded-lg border border-teal-500/50 text-white font-semibold">
+            <select id="rapidMatchSelect" onchange="onSelectMatchChanged(this.value)" class="bg-pitch text-xs px-2.5 py-1.5 rounded-lg border border-teal-500/50 text-white font-semibold">
               <option value="Crossfire #2 (Nov 8)" selected>Crossfire #2 (Nov 8)</option>
               <option value="Rocklin (Nov 1)">Rocklin (Nov 1)</option>
               <option value="La Morinda">La Morinda</option>
@@ -249,11 +251,34 @@
               <option value="Rocklin (Sept 16)">Rocklin (Sept 16)</option>
               <option value="CUSTOM">+ Custom...</option>
             </select>
-            <input type="text" id="rapidMatchCustom" placeholder="Match Name" oninput="onCustomMatchInput(this.value)" onchange="loadMatchMoments(getSelectedMatchName())" class="bg-pitch text-xs px-2.5 py-1 rounded-lg border border-border text-white w-36 hidden">
+            <input type="text" id="rapidMatchCustom" placeholder="Match Name" oninput="onCustomMatchInput(this.value)" onchange="loadMatchMoments(getSelectedMatchName())" class="bg-pitch text-xs px-2.5 py-1.5 rounded-lg border border-border text-white w-36 hidden">
+            <button type="button" id="toggleRapidCreatorBtn" onclick="toggleRapidCreator()" class="text-[11px] bg-surface hover:bg-slate-700 text-teal-300 border border-teal-500/40 font-bold px-3 py-1.5 rounded-xl transition">
+              ➕ Add New Moment
+            </button>
+            <button type="button" onclick="syncMomentsToMatchHub()" class="text-[11px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl transition">
+              ✅ Push Final Review to Match Hub
+            </button>
+          </div>
+        </div>
+        <div id="rapidMatchMomentsPreview" class="space-y-1.5 max-h-[58vh] overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- Collapsible Touch Moment Creator -->
+      <div id="rapidCreatorCard" class="bg-card rounded-2xl border border-border p-4 space-y-3 shadow-xl hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-2.5">
+          <div>
+            <h3 class="display text-lg text-white flex items-center gap-2">
+              <span>➕ Log New Moment by Touch</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">Add a missed moment while watching Veo; it inserts into the timeline in chronological order.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-[10px] mono uppercase text-slate-400 font-bold">Half:</label>
             <select id="rapidHalf" class="bg-pitch text-xs px-2 py-1 rounded-lg border border-border text-slate-200">
               <option value="H1">H1</option>
               <option value="H2" selected>H2</option>
             </select>
+            <button type="button" onclick="toggleRapidCreator(false)" class="text-[11px] px-2.5 py-1 rounded-lg bg-surface border border-border text-slate-300 hover:text-white">Hide</button>
           </div>
         </div>
 
@@ -346,7 +371,7 @@
           </div>
 
           <!-- Actions Grid (Filtered dynamically by filterActionCategory) -->
-          <div class="flex flex-wrap gap-1.5 text-xs max-h-[220px] overflow-y-auto pr-1" id="quickTagList">
+          <div class="flex flex-wrap gap-1.5 text-xs max-h-[150px] overflow-y-auto pr-1" id="quickTagList">
             <!-- 🟢 Passing (9) -->
             <button type="button" data-cat="passing" onclick="setRapidTag('Big Chance Created', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-emerald-400/50 bg-emerald-500/20 text-emerald-200 font-bold hover:bg-emerald-500/30 transition">✨ Big Chance Created</button>
             <button type="button" data-cat="passing" onclick="setRapidTag('Key Pass (Shot Assist)', 'Glow', 'Passing')" class="tag-btn px-2.5 py-1 rounded-lg border border-teal-500/30 bg-teal-950/20 text-teal-300 hover:bg-teal-900/40 transition">Key Pass (Shot Assist)</button>
@@ -478,23 +503,6 @@
         <button onclick="commitRapidMoment()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition shadow-xl flex items-center justify-center gap-2">
           <span>➕ Add Moment to Match Review (Enter)</span>
         </button>
-      </div>
-
-      <!-- Loaded Pitchside / Existing Match Moments (Fine-Tune & Edit in Touch Mode) -->
-      <div class="bg-card rounded-2xl border border-border p-4 space-y-3 shadow-xl">
-        <div class="flex items-center justify-between flex-wrap gap-2">
-          <div>
-            <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-              <span>🎬 Existing &amp; Fine-Tuned Match Moments</span>
-              <span id="rapidMomentsDrawerCount" class="text-[10px] bg-pitch px-2 py-0.5 rounded text-teal-300 border border-border mono">0</span>
-            </h3>
-            <p class="text-[11px] text-slate-400">Tap ✏️ on any moment to adjust timestamp, zone, player, tag, or coaching note while watching Veo.</p>
-          </div>
-          <button type="button" onclick="syncMomentsToMatchHub()" class="text-[11px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl transition">
-            ✅ Push Final Review to Match Hub
-          </button>
-        </div>
-        <div id="rapidMatchMomentsPreview" class="space-y-1.5 max-h-72 overflow-y-auto pr-1"></div>
       </div>
     </div>
 
@@ -1277,6 +1285,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       };
 
       LOGGED_MOMENTS.push(normalizeFilmEvent(momentObj));
+      sortMomentsChronologically();
       saveToLocalStorage();
       renderMomentsTable();
       document.getElementById('rapidNotes').value = '';
@@ -1360,6 +1369,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       });
 
       if (parsedCount > 0) {
+        sortMomentsChronologically();
         saveToLocalStorage();
         updateCountBadges();
         renderMomentsTable();
@@ -1829,6 +1839,36 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       updateRunningSummary();
     }
 
+    function toggleRapidCreator(forceOpen) {
+      const card = document.getElementById('rapidCreatorCard');
+      const btn = document.getElementById('toggleRapidCreatorBtn');
+      if (!card) return;
+      const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : card.classList.contains('hidden');
+      card.classList.toggle('hidden', !shouldOpen);
+      if (btn) {
+        btn.textContent = shouldOpen ? '✕ Hide Add Moment' : '➕ Add New Moment';
+      }
+    }
+
+    function parseMomentSortKey(m) {
+      const hStr = String((m && m.half) || 'H1').toUpperCase();
+      const halfRank = (hStr.includes('ET') || hStr.includes('OT')) ? 2 : (hStr.includes('2') ? 1 : 0);
+      const tStr = String((m && (m.time || m.t)) || '0:00').trim();
+      const parts = tStr.split(':');
+      let secs = 0;
+      if (parts.length >= 2) {
+        secs = (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+      } else {
+        secs = (parseInt(tStr, 10) || 0) * 60;
+      }
+      return halfRank * 100000 + secs;
+    }
+
+    function sortMomentsChronologically() {
+      if (!Array.isArray(LOGGED_MOMENTS) || LOGGED_MOMENTS.length < 2) return;
+      LOGGED_MOMENTS.sort((a, b) => parseMomentSortKey(a) - parseMomentSortKey(b));
+    }
+
     function renderInlineReviewDrawer() {
       const voiceEl = document.getElementById('voiceMatchMomentsPreview');
       const rapidEl = document.getElementById('rapidMatchMomentsPreview');
@@ -1838,15 +1878,21 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       if (rc) rc.textContent = LOGGED_MOMENTS.length;
       updateActiveMatchBanner();
 
-      const emptyHtml = `<div class="p-4 rounded-xl bg-pitch/60 border border-dashed border-border text-center text-xs text-slate-400">Holding record ready for <strong class="text-white">${esc(getSelectedMatchName())}</strong> (0 pitchside clips yet). Dictate voice notes or tap moments above to add.</div>`;
+      const emptyHtml = `<div class="p-4 rounded-xl bg-pitch/60 border border-dashed border-border text-center text-xs text-slate-400">Holding record ready for <strong class="text-white">${esc(getSelectedMatchName())}</strong> (0 pitchside clips yet). Dictate voice notes or tap moments below to add.</div>`;
       const cardsHtml = !LOGGED_MOMENTS.length ? emptyHtml : LOGGED_MOMENTS.map((m, idx) => {
         const qualStr = String(m.quality || m.qualityRaw || m.outcome || 'Neutral');
-        const pillCls = /pos|glow|goal scored/i.test(qualStr) && !/conceded/i.test(qualStr)
-          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-          : /neg|grow|conceded/i.test(qualStr)
-            ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
-            : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-        const pillTxt = /glow.*grow|mixed/i.test(qualStr) ? 'MIXED' : /conceded/i.test(qualStr) ? 'CONCEDED' : /pos|glow|goal scored/i.test(qualStr) ? 'GLOW' : 'GROW';
+        const isMixed = /glow.*grow|mixed/i.test(qualStr);
+        const isConceded = /conceded/i.test(qualStr);
+        const isGlow = !isMixed && !isConceded && /pos|glow|goal scored/i.test(qualStr);
+        const isGrow = !isMixed && !isConceded && !isGlow && /neg|grow/i.test(qualStr);
+        const pillCls = isMixed
+          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+          : isGlow
+            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+            : (isGrow || isConceded)
+              ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+              : 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+        const pillTxt = isMixed ? 'MIXED' : isConceded ? 'CONCEDED' : isGlow ? 'GLOW' : isGrow ? 'GROW' : 'NEUTRAL';
         return `
           <div class="flex items-center justify-between gap-2 bg-pitch/70 hover:bg-surface border border-border/70 rounded-xl px-3 py-2 text-xs transition">
             <div class="min-w-0 flex-1 flex items-center gap-2 flex-wrap">
@@ -2573,6 +2619,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         const cloned = Object.assign({}, m, { match: canonical });
         return normalizeFilmEvent(cloned);
       });
+      sortMomentsChronologically();
+      toggleRapidCreator(LOGGED_MOMENTS.length === 0);
       updateCountBadges();
       renderMomentsTable();
       if (!opts.silent) {
@@ -2846,6 +2894,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       const revCb = document.getElementById('editMomentFilmReview');
       if (revCb) m.filmReview = revCb.checked;
 
+      sortMomentsChronologically();
       saveToLocalStorage();
       syncMomentsToCloudHub();
       renderMomentsTable();
@@ -2888,6 +2937,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
             }
           });
           LOGGED_MOMENTS = saved.map(normalizeFilmEvent);
+          sortMomentsChronologically();
+          toggleRapidCreator(LOGGED_MOMENTS.length === 0);
           const firstMatch = canonicalizeMatchTitle(LOGGED_MOMENTS[0]?.match || '');
           if (firstMatch) {
             addMatchOptionIfMissing(firstMatch);

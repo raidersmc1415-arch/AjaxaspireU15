@@ -2557,6 +2557,33 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       assert(loggerHtml.includes('function sanitizeMomentClock('), 'Expected sanitizeMomentClock in film-moment-logger.html');
       assert(hubHtml.includes('function sanitizeMomentClock(') && hubHtml.includes('reconcileKeyTotals('), 'Expected sanitizeMomentClock & reconcileKeyTotals in match-hub.html');
     });
+
+    await runAsyncCheck('24. Touch Review puts moments first chronologically (1:00 -> 80:00), renders NEUTRAL badges, and preserves Quality Shot as Glow', async () => {
+      const loggerHtml = fs.readFileSync(path.join(ROOT, 'film-moment-logger.html'), 'utf8');
+      const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+
+      // Moments list appears before collapsible creator in #tab-rapid
+      const previewPos = loggerHtml.indexOf('id="rapidMatchMomentsPreview"');
+      const creatorPos = loggerHtml.indexOf('id="rapidCreatorCard"');
+      assert(previewPos > 0 && creatorPos > previewPos, 'Expected rapidMatchMomentsPreview above rapidCreatorCard in Touch Review');
+
+      // Chronological sort helper orders H1 1:00 -> H1 4:00 -> H2 45:00
+      const sortFnMatch = loggerHtml.match(/function parseMomentSortKey\(m\)[\s\S]*?function sortMomentsChronologically\(\)[\s\S]*?\n    \}/);
+      assert(sortFnMatch, 'Expected parseMomentSortKey and sortMomentsChronologically in film-moment-logger.html');
+      const sortSandbox = { LOGGED_MOMENTS: [
+        { half: 'H2', time: '45:00' },
+        { half: 'H1', time: '4:00' },
+        { half: 'H1', time: '1:00' }
+      ]};
+      vm.runInNewContext(sortFnMatch[0] + '\nsortMomentsChronologically();', sortSandbox);
+      assert.deepStrictEqual(sortSandbox.LOGGED_MOMENTS.map(m => `${m.half} ${m.time}`), ['H1 1:00', 'H1 4:00', 'H2 45:00']);
+
+      // Neutral badge branch exists in renderInlineReviewDrawer
+      assert(loggerHtml.includes("isGrow ? 'GROW' : 'NEUTRAL'"), 'Expected NEUTRAL pill branch in renderInlineReviewDrawer');
+
+      // Tracker preserves Quality Shot as Glow
+      assert(trackerHtml.includes("'Quality Shot'") && trackerHtml.includes("tag !== 'Quality Shot'"), 'Expected Quality Shot preserved as Glow in ajax-match-tracker.html');
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });
