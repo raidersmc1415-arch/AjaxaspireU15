@@ -2544,6 +2544,19 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       const loggerHtml = fs.readFileSync(path.join(ROOT, 'film-moment-logger.html'), 'utf8');
       assert(loggerHtml.includes('function onCustomMatchInput('), 'Expected onCustomMatchInput handler in film-moment-logger.html');
     });
+
+    await runAsyncCheck('23. Timestamp sanitizer heals 180:00/300:00/240:00 Date-serialized clocks & Match Hub reconciles 10-game League / 13-game All-Comp totals', async () => {
+      const { sandbox } = createCodeGsSandbox();
+      assert.strictEqual(sandbox.sanitizeMatchClockStr_('180:00', "OPPONENT SHOT against (75')"), '75:00');
+      assert.strictEqual(sandbox.sanitizeMatchClockStr_('300:00', "OPPONENT SHOT against (77')"), '77:00');
+      assert.strictEqual(sandbox.sanitizeMatchClockStr_('240:00', "🛑 FOUL COMMITTED: #25 Ella at 76'"), '76:00');
+      assert.strictEqual(sandbox.sanitizeMatchClockStr_('120:00', "CROSS OUT OF BOUNDS (Grow): #2 Giselle in A3 (74')"), '74:00');
+
+      const loggerHtml = fs.readFileSync(path.join(ROOT, 'film-moment-logger.html'), 'utf8');
+      const hubHtml = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+      assert(loggerHtml.includes('function sanitizeMomentClock('), 'Expected sanitizeMomentClock in film-moment-logger.html');
+      assert(hubHtml.includes('function sanitizeMomentClock(') && hubHtml.includes('reconcileKeyTotals('), 'Expected sanitizeMomentClock & reconcileKeyTotals in match-hub.html');
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });

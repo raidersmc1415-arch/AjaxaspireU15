@@ -831,6 +831,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
           allEv.forEach(ev => {
             const mt = canonicalizeMatchTitle(ev.match || ev.m);
             if (!mt) return;
+            ev.time = sanitizeMomentClock(ev.time || ev.t || '00:00', ev.note || ev.notes || '');
+            ev.t = ev.time;
             if (!byMatch[mt]) byMatch[mt] = [];
             byMatch[mt].push(ev);
           });
@@ -1927,10 +1929,31 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       return false;
     }
 
+    function sanitizeMomentClock(rawClock, noteText) {
+      let c = String(rawClock || '00:00').trim().replace(/^'+/, '').replace(/^(\d+:\d{2}):00$/, '$1');
+      const mMatch = c.match(/^(\d+):(\d{2})$/);
+      if (mMatch) {
+        let mm = parseInt(mMatch[1], 10);
+        const ss = mMatch[2];
+        if (mm > 95) {
+          const nMatch = String(noteText || '').match(/\((\d{1,2})'\)|\bat\s+(\d{1,2})'/i);
+          if (nMatch) {
+            mm = parseInt(nMatch[1] || nMatch[2], 10);
+          } else if (mm % 60 === 0) {
+            mm = Math.round(mm / 60);
+          }
+        }
+        return `${mm}:${ss}`;
+      }
+      return c;
+    }
+
     function normalizeFilmEvent(ev) {
       if (!ev || typeof ev !== 'object') return ev;
       ev.notes = ev.notes !== undefined ? String(ev.notes) : (ev.note !== undefined ? String(ev.note) : '');
       ev.note = ev.notes;
+      ev.time = sanitizeMomentClock(ev.time || ev.t || '00:00', ev.notes);
+      ev.t = ev.time;
       if (!ev.quality) {
         if (ev.qualityRaw) ev.quality = String(ev.qualityRaw);
         else if (/glow.*grow|mixed/i.test(String(ev.outcome || ''))) ev.quality = 'Glow and Grow (Good actions and Not so Good action)';

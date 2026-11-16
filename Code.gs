@@ -1410,9 +1410,16 @@ function getMatchHubData(pin) {
     }
     var kv = getMatchHubKVMap();
     var datasets = kv['datasets'] || {};
-    if (kv['datasets_aspire']) datasets['AJAX ASPIRE U15'] = kv['datasets_aspire'];
-    if (kv['datasets_league']) datasets['AJAX ASPIRE U15 (LEAGUE)'] = kv['datasets_league'];
-    if (kv['datasets_ga']) datasets['AJAX GA U15'] = kv['datasets_ga'];
+    var pickNewerDataset = function(existingDs, altDs) {
+      if (!altDs) return existingDs;
+      if (!existingDs) return altDs;
+      var exG = (existingDs.totals && Number(existingDs.totals.games)) || 0;
+      var altG = (altDs.totals && Number(altDs.totals.games)) || 0;
+      return altG >= exG ? altDs : existingDs;
+    };
+    if (kv['datasets_aspire']) datasets['AJAX ASPIRE U15'] = pickNewerDataset(datasets['AJAX ASPIRE U15'], kv['datasets_aspire']);
+    if (kv['datasets_league']) datasets['AJAX ASPIRE U15 (LEAGUE)'] = pickNewerDataset(datasets['AJAX ASPIRE U15 (LEAGUE)'], kv['datasets_league']);
+    if (kv['datasets_ga']) datasets['AJAX GA U15'] = pickNewerDataset(datasets['AJAX GA U15'], kv['datasets_ga']);
 
     var matchLogRows = readAllMatchLogRows_();
     var kvHistory = Array.isArray(kv['match_history']) ? kv['match_history'] : [];
@@ -2230,6 +2237,25 @@ function harmonizeMatchActionLogToV31() {
   }
 }
 
+function sanitizeMatchClockStr_(rawClock, noteText) {
+  var c = String(rawClock || '00:00').trim().replace(/^'+/, '').replace(/^(\d+:\d{2}):00$/, '$1');
+  var mMatch = c.match(/^(\d+):(\d{2})$/);
+  if (mMatch) {
+    var mm = parseInt(mMatch[1], 10);
+    var ss = mMatch[2];
+    if (mm > 95) {
+      var nMatch = String(noteText || '').match(/\((\d{1,2})'\)|\bat\s+(\d{1,2})'/i);
+      if (nMatch) {
+        mm = parseInt(nMatch[1] || nMatch[2], 10);
+      } else if (mm % 60 === 0) {
+        mm = Math.round(mm / 60);
+      }
+    }
+    return mm + ':' + ss;
+  }
+  return c;
+}
+
 function buildActionRowFromMoment(m, nowStr, forcedStatus) {
   var jList = Array.isArray(m.jerseys) ? m.jerseys : (Array.isArray(m.j) ? m.j : []);
   if (!jList.length && m.jersey) jList = [parseInt(m.jersey, 10)];
@@ -2258,6 +2284,7 @@ function buildActionRowFromMoment(m, nowStr, forcedStatus) {
   var category = String(m.category || m.cat || 'General').trim();
   var tag = String(m.tag || 'Action').trim();
   var note = String(m.note !== undefined ? m.note : (m.notes !== undefined ? m.notes : (m.n || ''))).trim();
+  clock = sanitizeMatchClockStr_(clock, note);
   var noteToPlayer = String(m.noteToPlayer !== undefined ? m.noteToPlayer : (m.playerNote || '')).trim();
   var filmReview = Boolean(m.filmReview || m.isBookmark);
   var status = String(forcedStatus || m.status || 'Published').trim();
@@ -2334,14 +2361,24 @@ function readAllMatchActionLogRows() {
       ? rawJersey.split(/[,\s]+/).map(function(x) { return parseInt(x.replace('#', ''), 10); }).filter(function(n) { return !isNaN(n); })
       : [];
 
+    var curNotes = iNotes !== -1 ? String(row[iNotes] || '').trim() : '';
     var rawClock = iClock !== -1 ? row[iClock] : '00:00';
     var clockStr = '00:00';
     if (rawClock instanceof Date) {
-      var mm = rawClock.getHours() * 60 + rawClock.getMinutes();
-      var ss2 = rawClock.getSeconds();
-      clockStr = (mm < 10 ? '0' + mm : mm) + ':' + (ss2 < 10 ? '0' + ss2 : ss2);
+      var hh = rawClock.getHours();
+      var minPart = rawClock.getMinutes();
+      var secPart = rawClock.getSeconds();
+      var noteMinMatch = curNotes.match(/\((\d{1,2})'\)|\bat\s+(\d{1,2})'/i);
+      if (noteMinMatch && secPart === 0 && minPart === 0) {
+        clockStr = (noteMinMatch[1] || noteMinMatch[2]) + ':00';
+      } else if (secPart === 0) {
+        clockStr = hh + ':' + (minPart < 10 ? '0' + minPart : minPart);
+      } else {
+        var mm = hh * 60 + minPart;
+        clockStr = (mm < 10 ? '0' + mm : mm) + ':' + (secPart < 10 ? '0' + secPart : secPart);
+      }
     } else {
-      clockStr = String(rawClock || '00:00').trim().replace(/^(\d+:\d{2}):00$/, '$1');
+      clockStr = sanitizeMatchClockStr_(rawClock, curNotes);
     }
 
     var revRaw = iRev !== -1 ? String(row[iRev] || '').trim().toLowerCase() : '';
@@ -2349,7 +2386,6 @@ function readAllMatchActionLogRows() {
     var playerRawStr = iPlayer !== -1 ? String(row[iPlayer] || '').trim() : '';
 
     var rawOut = iOut !== -1 ? String(row[iOut] || 'Glow').trim() : 'Glow';
-    var curNotes = iNotes !== -1 ? String(row[iNotes] || '').trim() : '';
     var norm = normalizeActionRowV31_(
       iCat !== -1 ? String(row[iCat] || 'General').trim() : 'General',
       iTag !== -1 ? String(row[iTag] || 'Action').trim() : 'Action',
@@ -2465,6 +2501,8 @@ function saveMatchActionRowsInternal_(payload) {
   var newRows = moments.map(function(m) {
     var built = buildActionRowFromMoment(m, nowStr, forcedRowStatus).slice(0, targetCols);
     while (built.length < targetCols) built.push('');
+    if (built[5]) built[5] = "'" + String(built[5]).replace(/^'+/, '');
+    if (built[11]) built[11] = "'" + String(built[11]).replace(/^'+/, '');
     return built;
   });
   var finalRows = keptRows.concat(newRows);

@@ -2850,6 +2850,81 @@
         applyFilmEventsToTeam(DATA['AJAX ASPIRE U15 (LEAGUE)'], unifiedLeagueFilm);
       }
 
+      // Reconcile team totals (GP, W-D-L, GF:GA, mins, shots, turnovers) when new matches exist in filmEvents / Match_Log beyond stale totals.games
+      const extraMatchNames = Array.from(new Set(
+        unifiedLeagueFilm.map(e => e.match).filter(m => m && !baseMatchSet.has(m))
+      ));
+      if (extraMatchNames.length > 0) {
+        const holdingMap = {};
+        if (typeof CLOUD_HOLDING_MATCHES !== 'undefined' && Array.isArray(CLOUD_HOLDING_MATCHES)) {
+          CLOUD_HOLDING_MATCHES.forEach(h => {
+            if (h && h.match) holdingMap[h.match.toLowerCase()] = h;
+          });
+        }
+        const reconcileKeyTotals = (dsKey, expectedGames) => {
+          const t = DATA[dsKey]?.totals;
+          const baseT = DEFAULT_DATA[dsKey]?.totals;
+          if (!t || !baseT || (Number(t.games) || 0) >= expectedGames) return;
+          let addW = 0, addD = 0, addL = 0, addGF = 0, addGA = 0, addMins = 0;
+          let addSOT = 0, addSOFF = 0, addSaves = 0, addToD = 0, addToM = 0, addToA = 0, addKP = 0, addFouls = 0;
+          extraMatchNames.forEach(mName => {
+            const mEvs = unifiedLeagueFilm.filter(e => e.match === mName);
+            const hInfo = holdingMap[mName.toLowerCase()] || {};
+            let gf = 0, ga = 0;
+            if (hInfo.score && hInfo.score.includes('-')) {
+              const sp = hInfo.score.split('-').map(s => parseInt(s.trim(), 10));
+              if (!isNaN(sp[0]) && !isNaN(sp[1])) { gf = sp[0]; ga = sp[1]; }
+            } else {
+              gf = mEvs.filter(e => e.tag === 'Goal Scored' || e.outcome === 'Goal Scored').length;
+              ga = mEvs.filter(e => e.tag === 'Goal Conceded' || e.outcome === 'Goal Conceded' || /OPPONENT GOAL conceded/i.test(e.note || e.notes || '')).length;
+            }
+            addGF += gf;
+            addGA += ga;
+            if (gf > ga) addW++;
+            else if (gf === ga) addD++;
+            else addL++;
+            addMins += Number(hInfo.matchMins) || 81;
+            mEvs.forEach(ev => {
+              const tg = String(ev.tag || '');
+              const z = String(ev.zone || 'M3');
+              if (tg === 'Goal Scored' || tg === 'Shot on Target') addSOT++;
+              else if (tg === 'Shot Off Target' || tg === 'Quality Shot' || tg === 'Poor Shot Selection' || tg === 'Big Chance Missed') addSOFF++;
+              if (tg.startsWith('Save')) addSaves++;
+              if (tg === 'Key Pass (Shot Assist)' || tg === 'Big Chance Created') addKP++;
+              if (tg === 'Foul Conceded') addFouls++;
+              if (isTurnoverEvent(ev)) {
+                if (z.startsWith('D3')) addToD++;
+                else if (z.startsWith('A3')) addToA++;
+                else addToM++;
+              }
+            });
+          });
+          t.games = (Number(baseT.games) || 0) + extraMatchNames.length;
+          t.mins = (Number(baseT.mins) || 0) + addMins;
+          t.won = (Number(baseT.won) || 0) + addW;
+          t.tied = (Number(baseT.tied) || 0) + addD;
+          t.lost = (Number(baseT.lost) || 0) + addL;
+          t.gf = (Number(baseT.gf) || 0) + addGF;
+          t.ga = (Number(baseT.ga) || 0) + addGA;
+          t.gd = t.gf - t.ga;
+          t.sot = Math.max(Number(t.sot) || 0, (Number(baseT.sot) || 0) + addSOT);
+          t.soff = Math.max(Number(t.soff) || 0, (Number(baseT.soff) || 0) + addSOFF);
+          t.shots = Math.max(Number(t.shots) || 0, t.sot + t.soff);
+          t.saves = Math.max(Number(t.saves) || 0, (Number(baseT.saves) || 0) + addSaves);
+          t.toD = Math.max(Number(t.toD) || 0, (Number(baseT.toD) || 0) + addToD);
+          t.toM = Math.max(Number(t.toM) || 0, (Number(baseT.toM) || 0) + addToM);
+          t.toA = Math.max(Number(t.toA) || 0, (Number(baseT.toA) || 0) + addToA);
+          t.turnovers = Math.max(Number(t.turnovers) || 0, t.toD + t.toM + t.toA);
+          t.keyPasses = Math.max(Number(t.keyPasses) || 0, (Number(baseT.keyPasses) || 0) + addKP);
+          t.fouls = Math.max(Number(t.fouls) || 0, (Number(baseT.fouls) || 0) + addFouls);
+          t.shotAcc = t.shots > 0 ? Math.round((t.sot / t.shots) * 100) : 0;
+          t.conv = t.shots > 0 ? Math.round((t.gf / t.shots) * 100) : 0;
+          t.winPct = t.games > 0 ? Math.round((t.won / t.games) * 100) : 0;
+        };
+        reconcileKeyTotals('AJAX ASPIRE U15', (DEFAULT_DATA['AJAX ASPIRE U15']?.totals?.games || 10) + extraMatchNames.length);
+        reconcileKeyTotals('AJAX ASPIRE U15 (LEAGUE)', (DEFAULT_DATA['AJAX ASPIRE U15 (LEAGUE)']?.totals?.games || 7) + extraMatchNames.length);
+      }
+
       // Heal player minutes and counting stats if they were truncated to single-match values in customData/localStorage
       aspireKeys.forEach(k => {
         if (!DATA[k] || !Array.isArray(DATA[k].players)) return;
@@ -5612,8 +5687,29 @@
       return V31_TURNOVER_TAGS.includes(e.tag);
     }
 
+    function sanitizeMomentClock(rawClock, noteText) {
+      let c = String(rawClock || '00:00').trim().replace(/^'+/, '').replace(/^(\d+:\d{2}):00$/, '$1');
+      const mMatch = c.match(/^(\d+):(\d{2})$/);
+      if (mMatch) {
+        let mm = parseInt(mMatch[1], 10);
+        const ss = mMatch[2];
+        if (mm > 95) {
+          const nMatch = String(noteText || '').match(/\((\d{1,2})'\)|\bat\s+(\d{1,2})'/i);
+          if (nMatch) {
+            mm = parseInt(nMatch[1] || nMatch[2], 10);
+          } else if (mm % 60 === 0) {
+            mm = Math.round(mm / 60);
+          }
+        }
+        return `${mm}:${ss}`;
+      }
+      return c;
+    }
+
     function normalizeFilmEvent(ev) {
       if (!ev || typeof ev !== 'object') return ev;
+      ev.time = sanitizeMomentClock(ev.time || ev.t || '00:00', ev.note || ev.notes || '');
+      ev.t = ev.time;
       if (!Array.isArray(ev.jerseys)) ev.jerseys = [];
       if (ev.primaryJersey === undefined) {
         ev.primaryJersey = ev.jerseys.length > 0 ? ev.jerseys[0] : null;
@@ -8388,6 +8484,11 @@
     window.addEventListener('beforeprint', syncAllReportTextareas);
 
     function renderAll() {
+      if (team && DATA[activeExportKey(team)]) {
+        const activeDataset = DATA[activeExportKey(team)];
+        totals = activeDataset.totals || {};
+        players = (activeDataset.players || []).map(p => ({ ...p }));
+      }
       renderTeamSwitch();
       renderBanner();
       renderLeaders();
