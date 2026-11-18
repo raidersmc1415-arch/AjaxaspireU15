@@ -6733,6 +6733,7 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           const isPressWon = ev.type === 'pressWon';
           const isSave = ev.type === 'save';
           const isCorner = ev.type === 'corner';
+          const isCornerShot = isCorner && (ev.setPieceOutcome === 'Shot' || ev.setPieceOutcome === 'Shot Created' || ev.setPieceOutcome === 'Goal Scored');
           const isSetPiece = ev.type === 'setPiece';
           const isGlowTag = ev.tag && [
             'Goal Scored', 'Goal Assist', 'Big Chance Created', 'Key Pass (Shot Assist)',
@@ -6744,7 +6745,7 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
             'Save (Clean / Held)', 'Save (Parried)', 'Box Aerial Claim', 'Build-Out Distribution',
             'Run in Behind', 'Scanning & Pre-Orientation', 'Support Angle Offered', 'Tactical Communication', 'Team Shape Shift'
           ].includes(ev.tag);
-          const isGlow = isGoal || isAssist || isKeyPass || isSOT || isDuelWon || isPressWon || isSave || isCorner || isSetPiece || isGlowTag;
+          const isGlow = isGoal || isAssist || isKeyPass || isSOT || isDuelWon || isPressWon || isSave || isCornerShot || isSetPiece || isGlowTag;
 
           let cat = ev.category || 'Tactical_Shape';
           let tag = ev.tag || 'Decision on the Ball';
@@ -6752,6 +6753,7 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
             cat = ev.category;
             tag = ev.tag;
           } else if (isGoal) { cat = 'Finishing'; tag = 'Goal Scored'; }
+          else if (ev.type === 'oppGoal') { cat = 'Goalkeeping'; tag = 'Goal Conceded'; }
           else if (isAssist) { cat = 'Passing'; tag = 'Goal Assist'; }
           else if (isKeyPass) { cat = 'Passing'; tag = 'Key Pass (Shot Assist)'; }
           else if (isSOT) { cat = 'Finishing'; tag = 'Shot on Target'; }
@@ -6783,7 +6785,8 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
             cat = 'Goalkeeping'; tag = 'Save (Clean / Held)';
           }
           else if (ev.type === 'corner') {
-            cat = 'Passing'; tag = 'Key Pass (Shot Assist)';
+            cat = 'Passing';
+            tag = (ev.setPieceOutcome === 'Shot' || ev.setPieceOutcome === 'Shot Created' || ev.setPieceOutcome === 'Goal Scored') ? 'Key Pass (Shot Assist)' : 'Progressive Pass';
           }
           else if (ev.type === 'setPiece') {
             cat = 'Duel'; tag = 'Foul Won';
@@ -6807,7 +6810,7 @@ ${(cachedMatchRecapReport.takeaways || []).map(t => '• ' + t).join('\n')}`;
           if (isCorner) noteText = `CORNER KICK: #${ev.jersey || ''} ${pName} at ${ev.time}'`;
           else if (isSetPiece) noteText = `SET PIECE: #${ev.jersey || ''} ${pName} at ${ev.time}'`;
 
-          const evOutcome = ev.outcome || (isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || (ev.type === 'soff' && tag !== 'Quality Shot') ? 'Grow' : 'Neutral'));
+          const evOutcome = ev.outcome || (isGoal ? 'Goal Scored' : (ev.type === 'oppGoal' ? 'Goal Conceded' : (isGlow ? 'Glow' : (ev.type === 'turnover' || ev.type === 'foul' || ev.type === 'duelLost' || (ev.type === 'soff' && tag !== 'Quality Shot') ? 'Grow' : 'Neutral'))));
           const evQualityRaw = isGoal ? 'Goal Scored' : (ev.type === 'oppGoal' ? 'Goal Conceded' : (evOutcome === 'Glow' ? 'Good / Positive' : (evOutcome === 'Grow' ? 'Poor / Negative' : 'Neutral')));
           const shotLocation = ev.shotLocation || '';
           const isHeader = Boolean(ev.isHeader);

@@ -2569,7 +2569,8 @@
       const ggTotal = glow + grow;
       const glowPct = ggTotal > 0 ? Math.round((glow * 100) / ggTotal) : 50;
       const d3ToShare = totalClips > 0 ? (toD / totalClips) : 0;
-      const rawIdx = 80 + (netPerClip - baseNetPerClip) * 26 + (glowPct - 45) * 0.35 - (d3ToShare - 0.09) * 22;
+      const gdDeficit = (totalClips <= 180 && goalsConceded > goalsScored) ? (goalsConceded - goalsScored) : 0;
+      const rawIdx = 80 + (netPerClip - baseNetPerClip) * 26 + (glowPct - 45) * 0.35 - (d3ToShare - 0.09) * 22 - gdDeficit * 4.5;
       const index = Math.max(50, Math.min(99, Math.round(rawIdx)));
       return {
         index,

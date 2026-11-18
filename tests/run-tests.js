@@ -2584,6 +2584,57 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       // Tracker preserves Quality Shot as Glow
       assert(trackerHtml.includes("'Quality Shot'") && trackerHtml.includes("tag !== 'Quality Shot'"), 'Expected Quality Shot preserved as Glow in ajax-match-tracker.html');
     });
+
+    await runAsyncCheck('25. Game Film Index reflects Goal Conceded & goal-deficit reality and tracker preserves oppGoal / routine corner outcomes', async () => {
+      const trackerHtml = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+      assert(
+        trackerHtml.includes("else if (ev.type === 'oppGoal') { cat = 'Goalkeeping'; tag = 'Goal Conceded'; }"),
+        'Expected oppGoal mapping to Goalkeeping / Goal Conceded in ajax-match-tracker.html'
+      );
+      assert(
+        trackerHtml.includes("ev.type === 'oppGoal' ? 'Goal Conceded'"),
+        'Expected evOutcome to preserve Goal Conceded for oppGoal in ajax-match-tracker.html'
+      );
+      assert(
+        trackerHtml.includes("const isCornerShot = isCorner &&") && trackerHtml.includes(": 'Progressive Pass'"),
+        'Expected routine corner kick without shot outcome to map to Progressive Pass (Neutral) in ajax-match-tracker.html'
+      );
+
+      const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+      const ddLine = mh.split('\n').find(l => l.includes('const DEFAULT_DATA ='));
+      assert(ddLine, 'DEFAULT_DATA line not found in match-hub.html');
+      const defaultData = JSON.parse(ddLine.replace(/^\s*const\s+DEFAULT_DATA\s*=\s*/, '').replace(/;\s*$/, ''));
+      const baseEvents = defaultData['AJAX ASPIRE U15'].filmEvents;
+      const vStart = mh.indexOf('const V31_TURNOVER_TAGS =');
+      const vEnd = mh.indexOf('function sanitizeMomentClock(');
+      const wStart = mh.indexOf('const EVENT_WEIGHTS =');
+      const wEnd = mh.indexOf('function fmtNet(');
+      const gStart = mh.indexOf('const GAME_FILM_FAMILIES =');
+      const gEnd = mh.indexOf('function sanitizeAndHealData(');
+      const sandbox = { ASPIRE_JERSEY_MAP: {} };
+      vm.createContext(sandbox);
+      vm.runInContext([mh.slice(vStart, vEnd), mh.slice(wStart, wEnd), mh.slice(gStart, gEnd)].join('\n;\n'), sandbox);
+
+      const events = [
+        { id: 9001, match: 'Test 1-4 Loss', half: 'H1', time: '10:00', zone: 'A3', outcome: 'Goal Scored', qualityRaw: 'Goal Scored', category: 'Finishing', tag: 'Goal Scored' },
+        { id: 9002, match: 'Test 1-4 Loss', half: 'H1', time: '10:00', zone: 'A3', outcome: 'Glow', qualityRaw: 'Good / Positive', category: 'Passing', tag: 'Goal Assist' },
+        { id: 9003, match: 'Test 1-4 Loss', half: 'H1', time: '15:00', zone: 'D3', outcome: 'Goal Conceded', qualityRaw: 'Goal Conceded', category: 'Goalkeeping', tag: 'Goal Conceded' },
+        { id: 9004, match: 'Test 1-4 Loss', half: 'H1', time: '22:00', zone: 'D3', outcome: 'Goal Conceded', qualityRaw: 'Goal Conceded', category: 'Goalkeeping', tag: 'Goal Conceded' },
+        { id: 9005, match: 'Test 1-4 Loss', half: 'H1', time: '27:00', zone: 'D3', outcome: 'Goal Conceded', qualityRaw: 'Goal Conceded', category: 'Goalkeeping', tag: 'Goal Conceded' },
+        { id: 9006, match: 'Test 1-4 Loss', half: 'H2', time: '76:00', zone: 'D3', outcome: 'Goal Conceded', qualityRaw: 'Goal Conceded', category: 'Goalkeeping', tag: 'Goal Conceded' },
+        { id: 9007, match: 'Test 1-4 Loss', half: 'H1', time: '03:00', zone: 'D3', outcome: 'Grow', qualityRaw: 'Poor / Negative', category: 'Passing', tag: 'Unforced Turnover Pass' },
+        { id: 9008, match: 'Test 1-4 Loss', half: 'H1', time: '04:00', zone: 'D3', outcome: 'Grow', qualityRaw: 'Poor / Negative', category: 'Passing', tag: 'Unforced Turnover Pass' },
+        { id: 9009, match: 'Test 1-4 Loss', half: 'H1', time: '16:00', zone: 'D3', outcome: 'Grow', qualityRaw: 'Poor / Negative', category: 'Defending', tag: 'Lost Mark / Recovery' },
+        { id: 9010, match: 'Test 1-4 Loss', half: 'H2', time: '48:00', zone: 'M3', outcome: 'Grow', qualityRaw: 'Poor / Negative', category: 'Duel', tag: 'Foul Conceded' },
+        { id: 9011, match: 'Test 1-4 Loss', half: 'H2', time: '75:00', zone: 'A3', outcome: 'Grow', qualityRaw: 'Poor / Negative', category: 'Finishing', tag: 'Poor Shot Selection' },
+        { id: 9012, match: 'Test 1-4 Loss', half: 'H1', time: '01:00', zone: 'A3', outcome: 'Glow', qualityRaw: 'Good / Positive', category: 'Finishing', tag: 'Quality Shot' },
+        { id: 9013, match: 'Test 1-4 Loss', half: 'H1', time: '02:00', zone: 'A3', outcome: 'Glow', qualityRaw: 'Good / Positive', category: 'Finishing', tag: 'Quality Shot' }
+      ];
+      const res = sandbox.computeGameFilmMetrics(baseEvents.concat(events), 'Test 1-4 Loss', 'ALL');
+      assert.strictEqual(res.overall.goalsScored, 1);
+      assert.strictEqual(res.overall.goalsConceded, 4);
+      assert(res.overall.index < 75, `Expected 1-4 match index < 75, got ${res.overall.index}`);
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });
