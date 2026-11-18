@@ -2635,6 +2635,106 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       assert.strictEqual(res.overall.goalsConceded, 4);
       assert(res.overall.index < 75, `Expected 1-4 match index < 75, got ${res.overall.index}`);
     });
+
+    await runAsyncCheck('26. Film logger syncMomentsToCloudHub returns success: false on failing fetch, shows unsaved banner, flags moments unsaved until retry succeeds', async () => {
+      const flHtml = fs.readFileSync(path.join(ROOT, 'film-moment-logger.html'), 'utf8');
+      const scriptBlocks = [...flHtml.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)];
+      const scriptContent = scriptBlocks[scriptBlocks.length - 1][1];
+
+      const domEls = {};
+      const mkEl = id => {
+        if (!domEls[id]) {
+          const set = new Set(id === 'unsavedSheetBanner' ? ['hidden'] : []);
+          domEls[id] = {
+            id,
+            value: id === 'voiceMatchSelect' || id === 'rapidMatchSelect' ? 'Crossfire #2 (Nov 8)' : '',
+            textContent: '',
+            innerHTML: '',
+            className: '',
+            checked: false,
+            options: [{ value: 'Crossfire #2 (Nov 8)', textContent: 'Crossfire #2 (Nov 8)' }],
+            classList: {
+              _s: set,
+              add(c) { set.add(c); },
+              remove(c) { set.delete(c); },
+              contains(c) { return set.has(c); },
+              toggle(c, force) {
+                const shouldHave = typeof force === 'boolean' ? force : !set.has(c);
+                if (shouldHave) set.add(c); else set.delete(c);
+              }
+            },
+            appendChild() {},
+            insertBefore() {}
+          };
+        }
+        return domEls[id];
+      };
+
+      let fetchMode = 'network_fail';
+      const localStore = {};
+      const sandbox = {
+        document: {
+          createElement: () => ({ value: '', textContent: '' }),
+          getElementById: mkEl,
+          querySelectorAll: () => [],
+          addEventListener: () => {}
+        },
+        window: { location: { search: '' }, open: () => {} },
+        URLSearchParams,
+        localStorage: {
+          getItem: k => (k in localStore ? localStore[k] : null),
+          setItem: (k, v) => { localStore[k] = String(v); },
+          removeItem: k => { delete localStore[k]; }
+        },
+        sessionStorage: {
+          _s: { ajax_coach_session_token: 'TEST_COACH_TOKEN' },
+          getItem: k => sandbox.sessionStorage._s[k] || null,
+          setItem: (k, v) => { sandbox.sessionStorage._s[k] = String(v); },
+          removeItem: k => { delete sandbox.sessionStorage._s[k]; }
+        },
+        fetch: async () => {
+          if (fetchMode === 'network_fail') {
+            throw new Error('Failed to fetch');
+          }
+          if (fetchMode === 'http_503') {
+            return { ok: false, status: 503, json: async () => ({}) };
+          }
+          return { ok: true, status: 200, json: async () => ({ success: true, matchRowsWritten: 1 }) };
+        },
+        setTimeout: () => {},
+        clearTimeout: () => {},
+        alert: () => {},
+        confirm: () => true,
+        prompt: () => 'TEST_COACH_TOKEN',
+        console, Date, Math, Object, Array, Set, Number, String, Boolean, RegExp, Promise, URL, parseInt, parseFloat, isNaN, isFinite
+      };
+
+      vm.createContext(sandbox);
+      vm.runInContext(scriptContent, sandbox);
+
+      vm.runInContext(`LOGGED_MOMENTS = [normalizeFilmEvent({ id: 1001, match: 'Crossfire #2 (Nov 8)', time: '12:00', half: 'H1', zone: 'A3', playersRaw: '#23 Sophia Culver', category: 'Finishing', tag: 'Shot on Target', outcome: 'Glow', notes: 'Test moment' })];`, sandbox);
+
+      // 1. Failing fetch (network rejection) must return success: false, flag moment unsaved, and reveal banner
+      const failRes = await sandbox.syncMomentsToCloudHub();
+      assert.strictEqual(failRes.success, false, 'Expected failing fetch to return success: false');
+      assert.strictEqual(failRes.optimistic, undefined, 'Expected no optimistic: true fallback');
+      assert.strictEqual(vm.runInContext('LOGGED_MOMENTS[0].unsaved', sandbox), true, 'Expected moment flagged as unsaved after failed save');
+      assert.strictEqual(mkEl('unsavedSheetBanner').classList.contains('hidden'), false, 'Expected unsavedSheetBanner to be visible after failed save');
+      assert(mkEl('momentsTbody').innerHTML.includes('UNSAVED'), 'Expected UNSAVED flag rendered in moments table');
+
+      // 2. Non-OK HTTP status must also return success: false and keep moment flagged
+      fetchMode = 'http_503';
+      const httpFailRes = await sandbox.syncMomentsToCloudHub();
+      assert.strictEqual(httpFailRes.success, false, 'Expected non-OK HTTP 503 response to return success: false');
+      assert.strictEqual(vm.runInContext('LOGGED_MOMENTS[0].unsaved', sandbox), true, 'Expected moment to remain flagged unsaved');
+
+      // 3. Retry when network recovers clears unsaved flag and hides banner
+      fetchMode = 'ok';
+      const retryRes = await sandbox.retryCloudSave();
+      assert.strictEqual(retryRes.success, true, 'Expected retryCloudSave to return success: true when fetch succeeds');
+      assert.strictEqual(vm.runInContext('LOGGED_MOMENTS[0].unsaved', sandbox), false, 'Expected unsaved flag cleared after successful retry');
+      assert.strictEqual(mkEl('unsavedSheetBanner').classList.contains('hidden'), true, 'Expected unsavedSheetBanner hidden after successful retry');
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });
