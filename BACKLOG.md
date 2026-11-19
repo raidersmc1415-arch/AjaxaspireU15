@@ -1,0 +1,2 @@
+- `index.html` (`renderFourPillarsEvaluation`): falls back to `s.defaultPlayer || 3` when a player has no self-rating; consider matching `renderRatingRow`'s "Not rated yet" behavior in a follow-up.
+- `ajax-match-tracker.html`: `Equal Time Monitor ⏱️` button next to `Add Guest Player` is still `text-[10px]` (~16px tall); consider bumping to 44×44 px in a follow-up.
