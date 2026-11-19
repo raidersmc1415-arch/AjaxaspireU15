@@ -2807,6 +2807,112 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       assert.strictEqual(mkEl('gfiSubtitle').textContent, 'Based on 5 moments in this game');
       assert.strictEqual(mkEl('gfiScoreBadge').textContent, 'Not enough film yet', 'Expected "Not enough film yet" when game has < 10 moments');
     });
+
+    await runAsyncCheck('28. Player portal: renderRatingRow handles missing/present self-rating, Glows·Grows badge counts, RATING_SCALE_TEXT, and Login before SheScores', async () => {
+      const idx = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+
+      // 1. Portal tab order: Player Login appears before GA SheScores wellness card, and wellness card stays present
+      const portalStart = idx.indexOf('<div id="portal" class="section">');
+      const portalEnd = idx.indexOf('<div id="portal-content">');
+      assert(portalStart !== -1 && portalEnd > portalStart, 'Expected #portal section in index.html');
+      const portalLanding = idx.slice(portalStart, portalEnd);
+      const loginPos = portalLanding.indexOf('id="portal-login"');
+      const wellnessPos = portalLanding.indexOf('GA SheScores: Own Your Wellness');
+      assert(loginPos !== -1 && wellnessPos !== -1, 'Expected both #portal-login and GA SheScores wellness card on Portal tab');
+      assert(loginPos < wellnessPos, 'Expected #portal-login to appear before GA SheScores wellness card');
+
+      // 2. Static badge default has no 0% Glows
+      assert(idx.includes('id="player-glow-rate-badge">0 Glows · 0 Grows</span>'), 'Expected default #player-glow-rate-badge text to be "0 Glows · 0 Grows"');
+      assert(!idx.includes('0% Glows'), 'Expected no "0% Glows" text in index.html');
+
+      // 3. Execute RATING_SCALE_TEXT, applyRatingScaleText, and renderRatingRow in Node VM
+      const scaleStart = idx.indexOf('// TODO: move to metric_definitions Sheet tab (AGENTS.md 2, Explain every number)\n    const RATING_SCALE_TEXT');
+      const scaleEnd = idx.indexOf('function switchPortalTab(');
+      const rowStart = idx.indexOf('function renderRatingRow(');
+      const rowEnd = idx.indexOf('function goToResource(');
+      assert(scaleStart !== -1 && scaleEnd > scaleStart, 'Expected RATING_SCALE_TEXT and SKILL_LABELS in index.html');
+      assert(rowStart !== -1 && rowEnd > rowStart, 'Expected renderRatingRow and SKILL_RESOURCES in index.html');
+
+      const mockEls = {};
+      const getMockEl = id => {
+        if (!mockEls[id]) mockEls[id] = { id, textContent: '', innerHTML: '', style: {}, value: 'ALL', options: [], appendChild() {} };
+        return mockEls[id];
+      };
+      const sandbox = {
+        document: { getElementById: getMockEl, createElement: () => ({ value: '', textContent: '' }) },
+        Number, String, Math, Array, Object, Boolean, parseInt, isNaN
+      };
+      vm.createContext(sandbox);
+      vm.runInContext([idx.slice(scaleStart, scaleEnd), idx.slice(rowStart, rowEnd)].join('\n;\n'), sandbox);
+
+      const expectedScale = '1 just starting, 2 developing, 3 reliable in training, 4 reliable in matches, 5 a strength others can learn from.';
+      assert.strictEqual(vm.runInContext('RATING_SCALE_TEXT', sandbox), expectedScale);
+      assert.strictEqual(getMockEl('coach-ratings-scale-text').textContent, expectedScale, 'Expected RATING_SCALE_TEXT under coach ratings heading');
+      assert.strictEqual(getMockEl('eval-ratings-scale-text').textContent, expectedScale, 'Expected RATING_SCALE_TEXT under evaluation ratings heading');
+
+      // 3a. Missing self-rating (empty object, blank string, null playerData)
+      for (const missingData of [{}, { t_passing: '' }, { t_passing: 0 }, null]) {
+        const htmlMissing = sandbox.renderRatingRow('t_passing', missingData, { t_passing: 4 }, { t_passing: 'Good vision.' });
+        assert(htmlMissing.includes('Not rated yet'), 'Expected "Not rated yet" when self-rating is missing');
+        assert(!htmlMissing.includes('rating-bar-fill player'), 'Expected no "You" bar when self-rating is missing');
+        assert(!htmlMissing.includes('aligned'), 'Expected no "aligned" tag when self-rating is missing');
+        assert(!htmlMissing.includes('Coach rates higher') && !htmlMissing.includes('Coach rates lower'), 'Expected no gap tag when self-rating is missing');
+        assert(!htmlMissing.includes('rating-num player'), 'Expected no invented player rating number when self-rating is missing');
+        assert(htmlMissing.includes('rating-bar-fill coach') && htmlMissing.includes('width:80%'), 'Expected coach rating bar to still render');
+      }
+
+      // 3b. Present self-rating (aligned, higher, lower)
+      const htmlAligned = sandbox.renderRatingRow('t_passing', { t_passing: 4 }, { t_passing: 4 }, {});
+      assert(!htmlAligned.includes('Not rated yet'), 'Did not expect "Not rated yet" when self-rating is present');
+      assert(htmlAligned.includes('rating-bar-fill player') && htmlAligned.includes('width:80%'), 'Expected "You" bar for self-rating 4');
+      assert(htmlAligned.includes('>aligned<'), 'Expected "aligned" tag when player=4 and coach=4');
+
+      const htmlCoachHigher = sandbox.renderRatingRow('t_passing', { t_passing: 2 }, { t_passing: 4 }, {});
+      assert(htmlCoachHigher.includes('Coach rates higher'), 'Expected "Coach rates higher" when coach=4, player=2');
+
+      const htmlCoachLower = sandbox.renderRatingRow('t_passing', { t_passing: 5 }, { t_passing: 3 }, {});
+      assert(htmlCoachLower.includes('Coach rates lower'), 'Expected "Coach rates lower" when coach=3, player=5');
+
+      // 4. Execute renderPlayerFilmLog in VM to verify {g} Glows · {r} Grows badge counts
+      const matchHelperMatch = idx.match(/(function parseMatchSortScore[\s\S]*?function filterToRecentMatches[\s\S]*?\n    \})/);
+      const filmStart = idx.indexOf('function renderPlayerFilmLog()');
+      const filmEnd = idx.indexOf('function classifyVideo(');
+      assert(matchHelperMatch && filmStart !== -1 && filmEnd > filmStart, 'Expected renderPlayerFilmLog and match helpers in index.html');
+
+      const filmEls = {};
+      const getFilmEl = id => {
+        if (!filmEls[id]) filmEls[id] = { id, textContent: '', innerHTML: '', style: {}, value: 'ALL', appendChild() {} };
+        return filmEls[id];
+      };
+      const filmSandbox = {
+        document: { getElementById: getFilmEl, createElement: () => ({ value: '', textContent: '' }) },
+        localStorage: { getItem: () => null },
+        CURRENT_PLAYER_NAME: 'Fixture Player',
+        CURRENT_MOMENT_FILTER_MATCH: 'ALL',
+        CURRENT_MOMENT_FILTER_OUTCOME: 'ALL',
+        CURRENT_MOMENT_FILTER_CAT: 'ALL',
+        CURRENT_PLAYER_MOMENTS: [
+          { id: 1, match: 'Crossfire #2 (Nov 8)', matchDate: '2026-11-08', half: 'H1', time: '10:00', zone: 'A3', outcome: 'Glow', category: 'Passing', tag: 'Key Pass' },
+          { id: 2, match: 'Crossfire #2 (Nov 8)', matchDate: '2026-11-08', half: 'H1', time: '22:00', zone: 'M3', outcome: 'Grow', category: 'Passing', tag: 'Turnover' },
+          { id: 3, match: 'Rocklin (Nov 1)', matchDate: '2026-11-01', half: 'H2', time: '55:00', zone: 'A3', outcome: 'Glow', category: 'Finishing', tag: 'Quality Shot' },
+          { id: 4, match: 'Rocklin (Nov 1)', matchDate: '2026-11-01', half: 'H2', time: '64:00', zone: 'D3', outcome: 'Grow', category: 'Defending', tag: 'Lost Mark' },
+          { id: 5, match: 'Rocklin (Nov 1)', matchDate: '2026-11-01', half: 'H2', time: '70:00', zone: 'M3', outcome: 'Glow', category: 'Duel', tag: 'Duel Won' }
+        ],
+        normNameJS: s => String(s || '').toLowerCase().trim(),
+        escapeHtml: s => String(s ?? ''),
+        Date, Number, Map, Set, Array, String, Boolean, parseInt, isNaN
+      };
+      vm.createContext(filmSandbox);
+      vm.runInContext([matchHelperMatch[1], idx.slice(filmStart, filmEnd)].join('\n;\n'), filmSandbox);
+
+      filmSandbox.renderPlayerFilmLog();
+      assert.strictEqual(getFilmEl('player-glow-rate-badge').textContent, '3 Glows · 2 Grows', 'Expected "3 Glows · 2 Grows" for both games shown');
+      assert(!getFilmEl('player-glow-rate-badge').textContent.includes('%'), 'Expected no percentage in #player-glow-rate-badge');
+
+      filmSandbox.CURRENT_MOMENT_FILTER_MATCH = 'Crossfire #2 (Nov 8)';
+      filmSandbox.renderPlayerFilmLog();
+      assert.strictEqual(getFilmEl('player-glow-rate-badge').textContent, '1 Glows · 1 Grows', 'Expected "1 Glows · 1 Grows" when filtered to Crossfire #2');
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });
