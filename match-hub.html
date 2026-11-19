@@ -808,10 +808,11 @@
             </div>
             <h3 id="gfiTitle" class="font-extrabold text-base sm:text-lg text-white mt-1.5">Overall Game Film Index</h3>
             <p id="gfiSubtitle" class="text-[11px] text-slate-400 mt-0.5"></p>
+            <p id="gfiDeficitNote" class="hidden text-[11px] text-amber-300 mt-1">Includes a deduction for goals conceded beyond goals scored.</p>
           </div>
           <div class="flex items-center gap-3 shrink-0">
             <div class="text-right bg-pitch px-3.5 py-2 rounded-2xl border border-border">
-              <div class="text-[9px] font-mono uppercase text-slate-400 font-semibold">Game Index (Par 80)</div>
+              <div class="text-[9px] font-mono uppercase text-slate-400 font-semibold">Game Film Index · 80 is the middle</div>
               <div id="gfiScoreBadge" class="display text-3xl sm:text-4xl leading-none mt-0.5 text-brand-400">80</div>
             </div>
           </div>
@@ -822,13 +823,19 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
           <div class="bg-pitch/60 p-3.5 rounded-xl border border-border/80 space-y-2.5">
             <div class="flex items-center justify-between">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-teal-300">Action Family Net Impact (V3.1)</h4>
-              <span class="text-[10px] font-mono text-slate-400">Net Pts · Glow %</span>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-teal-300">How each part of our game went</h4>
+              <span class="text-[10px] font-mono text-slate-400" title="Count of positive moments (Glows) and coaching moments (Grows) logged in each part of our game">Glows · Grows</span>
             </div>
             <div id="gfiFamilyBars" class="space-y-2 text-xs"></div>
+            <p class="text-[10px] text-slate-400 pt-1 border-t border-border/50">Green bars show parts of our game with more Glows than Grows; red bars show where we had more moments to clean up.</p>
           </div>
           <div id="gfiStandoutsBox" class="bg-pitch/60 p-3.5 rounded-xl border border-border/80 space-y-3 text-xs"></div>
         </div>
+
+        <details id="gfiHowToReadDetails" class="bg-pitch/50 rounded-xl border border-border/70 px-3.5 py-2.5 text-xs">
+          <summary class="cursor-pointer font-bold text-teal-300 select-none">How to read this</summary>
+          <div id="gfiHowToReadBody" class="mt-2 space-y-1 text-[11px] text-slate-300 leading-snug"></div>
+        </details>
       </div>
 
       <!-- Game-by-Game Film Index & Glow % Progression Chart -->
@@ -2477,7 +2484,7 @@
           index: null, netPts: 0, netPerClip: 0,
           glow: 0, grow: 0, mixed: 0, neutral: 0, glowPct: 0,
           turnovers: 0, toD: 0, toM: 0, toA: 0, toDForced: 0, toDUnforced: 0,
-          goalsScored: 0, goalsConceded: 0, totalClips: 0,
+          goalsScored: 0, goalsConceded: 0, gdDeficit: 0, totalClips: 0,
           shots: 0, sot: 0, shotQualityFor: 0, shotQualityForCount: 0,
           bigChancesCreated: 0, bigChancesMissed: 0, bigChancesConceded: 0,
           boxEntries: 0, boxEntriesPass: 0, boxEntriesCarry: 0, boxEntriesCross: 0,
@@ -2578,7 +2585,7 @@
         netPerClip: Number(netPerClip.toFixed(2)),
         glow, grow, mixed, neutral, glowPct,
         turnovers, toD, toM, toA, toDForced, toDUnforced,
-        goalsScored, goalsConceded, totalClips,
+        goalsScored, goalsConceded, gdDeficit, totalClips,
         shots, sot,
         shotQualityFor: Number(shotQualityFor.toFixed(2)),
         shotQualityForCount,
@@ -2742,6 +2749,7 @@
         matchOrder,
         matchSummaries,
         baseNetPerClip: Number(baseNetPerClip.toFixed(3)),
+        gdDeficit: overall.gdDeficit || 0,
         overall,
         h1,
         h2,
@@ -4113,6 +4121,14 @@
       openMatchInCharts(insightsMatchFilter || 'ALL');
     }
 
+    // TODO: move to metric_definitions Sheet tab (AGENTS.md 2, Explain every number)
+    const GAME_SCORECARD_KEY_TEXT = [
+      { label: 'Game Film Index', text: 'One number summarizing our logged moments in this game compared with our usual baseline. 80 is the middle.' },
+      { label: 'Glows and Grows', text: 'Glows are moments that fit how we want to play. Grows are moments to clean up in training.' },
+      { label: 'How each part of our game went', text: 'Groups every logged moment by part of the game (such as Passing, Defending, or Finishing) so we see what worked and what broke down.' },
+      { label: 'Goals conceded deduction', text: 'When we concede more goals than we score in a game, the index includes a deduction so the score reflects the scoreboard.' }
+    ];
+
     function renderGameFilmIndexReview(gfm, events) {
       const filterBar = $('chartsFilterBar');
       const card = $('gameFilmIndexCard');
@@ -4133,10 +4149,12 @@
       if (mfEl) {
         const msMap = {};
         (gfm.matchSummaries || []).forEach(ms => { msMap[ms.match] = ms; });
-        mfEl.innerHTML = `<option value="ALL">All Matches (${gfm.matchOrder.length} Games · ${events.length} Clips)</option>` +
+        mfEl.innerHTML = `<option value="ALL">All Matches (${gfm.matchOrder.length} Games · ${events.length} Moments)</option>` +
           newestFirstMatches.map(m => {
             const ms = msMap[m] || {};
-            return `<option value="${esc(m)}">${esc(m)} · Index ${ms.index ?? '–'} (${ms.totalClips || 0} clips)</option>`;
+            const hasEnough = Number(ms.totalClips || 0) >= 10;
+            const idxPart = hasEnough && ms.index != null ? `Index ${ms.index}` : 'Not enough film yet';
+            return `<option value="${esc(m)}">${esc(m)} · ${idxPart} (${ms.totalClips || 0} moments)</option>`;
           }).join('');
         mfEl.value = chartsMatchFilter;
       }
@@ -4149,7 +4167,9 @@
         pillsEl.innerHTML = pillBtn('ALL', `All Matches (${gfm.matchOrder.length})`, chartsMatchFilter === 'ALL') +
           newestFirstMatches.map(m => {
             const ms = msMap[m] || {};
-            return pillBtn(m, `${esc(m)} <span class="font-mono text-[10px] opacity-80">${ms.index ?? '–'}</span>`, chartsMatchFilter === m);
+            const hasEnough = Number(ms.totalClips || 0) >= 10;
+            const badgeTxt = hasEnough && ms.index != null ? String(ms.index) : 'Not enough film yet';
+            return pillBtn(m, `${esc(m)} <span class="font-mono text-[10px] opacity-80">${badgeTxt}</span>`, chartsMatchFilter === m);
           }).join('');
       }
 
@@ -4161,24 +4181,42 @@
       });
 
       const ov = gfm.overall;
-      const tier = gameFilmIndexTier(ov.index);
+      const hasEnoughGameMoments = Number(ov.totalClips) >= 10;
+      const tier = hasEnoughGameMoments
+        ? gameFilmIndexTier(ov.index)
+        : { label: 'Not enough film yet', cls: 'text-slate-400 border-border bg-pitch' };
       const halfLabel = chartsHalfFilter === 'H1' ? ' · 1st Half Only' : chartsHalfFilter === 'H2' ? ' · 2nd Half Only' : '';
       const scopeName = chartsMatchFilter === 'ALL' ? `${team.label} · Season Film Scope (${gfm.matchOrder.length} Matches)` : chartsMatchFilter;
 
       if ($('gfiTitle')) $('gfiTitle').textContent = `${scopeName}${halfLabel}`;
-      if ($('gfiSubtitle')) $('gfiSubtitle').textContent = `${ov.totalClips} scored film events · Team Baseline Par = 80 (${gfm.baseNetPerClip >= 0 ? '+' : ''}${gfm.baseNetPerClip} net/clip avg)`;
+      if ($('gfiSubtitle')) $('gfiSubtitle').textContent = `Based on ${ov.totalClips} moments in this game`;
+      const deficitVal = Number(gfm.gdDeficit ?? ov.gdDeficit) || 0;
+      if ($('gfiDeficitNote')) {
+        $('gfiDeficitNote').textContent = 'Includes a deduction for goals conceded beyond goals scored.';
+        $('gfiDeficitNote').classList.toggle('hidden', !(deficitVal > 0));
+      }
       if ($('gfiTierBadge')) {
         $('gfiTierBadge').className = `text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold border ${tier.cls}`;
         $('gfiTierBadge').textContent = tier.label;
       }
       if ($('gfiScoreBadge')) {
-        $('gfiScoreBadge').textContent = ov.index != null ? `${ov.index}` : '–';
-        $('gfiScoreBadge').className = `display text-3xl sm:text-4xl leading-none mt-0.5 ${ov.index >= 85 ? 'text-emerald-400' : ov.index >= 80 ? 'text-teal-400' : ov.index >= 70 ? 'text-amber-300' : 'text-rose-400'}`;
+        if (hasEnoughGameMoments && ov.index != null) {
+          $('gfiScoreBadge').textContent = `${ov.index}`;
+          $('gfiScoreBadge').className = `display text-3xl sm:text-4xl leading-none mt-0.5 ${ov.index >= 85 ? 'text-emerald-400' : ov.index >= 80 ? 'text-teal-400' : ov.index >= 70 ? 'text-amber-300' : 'text-rose-400'}`;
+        } else {
+          $('gfiScoreBadge').textContent = 'Not enough film yet';
+          $('gfiScoreBadge').className = 'text-xs font-bold mt-1 text-slate-400';
+        }
+      }
+      if ($('gfiHowToReadBody')) {
+        $('gfiHowToReadBody').innerHTML = GAME_SCORECARD_KEY_TEXT
+          .map(item => `<div><strong class="text-white">${esc(item.label)}:</strong> ${esc(item.text)}</div>`)
+          .join('');
       }
 
-      const h1Idx = gfm.h1.index;
-      const h2Idx = gfm.h2.index;
-      const dVal = gfm.h2Delta;
+      const h1Idx = Number(gfm.h1?.totalClips) >= 10 ? gfm.h1.index : null;
+      const h2Idx = Number(gfm.h2?.totalClips) >= 10 ? gfm.h2.index : null;
+      const dVal = (h1Idx != null && h2Idx != null) ? (h2Idx - h1Idx) : null;
       const deltaStr = dVal == null
         ? 'Single-half data only'
         : (dVal > 0 ? `▲ +${dVal} H2 Momentum` : dVal < 0 ? `▼ ${dVal} H2 Drop` : 'Steady H1 → H2');
@@ -4187,9 +4225,9 @@
       if ($('gfiKpiGrid')) {
         $('gfiKpiGrid').innerHTML = `
           <div class="bg-pitch/60 p-3 rounded-xl border border-border/80 space-y-0.5">
-            <div class="text-[10px] font-mono uppercase text-slate-400">Net Film Points</div>
-            <div class="display text-2xl ${ov.netPts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${ov.netPts > 0 ? '+' : ''}${ov.netPts.toFixed(1)}</div>
-            <div class="text-[10px] text-slate-400">${ov.netPerClip > 0 ? '+' : ''}${ov.netPerClip.toFixed(2)} pts / clip (${ov.totalClips} clips)</div>
+            <div class="text-[10px] font-mono uppercase text-slate-400" title="Positive moments (Glows) and coaching moments (Grows) logged in this game">Logged Moments</div>
+            <div class="display text-2xl text-white">${ov.glow} Glows · ${ov.grow} Grows</div>
+            <div class="text-[10px] text-slate-400">${ov.totalClips} moments total${ov.mixed ? ` (${ov.mixed} Mixed)` : ''}</div>
           </div>
           <div class="bg-pitch/60 p-3 rounded-xl border border-border/80 space-y-0.5">
             <div class="text-[10px] font-mono uppercase text-slate-400">H1 vs. H2 Index</div>
@@ -4197,13 +4235,13 @@
             <div class="text-[10px] font-semibold ${deltaCls}">${deltaStr}</div>
           </div>
           <div class="bg-pitch/60 p-3 rounded-xl border border-border/80 space-y-0.5">
-            <div class="text-[10px] font-mono uppercase text-slate-400">Execution Rate</div>
+            <div class="text-[10px] font-mono uppercase text-slate-400">Glow Share</div>
             <div class="display text-2xl ${ov.glowPct >= 50 ? 'text-emerald-400' : 'text-amber-300'}">${ov.glowPct}% Glow</div>
-            <div class="text-[10px] text-slate-400">${ov.glow} Glow · ${ov.grow} Grow (${ov.mixed} Mixed)</div>
+            <div class="text-[10px] text-slate-400">${ov.glow} Glows · ${ov.grow} Grows</div>
           </div>
           <div class="bg-pitch/60 p-3 rounded-xl border border-border/80 space-y-0.5">
             <div class="text-[10px] font-mono uppercase text-slate-400">Turnovers &amp; Film Goals</div>
-            <div class="display text-2xl text-white">${ov.turnovers} TOs</div>
+            <div class="display text-2xl text-white">${ov.turnovers} Turnovers</div>
             <div class="text-[10px] text-slate-400">D3:${ov.toD} · M3:${ov.toM} · A3:${ov.toA} · Goals ${ov.goalsScored}:${ov.goalsConceded}</div>
           </div>
         `;
@@ -4218,18 +4256,18 @@
               const isNeg = f.netPts < 0;
               const netCls = isPos ? 'text-emerald-400' : isNeg ? 'text-rose-400' : 'text-slate-400';
               const barColor = isPos ? '#15803D' : isNeg ? '#B91C1C' : '#64748B';
-              const rateTxt = f.glowPct != null ? `${f.glowPct}% Glow (${f.glow}G/${f.grow}Gr)` : `${f.neutral} Neutral`;
+              const countsTxt = `${f.glow} Glows · ${f.grow} Grows${f.glowPct != null ? ` (${f.glowPct}% Glow)` : ''}`;
               return `<div class="space-y-1">
                 <div class="flex items-center justify-between gap-2 text-[11px]">
-                  <span class="font-semibold text-white truncate">${esc(f.label)} <span class="text-[10px] text-slate-400 font-normal">(${f.clips})</span></span>
-                  <span class="font-mono font-bold ${netCls} shrink-0">${f.netPts > 0 ? '+' : ''}${f.netPts.toFixed(1)} <span class="text-[10px] text-slate-400 font-normal">· ${rateTxt}</span></span>
+                  <span class="font-semibold text-white truncate">${esc(f.label)} <span class="text-[10px] text-slate-400 font-normal">(${f.clips} moments)</span></span>
+                  <span class="font-mono font-bold ${netCls} shrink-0">${countsTxt}</span>
                 </div>
                 <div class="w-full h-1.5 bg-surface rounded-full overflow-hidden">
                   <div class="h-full rounded-full" style="width:${barW}%; background:${barColor}"></div>
                 </div>
               </div>`;
             }).join('')
-          : '<p class="text-xs text-slate-500">No V3.1 Action Family clips logged for this filter.</p>';
+          : '<p class="text-xs text-slate-500">No moments logged for this filter.</p>';
       }
 
       if ($('gfiStandoutsBox')) {
@@ -4239,20 +4277,20 @@
         $('gfiStandoutsBox').innerHTML = `
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Top Game Film Standouts (1°/2° Weighted)</h4>
-              <span class="text-[10px] font-mono text-slate-400">Net Pts</span>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Top Game Film Standouts</h4>
+              <span class="text-[10px] font-mono text-slate-400" title="Positive and coaching moments logged for each player in this game">Glows · Grows</span>
             </div>
             ${topPlayers.length ? topPlayers.map((p, idx) => `
               <div class="flex items-center justify-between bg-surface px-2.5 py-2 rounded-lg border border-border/70">
-                <span class="font-semibold text-white truncate">${idx + 1}. <span class="font-mono text-brand-400">#${p.jersey}</span> ${esc(p.name)} <span class="text-[10px] text-slate-400 font-normal">(${p.glow}G/${p.grow}Gr${p.goals ? ` · ${p.goals}G` : ''}${p.keyPasses ? ` · ${p.keyPasses}KP` : ''})</span></span>
-                <span class="font-mono font-bold ${p.netPts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${p.netPts > 0 ? '+' : ''}${p.netPts.toFixed(1)}</span>
+                <span class="font-semibold text-white truncate">${idx + 1}. <span class="font-mono text-brand-400">#${p.jersey}</span> ${esc(p.name)}${p.goals ? ` <span class="text-[10px] text-emerald-400 font-normal">· ${p.goals}G</span>` : ''}${p.keyPasses ? ` <span class="text-[10px] text-teal-300 font-normal">· ${p.keyPasses} Key passes</span>` : ''}</span>
+                <span class="font-mono font-bold ${p.netPts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${p.glow} Glows · ${p.grow} Grows</span>
               </div>
             `).join('') : '<p class="text-[11px] text-slate-400">Not enough player-attributed clips in this selection.</p>'}
           </div>
           <div class="pt-2 border-t border-border/70 space-y-1.5">
             <div class="flex items-center justify-between">
               <h4 class="text-xs font-bold uppercase tracking-wider text-rose-400">Primary Match Focus &amp; Grow Triggers</h4>
-              ${weakestFam ? `<span class="text-[10px] font-mono text-rose-400 font-bold">${esc(weakestFam.label)} (${weakestFam.netPts.toFixed(1)})</span>` : ''}
+              ${weakestFam ? `<span class="text-[10px] font-mono text-rose-400 font-bold">${esc(weakestFam.label)} (${weakestFam.grow} Grows)</span>` : ''}
             </div>
             ${topGrow.length ? `<div class="flex flex-wrap gap-1.5">${topGrow.map(([tag, cnt]) => `<span class="text-[10px] font-mono bg-surface border border-border px-2 py-1 rounded-lg text-slate-200"><strong class="text-rose-400">${cnt}×</strong> ${esc(tag)}</span>`).join('')}</div>` : '<p class="text-[11px] text-slate-400">Zero negative coaching events in this filter.</p>'}
           </div>

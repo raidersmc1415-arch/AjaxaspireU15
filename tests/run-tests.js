@@ -2638,7 +2638,7 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
 
     await runAsyncCheck('26. Printed report card renders current month/year, Glow/Grow counts before plain Film Index, no /100 or Shot Acc, key box, and Not enough film yet below gate', async () => {
       const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
-      const rcStart = mh.indexOf('// TODO: move to metric_definitions Sheet tab');
+      const rcStart = mh.indexOf('// TODO: move to metric_definitions Sheet tab (AGENTS.md 2, Explain every number)\n    const REPORT_CARD_KEY_TEXT');
       const rcEnd = mh.indexOf('let reportCardFilmDrawerOpen = false;');
       assert(rcStart !== -1 && rcEnd > rcStart, 'Expected REPORT_CARD_KEY_TEXT and renderReportCard in match-hub.html');
 
@@ -2729,6 +2729,83 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       const lowGateHtml = containerEl.innerHTML;
       assert(lowGateHtml.includes('Not enough film yet'), 'Expected "Not enough film yet" when player is below the data gate');
       assert(!lowGateHtml.includes('<div class="text-[10px] text-slate-400 print:text-slate-600">80 is the middle</div>') && !lowGateHtml.includes('>86</div>'), 'Expected no Film Index number/subline in the Film Index tile when below the data gate');
+    });
+
+    await runAsyncCheck('27. Game scorecard exposes gdDeficit, shows Based on {n} moments, gates <10 moments as Not enough film yet, removes V3.1/Net Pts jargon, and populates How to read this', async () => {
+      const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+      const vStart = mh.indexOf('const V31_TURNOVER_TAGS =');
+      const vEnd = mh.indexOf('function sanitizeMomentClock(');
+      const wStart = mh.indexOf('const EVENT_WEIGHTS =');
+      const wEnd = mh.indexOf('function fmtNet(');
+      const gStart = mh.indexOf('const GAME_FILM_FAMILIES =');
+      const gEnd = mh.indexOf('function sanitizeAndHealData(');
+      const rStart = mh.indexOf('// TODO: move to metric_definitions Sheet tab (AGENTS.md 2, Explain every number)\n    const GAME_SCORECARD_KEY_TEXT');
+      const rEnd = mh.indexOf('function renderCharts()');
+      assert(rStart !== -1 && rEnd > rStart, 'Expected GAME_SCORECARD_KEY_TEXT and renderGameFilmIndexReview in match-hub.html');
+
+      const els = {};
+      const mkEl = id => {
+        if (!els[id]) {
+          const set = new Set(id === 'gfiDeficitNote' ? ['hidden'] : []);
+          els[id] = {
+            id,
+            textContent: '',
+            innerHTML: '',
+            className: '',
+            value: 'ALL',
+            classList: {
+              add(c) { set.add(c); },
+              remove(c) { set.delete(c); },
+              contains(c) { return set.has(c); },
+              toggle(c, force) {
+                const shouldHave = typeof force === 'boolean' ? force : !set.has(c);
+                if (shouldHave) set.add(c); else set.delete(c);
+              }
+            }
+          };
+        }
+        return els[id];
+      };
+
+      const sandbox = {
+        $: mkEl,
+        ASPIRE_JERSEY_MAP: { 23: { name: 'Sophia Culver', pos: 'CF' } },
+        chartsMatchFilter: 'Test Game',
+        chartsHalfFilter: 'ALL',
+        team: { label: 'AJAX Aspire U15' },
+        esc: s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+        Math, Number, String, Boolean, Array, Object, Set, Map
+      };
+      vm.createContext(sandbox);
+      vm.runInContext([mh.slice(vStart, vEnd), mh.slice(wStart, wEnd), mh.slice(gStart, gEnd), mh.slice(rStart, rEnd)].join('\n;\n'), sandbox);
+
+      // 1. Game with >= 10 moments and goalsConceded > goalsScored (gdDeficit > 0)
+      const fullGameEvents = [
+        { id: 1, match: 'Test Game', half: 'H1', time: '10:00', zone: 'A3', outcome: 'Goal Scored', qualityRaw: 'Goal Scored', category: 'Finishing', tag: 'Goal Scored', jerseys: [23] },
+        { id: 2, match: 'Test Game', half: 'H1', time: '15:00', zone: 'D3', outcome: 'Goal Conceded', qualityRaw: 'Goal Conceded', category: 'Goalkeeping', tag: 'Goal Conceded', jerseys: [] },
+        { id: 3, match: 'Test Game', half: 'H2', time: '55:00', zone: 'D3', outcome: 'Goal Conceded', qualityRaw: 'Goal Conceded', category: 'Goalkeeping', tag: 'Goal Conceded', jerseys: [] }
+      ];
+      for (let i = 0; i < 9; i++) {
+        fullGameEvents.push({ id: 10 + i, match: 'Test Game', half: 'H1', time: '20:00', zone: 'M3', outcome: i % 2 === 0 ? 'Glow' : 'Grow', category: 'Passing', tag: i % 2 === 0 ? 'Progressive Pass' : 'Forced Turnover Pass', jerseys: [23] });
+      }
+      const gfmFull = sandbox.computeGameFilmMetrics(fullGameEvents, 'Test Game', 'ALL');
+      assert.strictEqual(gfmFull.gdDeficit, 1, 'Expected gdDeficit === 1 when 2 goals conceded vs 1 goal scored');
+      assert.strictEqual(gfmFull.overall.gdDeficit, 1, 'Expected overall.gdDeficit === 1');
+
+      sandbox.renderGameFilmIndexReview(gfmFull, fullGameEvents);
+      assert.strictEqual(mkEl('gfiSubtitle').textContent, 'Based on 12 moments in this game');
+      assert.strictEqual(mkEl('gfiDeficitNote').classList.contains('hidden'), false, 'Expected deficit deduction line visible when gdDeficit > 0');
+      assert.strictEqual(mkEl('gfiDeficitNote').textContent, 'Includes a deduction for goals conceded beyond goals scored.');
+      assert(/^\d+$/.test(mkEl('gfiScoreBadge').textContent), 'Expected numeric index when game has >= 10 moments');
+      assert(!mkEl('gfiFamilyBars').innerHTML.includes('V3.1') && !mkEl('gfiStandoutsBox').innerHTML.includes('Net Pts'), 'Expected no V3.1 or Net Pts jargon in rendered panels');
+      assert(mkEl('gfiHowToReadBody').innerHTML.includes('80 is the middle.') && mkEl('gfiHowToReadBody').innerHTML.includes('Goals conceded deduction'), 'Expected 4-line How to read this explanation populated');
+
+      // 2. Game with < 10 moments shows "Not enough film yet" and no number
+      const shortEvents = fullGameEvents.slice(0, 5);
+      const gfmShort = sandbox.computeGameFilmMetrics(shortEvents, 'Test Game', 'ALL');
+      sandbox.renderGameFilmIndexReview(gfmShort, shortEvents);
+      assert.strictEqual(mkEl('gfiSubtitle').textContent, 'Based on 5 moments in this game');
+      assert.strictEqual(mkEl('gfiScoreBadge').textContent, 'Not enough film yet', 'Expected "Not enough film yet" when game has < 10 moments');
     });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
