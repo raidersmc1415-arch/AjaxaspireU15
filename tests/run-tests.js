@@ -2735,6 +2735,339 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       assert.strictEqual(vm.runInContext('LOGGED_MOMENTS[0].unsaved', sandbox), false, 'Expected unsaved flag cleared after successful retry');
       assert.strictEqual(mkEl('unsavedSheetBanner').classList.contains('hidden'), true, 'Expected unsavedSheetBanner hidden after successful retry');
     });
+
+    await runAsyncCheck('27. Printed report card renders current month/year, Glow/Grow counts before plain Film Index, no /100 or Shot Acc, key box, and Not enough film yet below gate', async () => {
+      const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+      const rcStart = mh.indexOf('// TODO: move to metric_definitions Sheet tab (AGENTS.md 2, Explain every number)\n    const REPORT_CARD_KEY_TEXT');
+      const rcEnd = mh.indexOf('let reportCardFilmDrawerOpen = false;');
+      assert(rcStart !== -1 && rcEnd > rcStart, 'Expected REPORT_CARD_KEY_TEXT and renderReportCard in match-hub.html');
+
+      const containerEl = { innerHTML: '' };
+      let activeFixturePlayer = null;
+      const sandbox = {
+        $: id => (id === 'reportCardContent' ? containerEl : null),
+        renderReportCardSelect: () => {},
+        currentReportPlayerKey: 'aspire:Fixture Player',
+        getPlayerByKey: () => activeFixturePlayer,
+        normName: s => String(s || '').toLowerCase().trim(),
+        REPORT_HUB_CACHE: { 'fixture player': { ratingsData: { found: false }, reflectionsData: { reflections: [] } } },
+        REPORT_HUB_LOADING: {},
+        fetchPlayerHubData: async () => {},
+        getReportDraftKey: () => 'draft_key',
+        getSavedReportDraft: () => null,
+        TEAMS: [{ id: 'aspire', reportTitle: 'AJAX ASPIRE U15', headCoach: 'Shawn Craig', coachSignature: 'Coach Shawn Craig', coachShort: 'Coach Shawn' }],
+        team: { id: 'aspire' },
+        aspireScope: 'league',
+        INDEX_CONFIG: { regMinutes: 45, minMinutes: 120, minEvents: 10 },
+        parseReflections: () => ({ goals: {}, general: [], film: [], allRecent: [] }),
+        getPlayerPracticeScorecard: () => null,
+        getPracticeGradeInfo: () => ({}),
+        SKILL_DISPLAY_NAMES: {},
+        esc: s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+        fmtFilmIndex: p => (p && p.filmIndex != null ? String(p.filmIndex) : '–'),
+        syncAllReportTextareas: () => {},
+        renderReportCardPlayerFilmPanel: () => {},
+        Date, Math, Number, String, Boolean, Array, Object
+      };
+      vm.createContext(sandbox);
+      vm.runInContext(mh.slice(rcStart, rcEnd), sandbox);
+
+      // 1. Fixture player meeting the data gate
+      activeFixturePlayer = {
+        name: 'Fixture Player',
+        jersey: 99,
+        squad: 'Aspire U15',
+        squadKey: 'aspire',
+        roles: ['CM'],
+        gp: 6,
+        mins: 420,
+        goals: 2,
+        assists: 1,
+        keyPasses: 4,
+        turnovers: 10,
+        toPer80: '1.9',
+        glow: 18,
+        grow: 12,
+        filmEventsCount: 30,
+        filmIndex: 86,
+        allCompsIndex: 83,
+        leagueIndex: 86,
+        shots: 5,
+        sot: 3,
+        shotAcc: 60
+      };
+      sandbox.renderReportCard();
+      const html = containerEl.innerHTML;
+      const expectedMonthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      assert(!html.includes('/100'), 'Expected no /100 in rendered report card HTML');
+      assert(!html.includes('Shot Acc'), 'Expected no Shot Acc in rendered report card HTML');
+      assert(html.includes(`Evaluation Date:</strong> ${expectedMonthYear}`), `Expected Evaluation Date to match ${expectedMonthYear}`);
+      assert(html.includes(`Date: ${expectedMonthYear}`), `Expected signature Date to match ${expectedMonthYear}`);
+      assert(!html.includes('October 2026'), 'Expected no hardcoded October 2026 in report card');
+      assert(html.includes('18 Glows · 12 Grows'), 'Expected Glow and Grow counts tile');
+      assert(html.indexOf('18 Glows · 12 Grows') < html.indexOf('Film Index (League)'), 'Expected Glows · Grows tile before Film Index tile');
+      assert(html.includes('80 is the middle'), 'Expected "80 is the middle" under Film Index');
+      assert(html.includes('6 league games · 30 moments'), 'Expected "{n} league games · {m} moments" under Film Index');
+      assert(html.includes('Turnovers per 80 min'), 'Expected plain label "Turnovers per 80 min"');
+      assert(html.includes('Key passes'), 'Expected plain label "Key passes"');
+      assert(html.includes('id="reportCardHowToReadBox"') && html.includes('How to read this card'), 'Expected "How to read this card" key box');
+      assert(html.includes('It is a guide for our conversation, not a grade.'), 'Expected DRAFT Film Index explanation in key box');
+      assert(!html.includes('id="reportTierMeaningText"'), 'Expected no tier meaning printed when TIER_MEANINGS entries are empty strings');
+
+      // 2. Fixture player below the data gate
+      activeFixturePlayer = {
+        ...activeFixturePlayer,
+        gp: 1,
+        mins: 20,
+        glow: 1,
+        grow: 1,
+        filmEventsCount: 2,
+        filmIndex: null
+      };
+      sandbox.renderReportCard();
+      const lowGateHtml = containerEl.innerHTML;
+      assert(lowGateHtml.includes('Not enough film yet'), 'Expected "Not enough film yet" when player is below the data gate');
+      assert(!lowGateHtml.includes('<div class="text-[10px] text-slate-400 print:text-slate-600">80 is the middle</div>') && !lowGateHtml.includes('>86</div>'), 'Expected no Film Index number/subline in the Film Index tile when below the data gate');
+    });
+
+    await runAsyncCheck('28. Game scorecard exposes gdDeficit, shows Based on {n} moments, gates <10 moments as Not enough film yet, removes V3.1/Net Pts jargon, and populates How to read this', async () => {
+      const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+      const vStart = mh.indexOf('const V31_TURNOVER_TAGS =');
+      const vEnd = mh.indexOf('function sanitizeMomentClock(');
+      const wStart = mh.indexOf('const EVENT_WEIGHTS =');
+      const wEnd = mh.indexOf('function fmtNet(');
+      const gStart = mh.indexOf('const GAME_FILM_FAMILIES =');
+      const gEnd = mh.indexOf('function sanitizeAndHealData(');
+      const rStart = mh.indexOf('// TODO: move to metric_definitions Sheet tab (AGENTS.md 2, Explain every number)\n    const GAME_SCORECARD_KEY_TEXT');
+      const rEnd = mh.indexOf('function renderCharts()');
+      assert(rStart !== -1 && rEnd > rStart, 'Expected GAME_SCORECARD_KEY_TEXT and renderGameFilmIndexReview in match-hub.html');
+
+      const els = {};
+      const mkEl = id => {
+        if (!els[id]) {
+          const set = new Set(id === 'gfiDeficitNote' ? ['hidden'] : []);
+          els[id] = {
+            id,
+            textContent: '',
+            innerHTML: '',
+            className: '',
+            value: 'ALL',
+            classList: {
+              add(c) { set.add(c); },
+              remove(c) { set.delete(c); },
+              contains(c) { return set.has(c); },
+              toggle(c, force) {
+                const shouldHave = typeof force === 'boolean' ? force : !set.has(c);
+                if (shouldHave) set.add(c); else set.delete(c);
+              }
+            }
+          };
+        }
+        return els[id];
+      };
+
+      const sandbox = {
+        $: mkEl,
+        ASPIRE_JERSEY_MAP: { 23: { name: 'Sophia Culver', pos: 'CF' } },
+        chartsMatchFilter: 'Test Game',
+        chartsHalfFilter: 'ALL',
+        team: { label: 'AJAX Aspire U15' },
+        esc: s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+        Math, Number, String, Boolean, Array, Object, Set, Map
+      };
+      vm.createContext(sandbox);
+      vm.runInContext([mh.slice(vStart, vEnd), mh.slice(wStart, wEnd), mh.slice(gStart, gEnd), mh.slice(rStart, rEnd)].join('\n;\n'), sandbox);
+
+      // 1. Game with >= 10 moments and goalsConceded > goalsScored (gdDeficit > 0)
+      const fullGameEvents = [
+        { id: 1, match: 'Test Game', half: 'H1', time: '10:00', zone: 'A3', outcome: 'Goal Scored', qualityRaw: 'Goal Scored', category: 'Finishing', tag: 'Goal Scored', jerseys: [23] },
+        { id: 2, match: 'Test Game', half: 'H1', time: '15:00', zone: 'D3', outcome: 'Goal Conceded', qualityRaw: 'Goal Conceded', category: 'Goalkeeping', tag: 'Goal Conceded', jerseys: [] },
+        { id: 3, match: 'Test Game', half: 'H2', time: '55:00', zone: 'D3', outcome: 'Goal Conceded', qualityRaw: 'Goal Conceded', category: 'Goalkeeping', tag: 'Goal Conceded', jerseys: [] }
+      ];
+      for (let i = 0; i < 9; i++) {
+        fullGameEvents.push({ id: 10 + i, match: 'Test Game', half: 'H1', time: '20:00', zone: 'M3', outcome: i % 2 === 0 ? 'Glow' : 'Grow', category: 'Passing', tag: i % 2 === 0 ? 'Progressive Pass' : 'Forced Turnover Pass', jerseys: [23] });
+      }
+      const gfmFull = sandbox.computeGameFilmMetrics(fullGameEvents, 'Test Game', 'ALL');
+      assert.strictEqual(gfmFull.gdDeficit, 1, 'Expected gdDeficit === 1 when 2 goals conceded vs 1 goal scored');
+      assert.strictEqual(gfmFull.overall.gdDeficit, 1, 'Expected overall.gdDeficit === 1');
+
+      sandbox.renderGameFilmIndexReview(gfmFull, fullGameEvents);
+      assert.strictEqual(mkEl('gfiSubtitle').textContent, 'Based on 12 moments in this game');
+      assert.strictEqual(mkEl('gfiDeficitNote').classList.contains('hidden'), false, 'Expected deficit deduction line visible when gdDeficit > 0');
+      assert.strictEqual(mkEl('gfiDeficitNote').textContent, 'Includes a deduction for goals conceded beyond goals scored.');
+      assert(/^\d+$/.test(mkEl('gfiScoreBadge').textContent), 'Expected numeric index when game has >= 10 moments');
+      assert(!mkEl('gfiFamilyBars').innerHTML.includes('V3.1') && !mkEl('gfiStandoutsBox').innerHTML.includes('Net Pts'), 'Expected no V3.1 or Net Pts jargon in rendered panels');
+      assert(mkEl('gfiHowToReadBody').innerHTML.includes('80 is the middle.') && mkEl('gfiHowToReadBody').innerHTML.includes('Goals conceded deduction'), 'Expected 4-line How to read this explanation populated');
+
+      // 2. Game with < 10 moments shows "Not enough film yet" and no number
+      const shortEvents = fullGameEvents.slice(0, 5);
+      const gfmShort = sandbox.computeGameFilmMetrics(shortEvents, 'Test Game', 'ALL');
+      sandbox.renderGameFilmIndexReview(gfmShort, shortEvents);
+      assert.strictEqual(mkEl('gfiSubtitle').textContent, 'Based on 5 moments in this game');
+      assert.strictEqual(mkEl('gfiScoreBadge').textContent, 'Not enough film yet', 'Expected "Not enough film yet" when game has < 10 moments');
+    });
+
+    await runAsyncCheck('29. Player portal: renderRatingRow handles missing/present self-rating, Glows·Grows badge counts, RATING_SCALE_TEXT, and Login before SheScores', async () => {
+      const idx = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+
+      // 1. Portal tab order: Player Login appears before GA SheScores wellness card, and wellness card stays present
+      const portalStart = idx.indexOf('<div id="portal" class="section">');
+      const portalEnd = idx.indexOf('<div id="portal-content">');
+      assert(portalStart !== -1 && portalEnd > portalStart, 'Expected #portal section in index.html');
+      const portalLanding = idx.slice(portalStart, portalEnd);
+      const loginPos = portalLanding.indexOf('id="portal-login"');
+      const wellnessPos = portalLanding.indexOf('GA SheScores: Own Your Wellness');
+      assert(loginPos !== -1 && wellnessPos !== -1, 'Expected both #portal-login and GA SheScores wellness card on Portal tab');
+      assert(loginPos < wellnessPos, 'Expected #portal-login to appear before GA SheScores wellness card');
+
+      // 2. Static badge default has no 0% Glows
+      assert(idx.includes('id="player-glow-rate-badge">0 Glows · 0 Grows</span>'), 'Expected default #player-glow-rate-badge text to be "0 Glows · 0 Grows"');
+      assert(!idx.includes('0% Glows'), 'Expected no "0% Glows" text in index.html');
+
+      // 3. Execute RATING_SCALE_TEXT, applyRatingScaleText, and renderRatingRow in Node VM
+      const scaleStart = idx.indexOf('// TODO: move to metric_definitions Sheet tab (AGENTS.md 2, Explain every number)\n    const RATING_SCALE_TEXT');
+      const scaleEnd = idx.indexOf('function switchPortalTab(');
+      const rowStart = idx.indexOf('function renderRatingRow(');
+      const rowEnd = idx.indexOf('function goToResource(');
+      assert(scaleStart !== -1 && scaleEnd > scaleStart, 'Expected RATING_SCALE_TEXT and SKILL_LABELS in index.html');
+      assert(rowStart !== -1 && rowEnd > rowStart, 'Expected renderRatingRow and SKILL_RESOURCES in index.html');
+
+      const mockEls = {};
+      const getMockEl = id => {
+        if (!mockEls[id]) mockEls[id] = { id, textContent: '', innerHTML: '', style: {}, value: 'ALL', options: [], appendChild() {} };
+        return mockEls[id];
+      };
+      const sandbox = {
+        document: { getElementById: getMockEl, createElement: () => ({ value: '', textContent: '' }) },
+        Number, String, Math, Array, Object, Boolean, parseInt, isNaN
+      };
+      vm.createContext(sandbox);
+      vm.runInContext([idx.slice(scaleStart, scaleEnd), idx.slice(rowStart, rowEnd)].join('\n;\n'), sandbox);
+
+      const expectedScale = '1 just starting, 2 developing, 3 reliable in training, 4 reliable in matches, 5 a strength others can learn from.';
+      assert.strictEqual(vm.runInContext('RATING_SCALE_TEXT', sandbox), expectedScale);
+      assert.strictEqual(getMockEl('coach-ratings-scale-text').textContent, expectedScale, 'Expected RATING_SCALE_TEXT under coach ratings heading');
+      assert.strictEqual(getMockEl('eval-ratings-scale-text').textContent, expectedScale, 'Expected RATING_SCALE_TEXT under evaluation ratings heading');
+
+      // 3a. Missing self-rating (empty object, blank string, null playerData)
+      for (const missingData of [{}, { t_passing: '' }, { t_passing: 0 }, null]) {
+        const htmlMissing = sandbox.renderRatingRow('t_passing', missingData, { t_passing: 4 }, { t_passing: 'Good vision.' });
+        assert(htmlMissing.includes('Not rated yet'), 'Expected "Not rated yet" when self-rating is missing');
+        assert(!htmlMissing.includes('rating-bar-fill player'), 'Expected no "You" bar when self-rating is missing');
+        assert(!htmlMissing.includes('aligned'), 'Expected no "aligned" tag when self-rating is missing');
+        assert(!htmlMissing.includes('Coach rates higher') && !htmlMissing.includes('Coach rates lower'), 'Expected no gap tag when self-rating is missing');
+        assert(!htmlMissing.includes('rating-num player'), 'Expected no invented player rating number when self-rating is missing');
+        assert(htmlMissing.includes('rating-bar-fill coach') && htmlMissing.includes('width:80%'), 'Expected coach rating bar to still render');
+      }
+
+      // 3b. Present self-rating (aligned, higher, lower)
+      const htmlAligned = sandbox.renderRatingRow('t_passing', { t_passing: 4 }, { t_passing: 4 }, {});
+      assert(!htmlAligned.includes('Not rated yet'), 'Did not expect "Not rated yet" when self-rating is present');
+      assert(htmlAligned.includes('rating-bar-fill player') && htmlAligned.includes('width:80%'), 'Expected "You" bar for self-rating 4');
+      assert(htmlAligned.includes('>aligned<'), 'Expected "aligned" tag when player=4 and coach=4');
+
+      const htmlCoachHigher = sandbox.renderRatingRow('t_passing', { t_passing: 2 }, { t_passing: 4 }, {});
+      assert(htmlCoachHigher.includes('Coach rates higher'), 'Expected "Coach rates higher" when coach=4, player=2');
+
+      const htmlCoachLower = sandbox.renderRatingRow('t_passing', { t_passing: 5 }, { t_passing: 3 }, {});
+      assert(htmlCoachLower.includes('Coach rates lower'), 'Expected "Coach rates lower" when coach=3, player=5');
+
+      // 4. Execute renderPlayerFilmLog in VM to verify {g} Glows · {r} Grows badge counts
+      const matchHelperMatch = idx.match(/(function parseMatchSortScore[\s\S]*?function filterToRecentMatches[\s\S]*?\n    \})/);
+      const filmStart = idx.indexOf('function renderPlayerFilmLog()');
+      const filmEnd = idx.indexOf('function classifyVideo(');
+      assert(matchHelperMatch && filmStart !== -1 && filmEnd > filmStart, 'Expected renderPlayerFilmLog and match helpers in index.html');
+
+      const filmEls = {};
+      const getFilmEl = id => {
+        if (!filmEls[id]) filmEls[id] = { id, textContent: '', innerHTML: '', style: {}, value: 'ALL', appendChild() {} };
+        return filmEls[id];
+      };
+      const filmSandbox = {
+        document: { getElementById: getFilmEl, createElement: () => ({ value: '', textContent: '' }) },
+        localStorage: { getItem: () => null },
+        CURRENT_PLAYER_NAME: 'Fixture Player',
+        CURRENT_MOMENT_FILTER_MATCH: 'ALL',
+        CURRENT_MOMENT_FILTER_OUTCOME: 'ALL',
+        CURRENT_MOMENT_FILTER_CAT: 'ALL',
+        CURRENT_PLAYER_MOMENTS: [
+          { id: 1, match: 'Crossfire #2 (Nov 8)', matchDate: '2026-11-08', half: 'H1', time: '10:00', zone: 'A3', outcome: 'Glow', category: 'Passing', tag: 'Key Pass' },
+          { id: 2, match: 'Crossfire #2 (Nov 8)', matchDate: '2026-11-08', half: 'H1', time: '22:00', zone: 'M3', outcome: 'Grow', category: 'Passing', tag: 'Turnover' },
+          { id: 3, match: 'Rocklin (Nov 1)', matchDate: '2026-11-01', half: 'H2', time: '55:00', zone: 'A3', outcome: 'Glow', category: 'Finishing', tag: 'Quality Shot' },
+          { id: 4, match: 'Rocklin (Nov 1)', matchDate: '2026-11-01', half: 'H2', time: '64:00', zone: 'D3', outcome: 'Grow', category: 'Defending', tag: 'Lost Mark' },
+          { id: 5, match: 'Rocklin (Nov 1)', matchDate: '2026-11-01', half: 'H2', time: '70:00', zone: 'M3', outcome: 'Glow', category: 'Duel', tag: 'Duel Won' }
+        ],
+        normNameJS: s => String(s || '').toLowerCase().trim(),
+        escapeHtml: s => String(s ?? ''),
+        Date, Number, Map, Set, Array, String, Boolean, parseInt, isNaN
+      };
+      vm.createContext(filmSandbox);
+      vm.runInContext([matchHelperMatch[1], idx.slice(filmStart, filmEnd)].join('\n;\n'), filmSandbox);
+
+      filmSandbox.renderPlayerFilmLog();
+      assert.strictEqual(getFilmEl('player-glow-rate-badge').textContent, '3 Glows · 2 Grows', 'Expected "3 Glows · 2 Grows" for both games shown');
+      assert(!getFilmEl('player-glow-rate-badge').textContent.includes('%'), 'Expected no percentage in #player-glow-rate-badge');
+
+      filmSandbox.CURRENT_MOMENT_FILTER_MATCH = 'Crossfire #2 (Nov 8)';
+      filmSandbox.renderPlayerFilmLog();
+      assert.strictEqual(getFilmEl('player-glow-rate-badge').textContent, '1 Glows · 1 Grows', 'Expected "1 Glows · 1 Grows" when filtered to Crossfire #2');
+    });
+
+    await runAsyncCheck('30. Sideline tracker tap targets (+1m/-1m, Add Guest Player, Flag Film Moment, Undo Last, filter chips) enforce >=44x44 px initially and after setEventFilter()', async () => {
+      const trk = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+      assert(trk.includes('.tap-target-44 { min-width: 44px; min-height: 44px; }'), 'Expected offline-safe .tap-target-44 CSS rule in ajax-match-tracker.html');
+
+      const requiredMarkers = [
+        'onclick="adjustClock(60)"',
+        'onclick="adjustClock(-60)"',
+        'onclick="openAddGuestModal()"',
+        'onclick="flagSidelineBookmark()"',
+        'onclick="undoLastEvent()"',
+        'id="efPill-all"',
+        'id="efPill-goals"',
+        'id="efPill-subs"',
+        'id="efPill-setpieces"',
+        'id="efPill-cards"',
+        'id="efPill-film"'
+      ];
+      for (const marker of requiredMarkers) {
+        const idxPos = trk.indexOf(marker);
+        assert(idxPos !== -1, `Missing tracker button marker: ${marker}`);
+        const tagStart = trk.lastIndexOf('<button', idxPos);
+        const tagEnd = trk.indexOf('>', idxPos);
+        assert(tagStart !== -1 && tagEnd > tagStart, `Could not isolate <button> tag for ${marker}`);
+        const btnTag = trk.slice(tagStart, tagEnd + 1);
+        assert(btnTag.includes('min-h-[44px]') && btnTag.includes('min-w-[44px]') && btnTag.includes('tap-target-44'),
+          `Expected >=44x44 tap target classes on ${marker}: ${btnTag}`);
+      }
+
+      // Execute setEventFilter() in VM and assert active & inactive pills retain >=44x44 classes
+      const sfStart = trk.indexOf("let currentEventFilter = 'all';");
+      const sfEnd = trk.indexOf('function renderEventsFeed(', sfStart);
+      assert(sfStart !== -1 && sfEnd > sfStart, 'Could not locate setEventFilter in ajax-match-tracker.html');
+      const pills = {};
+      ['all', 'goals', 'subs', 'setpieces', 'cards', 'film'].forEach(f => {
+        pills[`efPill-${f}`] = { className: '' };
+      });
+      const sfSandbox = {
+        document: { getElementById: id => pills[id] || null },
+        renderEventsFeed: () => {}
+      };
+      vm.createContext(sfSandbox);
+      vm.runInContext(trk.slice(sfStart, sfEnd), sfSandbox);
+
+      sfSandbox.setEventFilter('goals');
+      for (const [id, el] of Object.entries(pills)) {
+        assert(el.className.includes('min-h-[44px]') && el.className.includes('min-w-[44px]') && el.className.includes('tap-target-44'),
+          `Expected setEventFilter('goals') to preserve 44x44 classes on ${id}, got: ${el.className}`);
+      }
+      sfSandbox.setEventFilter('subs');
+      for (const [id, el] of Object.entries(pills)) {
+        assert(el.className.includes('min-h-[44px]') && el.className.includes('min-w-[44px]') && el.className.includes('tap-target-44'),
+          `Expected setEventFilter('subs') to preserve 44x44 classes on ${id}, got: ${el.className}`);
+      }
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });

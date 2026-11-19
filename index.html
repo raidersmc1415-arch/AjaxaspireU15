@@ -2045,20 +2045,20 @@
         <div class="section-desc">Secure access to your personal development plan (players only).</div>
       </div>
 
+      <div id="portal-login" class="portal-gate" style="margin-bottom: 28px;">
+        <div style="width:52px; height:52px; margin:0 auto 18px; border-radius:14px; background:var(--forest); display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:12px; font-weight:700; color:var(--gold-bright); letter-spacing:1.5px;">IDP</div>
+        <h2>Player Login</h2>
+        <div class="input-group"><label>Your Name</label><input type="text" id="player-name" placeholder="e.g. Shawn Craig"></div>
+        <div class="input-group"><label>4-Digit PIN</label><input type="password" id="player-pass" placeholder="****"></div>
+        <button class="btn" id="login-btn" onclick="loginPortal()" style="margin-top: 10px;">Unlock My IDP →</button>
+      </div>
+
       <!-- GA SHESCORES HEALTH & WELLNESS (Main Player Portal Landing) -->
       <div class="contrast-block" style="max-width: 680px; margin: 0 auto 28px; padding: 26px 30px;">
         <div style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-bright); margin-bottom: 6px;">Girls Academy SheScores · Female Health, Mental Health &amp; Body Positivity</div>
         <h3 style="font-family: 'Bebas Neue', cursive; font-size: 30px; color: #FFFFFF; margin-bottom: 10px;">GA SheScores: Own Your Wellness</h3>
         <p style="color: #CBD5E1; font-size: 14px; line-height: 1.7; margin-bottom: 16px;">At the U15 level, understanding your body is a performance advantage. Use this U.S. Soccer herLENS guide to learn about tracking your cycle, managing growth spurts, and taking care of your mental health. Health first, performance follows.</p>
         <a href="https://www.ussoccer.com/herlens/puberty/what-is-puberty" target="_blank" rel="noopener noreferrer" class="btn" style="width: auto; background: var(--gold-bright); color: var(--forest); text-decoration: none; font-family: 'Bebas Neue', cursive; font-size: 16px; letter-spacing: 1.5px; padding: 11px 22px;">Open U.S. Soccer herLENS Guide ↗</a>
-      </div>
-
-      <div id="portal-login" class="portal-gate">
-        <div style="width:52px; height:52px; margin:0 auto 18px; border-radius:14px; background:var(--forest); display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:12px; font-weight:700; color:var(--gold-bright); letter-spacing:1.5px;">IDP</div>
-        <h2>Player Login</h2>
-        <div class="input-group"><label>Your Name</label><input type="text" id="player-name" placeholder="e.g. Shawn Craig"></div>
-        <div class="input-group"><label>4-Digit PIN</label><input type="password" id="player-pass" placeholder="****"></div>
-        <button class="btn" id="login-btn" onclick="loginPortal()" style="margin-top: 10px;">Unlock My IDP →</button>
       </div>
 
       <div id="portal-content">
@@ -2155,7 +2155,7 @@
                 <div style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--white); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                   <span id="player-film-title-text">All Match Actions (Last 2 Matches)</span>
                   <span class="badge badge-teal" id="player-film-count-badge">0 Moments</span>
-                  <span class="badge badge-green" id="player-glow-rate-badge">0% Glows</span>
+                  <span class="badge badge-green" id="player-glow-rate-badge">0 Glows · 0 Grows</span>
                 </div>
               </div>
               <button type="button" class="btn btn-outline" style="padding:6px 14px; font-size:12px; height:auto;" id="film-log-toggle-btn">▶ View All Match Actions</button>
@@ -2264,6 +2264,7 @@
                 <div>
                   <div style="font-family:'DM Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin-bottom:2px;">Core Development Pillars</div>
                   <div style="font-family:'Bebas Neue',cursive; font-size:24px; color:var(--white);">Coach Shawn vs. Player Ratings</div>
+                  <div id="eval-ratings-scale-text" style="font-size:12px; color:var(--muted); margin-top:4px; line-height:1.45;"></div>
                 </div>
                 <div style="display:flex; align-items:center; gap:14px; font-size:11px; font-family:'DM Mono',monospace;">
                   <span style="display:inline-flex; align-items:center; gap:5px; color:#22c55e;"><span style="width:10px; height:10px; background:#16a34a; border-radius:2px;"></span> Coach Shawn</span>
@@ -2468,10 +2469,11 @@
           <!-- COACH RATINGS COMPARISON — shown only when coach has filled in ratings -->
       <div id="coach-ratings-section" style="display:none; margin-top:16px;">
         <div style="background:var(--card); border:1px solid var(--border); border-radius:4px; overflow:hidden;">
-          <div style="background:var(--navy-mid); border-bottom:1px solid var(--border); padding:16px 20px; display:flex; align-items:center; gap:12px;">
-            <div style="flex:1;">
+          <div style="background:var(--navy-mid); border-bottom:1px solid var(--border); padding:16px 20px; display:flex; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div style="flex:1; min-width:220px;">
               <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:4px;">Coach Shawn's Assessment</div>
               <div style="font-family:'Bebas Neue',cursive; font-size:22px; color:var(--white);">Your Ratings vs Coach's View</div>
+              <div id="coach-ratings-scale-text" style="font-size:12px; color:var(--muted); margin-top:4px; line-height:1.45;"></div>
             </div>
             <div style="display:flex; gap:16px;">
               <div style="display:flex; align-items:center; gap:6px;">
@@ -2569,6 +2571,18 @@
     // COACH RATINGS
     // ═══════════════════════════════════════════════
 
+    // TODO: move to metric_definitions Sheet tab (AGENTS.md 2, Explain every number)
+    const RATING_SCALE_TEXT = '1 just starting, 2 developing, 3 reliable in training, 4 reliable in matches, 5 a strength others can learn from.';
+
+    function applyRatingScaleText() {
+      if (typeof document === 'undefined') return;
+      ['coach-ratings-scale-text', 'eval-ratings-scale-text'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = RATING_SCALE_TEXT;
+      });
+    }
+    applyRatingScaleText();
+
     const SKILL_LABELS = {
       t_dribbling: 'Dribbling',
       t_passing:   'Passing',
@@ -2605,6 +2619,7 @@
     }
 
     async function loadCoachRatings(playerName, loginData) {
+      applyRatingScaleText();
       // ALWAYS reset first — prevents a previous login's ratings from
       // showing for a player who has none (stale DOM bug)
       const section = document.getElementById('coach-ratings-section');
@@ -2847,17 +2862,24 @@
     }
 
     function renderRatingRow(key, playerData, coachRatings, comments) {
-      const playerVal = parseInt(playerData[key] || 3);
-      const coachVal  = parseInt(coachRatings[key] || 0);
+      const rawPlayerVal = playerData ? playerData[key] : null;
+      const parsedPlayerVal = (rawPlayerVal !== undefined && rawPlayerVal !== null && String(rawPlayerVal).trim() !== '')
+        ? parseInt(rawPlayerVal, 10)
+        : NaN;
+      const hasPlayerRating = Number.isFinite(parsedPlayerVal) && parsedPlayerVal > 0;
+      const playerVal = hasPlayerRating ? parsedPlayerVal : null;
+      const coachVal  = parseInt((coachRatings && coachRatings[key]) || 0, 10);
       const label     = SKILL_LABELS[key];
-      const comment   = comments[key] || '';
-      const deviation = coachVal - playerVal;
+      const comment   = (comments && comments[key]) || '';
+      const deviation = hasPlayerRating ? (coachVal - playerVal) : null;
 
-      if (coachVal === 0) return '';
+      if (!coachVal || coachVal <= 0) return '';
 
-      const devBadge = Math.abs(deviation) >= 2
-        ? `<span class="coach-rating-deviation ${deviation > 0 ? 'dev-low' : 'dev-high'}">${deviation > 0 ? '▲ Coach rates higher' : '▼ Coach rates lower'}</span>`
-        : `<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">aligned</span>`;
+      const devBadge = hasPlayerRating
+        ? (Math.abs(deviation) >= 2
+            ? `<span class="coach-rating-deviation ${deviation > 0 ? 'dev-low' : 'dev-high'}">${deviation > 0 ? '▲ Coach rates higher' : '▼ Coach rates lower'}</span>`
+            : `<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">aligned</span>`)
+        : '';
 
       const commentHTML = comment
         ? `<div class="coach-comment">${comment}</div>` : '';
@@ -2865,7 +2887,7 @@
       // IDP -> resource pathway (fix #9): when this is a growth area
       // (coach rates 3 or below, or coach rates lower than player), point
       // the player to the relevant hub content so a rating becomes a next step.
-      const isGrowthArea = coachVal <= 3 || deviation < 0;
+      const isGrowthArea = coachVal <= 3 || (hasPlayerRating && deviation < 0);
       const resource = SKILL_RESOURCES[key];
       const resourceHTML = (isGrowthArea && resource)
         ? `<div class="idp-resource">
@@ -2874,14 +2896,21 @@
            </div>`
         : '';
 
-      return `
-        <div class="coach-rating-row">
-          <div class="coach-rating-skill"><span>${label}</span>${devBadge}</div>
-          <div class="rating-track">
+      const playerTrackHTML = hasPlayerRating
+        ? `<div class="rating-track">
             <span class="rating-track-label player">You</span>
             <div class="rating-bar"><div class="rating-bar-fill player" style="width:${(playerVal/5)*100}%"></div></div>
             <span class="rating-num player">${playerVal}</span>
-          </div>
+          </div>`
+        : `<div class="rating-track">
+            <span class="rating-track-label player">You</span>
+            <span class="rating-unrated" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">Not rated yet</span>
+          </div>`;
+
+      return `
+        <div class="coach-rating-row">
+          <div class="coach-rating-skill"><span>${label}</span>${devBadge}</div>
+          ${playerTrackHTML}
           <div class="rating-track">
             <span class="rating-track-label coach">Coach</span>
             <div class="rating-bar"><div class="rating-bar-fill coach" style="width:${(coachVal/5)*100}%"></div></div>
@@ -3554,13 +3583,20 @@
         : (document.getElementById('portal-welcome')?.textContent || '').replace('Welcome, ', '').replace('!', '').replace(/,/g, ' ').trim();
       const normPlayer = normNameJS(currentPlayerName);
 
-      const totalAll = CURRENT_PLAYER_MOMENTS.length;
-      const glowsAll = CURRENT_PLAYER_MOMENTS.filter(m => /glow/i.test(m.outcome)).length;
-      const growsAll = CURRENT_PLAYER_MOMENTS.filter(m => /grow/i.test(m.outcome)).length;
-      const glowPct = totalAll > 0 ? Math.round((glowsAll / (glowsAll + growsAll || 1)) * 100) : 0;
+      const recentMatchNames = getRecentMatchNames(CURRENT_PLAYER_MOMENTS, 2);
+      const selectedMatch = (CURRENT_MOMENT_FILTER_MATCH && CURRENT_MOMENT_FILTER_MATCH !== 'ALL' && recentMatchNames.includes(CURRENT_MOMENT_FILTER_MATCH))
+        ? CURRENT_MOMENT_FILTER_MATCH
+        : 'ALL';
+      const momentsInScope = selectedMatch === 'ALL'
+        ? CURRENT_PLAYER_MOMENTS
+        : CURRENT_PLAYER_MOMENTS.filter(m => m.match === selectedMatch);
+
+      const totalAll = momentsInScope.length;
+      const glowsAll = momentsInScope.filter(m => /glow/i.test(String(m.outcome || ''))).length;
+      const growsAll = momentsInScope.filter(m => /grow/i.test(String(m.outcome || ''))).length;
 
       if (countBadge) countBadge.textContent = `${totalAll} Moment${totalAll !== 1 ? 's' : ''}`;
-      if (glowRateBadge) glowRateBadge.textContent = `${glowPct}% Glows (+${glowsAll} / -${growsAll})`;
+      if (glowRateBadge) glowRateBadge.textContent = `${glowsAll} Glows · ${growsAll} Grows`;
 
       // Separate Curated Moments (filmReview === true OR noteToPlayer present)
       const curatedMoments = CURRENT_PLAYER_MOMENTS.filter(m => Boolean(m.filmReview) || Boolean(m.noteToPlayer));
@@ -3615,7 +3651,6 @@
       }
 
       // Update dynamic header & rebuild match select options
-      const recentMatchNames = getRecentMatchNames(CURRENT_PLAYER_MOMENTS, 2);
       const titleEl = document.getElementById('player-film-title-text');
       if (titleEl) {
         titleEl.textContent = recentMatchNames.length
