@@ -83,6 +83,17 @@
       </div>
     </header>
 
+    <!-- Unsaved Cloud Warning Banner -->
+    <div id="unsavedSheetBanner" class="hidden bg-rose-950/80 rounded-2xl border border-rose-500/50 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-rose-200 shadow-lg" role="alert">
+      <div class="flex items-center gap-2.5">
+        <span class="text-base">⚠️</span>
+        <span id="unsavedSheetBannerText" class="font-semibold">Not saved to the Sheet. Your moments are kept on this device. Tap Retry.</span>
+      </div>
+      <button type="button" id="unsavedSheetRetryBtn" onclick="retryCloudSave()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-3.5 py-1.5 rounded-xl transition shadow active:scale-95">
+        🔄 Retry
+      </button>
+    </div>
+
     <!-- Holding Record / Active Match Context Banner -->
     <div id="activeMatchHoldingBanner" class="bg-card/80 rounded-2xl border border-teal-500/30 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
       <div class="flex items-center gap-2 flex-wrap">
@@ -993,7 +1004,10 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
           addMatchOptionIfMissing(mt, `${mt}${scorePart} (${cnt} ${cnt === 1 ? 'moment' : 'moments'})`);
         });
 
-        updateCloudAuthBarUI(Object.keys(CLOUD_MATCH_CATALOG).length, totalRows);
+        const cloudReachable = Boolean((actionsRes && actionsRes.success) || (hubRes && hubRes.success));
+        if (cloudReachable) {
+          updateCloudAuthBarUI(Object.keys(CLOUD_MATCH_CATALOG).length, totalRows);
+        }
 
         // Handle explicit ?match=... deep-link OR refresh current selected match if cloud now has moments
         const jumpEl = document.getElementById('pendingDraftQuickJump');
@@ -1026,7 +1040,11 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         }
 
         if (showStatusToast) {
-          showToast(`☁️ Synced ${Object.keys(CLOUD_MATCH_CATALOG).length} matches & ${totalRows} Sheet film actions!`);
+          if (cloudReachable) {
+            showToast(`☁️ Synced ${Object.keys(CLOUD_MATCH_CATALOG).length} matches & ${totalRows} Sheet film actions!`);
+          } else {
+            showToast('⚠️ Could not reach the Sheet. Showing moments stored on this device.');
+          }
         }
       } catch (e) {}
     }
@@ -1823,7 +1841,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
             <td class="py-2.5 px-2 font-mono font-bold text-white text-[11px]">${esc(m.playersRaw || 'Team')}</td>
             <td class="py-2.5 px-2 text-slate-300 text-[11px]">${esc(m.category)}</td>
             <td class="py-2.5 px-2 text-amber-300 text-[11px] font-semibold">${esc(m.tag)}</td>
-            <td class="py-2.5 px-2 text-center">${qBadge}</td>
+            <td class="py-2.5 px-2 text-center">${qBadge}${m.unsaved ? '<span class="ml-1 px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-bold">UNSAVED</span>' : ''}</td>
             <td class="py-2.5 px-3 text-slate-300 text-[11px] max-w-xs truncate" title="${esc(m.notes)}">${esc(m.notes)}</td>
             <td class="py-2.5 px-2 text-center whitespace-nowrap">
               <button onclick="toggleMomentFilmReview(${idx})" class="${m.filmReview ? 'text-amber-300 bg-amber-500/20 border border-amber-400/60' : 'text-slate-500 hover:text-slate-300 bg-surface border border-border/80'} text-[11px] font-bold px-2 py-0.5 rounded transition mr-1" title="${m.filmReview ? 'Marked for Player Review (Note is visible to player). Click to make private.' : 'Private Note (Hidden from player). Click to share with player.'}">
@@ -1901,6 +1919,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
               <span class="font-semibold text-white">${esc(m.playersRaw || 'Team')}</span>
               <span class="text-amber-300 font-semibold">${esc(m.tag || '')}</span>
               <span class="px-1.5 py-0.2 rounded border text-[9px] font-bold ${pillCls}">${pillTxt}</span>
+              ${m.unsaved ? '<span class="px-1.5 py-0.2 rounded border text-[9px] font-bold bg-rose-500/20 text-rose-300 border-rose-500/40">UNSAVED</span>' : ''}
               ${m.notes ? `<span class="text-slate-400 truncate max-w-sm">${esc(m.notes)}</span>` : ''}
             </div>
             <div class="flex items-center gap-1 shrink-0">
@@ -2270,8 +2289,9 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       let glow = 0, grow = 0, toD = 0, toM = 0, toA = 0;
 
       LOGGED_MOMENTS.forEach(m => {
-        if (m.quality.includes('Positive') || m.quality.includes('Goal Scored')) glow++;
-        else if (m.quality.includes('Negative') || m.quality.includes('Goal Conceded')) grow++;
+        const q = String(m.quality || m.qualityRaw || m.outcome || '');
+        if (/pos|glow|goal scored/i.test(q) && !/conceded/i.test(q)) glow++;
+        else if (/neg|grow|goal conceded/i.test(q)) grow++;
 
         if (isTurnoverEvent(m)) {
           if (m.zone === 'D3') toD++;
@@ -2352,7 +2372,60 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       showToast('Downloaded clean Aspire_Film_Log.csv!');
     }
 
+    function setUnsavedBannerVisible(visible, customMsg) {
+      const banner = document.getElementById('unsavedSheetBanner');
+      const txt = document.getElementById('unsavedSheetBannerText');
+      if (txt) {
+        txt.textContent = customMsg || 'Not saved to the Sheet. Your moments are kept on this device. Tap Retry.';
+      }
+      if (banner) {
+        banner.classList.toggle('hidden', !visible);
+      }
+    }
+
+    function markMomentsUnsaved(matchTitle) {
+      const target = canonicalizeMatchTitle(matchTitle || getSelectedMatchName());
+      LOGGED_MOMENTS.forEach(m => {
+        if (!target || !m.match || canonicalizeMatchTitle(m.match) === target) {
+          m.unsaved = true;
+        }
+      });
+      saveToLocalStorage();
+      setUnsavedBannerVisible(true);
+      renderMomentsTable();
+    }
+
+    function clearMomentsUnsaved(matchTitle) {
+      const target = canonicalizeMatchTitle(matchTitle || getSelectedMatchName());
+      LOGGED_MOMENTS.forEach(m => {
+        if (!target || !m.match || canonicalizeMatchTitle(m.match) === target) {
+          m.unsaved = false;
+        }
+      });
+      saveToLocalStorage();
+      const anyStillUnsaved = LOGGED_MOMENTS.some(m => Boolean(m && m.unsaved));
+      setUnsavedBannerVisible(anyStillUnsaved);
+      renderMomentsTable();
+    }
+
+    async function retryCloudSave() {
+      const res = await syncMomentsToCloudHub();
+      if (res && res.success) {
+        const match = canonicalizeMatchTitle(getSelectedMatchName());
+        const matchMoments = LOGGED_MOMENTS.filter(m => !m.match || canonicalizeMatchTitle(m.match) === match).map(m => ({ ...m, match }));
+        if (!CLOUD_MATCH_CATALOG[match]) CLOUD_MATCH_CATALOG[match] = { match, moments: [], meta: {} };
+        CLOUD_MATCH_CATALOG[match].moments = matchMoments;
+        CLOUD_MATCH_CATALOG[match].meta = { ...(CLOUD_MATCH_CATALOG[match].meta || {}), status: 'Reviewed & Published' };
+        updateActiveMatchBanner();
+        showToast(`✅ Saved ${matchMoments.length} moments for ${match} to the Sheet.`);
+      } else {
+        showToast('Not saved to the Sheet. Your moments are kept on this device. Tap Retry.');
+      }
+      return res;
+    }
+
     async function syncMomentsToCloudHub(matchMomentsOverride) {
+      const match = canonicalizeMatchTitle(getSelectedMatchName());
       try {
         let pin = getCoachSessionPin();
         if (!pin) {
@@ -2363,8 +2436,10 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
             updateCloudAuthBarUI();
           }
         }
-        if (!pin) return { success: false, message: 'Missing Coach Token' };
-        const match = canonicalizeMatchTitle(getSelectedMatchName());
+        if (!pin) {
+          markMomentsUnsaved(match);
+          return { success: false, message: 'Missing Coach Token' };
+        }
         const matchMoments = (Array.isArray(matchMomentsOverride)
           ? matchMomentsOverride
           : LOGGED_MOMENTS.filter(m => !m.match || canonicalizeMatchTitle(m.match) === match)).map(m => ({
@@ -2372,7 +2447,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
             match,
             status: 'Reviewed & Published'
           }));
-        const res = await fetch(API_URL, {
+        const resp = await fetch(API_URL, {
           method: 'POST',
           body: JSON.stringify({
             action: 'saveFilmMoments',
@@ -2381,10 +2456,23 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
             reviewed: true,
             moments: matchMoments
           })
-        }).then(r => r.json()).catch(() => ({ success: true, optimistic: true }));
-        return res || { success: true, optimistic: true };
+        });
+        if (!resp || resp.ok === false) {
+          const statusMsg = (resp && resp.status) ? `HTTP ${resp.status}` : 'Network error';
+          markMomentsUnsaved(match);
+          return { success: false, message: statusMsg };
+        }
+        const res = await resp.json();
+        if (!res || res.success !== true) {
+          const errMsg = (res && (res.message || res.error || res.sheetError)) || 'Save failed';
+          markMomentsUnsaved(match);
+          return { success: false, message: errMsg };
+        }
+        clearMomentsUnsaved(match);
+        return res;
       } catch (e) {
-        return { success: false, message: e.message || 'Network error' };
+        markMomentsUnsaved(match);
+        return { success: false, message: (e && e.message) ? e.message : 'Network error' };
       }
     }
 
@@ -2446,8 +2534,8 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       syncMatchReviewIntoLocalHub(match, matchMoments);
       showToast(`Pushing ${matchMoments.length} reviewed moments for ${match} to Google Sheet & Match Hub...`);
       const cloudRes = await syncMomentsToCloudHub(matchMoments);
-      if (cloudRes && cloudRes.success === false) {
-        showToast(`⚠️ Saved locally; Sheet sync failed: ${cloudRes.message || 'Check Coach Token'}`);
+      if (!cloudRes || cloudRes.success !== true) {
+        showToast('Not saved to the Sheet. Your moments are kept on this device. Tap Retry.');
         return;
       }
       if (!CLOUD_MATCH_CATALOG[match]) CLOUD_MATCH_CATALOG[match] = { match, moments: [], meta: {} };
@@ -2620,6 +2708,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
         return normalizeFilmEvent(cloned);
       });
       sortMomentsChronologically();
+      setUnsavedBannerVisible(LOGGED_MOMENTS.some(m => Boolean(m && m.unsaved)));
       toggleRapidCreator(LOGGED_MOMENTS.length === 0);
       updateCountBadges();
       renderMomentsTable();
@@ -2844,7 +2933,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       }
     }
 
-    function saveMomentModalEdits() {
+    async function saveMomentModalEdits() {
       const idx = Number(document.getElementById('editMomentIdx').value);
       if (isNaN(idx) || !LOGGED_MOMENTS[idx]) return;
 
@@ -2894,12 +2983,17 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
       const revCb = document.getElementById('editMomentFilmReview');
       if (revCb) m.filmReview = revCb.checked;
 
+      m.unsaved = true;
       sortMomentsChronologically();
       saveToLocalStorage();
-      syncMomentsToCloudHub();
       renderMomentsTable();
       closeMomentEditModal();
-      showToast('Moment updated & synced to Sheet + Player Portal! ☁️');
+      const cloudRes = await syncMomentsToCloudHub();
+      if (cloudRes && cloudRes.success === true) {
+        showToast('Moment updated & synced to Sheet + Player Portal! ☁️');
+      } else {
+        showToast('Not saved to the Sheet. Your moments are kept on this device. Tap Retry.');
+      }
     }
 
     function deleteCurrentEditedMoment() {
@@ -2938,6 +3032,7 @@ Output ONLY the raw CSV text so I can copy and paste directly into my Master She
           });
           LOGGED_MOMENTS = saved.map(normalizeFilmEvent);
           sortMomentsChronologically();
+          setUnsavedBannerVisible(LOGGED_MOMENTS.some(m => Boolean(m && m.unsaved)));
           toggleRapidCreator(LOGGED_MOMENTS.length === 0);
           const firstMatch = canonicalizeMatchTitle(LOGGED_MOMENTS[0]?.match || '');
           if (firstMatch) {
