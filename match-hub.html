@@ -7647,6 +7647,23 @@
       };
     }
 
+    // TODO: move to metric_definitions Sheet tab (AGENTS.md 2, Explain every number)
+    const REPORT_CARD_KEY_TEXT = [
+      { label: 'Film Index', text: 'One number summarizing the moments we logged, compared with what is usual for her position. 80 is the middle. It is a guide for our conversation, not a grade.' },
+      { label: 'Glow', text: 'A moment where she did something that fits how we want to play.' },
+      { label: 'Grow', text: 'A moment with something to work on. We pick a few per game, so this is a sample, not every touch.' },
+      { label: 'Turnovers per 80 min', text: 'How often she lost the ball, scaled to a full 80-minute game.' },
+      { label: 'Key passes', text: "A pass that sets up a teammate's shot." },
+      { label: 'Rating 1 to 5', text: '1 just starting, 2 developing, 3 reliable in training, 4 reliable in matches, 5 a strength others can learn from.' }
+    ];
+
+    const TIER_MEANINGS = {
+      'Key Starter / High Impact': '',
+      'Core Impact Contributor': '',
+      'Emerging Tactical Contributor': '',
+      'High-Growth Developmental Prospect': ''
+    };
+
     function renderReportCard() {
       const container = $('reportCardContent');
       if (!container) return;
@@ -7699,14 +7716,20 @@
       const coachShort = teamConfig.coachShort || (isGA ? 'Coach Brian' : 'Coach Shawn');
 
       // Calculate stats
+      const currentMonthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
       const gp = player.gp || 0;
       const mins = player.mins || 0;
       const goals = player.goals || 0;
       const assists = player.assists || 0;
       const kp = player.keyPasses || 0;
       const to80 = player.toPer80 !== undefined ? player.toPer80 : (mins > 0 ? ((player.turnovers || 0) * 80 / mins).toFixed(1) : 0);
-      const glowPct = player.glowPct !== undefined ? player.glowPct : ((player.glow || 0) + (player.grow || 0) > 0 ? Math.round(player.glow * 100 / (player.glow + player.grow)) : null);
-      const shotAcc = player.shots > 0 ? Math.round((player.sot || 0) * 100 / player.shots) : (player.shotAcc || null);
+      const glowCount = Number(player.glow) || 0;
+      const growCount = Number(player.grow) || 0;
+      const momentsCount = Number(player.filmEventsCount) || 0;
+      const meetsFilmGate = Boolean(momentsCount > 0 && mins >= INDEX_CONFIG.regMinutes && player.filmIndex != null);
+      const isLeagueScope = isGA || aspireScope === 'league';
+      const scopeHeaderLabel = isLeagueScope ? 'League' : 'All Competitions';
+      const scopeGamesText = isLeagueScope ? `${gp} league games · ${momentsCount} moments` : `${gp} games · ${momentsCount} moments`;
       const roles = player.roles?.length ? player.roles.join(', ') : (player.pos || 'Squad Player');
 
       // Process live Hub data from Player_IDP & Reflections_Log
@@ -8011,7 +8034,7 @@
           </div>
           <div class="text-left sm:text-right text-xs text-slate-400 print:text-slate-600 space-y-0.5">
             <div><strong class="text-white print:text-black">Head Coach:</strong> ${esc(coachName)}</div>
-            <div><strong class="text-white print:text-black">Evaluation Date:</strong> October 2026</div>
+            <div><strong class="text-white print:text-black">Evaluation Date:</strong> ${esc(currentMonthYear)}</div>
             <div><strong class="text-white print:text-black">Club:</strong> AJAX UNITED</div>
           </div>
         </div>
@@ -8032,14 +8055,15 @@
                 <span id="reportOverallTierDisplay" class="font-bold text-amber-300 print:text-amber-800">${esc(values.overall_tier)}</span>
               </p>
             </div>
-            <div class="text-right no-print">
-              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Tier Assignment</label>
-              <select data-field="overall_tier" onchange="onReportFieldInput(this)" class="bg-pitch border border-border text-xs text-amber-300 font-bold rounded-lg px-2.5 py-1.5 outline-none">
+            <div class="text-right">
+              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1 no-print">Tier Assignment</label>
+              <select data-field="overall_tier" onchange="onReportFieldInput(this)" class="bg-pitch border border-border text-xs text-amber-300 font-bold rounded-lg px-2.5 py-1.5 outline-none no-print">
                 <option value="Key Starter / High Impact" ${String(values.overall_tier || '').includes('Key Starter') ? 'selected' : ''}>Key Starter / High Impact</option>
                 <option value="Core Impact Contributor" ${String(values.overall_tier || '').includes('Core Impact') ? 'selected' : ''}>Core Impact Contributor</option>
                 <option value="Emerging Tactical Contributor" ${String(values.overall_tier || '').includes('Emerging') ? 'selected' : ''}>Emerging Tactical Contributor</option>
                 <option value="High-Growth Developmental Prospect" ${String(values.overall_tier || '').includes('High-Growth') ? 'selected' : ''}>High-Growth Developmental Prospect</option>
               </select>
+              ${TIER_MEANINGS[values.overall_tier] ? `<div id="reportTierMeaningText" class="text-[10px] text-slate-400 print:text-slate-600 mt-1">${esc(TIER_MEANINGS[values.overall_tier])}</div>` : ''}
             </div>
           </div>
 
@@ -8054,22 +8078,26 @@
               <div class="text-base font-black text-emerald-400 print:text-emerald-700">${goals}G · ${assists}A</div>
             </div>
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
-              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Key Passes</div>
-              <div class="text-base font-black text-teal-400 print:text-teal-700">${kp} KP</div>
+              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Key passes</div>
+              <div class="text-base font-black text-teal-400 print:text-teal-700">${kp}</div>
             </div>
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
-              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Turnovers/80</div>
+              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Turnovers per 80 min</div>
               <div class="text-base font-black text-amber-300 print:text-amber-700">${to80 || '0.0'}</div>
             </div>
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
-              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Film Index (${aspireScope === 'league' ? '6G League' : '9G All'})</div>
-              <div class="text-base font-black text-brand-400 print:text-teal-700">${player.filmEventsCount && mins > 0 && player.filmIndex != null ? `${fmtFilmIndex(player)}/100 <span class="text-xs font-semibold text-slate-400">(${glowPct}%)</span>` : (glowPct ? glowPct + '%' : '–')}</div>
-              ${player.leagueIndex != null && player.allCompsIndex != null ? `<div class="text-[9px] mono text-slate-400 print:text-slate-600 mt-0.5">9G: <strong>${player.allCompsIndex}</strong> → 6G Lg: <strong class="text-emerald-400 print:text-emerald-700">${player.leagueIndex}</strong> (${player.leagueIndex - player.allCompsIndex >= 0 ? '+' : ''}${player.leagueIndex - player.allCompsIndex})</div>` : ''}
-              <button type="button" onclick="openFilmLegendModal()" class="text-[9px] text-teal-400 hover:underline mono block mt-0.5 no-print">How is this calculated? ↗</button>
+              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Glows · Grows</div>
+              <div class="text-base font-black text-white print:text-black">${glowCount} Glows · ${growCount} Grows</div>
             </div>
             <div class="p-2 rounded-xl bg-pitch/60 print:bg-white border border-border/60">
-              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Shot Acc %</div>
-              <div class="text-base font-black text-sky-400 print:text-sky-700">${shotAcc ? shotAcc + '%' : '–'}</div>
+              <div class="text-[10px] mono uppercase text-slate-400 print:text-slate-600">Film Index (${scopeHeaderLabel})</div>
+              ${meetsFilmGate
+                ? `<div class="text-base font-black text-brand-400 print:text-teal-700">${fmtFilmIndex(player)}</div>
+                   <div class="text-[10px] text-slate-400 print:text-slate-600">80 is the middle</div>
+                   <div class="text-[10px] mono text-slate-400 print:text-slate-600">${scopeGamesText}</div>`
+                : `<div class="text-xs font-bold text-slate-400 print:text-slate-600 mt-1">Not enough film yet</div>`}
+              ${player.leagueIndex != null && player.allCompsIndex != null ? `<div class="text-[9px] mono text-slate-400 print:text-slate-600 mt-0.5 no-print">9G: <strong>${player.allCompsIndex}</strong> → 6G Lg: <strong class="text-emerald-400 print:text-emerald-700">${player.leagueIndex}</strong> (${player.leagueIndex - player.allCompsIndex >= 0 ? '+' : ''}${player.leagueIndex - player.allCompsIndex})</div>` : ''}
+              <button type="button" onclick="openFilmLegendModal()" class="text-[9px] text-teal-400 hover:underline mono block mt-0.5 no-print">How is this calculated? ↗</button>
             </div>
           </div>
         </div>
@@ -8277,7 +8305,7 @@
             <div>
               <div class="text-[10px] mono text-slate-400 print:text-slate-600 uppercase font-semibold">Head Coach Signature</div>
               <div class="mt-3 pt-1 border-b border-slate-500 font-serif italic text-sm text-teal-400 print:text-black">${esc(coachSignature)}</div>
-              <div class="text-[10px] text-slate-500 mt-0.5">Date: October 2026</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">Date: ${esc(currentMonthYear)}</div>
             </div>
             <div>
               <div class="text-[10px] mono text-slate-400 print:text-slate-600 uppercase font-semibold">Player Signature</div>
@@ -8289,6 +8317,16 @@
               <div class="mt-3 pt-1 border-b border-slate-500 text-sm text-slate-400 print:text-black">&nbsp;</div>
               <div class="text-[10px] text-slate-500 mt-0.5">Date: _________________</div>
             </div>
+          </div>
+        </div>
+
+        <!-- HOW TO READ THIS CARD (PRINTS ON PAPER) -->
+        <div id="reportCardHowToReadBox" class="bg-card print-card rounded-2xl p-3.5 border border-border space-y-1.5">
+          <div class="text-xs font-bold uppercase tracking-wider text-teal-400 print:text-teal-800 border-b border-border/80 pb-1">
+            How to read this card
+          </div>
+          <div class="space-y-1 text-[11px] text-slate-300 print:text-slate-700 leading-snug">
+            ${REPORT_CARD_KEY_TEXT.map(item => `<div><strong class="text-white print:text-black">${esc(item.label)}:</strong> ${esc(item.text)}</div>`).join('')}
           </div>
         </div>
       `;

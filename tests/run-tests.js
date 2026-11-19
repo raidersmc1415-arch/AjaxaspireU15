@@ -2635,6 +2635,101 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       assert.strictEqual(res.overall.goalsConceded, 4);
       assert(res.overall.index < 75, `Expected 1-4 match index < 75, got ${res.overall.index}`);
     });
+
+    await runAsyncCheck('26. Printed report card renders current month/year, Glow/Grow counts before plain Film Index, no /100 or Shot Acc, key box, and Not enough film yet below gate', async () => {
+      const mh = fs.readFileSync(path.join(ROOT, 'match-hub.html'), 'utf8');
+      const rcStart = mh.indexOf('// TODO: move to metric_definitions Sheet tab');
+      const rcEnd = mh.indexOf('let reportCardFilmDrawerOpen = false;');
+      assert(rcStart !== -1 && rcEnd > rcStart, 'Expected REPORT_CARD_KEY_TEXT and renderReportCard in match-hub.html');
+
+      const containerEl = { innerHTML: '' };
+      let activeFixturePlayer = null;
+      const sandbox = {
+        $: id => (id === 'reportCardContent' ? containerEl : null),
+        renderReportCardSelect: () => {},
+        currentReportPlayerKey: 'aspire:Fixture Player',
+        getPlayerByKey: () => activeFixturePlayer,
+        normName: s => String(s || '').toLowerCase().trim(),
+        REPORT_HUB_CACHE: { 'fixture player': { ratingsData: { found: false }, reflectionsData: { reflections: [] } } },
+        REPORT_HUB_LOADING: {},
+        fetchPlayerHubData: async () => {},
+        getReportDraftKey: () => 'draft_key',
+        getSavedReportDraft: () => null,
+        TEAMS: [{ id: 'aspire', reportTitle: 'AJAX ASPIRE U15', headCoach: 'Shawn Craig', coachSignature: 'Coach Shawn Craig', coachShort: 'Coach Shawn' }],
+        team: { id: 'aspire' },
+        aspireScope: 'league',
+        INDEX_CONFIG: { regMinutes: 45, minMinutes: 120, minEvents: 10 },
+        parseReflections: () => ({ goals: {}, general: [], film: [], allRecent: [] }),
+        getPlayerPracticeScorecard: () => null,
+        getPracticeGradeInfo: () => ({}),
+        SKILL_DISPLAY_NAMES: {},
+        esc: s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+        fmtFilmIndex: p => (p && p.filmIndex != null ? String(p.filmIndex) : '–'),
+        syncAllReportTextareas: () => {},
+        renderReportCardPlayerFilmPanel: () => {},
+        Date, Math, Number, String, Boolean, Array, Object
+      };
+      vm.createContext(sandbox);
+      vm.runInContext(mh.slice(rcStart, rcEnd), sandbox);
+
+      // 1. Fixture player meeting the data gate
+      activeFixturePlayer = {
+        name: 'Fixture Player',
+        jersey: 99,
+        squad: 'Aspire U15',
+        squadKey: 'aspire',
+        roles: ['CM'],
+        gp: 6,
+        mins: 420,
+        goals: 2,
+        assists: 1,
+        keyPasses: 4,
+        turnovers: 10,
+        toPer80: '1.9',
+        glow: 18,
+        grow: 12,
+        filmEventsCount: 30,
+        filmIndex: 86,
+        allCompsIndex: 83,
+        leagueIndex: 86,
+        shots: 5,
+        sot: 3,
+        shotAcc: 60
+      };
+      sandbox.renderReportCard();
+      const html = containerEl.innerHTML;
+      const expectedMonthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      assert(!html.includes('/100'), 'Expected no /100 in rendered report card HTML');
+      assert(!html.includes('Shot Acc'), 'Expected no Shot Acc in rendered report card HTML');
+      assert(html.includes(`Evaluation Date:</strong> ${expectedMonthYear}`), `Expected Evaluation Date to match ${expectedMonthYear}`);
+      assert(html.includes(`Date: ${expectedMonthYear}`), `Expected signature Date to match ${expectedMonthYear}`);
+      assert(!html.includes('October 2026'), 'Expected no hardcoded October 2026 in report card');
+      assert(html.includes('18 Glows · 12 Grows'), 'Expected Glow and Grow counts tile');
+      assert(html.indexOf('18 Glows · 12 Grows') < html.indexOf('Film Index (League)'), 'Expected Glows · Grows tile before Film Index tile');
+      assert(html.includes('80 is the middle'), 'Expected "80 is the middle" under Film Index');
+      assert(html.includes('6 league games · 30 moments'), 'Expected "{n} league games · {m} moments" under Film Index');
+      assert(html.includes('Turnovers per 80 min'), 'Expected plain label "Turnovers per 80 min"');
+      assert(html.includes('Key passes'), 'Expected plain label "Key passes"');
+      assert(html.includes('id="reportCardHowToReadBox"') && html.includes('How to read this card'), 'Expected "How to read this card" key box');
+      assert(html.includes('It is a guide for our conversation, not a grade.'), 'Expected DRAFT Film Index explanation in key box');
+      assert(!html.includes('id="reportTierMeaningText"'), 'Expected no tier meaning printed when TIER_MEANINGS entries are empty strings');
+
+      // 2. Fixture player below the data gate
+      activeFixturePlayer = {
+        ...activeFixturePlayer,
+        gp: 1,
+        mins: 20,
+        glow: 1,
+        grow: 1,
+        filmEventsCount: 2,
+        filmIndex: null
+      };
+      sandbox.renderReportCard();
+      const lowGateHtml = containerEl.innerHTML;
+      assert(lowGateHtml.includes('Not enough film yet'), 'Expected "Not enough film yet" when player is below the data gate');
+      assert(!lowGateHtml.includes('<div class="text-[10px] text-slate-400 print:text-slate-600">80 is the middle</div>') && !lowGateHtml.includes('>86</div>'), 'Expected no Film Index number/subline in the Film Index tile when below the data gate');
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });
