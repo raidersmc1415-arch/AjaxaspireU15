@@ -2913,6 +2913,61 @@ runAsyncCheck('18b. Halftime AI compiles accurate H1 pressWon/TO/cards/opp telem
       filmSandbox.renderPlayerFilmLog();
       assert.strictEqual(getFilmEl('player-glow-rate-badge').textContent, '1 Glows · 1 Grows', 'Expected "1 Glows · 1 Grows" when filtered to Crossfire #2');
     });
+
+    await runAsyncCheck('29. Sideline tracker tap targets (+1m/-1m, Add Guest Player, Flag Film Moment, Undo Last, filter chips) enforce >=44x44 px initially and after setEventFilter()', async () => {
+      const trk = fs.readFileSync(path.join(ROOT, 'ajax-match-tracker.html'), 'utf8');
+      assert(trk.includes('.tap-target-44 { min-width: 44px; min-height: 44px; }'), 'Expected offline-safe .tap-target-44 CSS rule in ajax-match-tracker.html');
+
+      const requiredMarkers = [
+        'onclick="adjustClock(60)"',
+        'onclick="adjustClock(-60)"',
+        'onclick="openAddGuestModal()"',
+        'onclick="flagSidelineBookmark()"',
+        'onclick="undoLastEvent()"',
+        'id="efPill-all"',
+        'id="efPill-goals"',
+        'id="efPill-subs"',
+        'id="efPill-setpieces"',
+        'id="efPill-cards"',
+        'id="efPill-film"'
+      ];
+      for (const marker of requiredMarkers) {
+        const idxPos = trk.indexOf(marker);
+        assert(idxPos !== -1, `Missing tracker button marker: ${marker}`);
+        const tagStart = trk.lastIndexOf('<button', idxPos);
+        const tagEnd = trk.indexOf('>', idxPos);
+        assert(tagStart !== -1 && tagEnd > tagStart, `Could not isolate <button> tag for ${marker}`);
+        const btnTag = trk.slice(tagStart, tagEnd + 1);
+        assert(btnTag.includes('min-h-[44px]') && btnTag.includes('min-w-[44px]') && btnTag.includes('tap-target-44'),
+          `Expected >=44x44 tap target classes on ${marker}: ${btnTag}`);
+      }
+
+      // Execute setEventFilter() in VM and assert active & inactive pills retain >=44x44 classes
+      const sfStart = trk.indexOf("let currentEventFilter = 'all';");
+      const sfEnd = trk.indexOf('function renderEventsFeed(', sfStart);
+      assert(sfStart !== -1 && sfEnd > sfStart, 'Could not locate setEventFilter in ajax-match-tracker.html');
+      const pills = {};
+      ['all', 'goals', 'subs', 'setpieces', 'cards', 'film'].forEach(f => {
+        pills[`efPill-${f}`] = { className: '' };
+      });
+      const sfSandbox = {
+        document: { getElementById: id => pills[id] || null },
+        renderEventsFeed: () => {}
+      };
+      vm.createContext(sfSandbox);
+      vm.runInContext(trk.slice(sfStart, sfEnd), sfSandbox);
+
+      sfSandbox.setEventFilter('goals');
+      for (const [id, el] of Object.entries(pills)) {
+        assert(el.className.includes('min-h-[44px]') && el.className.includes('min-w-[44px]') && el.className.includes('tap-target-44'),
+          `Expected setEventFilter('goals') to preserve 44x44 classes on ${id}, got: ${el.className}`);
+      }
+      sfSandbox.setEventFilter('subs');
+      for (const [id, el] of Object.entries(pills)) {
+        assert(el.className.includes('min-h-[44px]') && el.className.includes('min-w-[44px]') && el.className.includes('tap-target-44'),
+          `Expected setEventFilter('subs') to preserve 44x44 classes on ${id}, got: ${el.className}`);
+      }
+    });
   }).then(() => {
     if (!process.exitCode) console.log(`\nAll ${passed} regression checks passed.`);
   });
